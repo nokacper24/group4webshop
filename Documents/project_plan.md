@@ -51,7 +51,8 @@
 ## Sprint 4 
 -   Period: 10. April – 14. May
 -   All documentation and presentations finished
--   Implement extra features that are added to the backlog throughout the project 
+-   Implement extra features
+	-   Redemption codes for discount
 
 Goals: 
 -   Modular design 
