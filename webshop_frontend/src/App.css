@@ -1,77 +1,87 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans|Lalezar|Poiret+One);
 
 :root {
-  /* Background variable */
+  /* Background colour variables */
   --bg-primary: #473372;
   --bg-secondary: #2B8093;
   --bg-tertiary: #5F8B05;
   --bg-neutral: #D9D9D9;
 
+  /* Text colour variables */
   --text-primary: #000;
   --text-secondary: #fff;
 
-  --ff-paragraph: "Open Sans", "Arial" sans-serif;
-  --ff-title: "Lalezar", sans-serif;
-  --ff-subtitle: "Poiret One", "Calibri", serif;
+  /* Font family variables */
+  --ff-paragraph: 'Open Sans', 'Arial', sans-serif;
+  --ff-title: 'Lalezar', 'Arial Black', 'Geneva' sans-serif;
+  --ff-subtitle: 'Poiret One', 'Goudy Old Style', serif;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: var(--ff-paragraph);
+  line-height: 2;
 }
 
-.navbar {
+h1 {
+  font-family: var(--ff-title);
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--ff-subtitle);
+}
+
+nav {
   display: flex;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
-  background-color: var(--bg-primary);
   opacity: 0.7;
-  color: var(--text-secondary);
 }
 
 .logo {
   display: flex;
   align-items: center;
-}
-
-.logo img {
-  height: 50px;
-  margin-right: 10px;
+  gap: 1rem;
 }
 
 .logo input[type="text"] {
+  padding: 0.4em 0.6em;
   border: 1px solid var(--bg-neutral);
-  padding: 5px 10px;
   border-radius: 5px;
-  font-size: 16px;
 }
 
-.links {
+.nav-icon {
+  height: 2.5em;
+}
+
+.nav-links {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.links a {
-  margin-left: 10px;
+.nav-link {
   text-decoration: none;
   color: var(--text-secondary);
 }
 
-.links a img {
-  height: 40px;
-  border-radius: 50%;
-}
-
-
-.footer {
+footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  min-height: 50px;
+  min-height: 3em;
   background-color: var(--bg-primary);
   color: var(--text-secondary);
+  font-size: 0.75rem;
   text-align: center;
 }
