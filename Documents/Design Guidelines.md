@@ -35,7 +35,7 @@ Our website is for selling software to enterprises, so the theme should be serio
 
 - Primary font (paragraphs): Open sans
 - Main headings: Lalezar
-- Other headings: Poirot One
+- Other headings: Poiret One
 
 ## Border rounding
 
