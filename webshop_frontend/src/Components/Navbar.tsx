@@ -4,20 +4,20 @@ import avatar from '../assets/avatar.svg';
 
 function Navbar() {
     return (
-        <nav className="navbar">
+        <nav>
             <div className="logo">
-                <img src={logo} />
+                <img className="nav-icon" src={logo} />
                 {/* Searchbox */}
                 <input type="text" placeholder="Search" />
             </div>
 
-            <div className="links">
-                <Link to="/">Home</Link>
-                <Link to="/products">Products</Link>
-                <Link to="/about">About</Link>
-                <Link to="/support">Support</Link>
+            <div className="nav-links">
+                <Link className="nav-link" to="/">Home</Link>
+                <Link className="nav-link" to="/products">Products</Link>
+                <Link className="nav-link" to="/about">About</Link>
+                <Link className="nav-link" to="/support">Support</Link>
                 {/* User profile logo */}
-                <Link to="/profile"><img src={avatar} /> </Link>
+                <Link className="nav-link" to="/profile"><img className="nav-icon" src={avatar} /> </Link>
             </div>
         </nav>
     );
