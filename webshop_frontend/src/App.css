@@ -15,7 +15,9 @@ font-family: sans-serif;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: var(--bg);
+    /* make it opaque */
+    background-color: var(--bg) ;
+    opacity: 0.7;
     color: var(--text-color);
     }
     
