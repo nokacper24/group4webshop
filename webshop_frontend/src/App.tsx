@@ -14,11 +14,10 @@ function App() {
     const [count, setCount] = useState(0)
 
     return (
-        <div className="App">
+
             <BrowserRouter>
-                <nav className="navbar">
                     <Navbar />
-                </nav>
+
                 <Routes>
                     <Route path="/" element={<Home/>} />
                         <Route path="products" element={<Products/>} />
@@ -28,7 +27,7 @@ function App() {
                 </Routes>
                 <Footer />
             </BrowserRouter>
-        </div>
+
     )
 }
 
