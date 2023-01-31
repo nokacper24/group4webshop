@@ -173,6 +173,12 @@ nav {
   text-align: center;
 }
 
+hr {
+  margin: 0;
+  height: 5px;
+  background: var(--bg-secondary);
+}
+
 footer {
   background-color: var(--bg-primary);
 }
