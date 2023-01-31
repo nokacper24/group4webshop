@@ -1,41 +1,195 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+@import url(https://fonts.googleapis.com/css?family=Open+Sans|Lalezar|Poiret+One);
+
+/* || VARIABLES */
+:root {
+  /* Background colour variables */
+  --bg-primary: #473372;
+  --bg-secondary: #2B8093;
+  --bg-tertiary: #5F8B05;
+  --bg-neutral: #D9D9D9;
+
+  /* Text colour variables */
+  --text-primary: #000;
+  --text-secondary: #fff;
+
+  /* Font family variables */
+  --ff-primary: 'Open Sans', 'Arial', sans-serif;
+  --ff-title: 'Lalezar', 'Arial Black', 'Geneva', sans-serif;
+  --ff-subtitle: 'Poiret One', 'Goudy Old Style', serif;
+
+  /* Miscellaneous */
+  --transition-speed: 250ms;
+}
+
+/* || SITEWIDE STYLES */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--ff-primary);
+  line-height: 2;
+
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: var(--ff-subtitle);
+}
+
+h1 {
+  font-family: var(--ff-title);
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+button {
+  cursor: pointer;
+}
+
+nav {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.search-box input[type="text"] {
+  padding: 0.4em 0.6em;
+  border: 1px solid var(--bg-neutral);
+  border-radius: 5px;
+}
+
+.search-box>label {
+  display: block;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+
+.nav-logo,
+.nav-icon {
+  fill: var(--text-secondary);
+}
+
+.nav-logo {
+  height: 2.5em;
+}
+
+.nav-icon {
+  display: block;
+  height: 2em;
+}
+
+.icon-button {
+  display: inline-block;
+  border: none;
+  background: transparent;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 1em;
+  font-family: var(--ff-primary);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+}
+
+footer {
+  min-height: 3rem;
+  width: 100%;
+  padding: 1em;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* || HOME PAGE */
+.hero {
+  height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+  color: var(--text-secondary);
+  background: var(--text-primary);
+  background-image: url(./assets/hero.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 90%;
+  background-attachment: fixed;
+  overflow: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.hero-inner {
+  height: 100%;
+  width: 100%;
+  padding: 1em;
+  padding-top: 5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: rgba(43, 128, 147, 0.3);
+  background: linear-gradient(125deg, rgba(43, 128, 147, 0.4) 10%, rgba(95, 139, 5, 0.4) 100%);
 }
 
-.card {
-  padding: 2em;
+.hero-inner {
+  text-align: center;
+  text-shadow: 0px 0px 5px var(--text-primary);
 }
 
-.read-the-docs {
-  color: #888;
+.hero-title {
+  font-size: 3em;
+}
+
+.hero-text {
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  margin: 0 0 2em 0;
+}
+
+.hero-button {
+  padding: 1em 2em;
+  font-weight: 900;
+  color: var(--text-secondary);
+  border: 3px solid var(--text-secondary);
+  background-color: transparent;
+  text-decoration: none;
+  text-transform: uppercase;
+  outline: 1px solid transparent;
+  transition:
+    color var(--transition-speed),
+    background var(--transition-speed);
+}
+
+.hero-button:is(:hover, :focus) {
+  color: var(--bg-secondary);
+  background-color: var(--text-secondary);
 }
