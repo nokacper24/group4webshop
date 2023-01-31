@@ -243,8 +243,9 @@ footer {
   padding: 1em 2em;
   font-weight: 900;
   color: var(--text-secondary);
-  border: 3px solid var(--text-secondary);
-  background-color: transparent;
+  border: 2px solid var(--text-secondary);
+  border-radius: 0.5em;
+  background-color: var(--bg-secondary);
   text-decoration: none;
   text-transform: uppercase;
   outline: 1px solid transparent;
