@@ -116,6 +116,7 @@ nav {
 .flex-container {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5em;
 }
 
@@ -251,4 +252,23 @@ footer {
 .hero-button:is(:hover, :focus) {
   color: var(--bg-secondary);
   background-color: var(--text-secondary);
+}
+
+.partners {
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  list-style: none;
+}
+
+.partner-logo {
+  display: block;
+  filter: grayscale(1);
+  transition: filter var(--transition-speed);
+}
+
+.partner-logo:is(:hover, :focus) {
+  filter: grayscale(0);
 }
