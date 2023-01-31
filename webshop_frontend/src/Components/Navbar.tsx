@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 function Navbar() {
     return (
         <nav>
+            <Link to="#main" id="skip-navigation">
+                Skip Navigation
+            </Link>
             <div className="flex-container">
                 {/* ProFlex Logo */}
                 <svg className="nav-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 878 299">

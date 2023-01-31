@@ -58,12 +58,32 @@ nav {
   position: absolute;
   width: 100%;
   display: flex;
+#skip-navigation {
+  position: absolute;
+  left: 1em;
+  top: -1000px;
   padding: 0.5rem;
   color: var(--text-secondary);
   background-color: var(--bg-primary);
   justify-content: space-between;
   align-items: center;
   opacity: 0.8;
+  border: 3px solid var(--text-secondary);
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: border var(--transition-speed) ease-out;
+  z-index: 1;
+}
+#skip-navigation:focus {
+  top: 50%;
+  transform: translateY(-50%);
+  outline: none;
+}
+
+#skip-navigation:hover {
+  border-color: var(--text-primary);
 }
 
 .flex-container {
