@@ -198,7 +198,7 @@ footer {
   background-image: url(./assets/hero.jpg);
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 90%;
+  background-position: 50% 100%;
   background-attachment: fixed;
   overflow: hidden;
 }
