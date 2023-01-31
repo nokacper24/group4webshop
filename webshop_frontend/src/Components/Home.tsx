@@ -10,8 +10,9 @@ export default function Home() {
                     <button className="hero-button">Our offers</button>
                 </div>
             </section>
-            <section className="home">
-                
+            <section className="container">
+                <h2>Our values</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dignissim enim sit amet venenatis urna cursus eget nunc scelerisque. A lacus vestibulum sed arcu non odio euismod lacinia at. Odio ut sem nulla pharetra diam. Ac tortor dignissim convallis aenean et tortor. Massa eget egestas purus viverra accumsan in nisl nisi.</p>
             </section>
         </React.Fragment>
         
