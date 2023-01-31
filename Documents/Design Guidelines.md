@@ -7,7 +7,7 @@ Our website is for selling software to enterprises, so the theme should be serio
 ## Colours
 
 - Primary colour: #473372 (purple)
-- Secondary colour: #2B8093 (blue)
+- Secondary colour: #2E74B5 (blue)
 - Tertiary colour: #5F8B05 (green)
 
 - Neutral colours: #D9D9D9 (lightgrey)
