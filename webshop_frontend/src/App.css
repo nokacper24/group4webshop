@@ -38,7 +38,7 @@ body {
 
 .container {
   max-width: var(--max-width);
-  margin: 0 auto;
+  margin-inline: auto;
   text-align: center;
 }
 
@@ -79,7 +79,7 @@ nav {
 .nav-container {
   height: var(--nav-height);
   max-width: var(--max-width);
-  margin: 0 auto;
+  margin-inline: auto;
   padding: 0.5rem;
   display: flex;
   justify-content: space-between;
@@ -135,16 +135,15 @@ nav {
 
 .nav-logo,
 .nav-icon {
+  display: block;
   fill: var(--text-secondary);
 }
 
 .nav-logo {
-  display: block;
   height: 2.5em;
 }
 
 .nav-icon {
-  display: block;
   height: 2em;
 }
 
@@ -155,11 +154,12 @@ nav {
 }
 
 .nav-links {
+  padding: 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 1em;
   font-family: var(--ff-primary);
 }
 
@@ -186,7 +186,7 @@ footer {
 .footer-container {
   min-height: 3rem;
   max-width: var(--max-width);
-  margin: 0 auto;
+  margin-inline: auto;
   padding: 1em;
 
   color: var(--text-secondary);
