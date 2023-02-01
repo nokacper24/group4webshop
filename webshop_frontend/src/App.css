@@ -307,3 +307,27 @@ footer {
 }
 
 /* || PRODUCTS PAGE */
+
+.product-list {
+  list-style-type: none;
+}
+
+.product-card {
+  border: #000 1px solid;
+  width: 30rem;
+  background-color: rgb(255, 255, 255);
+}
+
+.card-image {
+  float: left;
+}
+
+.card-text-wrapper {
+  top: 20%;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-content: center;
+}
