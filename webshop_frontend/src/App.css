@@ -34,6 +34,7 @@ body {
   margin: 0;
   font-family: var(--ff-primary);
   line-height: 2;
+  background: rgba(71, 51, 114, 0.15);
 }
 
 .container {
