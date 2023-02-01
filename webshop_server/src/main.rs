@@ -21,9 +21,6 @@ async fn main() -> std::io::Result<()> {
 
     println!("Starting server at http://{}", address);
 
-    //TEST THING, build should fail
-    let query = sqlx::query!("SELECT d FROM product");
-
     HttpServer::new(|| {
         let cors = Cors::default()
             .allow_any_origin() // Should be changed to allow only specific origins in production
@@ -62,7 +59,7 @@ mod tests {
         dotenvy::dotenv().ok();
         let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
         let pool = sqlx::PgPool::connect(dburl.as_str()).await.unwrap();
-        let results = sqlx::query!("SELECT *dd FROM product").fetch_all(&pool).await.unwrap();
+        let results = sqlx::query!("SELECT * FROM product").fetch_all(&pool).await.unwrap();
         println!("{:?}",results);
     }
 }
