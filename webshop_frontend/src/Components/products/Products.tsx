@@ -11,18 +11,18 @@ export default function Products() {
     }
     return (
         <div>
-            <section className="products">
+            <section className="container">
                 <h1>Our solutions</h1>
+                <ul className="product-list grid-container">
+                    {
+                        state.products.map((product) => (
+                            <Product 
+                                key={product.name}
+                                product={product} />
+                        ))
+                    }
+                </ul>
             </section>
-            <ul>
-                {
-                    state.products.map((product) => (
-                        <Product 
-                            key={product.name}
-                            product={product} />
-                    ))
-                }
-            </ul>
         </div>
     );
 }
