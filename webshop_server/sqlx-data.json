@@ -1,0 +1,27 @@
+{
+  "db": "PostgreSQL",
+  "40e5b26d2df5aa2cc92c1a45c47560092b4cbb50dd1aa24320afc6a729f16cfe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "product_name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_price",
+          "ordinal": 1,
+          "type_info": "Float4"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM product"
+  }
+}
