@@ -53,11 +53,11 @@ h6 {
 }
 
 h1 {
-  font-family: var(--ff-title);
   font-size: 2rem;
   font-weight: 400;
 }
 
+h1,
 h2,
 h3 {
   color: var(--text-primary);
@@ -228,7 +228,11 @@ footer {
 }
 
 .hero-title {
+  color: var(--text-secondary);
   font-size: 3em;
+  font-family: var(--ff-title);
+
+  -webkit-text-fill-color: var(--text-secondary);
 }
 
 .hero-text {
@@ -277,3 +281,5 @@ footer {
 .partner-logo:is(:hover, :focus) {
   filter: grayscale(0);
 }
+
+/* || PRODUCTS PAGE */
