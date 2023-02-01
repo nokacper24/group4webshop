@@ -120,6 +120,15 @@ nav {
   gap: 0.5em;
 }
 
+.wide {
+  width: 100%;
+}
+
+.space-between {
+  padding-inline: 0.5rem;
+  justify-content: space-between;
+}
+
 .search-box input[type="text"] {
   padding: 0.4em 0.6em;
   border: 1px solid var(--bg-neutral);
@@ -163,9 +172,23 @@ nav {
   font-family: var(--ff-primary);
 }
 
+.nav-links>li {
+  padding-inline: 1em;
+  display: flex;
+  align-items: center;
+  height: var(--nav-height);
+  line-height: var(--nav-height);
+  list-style: none;
+}
+
 .nav-link {
   color: var(--text-secondary);
   text-decoration: none;
+}
+
+.nav-links>li:is(:hover, :focus) {
+  background: var(--bg-secondary);
+  transition: background var(--transition-speed) ease;
 }
 
 .container {
