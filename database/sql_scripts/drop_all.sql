@@ -1,2 +1,15 @@
---postgreSQL simple table for test
-DROP TABLE IF EXISTS product;
+DROP TABLE description_component;
+DROP TABLE product_text;
+DROP TABLE product_image;
+DROP TABLE testemonial;
+DROP TABLE product_category;
+DROP TABLE category;
+DROP TABLE user_license;
+DROP TABLE license;
+DROP TABLE product;
+DROP TABLE cookies;
+DROP TABLE register_user;
+DROP TABLE app_user;
+DROP TABLE register_company_user;
+DROP TABLE company;
+DROP TYPE role_enum;
