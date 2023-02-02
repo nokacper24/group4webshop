@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 
 export type ProductProps = {
-    product: {
+    props: {
         name: string;
         description: string;
         sourceImage: string;
     }
 }
 
-export const Product = ({product}: ProductProps) => {
+export const Product = ({props: product}: ProductProps) => {
     return (
         <li>
             <Link className="product-card" to={"#"}>
