@@ -3,6 +3,7 @@ use actix_web::{get, http, web, App, HttpServer, Responder};
 use dotenvy::dotenv;
 
 mod routes;
+mod data_access;
 
 use routes::public::public;
 
