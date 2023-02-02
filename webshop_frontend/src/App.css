@@ -326,9 +326,8 @@ footer {
   display: flex;
   flex-direction: column;
   background-color: var(--text-secondary);
-  box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   -webkit-box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   text-decoration: none;
 }
 
