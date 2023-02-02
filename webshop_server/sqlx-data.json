@@ -9,12 +9,24 @@
           "type_info": "Text"
         },
         {
-          "name": "product_price",
+          "name": "price_per_user",
           "ordinal": 1,
           "type_info": "Float4"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "main_image",
+          "ordinal": 3,
+          "type_info": "Text"
         }
       ],
       "nullable": [
+        false,
+        false,
         false,
         false
       ],
@@ -23,5 +35,43 @@
       }
     },
     "query": "SELECT * FROM product"
+  },
+  "d803bb8a76f3757f3440d40378e0c23846af7233fdd6706acb7d03d5523b38ca": {
+    "describe": {
+      "columns": [
+        {
+          "name": "product_name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_per_user",
+          "ordinal": 1,
+          "type_info": "Float4"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "main_image",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT * FROM product WHERE product_name = $1"
   }
 }
