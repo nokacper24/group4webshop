@@ -1,6 +1,7 @@
+use serde::{Serialize, Deserialize};
 use sqlx::{query_as,{Postgres, Pool}};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Product {
     product_name: String,
     price_per_user: f32,
