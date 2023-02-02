@@ -55,21 +55,3 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-
-
-// if you want to see the print run
-// cargo test -- --nocapture
-#[cfg(test)]
-mod tests {
-    // test sqlx pool
-    #[ignore] 
-    #[actix_web::test]
-    async fn test_sqlx_pool() {
-        dotenvy::dotenv().ok();
-        let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
-        let pool = sqlx::PgPool::connect(dburl.as_str()).await.unwrap();
-        let results = sqlx::query!("SELECT * FROM product").fetch_all(&pool).await.unwrap();
-        println!("{:?}",results);
-    }
-}
