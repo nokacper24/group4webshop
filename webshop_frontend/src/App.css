@@ -37,6 +37,12 @@ body {
   background: rgba(71, 51, 114, 0.15);
 }
 
+#root {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
 .container {
   max-width: var(--max-width);
   margin-inline: auto;
@@ -214,7 +220,6 @@ footer {
   padding: 1em;
 
   color: var(--text-secondary);
-  font-size: 0.75rem;
   text-align: center;
 }
 
