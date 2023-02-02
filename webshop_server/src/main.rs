@@ -22,7 +22,13 @@ async fn main() -> std::io::Result<()> {
 
     println!("Starting server at http://{}", address);
 
-    HttpServer::new(|| {
+
+            //create new pool
+            let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
+
+            let pool = web::Data::new(sqlx::PgPool::connect(dburl.as_str()).await.expect("Can not connect to database"));
+
+    HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin() // Should be changed to allow only specific origins in production
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
@@ -30,9 +36,12 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
+
         let public = web::scope("/api").configure(public);
 
         App::new()
+            // register sqlx pool
+            .app_data(pool.clone())
             // configure cors
             .wrap(cors)
             .service(index)
