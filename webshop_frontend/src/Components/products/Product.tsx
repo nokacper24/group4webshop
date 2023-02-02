@@ -19,7 +19,7 @@ export const Product = ({props: product}: ProductProps) => {
                     className = "card-image">
                 </img>
                 <h2>{product.name}</h2>
-                <p>{product.description}</p>
+                <p className="card-description">{product.description}</p>
             </Link>
         </li>
     )
