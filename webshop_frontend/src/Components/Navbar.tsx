@@ -4,11 +4,10 @@ function Navbar() {
     return (
         <nav>
             <div className="nav-container">
-            <Link to="#main" id="skip-navigation">
-                Skip Navigation
-            </Link>
+                <Link to="#main" id="skip-navigation">
+                    Skip Navigation
+                </Link>
 
-            <div className="flex-container">
                 {/* ProFlex Logo */}
                 <Link className="nav-link" to="/">
                     <svg className="nav-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 878 299">
@@ -17,34 +16,47 @@ function Navbar() {
                         <path d="m398.7 257.4l21.5-121.9h83.5l-4 22.6h-44.9l-4.6 26h39.4l-4.4 24.9h-39.3l-8.6 48.4zm103.5 0l21.5-121.9h38.6l-17.1 97.1h41.4l-4.4 24.8zm99.3 0l21.5-121.9h85.6l-4 22.6h-46.9l-4.6 25.8h41.4l-3.9 22h-41.4l-4.7 26.7h47l-4.4 24.8zm242.4-121.9l-41.1 61.2 19.6 60.7h-46.9l-7.4-45.9-29 45.9h-35.4l41.1-60.7-19.6-61.2h47l11 43.2 27.6-43.2z"/>
                     </svg>
                 </Link>
-            
-                {/* Searchbox */}
-                <form className="search-box flex-container">
-                    <label htmlFor="nav-search">Search</label>
-                    <input id="nav-search" type="text" placeholder="Search" />
-                    {/* Magnifying glass icon */}
-                    <button className="icon-button" type="submit">   
-                        <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">{/* Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. */}
-                            <title>Magnifying Glass Icon</title>
-                            <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/>
-                        </svg>
-                    </button>
-                </form>
-            </div>
 
-            <div className="nav-links">
-                <Link className="nav-link" to="/">Home</Link>
-                <Link className="nav-link" to="/products">Products</Link>
-                <Link className="nav-link" to="/about">About</Link>
-                <Link className="nav-link" to="/support">Support</Link>
-                {/* User profile icon */}
-                <Link className="nav-link" to="/profile">
-                    <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">{/* Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. */}
-                    <title>User Profile Icon</title>
-                        <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0S96 57.3 96 128s57.3 128 128 128zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/>
-                    </svg>
-                </Link>
-            </div>
+                <div className="wide">
+                    <div className="flex-container space-between">
+                        {/* Searchbox */}
+                        <form className="search-box flex-container">
+                            <label htmlFor="nav-search">Search</label>
+                            <input id="nav-search" type="text" placeholder="Search" />
+                            {/* Magnifying glass icon */}
+                            <button className="icon-button" type="submit">   
+                                <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">{/* Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. */}
+                                    <title>Magnifying Glass Icon</title>
+                                    <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/>
+                                </svg>
+                            </button>
+                        </form>
+
+                        <ul className="nav-links">
+                            <li>
+                                <Link className="nav-link" to="/">Home</Link>
+                            </li>
+                            <li>
+                                <Link className="nav-link" to="/products">Products</Link>
+                            </li>
+                            <li>
+                                <Link className="nav-link" to="/about">About</Link>
+                            </li>
+                            <li>
+                                <Link className="nav-link" to="/support">Support</Link>
+                            </li>
+                            {/* User profile icon */}
+                            <li>
+                                <Link className="nav-link" to="/profile">
+                                <svg className="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">{/* Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. */}
+                                    <title>User Profile Icon</title>
+                                    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0S96 57.3 96 128s57.3 128 128 128zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/>
+                                </svg>
+                            </Link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </nav>
     );
