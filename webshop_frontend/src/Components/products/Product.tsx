@@ -10,8 +10,8 @@ export type ProductProps = {
 
 export const Product = ({product}: ProductProps) => {
     return (
-        <li className="product-card">
-            <Link to={"#"}>
+        <li>
+            <Link className="product-card" to={"#"}>
                 <img height={200}
                     width={300} 
                     src={product.sourceImage}
