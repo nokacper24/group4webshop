@@ -6,10 +6,10 @@ export type State = {
 
 export default function Products() {
     const website_data = [
-        {name: 'Acme', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/200/100'},
-        {name: 'Acme2', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/200/100'},
-        {name: 'Acme3', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/200/100'},
-        {name: 'Acme4', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/200/100'},
+        {name: 'Acme', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/300/200'},
+        {name: 'Acme2', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/300/200'},
+        {name: 'Acme3', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/300/200'},
+        {name: 'Acme4', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', sourceImage: 'https://unsplash.it/300/200'},
     ]
     let state: State = {
         products: [],

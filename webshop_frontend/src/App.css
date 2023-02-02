@@ -80,6 +80,7 @@ button {
 nav {
   position: relative;
   background-color: rgba(71, 51, 114, 0.8);
+  outline: 1px solid transparent;
 }
 
 .nav-container {
@@ -210,6 +211,7 @@ hr {
 
 footer {
   background-color: var(--bg-primary);
+  outline: 1px solid transparent;
 }
 
 .footer-container {
@@ -319,8 +321,8 @@ footer {
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 25em);
-  column-gap: 1em;
-  row-gap: 1em;
+  column-gap:4em;
+  row-gap: 4em;
   justify-content: center;
   align-items: center;
 }
@@ -333,9 +335,40 @@ footer {
   -webkit-box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   text-decoration: none;
+  outline: 1px solid transparent;
+  transition: transform 100ms;
+}
+
+.product-card:hover {
+  -webkit-box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.75);
+  transform: scale(1.1, 1.1);
 }
 
 .card-image {
   display: block;
   margin-inline: auto;
+}
+
+.card-description {
+  line-height: 1rem;
+  margin-top: 0;
+  color: var(--text-primary);
+}
+
+@media only screen and (max-width: 1000px) {
+  .grid-container {
+    grid-template-columns: 75vw;
+  }
+
+  .card-image {
+    width: calc(100% - 10vw);
+    height: auto;
+  }
+}
+
+@media only screen and (min-width: 1700px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 25em);
+  }
 }
