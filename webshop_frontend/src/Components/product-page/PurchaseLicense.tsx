@@ -28,7 +28,11 @@ export default class PurchaseLicense extends Component {
 
           <p className="total-price">TOTAL: {this.state.totalPrice}</p>
 
-          <button type="submit" className="default-button">
+          <button
+            type="submit"
+            className="default-button submit-button"
+            disabled
+          >
             Buy
           </button>
           <div className="checkbox-input">
@@ -40,5 +44,21 @@ export default class PurchaseLicense extends Component {
         </form>
       </section>
     );
+  }
+
+  componentDidMount(): void {
+    this.disableButtonEvent();
+  }
+
+  disableButtonEvent(): void {
+    const prices = document.querySelector("#prices");
+    const submitButton: HTMLInputElement | null =
+      document.querySelector(".submit-button");
+
+    prices?.addEventListener("change", function () {
+      if (submitButton != null) {
+        submitButton.disabled = false;
+      }
+    });
   }
 }

@@ -605,3 +605,8 @@ footer {
   font-size: 1.1rem;
   font-family: var(--ff-primary);
 }
+
+.submit-button[disabled] {
+  background: grey;
+  cursor: default;
+}
