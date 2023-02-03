@@ -8,6 +8,7 @@ import Products from './Components/products/Products';
 import About from './Components/About';
 import Support from './Components/Support';
 import Profile from './Components/Profile';
+import Product_page from './Components/product-page/ProductPage';
 
 function App() {
     const [count, setCount] = useState(0);
@@ -23,6 +24,7 @@ function App() {
                     <Route path="about" element={<About/>} />
                     <Route path="support" element={<Support/>} />
                     <Route path="profile" element={<Profile/>} />
+                    <Route path="product-page" element={<Product_page/>} />
                 </Routes>
             </main>
 
