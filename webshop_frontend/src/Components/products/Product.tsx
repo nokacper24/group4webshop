@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export type ProductProps = {
+export type ProductCardProps = {
     props: {
         name: string;
         description: string;
@@ -8,10 +8,10 @@ export type ProductProps = {
     }
 }
 
-export const Product = ({props: product}: ProductProps) => {
+export const Product = ({props: product}: ProductCardProps) => {
     return (
         <li>
-            <Link className="product-card" to={"#"}>
+            <Link className="product-card" to={"/product-page"}>
                 <img height={200}
                     width={300} 
                     src={product.sourceImage}
@@ -22,5 +22,5 @@ export const Product = ({props: product}: ProductProps) => {
                 <p className="card-description">{product.description}</p>
             </Link>
         </li>
-    )
+    );
 }

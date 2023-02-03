@@ -1,7 +1,7 @@
-import { Product, ProductProps} from "./Product";
+import { Product, ProductCardProps} from "./Product";
 
 export type State = {
-    products: ProductProps[];
+    products: ProductCardProps[];
 }
 
 export default function Products() {
@@ -15,7 +15,7 @@ export default function Products() {
         products: [],
     }
     website_data.forEach((projectObject) => {
-        let newProduct: ProductProps = {
+        let newProduct: ProductCardProps = {
             props: projectObject, 
         }
         state.products.push(newProduct);
