@@ -28,17 +28,23 @@ export default function ProductPage() {
         }
         state.rows.push(newRow);
     });
-    let i: number = 0;
     return (
         <section className="container">
             <h1 className="hero-title">Profile</h1>
             {
-                state.rows.map((item) => (
+                state.rows.map((productPageRow) => (
                     <DescriptionRow
-                        key={i}
-                        props={item.props} />
+                        key={assignUniqueKey("")}
+                        props={productPageRow.props} />
+                        
                 ))
             }
         </section>
     );
+}
+
+let counter = 0;
+function assignUniqueKey(base: string) {
+    counter++;
+    return base + counter;
 }
