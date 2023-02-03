@@ -6,6 +6,7 @@ import Footer from "./Components/Footer";
 import Home from "./Components/home/Home";
 import Products from "./Components/products/Products";
 import ProductPage from "./Components/product-page/ProductPage";
+import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/About";
 import Support from "./Components/Support";
 import Profile from "./Components/Profile";
@@ -25,6 +26,7 @@ function App() {
           <Route path="support" element={<Support />} />
           <Route path="profile" element={<Profile />} />
           <Route path="product-page" element={<ProductPage />} />
+          <Route path="purchase-license" element={<PurchaseLicense />} />
         </Routes>
       </main>
 
