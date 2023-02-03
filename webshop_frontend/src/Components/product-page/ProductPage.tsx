@@ -5,6 +5,15 @@ export type State = {
 }
 
 export default function ProductPage() {
+    let rowTextItem: RowItem = {
+        title: "Lorem",
+        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam vitae tempora tempore dolore, porro reprehenderit suscipit, id sapiente molestias delectus alias saepe a doloribus est enim. Tenetur dolore sapiente eaque.",
+        isTextNotImage: true,
+    }
+    let rowImageItem: RowItem = {
+        title: undefined,
+        content: 'https://unsplash.it/300/200',
+        isTextNotImage: false,
     }
     const row_data = [
         {item1: rowTextItem, item2: rowImageItem, textToLeft: true},
