@@ -1,7 +1,7 @@
 export default function About() {
-    return (
-        <section className="about">
-            <h1>About</h1>
-        </section>
-    );
+  return (
+    <section className="container">
+      <h1>About</h1>
+    </section>
+  );
 }
