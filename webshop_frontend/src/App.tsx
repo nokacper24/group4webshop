@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from './Components/Navbar'
+import Header from './Components/Header';
 import Footer from './Components/Footer';
 import Home from './Components/home/Home';
 import Products from './Components/products/Products';
@@ -14,7 +14,7 @@ function App() {
 
     return (
         <BrowserRouter>
-            <Navbar />
+            <Header />
 
             <main id="main">
                 <Routes>

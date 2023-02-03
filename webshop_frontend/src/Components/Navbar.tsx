@@ -1,6 +1,3 @@
-import { Link } from 'react-router-dom';
-
-function Navbar() {
     return (
         <nav>
             <div className="nav-container">
@@ -60,6 +57,3 @@ function Navbar() {
             </div>
         </nav>
     );
-}
-
-export default Navbar;
