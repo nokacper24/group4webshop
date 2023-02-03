@@ -7,7 +7,7 @@
   --bg-secondary: #2E74B5;
   --bg-tertiary: #5F8B05;
   --bg-neutral: #D9D9D9;
-  --bg-gradient: 125deg, rgba(46, 116, 181, 0.5) 10%, rgba(95, 139, 5, 0.5) 100%;
+  --bg-gradient: 125deg, rgba(46, 116, 181, 0.4) 10%, rgba(95, 139, 5, 0.4) 100%;
 
   /* Text colour variables */
   --text-primary: #000;
@@ -21,7 +21,7 @@
 
   /* Sizes */
   --header-height: 60px;
-  --max-width: 1600px;
+  --max-width: 1200px;
 
   /* Miscellaneous */
   --transition-speed: 250ms;
@@ -384,7 +384,6 @@ nav {
   nav {
     height: 100%;
     overflow: visible;
-    margin-right: 0.5rem;
   }
 
   .nav-list {
@@ -432,7 +431,6 @@ footer {
   margin-top: calc(0px - var(--header-height));
   height: 100vh;
   max-width: 100%;
-  color: var(--text-secondary);
   background: var(--text-primary);
   background-image: url(./assets/hero.jpg);
   background-size: cover;
@@ -453,6 +451,7 @@ footer {
   justify-content: center;
   flex-wrap: wrap;
 
+  color: var(--text-secondary);
   background: linear-gradient(var(--bg-gradient));
   text-align: center;
   text-shadow: 0px 0px 5px var(--text-primary);
@@ -580,7 +579,29 @@ footer {
 /* || INDIVIDUAL PRODUCT PAGE */
 
 /* || PURCHASE LICENSE PAGE */
+.left-aligned {
+  text-align: left;
+}
+
 .checkbox-input>label {
   display: inline-block;
   margin-block: 0.5em;
+  cursor: pointer;
+}
+
+.checkbox-input a {
+  text-decoration: none;
+  font-style: italic;
+  transition: color var(--transition-speed);
+}
+
+.checkbox-input a:hover {
+  color: var(--bg-tertiary);
+}
+
+#prices {
+  min-width: 20em;
+  padding: 0.5em;
+  font-size: 1.1rem;
+  font-family: var(--ff-primary);
 }
