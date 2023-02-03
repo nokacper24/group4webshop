@@ -12,17 +12,20 @@
   /* Text colour variables */
   --text-primary: #000;
   --text-secondary: #fff;
-  --text-gradient: -35deg, rgba(46, 116, 181, 1) 40%, rgba(95, 139, 5, 1) 60%;
+  --text-gradient: -35deg, rgba(46, 116, 181, 1) 30%, rgba(95, 139, 5, 1) 70%;
 
   /* Font family variables */
   --ff-primary: 'Open Sans', 'Arial', sans-serif;
   --ff-title: 'Lalezar', 'Arial Black', 'Geneva', sans-serif;
   --ff-subtitle: 'Poiret One', 'Goudy Old Style', serif;
 
-  /* Miscellaneous */
-  --transition-speed: 250ms;
+  /* Sizes */
   --header-height: 60px;
   --max-width: 1600px;
+
+  /* Miscellaneous */
+  --transition-speed: 250ms;
+
 }
 
 /* || SITEWIDE STYLES */
@@ -68,7 +71,27 @@ h3 {
 }
 
 button {
+  font-family: var(--ff-primary);
   cursor: pointer;
+}
+
+.default-button {
+  padding: 0.75em 2em;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: 5px;
+  border: none;
+  outline: 1px solid transparent;
+  transition: background var(--transition-speed);
+}
+
+.default-button:is(:hover, :focus) {
+  background: var(--bg-tertiary);
+  outline: 1px solid currentColor;
+}
+
+label {
+  display: block;
 }
 
 .container {
@@ -94,7 +117,6 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-  height: 100vh;
   outline: 1px solid transparent;
 }
 
@@ -152,7 +174,6 @@ nav {
 }
 
 .nav-search>label {
-  display: block;
   height: 1px;
   width: 1px;
   overflow: hidden;
@@ -216,10 +237,13 @@ nav {
 }
 
 /* Navbar -- Mobile */
-@media screen and (max-width: 799px) {
+@media screen and (max-width: 800px) {
   nav {
-    position: fixed;
-    width: 100%;
+    width: var(--header-height);
+    height: var(--header-height);
+    position: absolute;
+    top: 0;
+    right: 0;
     overflow-x: hidden;
   }
 
@@ -374,8 +398,6 @@ nav {
 
   .nav-link {
     padding-inline: 1em;
-    /* justify-self: center; */
-    /* align-self: center; */
   }
 }
 
@@ -416,7 +438,6 @@ footer {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 50% 100%;
-  background-attachment: fixed;
   overflow: hidden;
 }
 
@@ -455,18 +476,19 @@ footer {
 }
 
 .hero-button {
-  padding: 1em 2em;
-  font-weight: 900;
+  padding: 0.5em 1.5em;
   color: var(--text-secondary);
+  background-color: var(--bg-secondary);
   border: 2px solid var(--text-secondary);
   border-radius: 0.5em;
-  background-color: var(--bg-secondary);
+  font-weight: 700;
   text-decoration: none;
   text-transform: uppercase;
   outline: 1px solid transparent;
   transition:
     color var(--transition-speed),
     background var(--transition-speed);
+  text-shadow: none;
 }
 
 .hero-button:is(:hover, :focus) {
@@ -479,6 +501,7 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   gap: 2em;
   list-style: none;
 }
@@ -555,3 +578,9 @@ footer {
 }
 
 /* || INDIVIDUAL PRODUCT PAGE */
+
+/* || PURCHASE LICENSE PAGE */
+.checkbox-input>label {
+  display: inline-block;
+  margin-block: 0.5em;
+}
