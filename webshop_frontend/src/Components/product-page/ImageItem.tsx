@@ -6,9 +6,7 @@ export const ImageItem = (rowItem: RowItem | undefined) => {
         item = <div className='empty-item'></div>
     } else {
         item = (
-        <div className='text-item-wrapper'>
-            <img src={rowItem.content} alt="" />
-        </div>
+        <img src={rowItem.content} alt="" />
         );
     }
     return item;
