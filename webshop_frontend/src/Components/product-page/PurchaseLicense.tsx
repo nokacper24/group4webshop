@@ -1,28 +1,43 @@
-import { ProductCardProps } from "../products/ProductCard";
+import { Component } from "react";
 import LicensePrices from "./LicensePrices";
 
-export default function PurchaseLicense(/* Product */) {
-  return (
-    <section className="container left-aligned">
-      <h1>Purchase License &rarr; Product Name</h1>
-      <p>
-        {/* Product Description */}
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum,
-        beatae cum. Sequi id sint quos beatae! Similique, molestias enim
-        explicabo obcaecati a iste voluptates repellat? Earum a possimus quo
-        itaque.
-      </p>
+export default class PurchaseLicense extends Component {
+  state = {
+    totalPrice: 0,
+  };
 
-      <LicensePrices />
+  updatePrice = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ totalPrice: event.target.value });
+  };
 
-      <p className="total-price">TOTAL: </p>
-      <button className="default-button">Buy</button>
-      <div className="checkbox-input">
-        <input id="accept-terms" type="checkbox"></input>
-        <label htmlFor="accpept-terms">
-          I have read and agree to the <a href="#!">terms of service</a>
-        </label>
-      </div>
-    </section>
-  );
+  render() {
+    return (
+      <section className="container">
+        <h1>Purchase License {/* &rarr; Product Name */}</h1>
+        <form className="left-aligned">
+          <p>
+            {/* Product Description */}
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum,
+            beatae cum. Sequi id sint quos beatae! Similique, molestias enim
+            explicabo obcaecati a iste voluptates repellat? Earum a possimus quo
+            itaque.
+          </p>
+
+          <LicensePrices updatePrice={this.updatePrice} />
+
+          <p className="total-price">TOTAL: {this.state.totalPrice}</p>
+
+          <button type="submit" className="default-button">
+            Buy
+          </button>
+          <div className="checkbox-input">
+            <input id="accept-terms" type="checkbox" required />
+            <label htmlFor="accept-terms">
+              I have read and agree to the <a href="#!">terms of service</a>.
+            </label>
+          </div>
+        </form>
+      </section>
+    );
+  }
 }
