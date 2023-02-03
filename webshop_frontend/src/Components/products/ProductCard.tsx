@@ -8,7 +8,7 @@ export type ProductCardProps = {
     }
 }
 
-export const Product = ({props: product}: ProductCardProps) => {
+export const ProductCard = ({props: product}: ProductCardProps) => {
     return (
         <li>
             <Link className="product-card" to={"/product-page"}>

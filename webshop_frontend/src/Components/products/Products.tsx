@@ -1,4 +1,4 @@
-import { Product, ProductCardProps} from "./Product";
+import { ProductCard, ProductCardProps} from "./ProductCard";
 
 export type State = {
     products: ProductCardProps[];
@@ -28,7 +28,7 @@ export default function Products() {
                 <ul className="product-list grid-container">
                     {
                         state.products.map((product) => (
-                            <Product 
+                            <ProductCard 
                                 key={product.props.name}
                                 props={product.props} />
                         ))
