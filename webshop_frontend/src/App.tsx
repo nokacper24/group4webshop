@@ -7,7 +7,7 @@ import Home from "./Components/home/Home";
 import Products from "./Components/products/Products";
 import ProductPage from "./Components/product-page/ProductPage";
 import PurchaseLicense from "./Components/product-page/PurchaseLicense";
-import About from "./Components/About";
+import About from "./Components/about-us/About";
 import Support from "./Components/Support";
 import Profile from "./Components/Profile";
 
