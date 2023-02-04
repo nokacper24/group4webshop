@@ -38,14 +38,13 @@ export default function ProductPage() {
         <div className="banner-inner">
           <div className="banner-highlight">
             <h1 className="banner-title banner-element hero-title">
-              Lorem ipsum
+              Product Name
             </h1>
-            <button className="banner-button banner-element hero-button">
-              Buy license now
-            </button>
+            <button className="banner-element hero-button">Buy license</button>
           </div>
         </div>
       </section>
+      <hr></hr>
       <section className="product-description">
         {state.rows.map((productPageRow) => (
           <DescriptionRow
