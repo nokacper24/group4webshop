@@ -667,6 +667,12 @@ footer {
   line-height: 1rem;
 }
 
+@media (max-width: 800px) {
+  .product-description-row {
+    flex-direction: column;
+  }
+}
+
 /* || PURCHASE LICENSE PAGE */
 .checkbox-input>label {
   display: inline-block;
