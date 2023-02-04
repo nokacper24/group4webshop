@@ -1,0 +1,67 @@
+import { Component } from "react";
+import ProductSelect from "./ProductSelect";
+
+export default class SupportForm extends Component {
+  state = {
+    products: [
+      { name: "Planner" },
+      { name: "Tax" },
+      { name: "Law" },
+      { name: "3D Modelling" },
+    ],
+  };
+
+  render() {
+    return (
+      <form className="container form-container">
+        <h2>Contact support</h2>
+        <p>
+          You are signed in as:<br></br>
+          <span className="user-email">email@company.com</span>
+        </p>
+        <ProductSelect products={this.state.products} />
+
+        <label htmlFor="support-subject">Subject</label>
+        <input
+          id="support-subject"
+          name="support-subject"
+          type="text"
+          required
+        ></input>
+
+        <label htmlFor="support-message">Message</label>
+        <textarea
+          id="support-message"
+          name="support-message"
+          required
+        ></textarea>
+
+        <button className="default-button submit-button" type="submit">
+          Send
+        </button>
+        <p className="form-alert"></p>
+      </form>
+    );
+  }
+
+  componentDidMount(): void {
+    this.validateForm();
+  }
+
+  validateForm(): void {
+    const productSelect: HTMLSelectElement | null =
+      document.querySelector("#product-select");
+    const submitButton: HTMLInputElement | null =
+      document.querySelector(".submit-button");
+    const formAlert: HTMLElement | null = document.querySelector(".form-alert");
+
+    submitButton?.addEventListener("click", function (e) {
+      if (submitButton != null && productSelect?.selectedIndex == 0) {
+        e.preventDefault();
+        if (formAlert != null) {
+          formAlert.innerHTML = "Please select a product";
+        }
+      }
+    });
+  }
+}
