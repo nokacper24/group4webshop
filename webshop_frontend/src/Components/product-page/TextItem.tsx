@@ -13,10 +13,10 @@ export const TextItem = (rowItem: RowItem | undefined) => {
     } else {
         item = (
         <div className='text-item-wrapper'>
-            <h2>
+            <h2 className='row-title'>
                 {rowItem.title}
             </h2>
-            <p>
+            <p className='row-text'>
                 {rowItem.content}
             </p>
         </div>
