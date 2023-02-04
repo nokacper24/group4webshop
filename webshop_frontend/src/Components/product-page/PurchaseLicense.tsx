@@ -28,11 +28,7 @@ export default class PurchaseLicense extends Component {
 
           <p className="total-price">TOTAL: {this.state.totalPrice}</p>
 
-          <button
-            type="submit"
-            className="default-button submit-button"
-            disabled
-          >
+          <button type="submit" className="default-button submit-button">
             Buy
           </button>
           <div className="checkbox-input">
@@ -41,23 +37,28 @@ export default class PurchaseLicense extends Component {
               I have read and agree to the <a href="#!">terms of service</a>.
             </label>
           </div>
+          <p className="form-alert"></p>
         </form>
       </section>
     );
   }
 
   componentDidMount(): void {
-    this.disableButtonEvent();
+    this.validateForm();
   }
 
-  disableButtonEvent(): void {
-    const prices = document.querySelector("#prices");
+  validateForm(): void {
+    const prices: HTMLSelectElement | null = document.querySelector("#prices");
     const submitButton: HTMLInputElement | null =
       document.querySelector(".submit-button");
+    const formAlert: HTMLElement | null = document.querySelector(".form-alert");
 
-    prices?.addEventListener("change", function () {
-      if (submitButton != null) {
-        submitButton.disabled = false;
+    submitButton?.addEventListener("click", function (e) {
+      if (submitButton != null && prices?.selectedIndex == 0) {
+        e.preventDefault();
+        if (formAlert != null) {
+          formAlert.innerHTML = "Please select a plan";
+        }
       }
     });
   }
