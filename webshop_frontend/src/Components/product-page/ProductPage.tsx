@@ -28,7 +28,12 @@ export default function ProductPage() {
   };
   row_data.forEach((row) => {
     let newRow: ProductPageRow = {
-      props: row,
+      props: {
+        item1: row.item1,
+        item2: row.item2,
+        textToLeft: row.textToLeft,
+        id: assignUniqueKey("row"),
+      }
     };
     state.rows.push(newRow);
   });

@@ -6,6 +6,7 @@ import { TextItem } from "./TextItem";
  */
 export type ProductPageRow = {
   props: {
+    id: string;
     item1: RowItem | undefined;
     item2: RowItem | undefined;
     textToLeft: boolean;
@@ -27,12 +28,12 @@ export type RowItem = {
  * @returns JSX element
  */
 export default function DescriptionRow (row: ProductPageRow) {
-    let rowElement: [JSX.Element | undefined, JSX.Element | undefined];
+    let rowElement: [string, JSX.Element | undefined, JSX.Element | undefined];
 
   if (row.props.item1?.isTextNotImage && !row.props.item2?.isTextNotImage) {
     //if item1 is text but not item2
     if (row.props.textToLeft) {
-      rowElement = [TextItem(row.props.item1), ImageItem(row.props.item2)];
+      rowElement = [row.props.id ,TextItem(row.props.item1), ImageItem(row.props.item2)];
       console.log(
         "Item 1: " +
           row.props.item1.content +
@@ -41,7 +42,7 @@ export default function DescriptionRow (row: ProductPageRow) {
           " functionID: 1"
       );
     } else {
-      rowElement = [ImageItem(row.props.item2), TextItem(row.props.item1)];
+      rowElement = [row.props.id ,ImageItem(row.props.item2), TextItem(row.props.item1)];
       console.log(
         "Item 1: " +
           row.props.item1.content +
@@ -56,12 +57,12 @@ export default function DescriptionRow (row: ProductPageRow) {
   ) {
     //if item2 is text but item1 is not
     if (row.props.textToLeft) {
-      rowElement = [TextItem(row.props.item2), ImageItem(row.props.item1)];
+      rowElement = [row.props.id ,TextItem(row.props.item2), ImageItem(row.props.item1)];
       console.log(
         "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 3"
       );
     } else {
-      rowElement = [ImageItem(row.props.item1), TextItem(row.props.item2)];
+      rowElement = [row.props.id ,ImageItem(row.props.item1), TextItem(row.props.item2)];
       console.log(
         "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 4"
       );
@@ -69,7 +70,7 @@ export default function DescriptionRow (row: ProductPageRow) {
   } else {
     //if item1 and item2 is the same the order will be item1 > item2
     if (row.props.item1?.isTextNotImage && row.props.item2?.isTextNotImage) {
-      rowElement = [TextItem(row.props.item1), TextItem(row.props.item2)];
+      rowElement = [row.props.id ,TextItem(row.props.item1), TextItem(row.props.item2)];
       console.log(
         "Item 1: " +
           row.props.item1.content +
@@ -78,16 +79,25 @@ export default function DescriptionRow (row: ProductPageRow) {
           " functionID: 5"
       );
     } else {
-      rowElement = [ImageItem(row.props.item1), ImageItem(row.props.item2)];
+      rowElement = [row.props.id ,ImageItem(row.props.item1), ImageItem(row.props.item2)];
       console.log(
         "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 6"
       );
     }
   }
   return (
-    <div className="product-description-row">
+    <div className="product-description-row" key={rowElement[0]}>
         {
-        rowElement
+            // remove first element in array (id) and map the rest
+            rowElement.slice(1).map((item, index) => {
+                if (item) {
+                    return (
+                        <div className="product-description-row-item" key={index}>
+                            {item}
+                        </div>
+                    );
+                }
+            })
         }
     </div>
 );
