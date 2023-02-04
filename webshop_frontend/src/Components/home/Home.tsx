@@ -37,7 +37,6 @@ class Home extends Component {
             <Link className="hero-button" to={"purchase-license"}>
               Offers
             </Link>
-            {/* <button className="hero-button">Our offer</button> */}
           </div>
         </section>
         <hr></hr>
