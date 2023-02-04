@@ -2,9 +2,9 @@
 
 // Path: webshop_server\src\routes\public\public.rs
 
-use actix_web::{get, web, Responder, HttpResponse};
+use actix_web::{get, web, Responder, HttpResponse, post};
 use sqlx::{Pool, Postgres};
-use crate::data_access::product::{get_products, get_product_by_name};
+use crate::data_access::product::{get_products, get_product_by_name, Product, create_new_product};
 
 #[get("")]
 async fn index() -> impl Responder {
@@ -39,6 +39,23 @@ async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 #[get("products/{product_name}")]
 async fn product_by_name(pool: web::Data<Pool<Postgres>>, product_name: web::Path<String>) -> impl Responder {
     let product = get_product_by_name(&pool, product_name.as_str()).await;
+
+    //error check
+    if product.is_err() {
+        return HttpResponse::InternalServerError().json("Internal Server Error");
+    }
+    
+    //parse to json
+    if let Ok(product) = product {
+        return HttpResponse::Ok().json(product);
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+#[post("products")]
+async fn create_product(pool: web::Data<Pool<Postgres>>, product: web::Json<Product>) -> impl Responder {
+    let product = create_new_product(&pool, &product).await;
 
     //error check
     if product.is_err() {
