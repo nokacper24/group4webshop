@@ -8,7 +8,7 @@ import Products from "./Components/products/Products";
 import ProductPage from "./Components/product-page/ProductPage";
 import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
-import Support from "./Components/Support";
+import Support from "./Components/support/Support";
 import Profile from "./Components/Profile";
 
 function App() {
