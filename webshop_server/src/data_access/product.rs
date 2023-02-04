@@ -49,3 +49,16 @@ pub async fn get_product_by_name(pool: &Pool<Postgres>, product_name: &str) -> R
         .await?;
     Ok(product)
 }
+
+pub async fn create_product(pool: &Pool<Postgres>, product: &Product) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "INSERT INTO product (product_name, price_per_user, short_description, main_image) VALUES ($1, $2, $3, $4)",
+        product.product_name(),
+        product.price_per_user(),
+        product.short_description(),
+        product.main_image()
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
