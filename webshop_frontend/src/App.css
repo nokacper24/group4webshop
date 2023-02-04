@@ -35,9 +35,9 @@
 
 body {
   margin: 0;
+  background: rgba(71, 51, 114, 0.10);
   font-family: var(--ff-primary);
   line-height: 2;
-  background: rgba(71, 51, 114, 0.10);
 }
 
 #root {
@@ -58,6 +58,10 @@ h6 {
 }
 
 h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
   font-size: 2rem;
 }
 
@@ -691,12 +695,13 @@ footer {
   position: relative;
   height: 80vh;
   max-width: 100%;
+  margin-top: calc(0px - var(--header-height));
   color: var(--text-secondary);
   background: var(--text-primary);
   background-image: url(assets/about-us-banner.jpg);
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 50%;
+  background-position: 50% 40%;
   overflow: hidden;
 }
 
