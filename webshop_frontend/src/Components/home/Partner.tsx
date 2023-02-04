@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export type PartnerProps = {
+type PartnerProps = {
   partner: {
     name: string;
     link: string;
