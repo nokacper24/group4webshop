@@ -577,6 +577,35 @@ footer {
 }
 
 /* || INDIVIDUAL PRODUCT PAGE */
+.banner {
+  background-image: url(https://unsplash.it/1900/1000);
+  background-repeat: no-repeat;
+  width: 100vw;
+  height: 50em;
+  
+}
+
+.banner-inner {
+  position: relative;
+  width: inherit;
+  height: inherit;
+}
+
+.banner-highlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 15em;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+
+  width: inherit;
+  background-color: rgba(0, 0, 0, 0.416);
+  
+}
 
 /* || PURCHASE LICENSE PAGE */
 .left-aligned {
