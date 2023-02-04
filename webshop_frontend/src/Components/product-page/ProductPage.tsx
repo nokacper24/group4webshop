@@ -32,7 +32,6 @@ export default function ProductPage() {
         item1: row.item1,
         item2: row.item2,
         textToLeft: row.textToLeft,
-        id: assignUniqueKey("row"),
       }
     };
     state.rows.push(newRow);
