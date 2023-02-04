@@ -1,4 +1,7 @@
+import React from "react";
 import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
+
+let counter = 0;
 
 export type State = {
     rows: ProductPageRow[];
@@ -29,21 +32,29 @@ export default function ProductPage() {
         state.rows.push(newRow);
     });
     return (
-        <section className="container">
-            <h1 className="hero-title">Profile</h1>
-            {
-                state.rows.map((productPageRow) => (
-                    <DescriptionRow
-                        key={assignUniqueKey("")}
-                        props={productPageRow.props} />
-                        
-                ))
-            }
-        </section>
+        <React.Fragment>
+            <section className="banner">
+                <div className="banner-inner">
+                    <div className="banner-highlight">
+                        <h1 className="banner-title banner-element hero-title">Lorem ipsum</h1>
+                        <button className="banner-button banner-element hero-button">Buy license now</button>
+                    </div>
+                </div>
+            
+            </section>
+            <section className="product-description">
+                {
+                    state.rows.map((productPageRow) => (
+                        <DescriptionRow
+                            key={assignUniqueKey("row")}
+                            props={productPageRow.props} />
+                            
+                    ))
+                }
+            </section>
+        </React.Fragment>
     );
 }
-
-let counter = 0;
 /**
  * When you have multiple items with the same key, this adds an unique ID behind the key
  * and returns it.
