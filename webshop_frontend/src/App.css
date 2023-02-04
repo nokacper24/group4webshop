@@ -102,7 +102,7 @@ label {
 .container {
   max-width: var(--max-width);
   margin-inline: auto;
-  padding: 1em;
+  padding: 1em 2em;
   text-align: center;
 }
 
@@ -417,6 +417,7 @@ hr {
 }
 
 footer {
+  margin-top: 1rem;
   background-color: var(--bg-primary);
   outline: 1px solid transparent;
 }
@@ -429,6 +430,11 @@ footer {
 
   color: var(--text-secondary);
   text-align: center;
+}
+
+.form-container {
+  max-width: 80vw;
+  background: var(--bg-neutral);
 }
 
 /* || HOME PAGE */
@@ -452,7 +458,7 @@ footer {
   }
 
   20% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
 
   30% {
@@ -487,7 +493,7 @@ footer {
   color: var(--text-secondary);
   background: linear-gradient(var(--bg-gradient));
   text-align: center;
-  text-shadow: 0px 0px 2px var(--text-primary);
+  text-shadow: 0px 0px 3px var(--text-primary);
 }
 
 .hero-title {
@@ -678,16 +684,12 @@ footer {
   color: var(--bg-tertiary);
 }
 
-#prices {
+#prices,
+#product-select {
   min-width: 20em;
   padding: 0.5em;
   font-size: 1.1rem;
   font-family: var(--ff-primary);
-}
-
-.submit-button[disabled] {
-  background: grey;
-  cursor: default;
 }
 
 /* || ABOUT US PAGE */
@@ -719,4 +721,39 @@ footer {
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
+}
+
+/* || SUPPORT PAGE */
+.form-container {
+  overflow: hidden;
+}
+
+.form-container> :is(label, select, input, textarea) {
+  width: 80%;
+  margin-inline: auto;
+  display: block;
+  text-align: left;
+}
+
+.form-container>label {
+  margin-top: 1em;
+}
+
+.form-container>input {
+  font-size: 1.1rem;
+  padding: 0.5em;
+}
+
+.form-container>textarea {
+  min-height: 10em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  font-size: 1.1rem;
+  font-family: var(--ff-primary);
+  resize: vertical;
+}
+
+.form-alert {
+  margin: 0;
+  color: red;
 }
