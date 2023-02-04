@@ -657,3 +657,33 @@ footer {
   background: grey;
   cursor: default;
 }
+
+/* || ABOUT US PAGE */
+.about-us-banner {
+  position: relative;
+  height: 80vh;
+  max-width: 100%;
+  color: var(--text-secondary);
+  background: var(--text-primary);
+  background-image: url(assets/about-us-banner.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  overflow: hidden;
+}
+
+.about-us-banner h1 {
+  color: inherit;
+  background: initial;
+  -webkit-text-fill-color: initial;
+}
+
+.dark-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.wrapper-bottom {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+}
