@@ -607,6 +607,32 @@ footer {
   
 }
 
+.product-description {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  
+  padding-top: 3em;
+  padding-bottom: 3em;
+}
+
+.product-description-row {
+  display: flex;
+  flex-wrap: wrap;
+
+  padding: 1em;
+}
+
+.text-item-wrapper {
+  text-align: center;
+}
+
+.row-text {
+  width: 25vw;
+  line-height: 1rem;
+}
+
 /* || PURCHASE LICENSE PAGE */
 .left-aligned {
   text-align: left;
