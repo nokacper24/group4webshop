@@ -98,7 +98,12 @@ label {
 .container {
   max-width: var(--max-width);
   margin-inline: auto;
+  padding: 1em;
   text-align: center;
+}
+
+.left-aligned {
+  text-align: left !important;
 }
 
 header {
@@ -401,11 +406,6 @@ nav {
   }
 }
 
-.container {
-  padding: 1em;
-  text-align: center;
-}
-
 hr {
   margin: 0;
   height: 5px;
@@ -455,7 +455,7 @@ footer {
   color: var(--text-secondary);
   background: linear-gradient(var(--bg-gradient));
   text-align: center;
-  text-shadow: 0px 0px 5px var(--text-primary);
+  text-shadow: 0px 0px 2px var(--text-primary);
 }
 
 .hero-title {
@@ -464,19 +464,15 @@ footer {
   font-weight: 400;
   font-family: var(--ff-title);
 
-  -webkit-text-fill-color: var(--text-secondary);
+  -webkit-text-fill-color: initial;
 }
 
 .hero-text {
-  -ms-hyphens: auto;
-  -moz-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
   margin: 0 0 2em 0;
 }
 
 .hero-button {
-  padding: 0.5em 1.5em;
+  padding: 0.3em 1.5em;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
   border: 2px solid var(--text-secondary);
@@ -488,7 +484,7 @@ footer {
   transition:
     color var(--transition-speed),
     background var(--transition-speed);
-  text-shadow: none;
+  text-shadow: initial;
 }
 
 .hero-button:is(:hover, :focus) {
@@ -583,7 +579,6 @@ footer {
   background-repeat: no-repeat;
   width: 100vw;
   height: 50em;
-  
 }
 
 .banner-inner {
@@ -605,7 +600,7 @@ footer {
 
   width: inherit;
   background-color: rgba(0, 0, 0, 0.416);
-  
+
 }
 
 .product-description {
@@ -613,7 +608,7 @@ footer {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  
+
   padding-top: 3em;
   padding-bottom: 3em;
 }
@@ -635,10 +630,6 @@ footer {
 }
 
 /* || PURCHASE LICENSE PAGE */
-.left-aligned {
-  text-align: left;
-}
-
 .checkbox-input>label {
   display: inline-block;
   margin-block: 0.5em;
