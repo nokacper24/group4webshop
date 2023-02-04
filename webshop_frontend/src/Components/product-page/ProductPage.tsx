@@ -44,6 +44,13 @@ export default function ProductPage() {
 }
 
 let counter = 0;
+/**
+ * When you have multiple items with the same key, this adds an unique ID behind the key
+ * and returns it.
+ * 
+ * @param base the string you want an unique ID added to
+ * @returns the string modified to include the ID
+ */
 function assignUniqueKey(base: string) {
     counter++;
     return base + counter;

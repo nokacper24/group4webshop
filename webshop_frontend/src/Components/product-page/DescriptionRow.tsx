@@ -1,6 +1,9 @@
 import { ImageItem } from "./ImageItem";
 import { TextItem } from "./TextItem";
 
+/**
+ * Object that symbolizes a row in the description of the product page
+ */
 export type ProductPageRow = {
   props: {
     item1: RowItem | undefined;
@@ -9,14 +12,22 @@ export type ProductPageRow = {
   };
 };
 
+/**
+ * Object that symbolizes a item in a row in the description of the product page
+ */
 export type RowItem = {
   title: string | undefined;
   content: string;
   isTextNotImage: boolean;
 };
-
-export default function DescriptionRow(row: ProductPageRow) {
-  let rowElement: [JSX.Element | undefined, JSX.Element | undefined];
+/**
+ * Properly creates the layout of a row based on the props of the row
+ * 
+ * @param row Row to create layout for
+ * @returns JSX element
+ */
+export default function DescriptionRow (row: ProductPageRow) {
+    let rowElement: [JSX.Element | undefined, JSX.Element | undefined];
 
   if (row.props.item1?.isTextNotImage && !row.props.item2?.isTextNotImage) {
     //if item1 is text but not item2
@@ -73,5 +84,11 @@ export default function DescriptionRow(row: ProductPageRow) {
       );
     }
   }
-  return <div>{rowElement}</div>;
+  return (
+    <div className="product-description-row">
+        {
+        rowElement
+        }
+    </div>
+);
 }
