@@ -428,6 +428,34 @@ footer {
 }
 
 /* || HOME PAGE */
+.vibrate {
+  font-weight: 700;
+  display: inline-block;
+}
+
+.hero:hover .vibrate {
+  animation: bounce 3s linear infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  10%,
+  25%,
+  40%,
+  50% {
+    transform: translateY(0);
+  }
+
+  20% {
+    transform: translateY(-10px);
+  }
+
+  30% {
+    transform: translateY(-5px);
+  }
+}
+
 .hero {
   margin-top: calc(0px - var(--header-height));
   height: 100vh;

@@ -32,7 +32,7 @@ class Home extends Component {
           <div className="hero-inner">
             <h1 className="hero-title">ProFlex</h1>
             <p className="hero-text">
-              Software for <b>your</b> enterprise
+              Software for <span className="vibrate">your</span> enterprise
             </p>
             <Link className="hero-button" to={"purchase-license"}>
               Offers
