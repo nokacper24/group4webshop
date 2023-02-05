@@ -9,6 +9,8 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
+import SignIn from "./Components/profile/SignIn";
+import CreateAccount from "./Components/profile/CreateAccount";
 
 /**
  * Represents the website content.
@@ -29,6 +31,8 @@ export default function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="product-page" element={<ProductPage />} />
           <Route path="purchase-license" element={<PurchaseLicense />} />
+          <Route path="sign-in" element={<SignIn />} />
+          <Route path="create-account/*" element={<CreateAccount />} />
         </Routes>
       </main>
 
