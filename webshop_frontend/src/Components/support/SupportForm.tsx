@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import ProductSelect from "./ProductSelect";
 
 /**
@@ -46,7 +46,11 @@ export default class SupportForm extends Component {
           required
         ></textarea>
 
-        <button className="default-button submit-button m-t-1" type="submit">
+        <button
+          className="default-button submit-button m-t-1"
+          type="submit"
+          onClick={(event) => this.validateForm(event)}
+        >
           Send
         </button>
         <p className="form-alert"></p>
@@ -54,30 +58,25 @@ export default class SupportForm extends Component {
     );
   }
 
-  componentDidMount(): void {
-    this.validateForm();
-  }
-
   /**
    * Confirm that all the form's input is valid.
    *
    * If the user has not selected an option for the product,
    * inform the user that their input is needed.
+   *
+   * @param event Mouse Event on button
    */
-  validateForm(): void {
+  validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     const productSelect: HTMLSelectElement | null =
       document.querySelector("#product-select");
-    const submitButton: HTMLButtonElement | null =
-      document.querySelector(".submit-button");
     const formAlert: HTMLElement | null = document.querySelector(".form-alert");
 
-    submitButton?.addEventListener("click", function (e) {
-      if (productSelect?.selectedIndex == 0) {
-        e.preventDefault();
-        if (formAlert != null) {
-          formAlert.innerHTML = "Please select a product";
-        }
+    if (productSelect?.selectedIndex == 0) {
+      event.preventDefault();
+
+      if (formAlert != null) {
+        formAlert.innerHTML = "Please select a product";
       }
-    });
+    }
   }
 }

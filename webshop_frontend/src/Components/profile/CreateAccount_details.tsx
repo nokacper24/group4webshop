@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 /**
  * Represents the Details component on the Create Account page.
@@ -74,15 +73,13 @@ export default class CreateAccountDetails extends Component {
     );
   }
 
-  componentDidMount(): void {}
-
   /**
    * Confirm that the form has valid input.
    * Check if the password and confirm password fields are identical.
    *
    * @param event Mouse Event on button
    */
-  validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+  validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     const formAlert: HTMLParagraphElement | null =
       document.querySelector(".form-alert");
     const password: HTMLInputElement | null = document.querySelector(
@@ -92,10 +89,13 @@ export default class CreateAccountDetails extends Component {
       "#create-account_confirm-password"
     );
 
-    if (password?.value != confirmPassword?.value && formAlert != null) {
+    if (password?.value != confirmPassword?.value) {
       event.preventDefault();
-      formAlert.innerHTML =
-        '"Confirm password" must contain the same value as "Password"';
+
+      if (formAlert != null) {
+        formAlert.innerHTML =
+          '"Confirm password" must contain the same value as "Password"';
+      }
     }
   }
 }
