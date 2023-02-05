@@ -88,7 +88,7 @@ export default class Header extends Component {
               </li>
               {/* User profile icon */}
               <li>
-                <Link className="nav-link" to="/profile">
+                <Link className="nav-link" to="/sign-in">
                   <svg
                     className="nav-icon"
                     xmlns="http://www.w3.org/2000/svg"
