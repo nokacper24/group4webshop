@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom";
 import { Component } from "react";
 
-class Header extends Component {
+/**
+ * Represents the header and navbar.
+ *
+ * Contains ProFlex' logo, a search form, and links to navigate the website.
+ */
+export default class Header extends Component {
   render() {
     return (
       <header>
@@ -108,17 +113,23 @@ class Header extends Component {
   }
 }
 
-// When clicking on the hamburger menu
 var navToggle: HTMLElement | null;
 var navList: HTMLElement | null;
 var nav: HTMLElement | null;
 
+/**
+ * Assign the HTML Elements to the respective variables.
+ */
 function assignVariables() {
   navToggle = document.querySelector("#nav-toggle");
   navList = document.querySelector(".nav-list");
   nav = document.querySelector("nav");
 }
 
+/**
+ * Add event listener to the nav-toggle element, to open and close
+ * the menu when it is clicked.
+ */
 function addHamburgerToggleFunction() {
   let isOpen: boolean = navList?.getAttribute("aria-expanded") === "true";
 
@@ -136,6 +147,10 @@ function addHamburgerToggleFunction() {
   });
 }
 
+/**
+ * Open the mobile version of the navigation menu, by
+ * setting the nav's height and width to cover the screen.
+ */
 function openMenu() {
   navList?.setAttribute("aria-expanded", "true");
   navList?.setAttribute("data-state", "open");
@@ -145,6 +160,11 @@ function openMenu() {
   }
 }
 
+/**
+ * Close the mobile version of the navigation menu, by
+ * setting the nav's height and width back to the default
+ * header height.
+ */
 function closeMenu() {
   navList?.setAttribute("aria-expanded", "false");
   navList?.setAttribute("data-state", "closing");
@@ -163,10 +183,14 @@ function closeMenu() {
   );
 }
 
+/**
+ * Toggle the nav position property. Set the position to fixed
+ * when it is open, and position to absolute when it is closed.
+ *
+ * @param isOpen Whether the navigation menu is open or not.
+ */
 function setNavPositionProperty(isOpen: boolean) {
   if (nav != null) {
     nav.style.position = isOpen ? "fixed" : "absolute";
   }
 }
-
-export default Header;

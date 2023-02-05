@@ -1,5 +1,10 @@
 import React from "react";
 
+/**
+ * Represents the About page.
+ *
+ * @returns The About component as a JSX element.
+ */
 export default function About() {
   return (
     <React.Fragment>

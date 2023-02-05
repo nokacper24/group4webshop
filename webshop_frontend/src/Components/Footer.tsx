@@ -1,4 +1,9 @@
-function Footer() {
+/**
+ * Represents the footer.
+ *
+ * @returns Footer component as a JSX element.
+ */
+export default function Footer() {
   return (
     <footer>
       <div className="footer-container">
@@ -12,5 +17,3 @@ function Footer() {
     </footer>
   );
 }
-
-export default Footer;

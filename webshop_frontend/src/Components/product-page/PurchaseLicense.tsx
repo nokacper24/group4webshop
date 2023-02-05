@@ -1,6 +1,12 @@
 import { Component } from "react";
 import LicensePrices from "./LicensePrices";
 
+/**
+ * Represents a Purchase License page.
+ *
+ * Contains a short product description, the plan options, and
+ * a checkbox that the user accepts the terms and conditions.
+ */
 export default class PurchaseLicense extends Component {
   state = {
     productName: "Placeholder Name",
@@ -10,6 +16,11 @@ export default class PurchaseLicense extends Component {
     totalPrice: 0,
   };
 
+  /**
+   * Update the total price in the object's state.
+   *
+   * @param event The user event.
+   */
   updatePrice = (event: React.ChangeEvent<HTMLSelectElement>) => {
     this.setState({ totalPrice: event.target.value });
   };
@@ -47,6 +58,12 @@ export default class PurchaseLicense extends Component {
     this.validateForm();
   }
 
+  /**
+   * Confirm that all the form's input is valid.
+   *
+   * If the user has not selected an option for the plan,
+   * inform the user that their input is needed.
+   */
   validateForm(): void {
     const prices: HTMLSelectElement | null = document.querySelector("#prices");
     const submitButton: HTMLInputElement | null =
@@ -54,7 +71,7 @@ export default class PurchaseLicense extends Component {
     const formAlert: HTMLElement | null = document.querySelector(".form-alert");
 
     submitButton?.addEventListener("click", function (e) {
-      if (submitButton != null && prices?.selectedIndex == 0) {
+      if (prices?.selectedIndex == 0) {
         e.preventDefault();
         if (formAlert != null) {
           formAlert.innerHTML = "Please select a plan";

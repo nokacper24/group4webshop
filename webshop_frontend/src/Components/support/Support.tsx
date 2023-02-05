@@ -1,6 +1,11 @@
 import React from "react";
 import SupportForm from "./SupportForm";
 
+/**
+ * Represents the Support page.
+ *
+ * @returns The Support component as a JSX element.
+ */
 export default function Support() {
   return (
     <React.Fragment>

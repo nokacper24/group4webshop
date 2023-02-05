@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./Components/Header";
@@ -9,11 +8,14 @@ import ProductPage from "./Components/product-page/ProductPage";
 import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
-
-function App() {
-  const [count, setCount] = useState(0);
 import Profile from "./Components/profile/Profile";
 
+/**
+ * Represents the website content.
+ *
+ * @returns The website as a JSX element.
+ */
+export default function App() {
   return (
     <BrowserRouter>
       <Header />
@@ -34,5 +36,3 @@ import Profile from "./Components/profile/Profile";
     </BrowserRouter>
   );
 }
-
-export default App;
