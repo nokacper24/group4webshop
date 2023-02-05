@@ -40,7 +40,7 @@ export default class Home extends Component {
             <p className="hero-text">
               Software for <span className="vibrate">your</span> enterprise
             </p>
-            <Link className="hero-button" to={"purchase-license"}>
+            <Link className="hero-button" to={"/products"}>
               Offers
             </Link>
           </div>
