@@ -76,6 +76,12 @@ export default class CreateAccountDetails extends Component {
 
   componentDidMount(): void {}
 
+  /**
+   * Confirm that the form has valid input.
+   * Check if the password and confirm password fields are identical.
+   *
+   * @param event Mouse Event on button
+   */
   validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     const formAlert: HTMLParagraphElement | null =
       document.querySelector(".form-alert");
@@ -90,9 +96,6 @@ export default class CreateAccountDetails extends Component {
       event.preventDefault();
       formAlert.innerHTML =
         '"Confirm password" must contain the same value as "Password"';
-    } else if (password?.value == confirmPassword?.value && formAlert != null) {
-      event.preventDefault();
-      formAlert.innerHTML = "";
     }
   }
 }
