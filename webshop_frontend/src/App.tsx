@@ -9,10 +9,10 @@ import ProductPage from "./Components/product-page/ProductPage";
 import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
-import Profile from "./Components/Profile";
 
 function App() {
   const [count, setCount] = useState(0);
+import Profile from "./Components/profile/Profile";
 
   return (
     <BrowserRouter>
