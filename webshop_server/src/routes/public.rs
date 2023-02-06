@@ -4,7 +4,7 @@
 
 use actix_web::{get, web, Responder, HttpResponse};
 use sqlx::{Pool, Postgres};
-use crate::data_access::product::{get_products, get_product_by_name};
+use crate::data_access::product::{get_products, get_product_by_id};
 
 #[get("")]
 async fn index() -> impl Responder {
@@ -38,7 +38,7 @@ async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 /// Get a specific product by name
 #[get("products/{product_name}")]
 async fn product_by_name(pool: web::Data<Pool<Postgres>>, product_name: web::Path<String>) -> impl Responder {
-    let product = get_product_by_name(&pool, product_name.as_str()).await;
+    let product = get_product_by_id(&pool, product_name.as_str()).await;
 
     //error check
     if product.is_err() {
