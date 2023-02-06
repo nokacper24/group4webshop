@@ -7,6 +7,7 @@ use sqlx::{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DescriptionComponent {
+    component_id: i32,
     priority: i32,
     text: Option<TextComponent>,
     image: Option<ImageComponent>,
@@ -29,21 +30,28 @@ pub async fn get_product_description_components(
     product_id: &str,
 ) -> Result<Vec<DescriptionComponent>, Box<dyn Error>> {
     let rows = query!(
-        r#"SELECT priority, description_component.text_id AS "text_id?", text_title AS "text_title?", paragraph AS "paragraph?", description_component.image_id, image_path AS "image_path?", alt_text AS "alt_text?"
+        r#"SELECT component_id, priority,
+        description_component.text_id AS "text_id?",
+        text_title AS "text_title?", paragraph AS "paragraph?",
+        description_component.image_id, image_path AS "image_path?",
+        alt_text AS "alt_text?"
         FROM description_component
         FULL JOIN product_text ON  description_component.text_id = product_text.text_id
         FULL JOIN product_image ON description_component.image_id = product_image.image_id
-        WHERE description_component.product_id = $1"#, product_id)
+        WHERE description_component.product_id = $1
+        ORDER BY priority ASC"#, product_id)
         .fetch_all(pool)
         .await?;
 
     let mut description_components: Vec<DescriptionComponent> = Vec::new();
 
     for row in rows {
+        // text component
         if row.text_id.is_some() {
             match (row.text_title, row.paragraph) {
                 (Some(text_title), Some(paragraph)) => {
                     description_components.push(DescriptionComponent {
+                        component_id: row.component_id,
                         priority: row.priority,
                         text: Some(TextComponent {
                             text_title,
@@ -54,10 +62,12 @@ pub async fn get_product_description_components(
                 }
                 _ => {}
             }
+        // image component
         } else if row.image_id.is_some() {
             match (row.image_path, row.alt_text) {
                 (Some(image_path), Some(alt_text)) => {
                     description_components.push(DescriptionComponent {
+                        component_id: row.component_id,
                         priority: row.priority,
                         text: None,
                         image: Some(ImageComponent {
