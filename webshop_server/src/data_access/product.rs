@@ -55,6 +55,33 @@ pub async fn get_product_by_id(
     Ok(product)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FullProduct {
+    product_id: String,
+    display_name: String,
+    price_per_user: f32,
+    short_description: String,
+    main_image: String,
+    description_components: Vec<DescriptionComponent>,
+}
+/// Returns a full product, including description components.
+pub async fn get_full_product_by_id(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<FullProduct, Box<dyn Error>> {
+    let product = get_product_by_id(pool, product_id).await?;
+    let description_components = get_product_description_components(pool, product_id).await?;
+
+    Ok(FullProduct {
+        product_id: product.product_id,
+        display_name: product.display_name,
+        price_per_user: product.price_per_user,
+        short_description: product.short_description,
+        main_image: product.main_image,
+        description_components,
+    })
+}
+
 
 /// Returns all description components for a product.
 async fn get_product_description_components(
