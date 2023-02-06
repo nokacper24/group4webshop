@@ -15,6 +15,31 @@ pub struct Product {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct PartialProduct {
+    display_name: String,
+    price_per_user: f32,
+    short_description: String,
+    main_image: String,
+}
+impl PartialProduct {
+    fn generate_id(&self) -> String {
+        self.display_name
+            .to_lowercase()
+            .replace(".", "")
+            .replace(" ", "_")
+    }
+    fn into_product(self) -> Product {
+        Product {
+            product_id: self.generate_id(),
+            display_name: self.display_name,
+            price_per_user: self.price_per_user,
+            short_description: self.short_description,
+            main_image: self.main_image,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DescriptionComponent {
     priority: i32,
     text: Option<TextComponent>,
@@ -55,36 +80,27 @@ pub async fn get_product_by_id(
     Ok(product)
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct FullProduct {
-    product_id: String,
-    display_name: String,
-    price_per_user: f32,
-    short_description: String,
-    main_image: String,
-    description_components: Vec<DescriptionComponent>,
-}
-/// Returns a full product, including description components.
-pub async fn get_full_product_by_id(
+/// Create a new product.
+pub async fn create_product(
     pool: &Pool<Postgres>,
-    product_id: &str,
-) -> Result<FullProduct, Box<dyn Error>> {
-    let product = get_product_by_id(pool, product_id).await?;
-    let description_components = get_product_description_components(pool, product_id).await?;
-
-    Ok(FullProduct {
-        product_id: product.product_id,
-        display_name: product.display_name,
-        price_per_user: product.price_per_user,
-        short_description: product.short_description,
-        main_image: product.main_image,
-        description_components,
-    })
+    product: &PartialProduct,
+) -> Result<(), sqlx::Error> {
+    query!(
+        "INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image) VALUES ($1, $2, $3, $4, $5)",
+        product.generate_id(),
+        product.display_name,
+        product.price_per_user,
+        product.short_description,
+        product.main_image
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
 }
 
 
-/// Returns all description components for a product.
-async fn get_product_description_components(
+/// Returns all description components of a product.
+pub async fn get_product_description_components(
     pool: &Pool<Postgres>,
     product_id: &str,
 ) -> Result<Vec<DescriptionComponent>, Box<dyn Error>> {
