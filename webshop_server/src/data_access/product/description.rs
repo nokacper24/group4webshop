@@ -84,3 +84,60 @@ pub async fn get_product_description_components(
     }
     return Result::Ok(description_components);
 }
+
+
+/// Returns a description component by id.
+pub async fn get_description_component(
+    pool: &Pool<Postgres>,
+    component_id: i32,
+) -> Result<DescriptionComponent, Box<dyn Error>> {
+    let row = query!(
+        r#"SELECT component_id, priority,
+        description_component.text_id AS "text_id?",
+        text_title AS "text_title?", paragraph AS "paragraph?",
+        description_component.image_id, image_path AS "image_path?",
+        alt_text AS "alt_text?"
+        FROM description_component
+        FULL JOIN product_text ON  description_component.text_id = product_text.text_id
+        FULL JOIN product_image ON description_component.image_id = product_image.image_id
+        WHERE description_component.component_id = $1"#, component_id)
+        .fetch_one(pool)
+        .await?;
+
+    // text component
+    if row.text_id.is_some() {
+        match (row.text_title, row.paragraph) {
+            (Some(text_title), Some(paragraph)) => {
+                return Result::Ok(DescriptionComponent {
+                    component_id: row.component_id,
+                    priority: row.priority,
+                    text: Some(TextComponent {
+                        text_title,
+                        paragraph,
+                    }),
+                    image: None,
+                });
+            }
+            _ => {}
+        }
+    // image component
+    } else if row.image_id.is_some() {
+        match (row.image_path, row.alt_text) {
+            (Some(image_path), Some(alt_text)) => {
+                return Result::Ok(DescriptionComponent {
+                    component_id: row.component_id,
+                    priority: row.priority,
+                    text: None,
+                    image: Some(ImageComponent {
+                        image_path,
+                        alt_text,
+                    }),
+                });
+            }
+            _ => {}
+        }
+    } else { // Should never happen, db has constraints
+        return Err("Could not decode description component, corrupt data.".into());
+    }
+    return Err("Could not decode description component, corrupt data.".into());
+}
