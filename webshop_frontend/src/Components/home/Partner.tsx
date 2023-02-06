@@ -9,6 +9,12 @@ type PartnerProps = {
   };
 };
 
+/**
+ * Represents the information about a Partner.
+ *
+ * @param partner A partner object.
+ * @returns The Partner component as a JSX element.
+ */
 export const Partner = ({ partner }: PartnerProps) => {
   return (
     <li>

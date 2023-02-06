@@ -4,6 +4,14 @@ type ProductSelectProps = {
   }[];
 };
 
+/**
+ * Represents the Product Select component.
+ *
+ * Contains a dropdown menu to select a product.
+ *
+ * @param products The list of products and their names.
+ * @returns The ProductSelect component as a JSX element.
+ */
 export default function ProductSelect({ products }: ProductSelectProps) {
   return (
     <select id="product-select" name="products" defaultValue="0">

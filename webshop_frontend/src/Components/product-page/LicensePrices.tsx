@@ -5,6 +5,9 @@ export type LicensePricesProps = {
   updatePrice: (arg: React.ChangeEvent<HTMLSelectElement>) => void;
 };
 
+/**
+ * Represents a select element with the license prices as options.
+ */
 export default class LicensePrices extends Component<LicensePricesProps> {
   state = {
     priceTiers: [

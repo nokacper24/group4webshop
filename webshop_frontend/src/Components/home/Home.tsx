@@ -2,7 +2,12 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Partners } from "./Partners";
 
-class Home extends Component {
+/**
+ * Represents the Home Page of the website.
+ *
+ * Contains a hero image, an "our values" section, and a "our partners" section.
+ */
+export default class Home extends Component {
   state = {
     partners: [
       {
@@ -25,6 +30,7 @@ class Home extends Component {
       },
     ],
   };
+
   render() {
     return (
       <React.Fragment>
@@ -34,7 +40,7 @@ class Home extends Component {
             <p className="hero-text">
               Software for <span className="vibrate">your</span> enterprise
             </p>
-            <Link className="hero-button" to={"purchase-license"}>
+            <Link className="hero-button" to={"/products"}>
               Offers
             </Link>
           </div>
@@ -59,5 +65,3 @@ class Home extends Component {
     );
   }
 }
-
-export default Home;

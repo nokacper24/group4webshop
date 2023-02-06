@@ -1,6 +1,11 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import ProductSelect from "./ProductSelect";
 
+/**
+ * Represents a Support Form component.
+ *
+ * Contains product select, subject and message of support ticket.
+ */
 export default class SupportForm extends Component {
   state = {
     products: [
@@ -17,8 +22,11 @@ export default class SupportForm extends Component {
         <h2>Contact support</h2>
         <p>
           You are signed in as:<br></br>
-          <span className="user-email">email@company.com</span>
+          <span className="user-email">
+            {/* TODO: Add user e-mail */}email@company.com
+          </span>
         </p>
+
         <ProductSelect products={this.state.products} />
 
         <label htmlFor="support-subject">Subject</label>
@@ -26,6 +34,7 @@ export default class SupportForm extends Component {
           id="support-subject"
           name="support-subject"
           type="text"
+          placeholder="Subject"
           required
         ></input>
 
@@ -33,10 +42,15 @@ export default class SupportForm extends Component {
         <textarea
           id="support-message"
           name="support-message"
+          placeholder="Describe the issue"
           required
         ></textarea>
 
-        <button className="default-button submit-button" type="submit">
+        <button
+          className="default-button submit-button m-t-1"
+          type="submit"
+          onClick={(event) => this.validateForm(event)}
+        >
           Send
         </button>
         <p className="form-alert"></p>
@@ -44,24 +58,25 @@ export default class SupportForm extends Component {
     );
   }
 
-  componentDidMount(): void {
-    this.validateForm();
-  }
-
-  validateForm(): void {
+  /**
+   * Confirm that all the form's input is valid.
+   *
+   * If the user has not selected an option for the product,
+   * inform the user that their input is needed.
+   *
+   * @param event Mouse Event on button
+   */
+  validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
     const productSelect: HTMLSelectElement | null =
       document.querySelector("#product-select");
-    const submitButton: HTMLInputElement | null =
-      document.querySelector(".submit-button");
     const formAlert: HTMLElement | null = document.querySelector(".form-alert");
 
-    submitButton?.addEventListener("click", function (e) {
-      if (submitButton != null && productSelect?.selectedIndex == 0) {
-        e.preventDefault();
-        if (formAlert != null) {
-          formAlert.innerHTML = "Please select a product";
-        }
+    if (productSelect?.selectedIndex == 0) {
+      event.preventDefault();
+
+      if (formAlert != null) {
+        formAlert.innerHTML = "Please select a product";
       }
-    });
+    }
   }
 }
