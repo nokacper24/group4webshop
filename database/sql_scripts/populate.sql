@@ -20,9 +20,9 @@ INSERT INTO cookies (id, cookie, exp, user_id)
 VALUES (1, 'cookie1', '2021-12-31', 1),
        (2, 'cookie2', '2022-06-30', 2);
 
-INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image)
-VALUES ('time_managment_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises', 'time_management.jpg'),
-       ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises', 'tax_accounting.jpg');
+INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image, available)
+VALUES ('time_managment_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises', 'time_management.jpg', true),
+       ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises', 'tax_accounting.jpg', true);
 
 INSERT INTO license (license_id, valid, start_date, end_date, amount, company_id, product_id)
 VALUES (1, true, '2021-01-01', '2021-12-31', 10000, 1, 'time_managment_software'),
