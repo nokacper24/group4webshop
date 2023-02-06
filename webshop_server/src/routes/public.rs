@@ -2,10 +2,12 @@
 
 // Path: webshop_server\src\routes\public\public.rs
 
-use actix_web::{get, web, Responder, HttpResponse, post};
+use crate::data_access::category::{get_categories, get_category_by_id};
+use crate::data_access::product::{get_product_by_id, get_products};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
-use crate::data_access::product::{get_products, get_product_by_id};
 
+mod categories;
 mod products;
 
 #[get("")]
