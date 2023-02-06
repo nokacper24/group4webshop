@@ -12,6 +12,7 @@ pub struct Product {
     price_per_user: f32,
     short_description: String,
     main_image: String,
+    available: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,6 +21,7 @@ pub struct PartialProduct {
     price_per_user: f32,
     short_description: String,
     main_image: String,
+    available: bool,
 }
 impl PartialProduct {
     fn generate_id(&self) -> String {
@@ -35,6 +37,7 @@ impl PartialProduct {
             price_per_user: self.price_per_user,
             short_description: self.short_description,
             main_image: self.main_image,
+            available: self.available,
         }
     }
 }
@@ -57,22 +60,25 @@ pub struct ImageComponent {
     alt_text: String,
 }
 
-/// Returns all products, in **simple** form, no description components.
+/// Returns all available products.
 pub async fn get_products(pool: &Pool<Postgres>) -> Result<Vec<Product>, sqlx::Error> {
-    let products = query_as!(Product, "SELECT * FROM product")
+    let products = query_as!(Product,
+        r#"SELECT *
+        FROM product WHERE available = true"#)
         .fetch_all(pool)
         .await?;
     Ok(products)
 }
 
-/// Returns a product, in **simple** form, no description components.
+/// Returns a product.
 pub async fn get_product_by_id(
     pool: &Pool<Postgres>,
     product_id: &str,
 ) -> Result<Product, sqlx::Error> {
     let product = query_as!(
         Product,
-        "SELECT * FROM product WHERE product_id = $1",
+        r#"SELECT product_id, display_name, price_per_user, short_description, main_image, available
+        FROM product WHERE product_id = $1"#,
         product_id
     )
     .fetch_one(pool)
@@ -86,12 +92,15 @@ pub async fn create_product(
     product: &PartialProduct,
 ) -> Result<(), sqlx::Error> {
     query!(
-        "INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image) VALUES ($1, $2, $3, $4, $5)",
+        r#"INSERT INTO product
+        (product_id, display_name, price_per_user, short_description, main_image, available)
+        VALUES ($1, $2, $3, $4, $5, $6)"#,
         product.generate_id(),
         product.display_name,
         product.price_per_user,
         product.short_description,
-        product.main_image
+        product.main_image,
+        product.available
     )
     .execute(pool)
     .await?;
@@ -104,11 +113,14 @@ pub async fn update_product(
     product: &Product,
 ) -> Result<(), sqlx::Error> {
     query!(
-        "UPDATE product SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4 WHERE product_id = $5",
+        r#"UPDATE product
+        SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5
+        WHERE product_id = $6"#,
         product.display_name,
         product.price_per_user,
         product.short_description,
         product.main_image,
+        product.available,
         product.product_id
     )
     .execute(pool)
