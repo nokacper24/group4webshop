@@ -46,7 +46,8 @@ CREATE TABLE product (
     display_name TEXT NOT NULL,
     price_per_user REAL NOT NULL,
     short_description TEXT NOT NULL,
-    main_image TEXT NOT NULL
+    main_image TEXT NOT NULL,
+    available BOOLEAN NOT NULL
 );
 
 CREATE TABLE license (
