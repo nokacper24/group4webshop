@@ -1,3 +1,4 @@
+use std::error::Error;
 
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -45,11 +46,13 @@ impl PartialProduct {
 
 /// Returns all available products.
 pub async fn get_products(pool: &Pool<Postgres>) -> Result<Vec<Product>, sqlx::Error> {
-    let products = query_as!(Product,
+    let products = query_as!(
+        Product,
         r#"SELECT *
-        FROM product WHERE available = true"#)
-        .fetch_all(pool)
-        .await?;
+        FROM product WHERE available = true"#
+    )
+    .fetch_all(pool)
+    .await?;
     Ok(products)
 }
 
@@ -93,22 +96,25 @@ pub async fn create_product(
 /// Update a product.
 pub async fn update_product(
     pool: &Pool<Postgres>,
-    product: &Product,
-) -> Result<(), sqlx::Error> {
-    query!(
+    ptoduct_id: &str,
+    new_product: &Product,
+) -> Result<(), Box<dyn Error>> {
+    if new_product.product_id == ptoduct_id {
+        query!(
         r#"UPDATE product
         SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5
         WHERE product_id = $6"#,
-        product.display_name,
-        product.price_per_user,
-        product.short_description,
-        product.main_image,
-        product.available,
-        product.product_id
+        new_product.display_name,
+        new_product.price_per_user,
+        new_product.short_description,
+        new_product.main_image,
+        new_product.available,
+        new_product.product_id
     )
     .execute(pool)
     .await?;
-    Ok(())
+        Ok(())
+    } else {
+        Err("Product id does not match".into())
+    }
 }
-
-
