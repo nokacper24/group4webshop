@@ -98,6 +98,24 @@ pub async fn create_product(
     Ok(())
 }
 
+/// Update a product.
+pub async fn update_product(
+    pool: &Pool<Postgres>,
+    product: &Product,
+) -> Result<(), sqlx::Error> {
+    query!(
+        "UPDATE product SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4 WHERE product_id = $5",
+        product.display_name,
+        product.price_per_user,
+        product.short_description,
+        product.main_image,
+        product.product_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 
 /// Returns all description components of a product.
 pub async fn get_product_description_components(
