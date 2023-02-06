@@ -7,6 +7,8 @@ mod data_access;
 
 use routes::public::public;
 
+use crate::data_access::create_pool;
+
 #[get("/")]
 async fn index() -> impl Responder {
     "Hello world!"
@@ -26,7 +28,7 @@ async fn main() -> std::io::Result<()> {
             //create new pool
             let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
 
-            let pool = web::Data::new(sqlx::PgPool::connect(dburl.as_str()).await.expect("Can not connect to database"));
+            let pool = web::Data::new(create_pool(dburl.as_str()).await.expect("Can not connect to database"));
 
     HttpServer::new(move || {
         let cors = Cors::default()
