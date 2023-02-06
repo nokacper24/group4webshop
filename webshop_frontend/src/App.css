@@ -20,12 +20,12 @@
   --ff-subtitle: 'Poiret One', 'Goudy Old Style', serif;
 
   /* Sizes */
-  --header-height: 60px;
+  --header-height: 3.5em;
   --max-width: 1200px;
 
   /* Miscellaneous */
   --transition-speed: 250ms;
-
+  font-size: 20px;
 }
 
 /* || SITEWIDE STYLES */
@@ -427,6 +427,7 @@ hr {
 }
 
 footer {
+  font-size: 0.8em;
   background-color: var(--bg-primary);
   outline: 1px solid transparent;
 }
