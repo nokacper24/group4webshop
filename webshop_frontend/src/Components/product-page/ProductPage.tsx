@@ -32,7 +32,7 @@ export default function ProductPage() {
         item1: row.item1,
         item2: row.item2,
         textToLeft: row.textToLeft,
-      }
+      },
     };
     state.rows.push(newRow);
   });
@@ -70,5 +70,6 @@ export default function ProductPage() {
  */
 function assignUniqueKey(base: string) {
   counter++;
+  console.log(base + counter);
   return base + counter;
 }
