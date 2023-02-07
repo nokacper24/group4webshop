@@ -1,7 +1,6 @@
 import { SlideType } from "./SlideTypes";
 
-
-export type slideProps = {
+export type SlideProps = {
   mainContent: string;
   reviewerProfile: {
     picturePath: string;
@@ -11,6 +10,15 @@ export type slideProps = {
   slideType: SlideType;
 };
 
-export default function () {
+export default function (slideProps: SlideProps[]) {
+  let slide: JSX.Element[];
+
+  slideProps.forEach(function (prop) {
+    switch (prop.slideType) {
+      case SlideType.PARAGRAPH: {
+      }
+    }
+  });
+
   return <div></div>;
 }
