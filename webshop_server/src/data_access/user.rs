@@ -28,3 +28,10 @@ async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> 
         .await?;
     Ok(users)
 }
+
+pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: &str) -> Result<User, sqlx::Error> {
+    let product = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#, user_id)
+        .fetch_one(pool)
+        .await?;
+    Ok(product)
+}
