@@ -39,6 +39,17 @@ enum ComponentType {
     Invalid,
 }
 
+/// Description component error.  
+/// Invalid component means that the component has
+/// - both Text and image are None  
+/// - both Text and image are Some  
+/// 
+/// SqlxError is a wrapper for sqlx::Error
+enum DescriptionCompError {
+    InvalidComponent(String),
+    SqlxError(sqlx::Error),
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TextComponent {
     text_title: String,
@@ -54,7 +65,7 @@ pub struct ImageComponent {
 pub async fn get_product_description_components(
     pool: &Pool<Postgres>,
     product_id: &str,
-) -> Result<Vec<DescriptionComponent>, Box<dyn Error>> {
+) -> Result<Vec<DescriptionComponent>, sqlx::Error> {
     let rows = query!(
         r#"SELECT component_id, priority, product_id,
         description_component.text_id AS "text_id?",
@@ -110,7 +121,9 @@ pub async fn get_product_description_components(
             }
         } else {
             // Should never happen, db has constraints
-            return Err("Could not decode description component, corrupt data.".into());
+            return Err(sqlx::Error::Decode(
+                "Could not decode description component, corrupt data".into(),
+            ));
         }
     }
     return Result::Ok(description_components);
@@ -120,7 +133,7 @@ pub async fn get_product_description_components(
 pub async fn get_description_component(
     pool: &Pool<Postgres>,
     component_id: i32,
-) -> Result<DescriptionComponent, Box<dyn Error>> {
+) -> Result<DescriptionComponent, sqlx::Error> {
     let row = query!(
         r#"SELECT component_id, priority, product_id,
         description_component.text_id AS "text_id?",
@@ -172,9 +185,13 @@ pub async fn get_description_component(
         }
     } else {
         // Should never happen, db has constraints
-        return Err("Could not decode description component, corrupt data.".into());
+        return Err(sqlx::Error::Decode(
+            "Could not decode description component, corrupt data".into(),
+        ));
     }
-    return Err("Could not decode description component, corrupt data.".into());
+    return Err(sqlx::Error::Decode(
+        "Could not decode description component, corrupt data".into(),
+    ));
 }
 
 /// Creates a new description component, and returns newly created component.
@@ -182,7 +199,7 @@ pub async fn create_component(
     pool: &Pool<Postgres>,
     product_id: &str,
     component: PartialDescriptionComponent,
-) -> Result<DescriptionComponent, Box<dyn Error>> {
+) -> Result<DescriptionComponent, DescriptionCompError> {
     match component.get_type() {
         ComponentType::Text => {
             let text_id = create_text_component(pool, &component).await?;
@@ -195,7 +212,12 @@ pub async fn create_component(
                 text_id
             )
             .fetch_one(pool)
-            .await?;
+            .await;
+
+            let component_id = match component_id {
+                Ok(component_id) => component_id,
+                Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+            };
 
             Ok(DescriptionComponent {
                 component_id: component_id.component_id,
@@ -216,7 +238,12 @@ pub async fn create_component(
                 image_id
             )
             .fetch_one(pool)
-            .await?;
+            .await;
+            let component_id = match component_id {
+                Ok(component_id) => component_id,
+                Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+            };
+
             Ok(DescriptionComponent {
                 component_id: component_id.component_id,
                 priority: component.priority,
@@ -225,7 +252,11 @@ pub async fn create_component(
                 image: component.image,
             })
         }
-        ComponentType::Invalid => return Err("Invalid component.".into()),
+        ComponentType::Invalid => {
+            return Err(DescriptionCompError::InvalidComponent(
+                "Invalid component".into(),
+            ))
+        }
     }
 }
 
@@ -233,7 +264,7 @@ pub async fn create_component(
 async fn create_text_component(
     pool: &Pool<Postgres>,
     component: &PartialDescriptionComponent,
-) -> Result<i32, Box<dyn Error>> {
+) -> Result<i32, DescriptionCompError> {
     if let Some(text_component) = &component.text {
         let row = query!(
             r#"INSERT INTO product_text (text_title, paragraph)
@@ -243,10 +274,18 @@ async fn create_text_component(
             text_component.paragraph
         )
         .fetch_one(pool)
-        .await?;
+        .await;
+
+        let row = match row {
+            Ok(row) => row,
+            Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        };
+
         return Result::Ok(row.text_id);
     } else {
-        return Err("Invalid text component.".into());
+        return Err(DescriptionCompError::InvalidComponent(
+            "Invalid text component.".into(),
+        ));
     }
 }
 
@@ -254,7 +293,7 @@ async fn create_text_component(
 async fn create_image_component(
     pool: &Pool<Postgres>,
     component: &PartialDescriptionComponent,
-) -> Result<i32, Box<dyn Error>> {
+) -> Result<i32, DescriptionCompError> {
     if let Some(image_component) = &component.image {
         let row = query!(
             r#"INSERT INTO product_image (image_path, alt_text)
@@ -264,9 +303,17 @@ async fn create_image_component(
             image_component.alt_text
         )
         .fetch_one(pool)
-        .await?;
+        .await;
+
+        let row = match row {
+            Ok(row) => row,
+            Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        };
+
         return Result::Ok(row.image_id);
     } else {
-        return Err("Invalid image component.".into());
+        return Err(DescriptionCompError::InvalidComponent(
+            "Invalid image component.".into(),
+        ));
     }
 }
