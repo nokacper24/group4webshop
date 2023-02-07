@@ -96,11 +96,9 @@ pub async fn create_product(
 /// Update a product.
 pub async fn update_product(
     pool: &Pool<Postgres>,
-    ptoduct_id: &str,
     new_product: &Product,
-) -> Result<(), Box<dyn Error>> {
-    if new_product.product_id == ptoduct_id {
-        query!(
+) -> Result<(), sqlx::Error> {
+    query!(
         r#"UPDATE product
         SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5
         WHERE product_id = $6"#,
@@ -113,8 +111,5 @@ pub async fn update_product(
     )
     .execute(pool)
     .await?;
-        Ok(())
-    } else {
-        Err("Product id does not match".into())
-    }
+    Ok(())
 }
