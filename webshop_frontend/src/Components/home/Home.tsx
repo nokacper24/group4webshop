@@ -12,21 +12,45 @@ export default class Home extends Component {
     partners: [
       {
         name: "Acme",
-        link: "https://unsplash.it/",
+        link: "https://logoipsum.com/",
         imageSize: [200, 100],
-        imageSource: "https://unsplash.it/200/100",
+        imageSource: "https://img.logoipsum.com/289.svg",
       },
       {
         name: "Acme2",
-        link: "https://unsplash.it/",
+        link: "https://logoipsum.com/",
         imageSize: [200, 100],
-        imageSource: "https://unsplash.it/200/100",
+        imageSource: "https://img.logoipsum.com/235.svg",
       },
       {
         name: "Acme3",
-        link: "https://unsplash.it/",
+        link: "https://logoipsum.com/",
         imageSize: [200, 100],
-        imageSource: "https://unsplash.it/200/100",
+        imageSource: "https://img.logoipsum.com/260.svg",
+      },
+      {
+        name: "Acme4",
+        link: "https://logoipsum.com/",
+        imageSize: [200, 100],
+        imageSource: "https://img.logoipsum.com/254.svg",
+      },
+      {
+        name: "Acme5",
+        link: "https://logoipsum.com/",
+        imageSize: [200, 100],
+        imageSource: "https://img.logoipsum.com/250.svg",
+      },
+      {
+        name: "Acme6",
+        link: "https://logoipsum.com/",
+        imageSize: [200, 100],
+        imageSource: "https://img.logoipsum.com/251.svg",
+      },
+      {
+        name: "Acme7",
+        link: "https://logoipsum.com/",
+        imageSize: [200, 100],
+        imageSource: "https://img.logoipsum.com/253.svg",
       },
     ],
   };
