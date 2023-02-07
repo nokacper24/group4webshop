@@ -51,7 +51,12 @@ export default class Header extends Component {
                 {/* Searchbox */}
                 <form className="nav-search">
                   <label htmlFor="search-input">Search</label>
-                  <input id="search-input" type="text" placeholder="Search" />
+                  <input
+                    id="search-input"
+                    name="search-input"
+                    type="text"
+                    placeholder="Search"
+                  />
                   {/* Magnifying glass icon */}
                   <button className="icon-button" type="submit">
                     <svg
