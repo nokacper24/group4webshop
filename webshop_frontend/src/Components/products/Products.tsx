@@ -7,27 +7,27 @@ export type State = {
 export default function Products() {
   const website_data = [
     {
-      name: "Acme",
+      name: "Product1",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       sourceImage: "https://unsplash.it/300/200",
     },
     {
-      name: "Acme2",
+      name: "Product2",
+      description:
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit laboriosam ea ipsam, non hic obcaecati repellat dignissimos deleniti explicabo nemo, aliquam, doloremque ipsa! Reiciendis, quidem ea asperiores impedit vero quisquam!",
+      sourceImage: "https://unsplash.it/300/200",
+    },
+    {
+      name: "Product3",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       sourceImage: "https://unsplash.it/300/200",
     },
     {
-      name: "Acme3",
+      name: "Product4",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      sourceImage: "https://unsplash.it/300/200",
-    },
-    {
-      name: "Acme4",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus dignissimos placeat dicta. Deserunt, velit, rerum distinctio iusto, officiis nulla omnis culpa obcaecati illo quaerat eius asperiores? Voluptates sunt nemo magnam.",
       sourceImage: "https://unsplash.it/300/200",
     },
   ];
