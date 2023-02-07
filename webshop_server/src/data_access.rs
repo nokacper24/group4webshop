@@ -1,5 +1,6 @@
 use sqlx::{Postgres, Pool};
 pub mod product;
+pub mod user;
 
 /// Creates a connection pool to the database
 /// This should be called once and a reference to the pool
