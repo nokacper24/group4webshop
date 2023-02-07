@@ -18,3 +18,13 @@ pub enum Role {
     COMPANYIT,
     DEFAULT,
 }
+
+async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
+    let users = query_as!(
+        User,
+        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user"#
+    )
+        .fetch_all(pool)
+        .await?;
+    Ok(users)
+}
