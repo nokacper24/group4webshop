@@ -10,7 +10,7 @@ import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
 import SignIn from "./Components/profile/SignIn";
-import CreateAccount from "./Components/profile/CreateAccount";
+import CreateCompanyAccount from "./Components/profile/CreateCompanyAccount";
 
 /**
  * Represents the website content.
@@ -32,7 +32,7 @@ export default function App() {
           <Route path="product-page" element={<ProductPage />} />
           <Route path="purchase-license" element={<PurchaseLicense />} />
           <Route path="sign-in" element={<SignIn />} />
-          <Route path="create-account/*" element={<CreateAccount />} />
+          <Route path="create-account/*" element={<CreateCompanyAccount />} />
         </Routes>
       </main>
 
