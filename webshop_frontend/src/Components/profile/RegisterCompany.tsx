@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 
 /**
- * Represents the Details component on the Create Account page.
+ * Represents the Register Company component on the Create Account page.
  *
  * Takes in the user input in a form to create their account.
  */
-export default class CreateAccountDetails extends Component {
+export default class RegisterCompany extends Component {
   render() {
     return (
       <React.Fragment>
