@@ -25,7 +25,7 @@
 
   /* Miscellaneous */
   --transition-speed: 250ms;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* || SITEWIDE STYLES */
@@ -232,6 +232,7 @@ nav {
   margin: 0;
   padding: 0;
   list-style: none;
+  overflow: hidden;
 }
 
 .logo-link {
@@ -253,7 +254,7 @@ nav {
 }
 
 /* Navbar -- Mobile */
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   nav {
     width: var(--header-height);
     height: var(--header-height);
@@ -392,7 +393,7 @@ nav {
 }
 
 /* Navbar -- Desktop */
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 900px) {
   .toggle-container {
     display: none;
   }
@@ -448,28 +449,26 @@ form>h1 {
 }
 
 .form-container {
-  width: 50vw;
+  width: max(50vw, 600px);
   margin-block: 1em;
   background: var(--bg-neutral);
   overflow: hidden;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   .form-container {
     width: 80vw;
   }
 }
 
-.form-container> :is(label, select, input, textarea) {
-  width: 80%;
+.form-container> :is(label, select, input, textarea, p) {
+  width: 90%;
   margin-inline: auto;
-  display: block;
-  text-align: left;
 }
 
-.form-container>p {
-  width: 80%;
-  margin-inline: auto;
+.form-container> :is(label, select, input, textarea) {
+  display: block;
+  text-align: left;
 }
 
 .form-container>label {
