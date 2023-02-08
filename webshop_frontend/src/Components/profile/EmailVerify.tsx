@@ -5,7 +5,7 @@ import React from "react";
  *
  * @returns The Create Account verification component as a JSX element.
  */
-export function CreateAccountVerify() {
+export function EmailVerify() {
   return (
     <React.Fragment>
       <p>
