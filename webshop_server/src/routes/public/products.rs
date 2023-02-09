@@ -3,6 +3,14 @@ use sqlx::{Pool, Postgres};
 
 use crate::data_access::product::{self, Product, PartialProduct};
 
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(products);
+    cfg.service(product_by_id);
+    cfg.service(create_product);
+    cfg.service(update_product);
+    cfg.service(get_product_description);
+}
+
 /// Get all products
 #[get("products")]
 pub async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
