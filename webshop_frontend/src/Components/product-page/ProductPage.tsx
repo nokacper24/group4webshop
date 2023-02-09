@@ -1,5 +1,9 @@
 import React from "react";
 import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
+import Gallery from "./gallery/Gallery";
+import { SlidesProps } from "./gallery/Gallery";
+import { ParagraphSlide } from "./gallery/ParagraphSlide";
+import { SlideType } from "./gallery/SlideTypes";
 
 let counter = 0;
 
@@ -71,7 +75,10 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      <section></section>
+      <section>
+        <h2>Testimonials</h2>
+        <Gallery slides={testimonial.slides} />
+      </section>
     </React.Fragment>
   );
 }
