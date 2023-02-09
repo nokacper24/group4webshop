@@ -62,23 +62,33 @@ pub async fn create_product(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
-#[put("products/{product_id}")]
+#[put("products")]
 pub async fn update_product(
     pool: web::Data<Pool<Postgres>>,
-    product_id: web::Path<String>,
     product: web::Json<Product>,
 ) -> impl Responder {
-    let product = product::update_product(&pool, product_id.as_str(), &product).await;
-
-    //error check
-    if product.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+    match product::update_product(&pool, &product).await {
+        Ok(product) => HttpResponse::Created().json(product),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
+            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
     }
+}
 
-    //parse to json
-    if let Ok(product) = product {
-        return HttpResponse::Ok().json(product);
+#[get("products/{product_id}/description")]
+pub async fn get_product_description(
+    pool: web::Data<Pool<Postgres>>,
+    product_id: web::Path<String>,
+) -> impl Responder {
+    let descriptions = product::description::get_product_description_components(&pool, product_id.as_str()).await;
+
+    match descriptions {
+        Ok(descriptions) => HttpResponse::Ok().json(descriptions),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
+            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+        
     }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }

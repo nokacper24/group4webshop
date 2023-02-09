@@ -17,4 +17,5 @@ pub fn public(cfg: &mut web::ServiceConfig) {
     cfg.service(products::product_by_id);
     cfg.service(products::create_product);
     cfg.service(products::update_product);
+    cfg.service(products::get_product_description);
 }
