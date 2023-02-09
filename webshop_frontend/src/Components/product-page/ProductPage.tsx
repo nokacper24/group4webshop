@@ -36,6 +36,20 @@ export default function ProductPage() {
     };
     state.rows.push(newRow);
   });
+  let testimonial: SlidesProps = {
+    slides: [
+      {
+        mainContent:
+          "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non perferendis reiciendis consectetur beatae commodi sapiente fugiat doloribus nam cupiditate vel distinctio, ducimus repudiandae iure tempore ipsam et sequi molestiae exercitationem!",
+        reviewerProfile: {
+          picturePath: "Lorem picsum",
+          name: "Joe Kerr",
+          title: "Professional Clown",
+        },
+        slideType: SlideType.PARAGRAPH,
+      },
+    ],
+  };
   return (
     <React.Fragment>
       <section className="banner">
