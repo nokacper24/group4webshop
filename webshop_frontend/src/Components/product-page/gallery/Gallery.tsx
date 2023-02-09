@@ -1,6 +1,7 @@
+import { Component } from "react";
 import { SlideType } from "./SlideTypes";
 
-export type SlideProps = {
+export type SlidesProps = {
   mainContent: string;
   reviewerProfile: {
     picturePath: string;
@@ -10,7 +11,23 @@ export type SlideProps = {
   slideType: SlideType;
 };
 
-export default function (slideProps: SlideProps[]) {
+export default class Gallery extends Component<SlidesProps[]> {
+  
+
+  main() {
+    
+    let slide: JSX.Element[];
+
+    this.props.forEach(function (prop) {
+      switch (prop.slideType) {
+        case SlideType.PARAGRAPH: {
+        }
+      }
+    });
+  }
+}
+
+/* export default function (slideProps: SlideProps[]) {
   let slide: JSX.Element[];
 
   slideProps.forEach(function (prop) {
@@ -21,4 +38,4 @@ export default function (slideProps: SlideProps[]) {
   });
 
   return <div></div>;
-}
+} */
