@@ -1,5 +1,9 @@
-import { SlideProps } from "./Gallery";
+import { SlidesProps } from "./Gallery";
 
-export const ParagraphSlide = (props: SlideProps) => {
+export type ParagraphSlideProps = {
+  
+}
+
+export const ParagraphSlide = (props: SlidesProps) => {
   return <div></div>;
 };
