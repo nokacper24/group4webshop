@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
  * @returns A Sign In component.
  */
 export default function SignIn() {
-  const email = useRef(null);
-  const password = useRef(null);
+  const email = useRef<HTMLInputElement>(null);
+  const password = useRef<HTMLInputElement>(null);
 
   const verifySignInInfo = () => {
     // Placeholder solution. TODO: Implement real solution.
