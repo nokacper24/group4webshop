@@ -1,9 +1,5 @@
 import Partner, { PartnerProps } from "./Partner";
 
-export type PartnersProps = {
-  partners: PartnerProps[];
-};
-
 /**
  * The list of ProFlex' partners.
  */
