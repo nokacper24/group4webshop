@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-type PartnerProps = {
+export type PartnerProps = {
   partner: {
     name: string;
     link: string;
@@ -15,7 +15,7 @@ type PartnerProps = {
  * @param partner A partner object.
  * @returns The Partner component as a JSX element.
  */
-export const Partner = ({ partner }: PartnerProps) => {
+export default function Partner({ partner }: PartnerProps) {
   return (
     <li>
       <Link target="_blank" to={partner.link}>
@@ -29,4 +29,4 @@ export const Partner = ({ partner }: PartnerProps) => {
       </Link>
     </li>
   );
-};
+}
