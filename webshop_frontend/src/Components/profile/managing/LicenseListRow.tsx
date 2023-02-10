@@ -18,9 +18,6 @@ export type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
-  const button = useRef<HTMLButtonElement>(null);
-  const row = useRef<HTMLTableRowElement>(null);
-
   const [collapsed, setCollapsed] = useState(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
@@ -35,7 +32,6 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
         <td>{license.status}</td>
         <td>
           <button
-            ref={button}
             className="icon-button expand-button"
             onClick={toggleVisibility}
           >
@@ -52,7 +48,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
           </button>
         </td>
       </tr>
-      <tr ref={row} className={`row-details ${collapsed ? "collapsed" : ""}`}>
+      <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
             Active period: {license.details[0]}&ndash;{license.details[1]}
