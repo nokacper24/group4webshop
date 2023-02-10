@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
 
@@ -18,11 +17,4 @@ export default function Profile() {
   } else {
     return <MyAccount />;
   }
-
-  /* return (
-    <Routes>
-      <Route path="sign-in" element={<SignIn />}></Route>
-      <Route path="my-account" element={<MyAccount />} />
-    </Routes>
-  ); */
 }
