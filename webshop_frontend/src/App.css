@@ -95,6 +95,25 @@ button {
   outline: 1px solid currentColor;
 }
 
+.small-button {
+  padding: 0.5em 1em;
+  margin-inline: 1em;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th {
+  border-bottom: 2px solid var(--text-primary);
+}
+
+th,
+td {
+  padding: 0.5em 1em;
+}
+
 label {
   display: block;
 }
@@ -789,4 +808,18 @@ form a:hover {
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
+}
+
+/* || PROFILE PAGE */
+.row-header {
+  background: var(--text-secondary);
+}
+
+.row-header,
+.row-details {
+  border-bottom: 1px solid var(--text-primary);
+}
+
+.collapsed {
+  visibility: collapse;
 }
