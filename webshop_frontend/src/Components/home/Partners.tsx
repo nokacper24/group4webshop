@@ -1,4 +1,4 @@
-import Partner, { PartnerProps } from "./Partner";
+import Partner from "./Partner";
 
 /**
  * The list of ProFlex' partners.
