@@ -23,6 +23,22 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     setCollapsed((c) => !c);
   };
 
+  let buttons;
+  if (license.status == "Active") {
+    buttons = (
+      <span className="button-container">
+        <button className="default-button small-button">Cancel renewal</button>
+        <button className="default-button small-button">Manage access</button>
+      </span>
+    );
+  } else {
+    buttons = (
+      <span className="button-container">
+        <button className="default-button small-button">Manage access</button>
+      </span>
+    );
+  }
+
   return (
     <React.Fragment>
       <tr className="row-header">
@@ -52,6 +68,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
         <td colSpan={5}>
           <p>
             Active period: {license.details[0]}&ndash;{license.details[1]}
+            {buttons}
           </p>
         </td>
       </tr>
