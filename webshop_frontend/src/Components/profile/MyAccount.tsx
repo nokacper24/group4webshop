@@ -12,15 +12,14 @@ export default function MyAccount() {
     <React.Fragment>
       <section className="container left-aligned">
         <h1>My account</h1>
-        <p>
-          E-mail: user@company.com
+        <div className="user-details">
+          <p>
+            E-mail: user@company.com <br></br>
+            Company: Acme<br></br>
+            <a href="">Reset password</a>
+          </p>
           <button className="default-button small-button">Edit</button>
-          <br></br>
-          Company: Acme
-        </p>
-        <p>
-          <a href="">Reset password</a>
-        </p>
+        </div>
       </section>
       <section className="container left-aligned">
         <h2>Licenses</h2>
