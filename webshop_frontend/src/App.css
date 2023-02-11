@@ -97,7 +97,6 @@ button {
 
 .small-button {
   padding: 0.5em 1em;
-  margin-inline: 1em;
 }
 
 .icon-button.expand-button {
@@ -816,6 +815,20 @@ form a:hover {
 }
 
 /* || PROFILE PAGE */
+.user-details {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.user-details button {
+  max-height: 3em;
+}
+
+.user-details p {
+  margin: 0;
+}
+
 .row-header {
   background: var(--text-secondary);
 }
@@ -827,4 +840,9 @@ form a:hover {
 
 .collapsed {
   visibility: collapse;
+}
+
+.button-container {
+  display: flex;
+  gap: 1em;
 }
