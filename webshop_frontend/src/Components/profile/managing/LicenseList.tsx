@@ -5,6 +5,13 @@ import LicenseListRow from "./LicenseListRow";
  */
 const licenses = [
   {
+    name: "E-mail",
+    activeUsers: 5,
+    total: 5,
+    status: "Expired",
+    details: ["01.07.2022", "01.01.2023"],
+  },
+  {
     name: "Planner",
     activeUsers: 14,
     total: 15,
