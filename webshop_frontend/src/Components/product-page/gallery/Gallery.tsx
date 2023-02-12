@@ -4,6 +4,7 @@ import { SlideType } from "./SlideTypes";
 
 export type SlidesProps = {
   slides: {
+    id: string;
     mainContent: string;
     reviewerProfile: {
       picturePath: string;
@@ -14,18 +15,28 @@ export type SlidesProps = {
   }[];
 };
 
-export default class Gallery extends Component<SlidesProps> {
-  main() {
-    let slides: JSX.Element[];
+export default function Gallery(props: SlidesProps) {
+  let slides: JSX.Element[];
 
-    this.props.slides.forEach(function (prop) {
-      switch (
-        prop.slideType //Using switch in case of future expandibiliy, if we ever create more slide types
-      ) {
-        case SlideType.PARAGRAPH: {
-          slides.push(<ParagraphSlide slides={prop} />); //adds a ready made slide component to the list.
+  return (
+    <div className="gallery">
+      {props.slides.map((prop) => {
+        switch (prop.slideType) {
+          case SlideType.PARAGRAPH: {
+            return (
+              <ParagraphSlide
+                key={prop.id}
+                paragraph={prop.mainContent}
+                reviewerProfile={prop.reviewerProfile}
+              />
+            );
+          }
         }
-      }
-    });
-  }
+      })}
+    </div>
+  );
+}
+function nextSlide() {
+  //code here to go to next slide, needs to wait on mounting
+  //to continue
 }
