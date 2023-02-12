@@ -3,6 +3,11 @@ use sqlx::{Pool, Postgres};
 
 use crate::data_access::category::{get_categories, get_category_by_id, Category};
 
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(categories);
+    cfg.service(category_by_id);
+}
+
 /// Get all categories.
 #[get("categories")]
 pub async fn categories(pool: web::Data<Pool<Postgres>>) -> impl Responder {

@@ -1,13 +1,19 @@
-use serde::{Serialize, Deserialize};
-use sqlx::{query_as,{Postgres, Pool}};
+use serde::{Deserialize, Serialize};
+use sqlx::{
+    query_as, {Pool, Postgres},
+};
 
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(get_all_users);
+    cfg.service(get_user_by_id);
+}
 
 pub struct User {
     user_id: i32,
     email: String,
     pass_hash: String,
     company_id: i32,
-    role: Role
+    role: Role,
 }
 
 #[derive(sqlx::Type)]
@@ -24,8 +30,8 @@ async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> 
         User,
         r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user"#
     )
-        .fetch_all(pool)
-        .await?;
+    .fetch_all(pool)
+    .await?;
     Ok(users)
 }
 

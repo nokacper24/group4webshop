@@ -43,7 +43,7 @@ enum ComponentType {
 /// Invalid component means that the component has
 /// - both Text and image are None  
 /// - both Text and image are Some  
-/// 
+///
 /// SqlxError is a wrapper for sqlx::Error
 enum DescriptionCompError {
     InvalidComponent(String),

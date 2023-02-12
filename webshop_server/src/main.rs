@@ -2,8 +2,8 @@ use actix_cors::Cors;
 use actix_web::{get, http, web, App, HttpServer, Responder};
 use dotenvy::dotenv;
 
-mod routes;
 mod data_access;
+mod routes;
 
 use routes::public::public;
 
@@ -24,11 +24,14 @@ async fn main() -> std::io::Result<()> {
 
     println!("Starting server at http://{}", address);
 
+    //create new pool
+    let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
 
-            //create new pool
-            let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
-
-            let pool = web::Data::new(create_pool(dburl.as_str()).await.expect("Can not connect to database"));
+    let pool = web::Data::new(
+        create_pool(dburl.as_str())
+            .await
+            .expect("Can not connect to database"),
+    );
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -37,7 +40,6 @@ async fn main() -> std::io::Result<()> {
             .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
-
 
         let public = web::scope("/api").configure(public);
 

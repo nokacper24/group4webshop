@@ -1,7 +1,7 @@
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 
-use crate::data_access::product::{self, Product, PartialProduct};
+use crate::data_access::product::{self, PartialProduct, Product};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(products);
@@ -89,7 +89,8 @@ pub async fn get_product_description(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
 ) -> impl Responder {
-    let descriptions = product::description::get_product_description_components(&pool, product_id.as_str()).await;
+    let descriptions =
+        product::description::get_product_description_components(&pool, product_id.as_str()).await;
 
     match descriptions {
         Ok(descriptions) => HttpResponse::Ok().json(descriptions),
@@ -97,6 +98,5 @@ pub async fn get_product_description(
             sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
             _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
         },
-        
     }
 }
