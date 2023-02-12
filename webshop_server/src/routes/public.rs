@@ -4,6 +4,7 @@
 
 use actix_web::{get, web, Responder};
 
+mod categories;
 mod products;
 
 #[get("")]
