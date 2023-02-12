@@ -1,7 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export type LicenseRowProps = {
   license: {
+    id: string;
     name: string;
     activeUsers: number;
     total: number;
@@ -23,20 +25,25 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     setCollapsed((c) => !c);
   };
 
+  const cancelButton = (
+    <button className="default-button small-button">Cancel renewal</button>
+  );
+  const manageButton = (
+    <Link to={"manage-license/" + license.id}>
+      <button className="default-button small-button">Manage access</button>
+    </Link>
+  );
+
   let buttons;
   if (license.status == "Active") {
     buttons = (
       <span className="button-container">
-        <button className="default-button small-button">Cancel renewal</button>
-        <button className="default-button small-button">Manage access</button>
+        {cancelButton}
+        {manageButton}
       </span>
     );
   } else {
-    buttons = (
-      <span className="button-container">
-        <button className="default-button small-button">Manage access</button>
-      </span>
-    );
+    buttons = <span className="button-container">{manageButton}</span>;
   }
 
   return (
