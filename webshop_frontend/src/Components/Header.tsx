@@ -47,7 +47,7 @@ export default function Header() {
 
   const setNavPositionProperty = () => {
     if (nav.current) {
-      nav.current.style.position = isOpen ? "fixed" : "absolute";
+      nav.current.style.position = isOpen ? "absolute" : "fixed";
     }
   };
 
