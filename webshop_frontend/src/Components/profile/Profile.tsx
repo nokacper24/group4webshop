@@ -1,4 +1,7 @@
+import React from "react";
 import { useState, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
 
@@ -18,11 +21,22 @@ export default function Profile() {
     }
   }, []);
 
+  let element;
+
   if (!authenticated) {
-    return <SignIn />;
+    element = <SignIn />;
   } else {
-    return <MyAccount />;
+    element = <MyAccount />;
   }
+
+  return (
+    <React.Fragment>
+      <Routes>
+        <Route path="/" element={element} />
+        <Route path="manage-license/:id" element={<ManageLicenseAccess />} />
+      </Routes>
+    </React.Fragment>
+  );
 }
 
 /**
