@@ -92,7 +92,7 @@ button {
 
 .default-button:is(:hover, :focus) {
   background: var(--bg-tertiary);
-  outline: 1px solid currentColor;
+  outline: 2px solid currentColor;
 }
 
 .small-button {
@@ -102,10 +102,12 @@ button {
 .icon-button.expand-button {
   display: block;
   margin-inline: auto;
+  fill: currentColor;
 }
 
 table {
-  border-collapse: collapse;
+  border-spacing: 0;
+  border-collapse: separate;
   width: 100%;
 }
 
@@ -116,6 +118,10 @@ th {
 th,
 td {
   padding: 0.5em 1em;
+}
+
+tr {
+  outline: 1px solid transparent;
 }
 
 label {
@@ -144,7 +150,8 @@ label {
 header {
   height: var(--header-height);
   background-color: rgba(71, 51, 114, 0.8);
-  z-index: 1;
+  z-index: 10;
+  outline: 1px solid transparent;
 }
 
 .header-container {
@@ -202,8 +209,7 @@ nav {
   align-items: center;
   width: fit-content;
   margin-inline: auto;
-  padding: 1em;
-
+  padding-inline: 1em;
 }
 
 .nav-search input[type="text"] {
@@ -255,7 +261,6 @@ nav {
   margin: 0;
   padding: 0;
   list-style: none;
-  overflow: hidden;
 }
 
 .logo-link {
@@ -277,7 +282,7 @@ nav {
 }
 
 /* Navbar -- Mobile */
-@media screen and (max-width: 900px) {
+@media (max-width: 900px) {
   nav {
     width: var(--header-height);
     height: var(--header-height);
@@ -298,6 +303,7 @@ nav {
     backdrop-filter: blur(15px);
     transform: translateX(100%);
     overflow-y: auto;
+    outline: 1px solid transparent;
   }
 
   .nav-link {
@@ -308,6 +314,7 @@ nav {
   }
 
   .nav-link:is(:hover, :focus) {
+    font-weight: bold;
     background: var(--bg-secondary);
     transition: background var(--transition-speed);
     outline: 1px solid transparent;
@@ -379,8 +386,8 @@ nav {
     border-radius: 1px;
     height: 5px;
     width: 35px;
-    background: white;
-    /* outline: 1px solid transparent; */
+    background: var(--text-secondary);
+    outline: 1px solid transparent;
     transition: all 300ms ease-in-out;
   }
 
@@ -398,7 +405,7 @@ nav {
 
   #nav-toggle.active>.hamburger {
     background-color: transparent;
-    /* outline: none; */
+    outline: none;
   }
 
   #nav-toggle.active>.hamburger:before,
@@ -416,7 +423,7 @@ nav {
 }
 
 /* Navbar -- Desktop */
-@media screen and (min-width: 900px) {
+@media (min-width: 900px) {
   .toggle-container {
     display: none;
   }
@@ -476,9 +483,10 @@ form>h1 {
   margin-block: 1em;
   background: var(--bg-neutral);
   overflow: hidden;
+  outline: 1px solid transparent;
 }
 
-@media screen and (max-width: 900px) {
+@media (max-width: 900px) {
   .form-container {
     width: 80vw;
   }
@@ -635,7 +643,7 @@ form a:hover {
   max-width: 200px;
   max-height: 100px;
   width: auto;
-  filter: grayscale(1) contrast(80%);
+  filter: grayscale(1) contrast(70%);
   transition: filter var(--transition-speed);
 }
 
@@ -885,4 +893,53 @@ form a:hover {
 .button-container {
   display: flex;
   gap: 1em;
+}
+
+/* || MANAGE LICENSE PAGE */
+.table-container {
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.table-container+button {
+  margin-top: 1em;
+}
+
+.select-table tr:nth-child(even) {
+  background: var(--bg-neutral);
+}
+
+.select-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  background: var(--bg-neutral);
+  border-bottom: 1px solid var(--text-primary);
+}
+
+.select-table th,
+.select-table td {
+  border-right: 1px solid var(--text-primary);
+  padding: 0.2em 1em;
+}
+
+.select-table th:last-child,
+.select-table td:last-child {
+  border-right: none;
+}
+
+.select-table td>input,
+.select-table td>button {
+  display: block;
+  margin-inline: auto;
+}
+
+.select-table input[type="checkbox"] {
+  height: 1.5em;
+  width: 1.5em;
+}
+
+.danger {
+  background: red;
 }
