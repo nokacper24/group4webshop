@@ -16,10 +16,12 @@ export const ParagraphSlide = (props: ParagraphSlideProps) => {
         props.paragraph
       }
     </p>
-    <div className="reviewer">
+    <div className="reviewer-profile">
       <img src={props.reviewerProfile.picturePath} alt="" />
-      <p>{props.reviewerProfile.name}</p>
-      <p>{props.reviewerProfile.title}</p>
+      <div className="reviewer-details">
+        <p>{props.reviewerProfile.name}</p>
+        <p>{props.reviewerProfile.title}</p>
+      </div>
     </div>
   </div>
 };

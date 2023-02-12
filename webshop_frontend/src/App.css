@@ -767,6 +767,46 @@ form a:hover {
     max-width: 80vw;
   }
 }
+/*Gallery*/
+.gallery-wrapper {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  padding-left: 0;
+  padding-right: 0;
+  outline: #473372 1px solid;
+}
+
+.gallery {
+  outline: green 1px solid;
+  margin-left: 3em;
+  margin-right: 3em;
+}
+
+.slide {
+  outline: black 1px solid;
+  height: 30vh;
+  background-color: white;
+}
+
+.reviewer-profile {
+  outline: red 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reviewer-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.reviewer-details p {
+  margin: 0;
+}
 
 /* || PURCHASE LICENSE PAGE */
 .checkbox-input>label {
