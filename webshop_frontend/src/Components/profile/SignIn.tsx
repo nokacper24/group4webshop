@@ -18,7 +18,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="center-container">
+    <section className="center-container">
       <form className="container form-container">
         <h1>Sign in</h1>
         <p>
@@ -55,6 +55,6 @@ export default function SignIn() {
           Sign in
         </button>
       </form>
-    </div>
+    </section>
   );
 }
