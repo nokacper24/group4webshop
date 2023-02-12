@@ -43,10 +43,11 @@ export default function ProductPage() {
   let testimonial: SlidesProps = {
     slides: [
       {
+        id: "slide1",
         mainContent:
           "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non perferendis reiciendis consectetur beatae commodi sapiente fugiat doloribus nam cupiditate vel distinctio, ducimus repudiandae iure tempore ipsam et sequi molestiae exercitationem!",
         reviewerProfile: {
-          picturePath: "Lorem picsum",
+          picturePath: "https://picsum.photos/100",
           name: "Joe Kerr",
           title: "Professional Clown",
         },
@@ -75,7 +76,7 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      <section>
+      <section className="gallery-wrapper">
         <h2>Testimonials</h2>
         <Gallery slides={testimonial.slides} />
       </section>
