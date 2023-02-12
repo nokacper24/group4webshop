@@ -14,17 +14,17 @@ import RegisterUser from "./RegisterUser";
  */
 export default function CreateCompanyAccount() {
   return (
-    <div className="center-container">
+    <section className="center-container">
       <form className="container form-container">
         <h1>Register company account</h1>
 
         <Routes>
-          <Route path="/" element={<RegisterEmail />}></Route>
-          <Route path="verify" element={<EmailVerify />}></Route>
-          <Route path="register-company" element={<RegisterCompany />}></Route>
+          <Route path="/" element={<RegisterEmail />} />
+          <Route path="verify" element={<EmailVerify />} />
+          <Route path="register-company" element={<RegisterCompany />} />
           <Route path="register-user" element={<RegisterUser />} />
         </Routes>
       </form>
-    </div>
+    </section>
   );
 }
