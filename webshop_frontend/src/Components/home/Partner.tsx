@@ -9,7 +9,13 @@ export type PartnerProps = {
   };
 };
 
-export const Partner = ({ partner }: PartnerProps) => {
+/**
+ * Represents the information about a Partner.
+ *
+ * @param partner A partner object.
+ * @returns The Partner component as a JSX element.
+ */
+export default function Partner({ partner }: PartnerProps) {
   return (
     <li>
       <Link target="_blank" to={partner.link}>
@@ -23,4 +29,4 @@ export const Partner = ({ partner }: PartnerProps) => {
       </Link>
     </li>
   );
-};
+}
