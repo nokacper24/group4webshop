@@ -96,6 +96,7 @@ button {
 }
 
 .small-button {
+  display: block;
   padding: 0.5em 1em;
 }
 
@@ -916,6 +917,10 @@ form a:hover {
 .button-container {
   display: flex;
   gap: 1em;
+}
+
+.button-container>a {
+  text-decoration: none;
 }
 
 /* || MANAGE LICENSE PAGE */
