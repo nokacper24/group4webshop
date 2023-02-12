@@ -788,14 +788,36 @@ form a:hover {
 
 .gallery {
   outline: green 1px solid;
-  margin-left: 3em;
-  margin-right: 3em;
+  background-color: white;
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
+
+.slide-button {
+
+  background: rgba(0, 0, 0, 0.306);
+  border-radius: 50%;
+  color: white;
+  font-size: 40px;
+  height: 1em;
+  line-height: 1em;
+  width: 1em;
+  align-self: center;
+  font-family: sans-serif;
+  margin: 0.5em;
+  outline: 1px solid transparent;
+  border: 0;
+}
+
+.slide-button:hover {
+  background-color: #0000009a;
 }
 
 .slide {
-  outline: black 1px solid;
-  height: 30vh;
-  background-color: white;
+  /* outline: black 1px solid; */
+  min-height: 25vh;
+  padding-top: 2em;
+  padding-bottom: 2em;
 }
 
 .reviewer-profile {

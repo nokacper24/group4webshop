@@ -15,11 +15,14 @@ export type SlidesProps = {
   }[];
 };
 
+let index: number;
+
 export default function Gallery(props: SlidesProps) {
   let slides: JSX.Element[];
 
   return (
     <div className="gallery">
+      <button className="slide-button" onClick={() => changeSlide(-1)}>&#8249;</button>
       {props.slides.map((prop) => {
         switch (prop.slideType) {
           case SlideType.PARAGRAPH: {
@@ -33,6 +36,7 @@ export default function Gallery(props: SlidesProps) {
           }
         }
       })}
+      <button className="slide-button" onClick={() => changeSlide(1)}>&#8250;</button>
     </div>
   );
 }
@@ -40,4 +44,6 @@ export default function Gallery(props: SlidesProps) {
 function changeSlide(amount: number) {
   //code here to go to next slide, needs to wait on mounting
   //to continue
+  index += amount;
+
 }
