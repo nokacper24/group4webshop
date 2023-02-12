@@ -5,6 +5,7 @@ import LicenseListRow from "./LicenseListRow";
  */
 const licenses = [
   {
+    id: "1",
     name: "E-mail",
     activeUsers: 5,
     total: 5,
@@ -12,6 +13,7 @@ const licenses = [
     details: ["01.07.2022", "01.01.2023"],
   },
   {
+    id: "2",
     name: "Planner",
     activeUsers: 14,
     total: 15,
@@ -19,6 +21,7 @@ const licenses = [
     details: ["01.01.2023", "01.07.2023"],
   },
   {
+    id: "3",
     name: "Legal",
     activeUsers: 11,
     total: 50,
@@ -26,6 +29,7 @@ const licenses = [
     details: ["01.01.2023", "01.07.2023"],
   },
   {
+    id: "4",
     name: "3D Model",
     activeUsers: 28,
     total: 40,
@@ -33,6 +37,7 @@ const licenses = [
     details: ["01.01.2023", "01.07.2023"],
   },
   {
+    id: "5",
     name: "Tax",
     activeUsers: 1,
     total: 5,
