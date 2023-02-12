@@ -36,7 +36,8 @@ export default function Gallery(props: SlidesProps) {
     </div>
   );
 }
-function nextSlide() {
+
+function changeSlide(amount: number) {
   //code here to go to next slide, needs to wait on mounting
   //to continue
 }
