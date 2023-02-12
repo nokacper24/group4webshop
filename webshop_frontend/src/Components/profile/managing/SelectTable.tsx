@@ -14,6 +14,13 @@ export type SelectTableProps = {
   outsideButton: { text: string; type: string };
 };
 
+/**
+ * Represents a Select Table component.
+ * A table where multiple rows can be selected for an action.
+ *
+ * @param props Table header and rows, and button after table.
+ * @returns A Select Table component.
+ */
 export default function SelectTable(props: SelectTableProps) {
   let outsideButton;
   switch (props.outsideButton.type) {
