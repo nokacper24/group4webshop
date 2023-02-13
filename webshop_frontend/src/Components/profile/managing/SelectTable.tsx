@@ -2,7 +2,7 @@ import React from "react";
 import SelectTableRow, { SelectTableRowProps } from "./SelectTableRow";
 
 /**
- * The cell type can be either checkbox, string, button, or danger-button.
+ * The cell type can be either string, button, or danger-button.
  */
 export type SelectTableProps = {
   header: {
@@ -11,7 +11,7 @@ export type SelectTableProps = {
     }[];
   };
   rows: SelectTableRowProps[];
-  outsideButton: { text: string; type: string };
+  actionButton: { text: string; type: string };
 };
 
 /**
@@ -22,19 +22,19 @@ export type SelectTableProps = {
  * @returns A Select Table component.
  */
 export default function SelectTable(props: SelectTableProps) {
-  let outsideButton;
-  switch (props.outsideButton.type) {
+  let actionButton;
+  switch (props.actionButton.type) {
     case "button":
-      outsideButton = (
+      actionButton = (
         <button className="default-button small-button">
-          {props.outsideButton.text}
+          {props.actionButton.text}
         </button>
       );
       break;
     case "danger-button":
-      outsideButton = (
+      actionButton = (
         <button className="default-button danger small-button">
-          {props.outsideButton.text}
+          {props.actionButton.text}
         </button>
       );
       break;
@@ -48,6 +48,7 @@ export default function SelectTable(props: SelectTableProps) {
         <table className="select-table table-container">
           <thead>
             <tr>
+              <th className="checkbox-column">Select</th>
               {props.header.columns.map((column, index) => (
                 <th key={index}>{column.text}</th>
               ))}
@@ -60,7 +61,7 @@ export default function SelectTable(props: SelectTableProps) {
           </tbody>
         </table>
       </div>
-      {outsideButton}
+      {actionButton}
     </React.Fragment>
   );
 }
