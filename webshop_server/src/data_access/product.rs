@@ -1,4 +1,4 @@
-use std::error::Error;
+
 
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -29,8 +29,8 @@ impl PartialProduct {
     fn generate_id(&self) -> String {
         self.display_name
             .to_lowercase()
-            .replace(".", "")
-            .replace(" ", "_")
+            .replace('.', "")
+            .replace(' ', "_")
     }
     fn into_product(self) -> Product {
         Product {

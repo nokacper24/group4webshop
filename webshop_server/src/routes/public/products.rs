@@ -1,4 +1,4 @@
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use actix_web::{get, post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 
 use crate::data_access::product::{self, PartialProduct, Product};
@@ -78,8 +78,8 @@ pub async fn update_product(
     match product::update_product(&pool, &product).await {
         Ok(product) => HttpResponse::Created().json(product),
         Err(e) => match e {
-            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
-            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
 }
@@ -95,8 +95,8 @@ pub async fn get_product_description(
     match descriptions {
         Ok(descriptions) => HttpResponse::Ok().json(descriptions),
         Err(e) => match e {
-            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
-            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
 }

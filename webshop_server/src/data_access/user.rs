@@ -16,10 +16,10 @@ pub struct User {
 #[derive(sqlx::Type, Serialize, Deserialize, Debug)]
 #[sqlx(type_name = "role", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Role {
-    ADMIN,
-    COMPANYITHEAD,
-    COMPANYIT,
-    DEFAULT,
+    Admin,
+    CompanyItHead,
+    CompanyIt,
+    Default,
 }
 
 pub async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {

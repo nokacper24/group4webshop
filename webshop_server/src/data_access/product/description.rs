@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, query_as, {Pool, Postgres},
+    query, {Pool, Postgres},
 };
-use std::error::Error;
+
 
 /// Description component. Contains either text or image.
 /// Database has constraints to ensure that only one of them is Some.
@@ -25,7 +25,7 @@ pub struct PartialDescriptionComponent {
 impl PartialDescriptionComponent {
     fn get_type(&self) -> ComponentType {
         if self.text.is_some() || self.image.is_none() {
-            return ComponentType::Text;
+            ComponentType::Text
         } else if self.image.is_some() || self.text.is_none() {
             return ComponentType::Image;
         } else {
@@ -45,7 +45,7 @@ enum ComponentType {
 /// - both Text and image are Some  
 ///
 /// SqlxError is a wrapper for sqlx::Error
-enum DescriptionCompError {
+pub enum DescriptionCompError {
     InvalidComponent(String),
     SqlxError(sqlx::Error),
 }
@@ -87,37 +87,31 @@ pub async fn get_product_description_components(
     for row in rows {
         // text component
         if row.text_id.is_some() {
-            match (row.text_title, row.paragraph) {
-                (Some(text_title), Some(paragraph)) => {
-                    description_components.push(DescriptionComponent {
-                        component_id: row.component_id,
-                        priority: row.priority,
-                        product_id: row.product_id,
-                        text: Some(TextComponent {
-                            text_title,
-                            paragraph,
-                        }),
-                        image: None,
-                    });
-                }
-                _ => {}
+            if let (Some(text_title), Some(paragraph)) = (row.text_title, row.paragraph) {
+                description_components.push(DescriptionComponent {
+                    component_id: row.component_id,
+                    priority: row.priority,
+                    product_id: row.product_id,
+                    text: Some(TextComponent {
+                        text_title,
+                        paragraph,
+                    }),
+                    image: None,
+                });
             }
         // image component
         } else if row.image_id.is_some() {
-            match (row.image_path, row.alt_text) {
-                (Some(image_path), Some(alt_text)) => {
-                    description_components.push(DescriptionComponent {
-                        component_id: row.component_id,
-                        priority: row.priority,
-                        product_id: row.product_id,
-                        text: None,
-                        image: Some(ImageComponent {
-                            image_path,
-                            alt_text,
-                        }),
-                    });
-                }
-                _ => {}
+            if let (Some(image_path), Some(alt_text)) = (row.image_path, row.alt_text) {
+                description_components.push(DescriptionComponent {
+                    component_id: row.component_id,
+                    priority: row.priority,
+                    product_id: row.product_id,
+                    text: None,
+                    image: Some(ImageComponent {
+                        image_path,
+                        alt_text,
+                    }),
+                });
             }
         } else {
             // Should never happen, db has constraints
@@ -126,7 +120,7 @@ pub async fn get_product_description_components(
             ));
         }
     }
-    return Result::Ok(description_components);
+    Result::Ok(description_components)
 }
 
 /// Returns a description component by id.
@@ -151,37 +145,31 @@ pub async fn get_description_component(
 
     // text component
     if row.text_id.is_some() {
-        match (row.text_title, row.paragraph) {
-            (Some(text_title), Some(paragraph)) => {
-                return Result::Ok(DescriptionComponent {
-                    component_id: row.component_id,
-                    priority: row.priority,
-                    product_id: row.product_id,
-                    text: Some(TextComponent {
-                        text_title,
-                        paragraph,
-                    }),
-                    image: None,
-                });
-            }
-            _ => {}
+        if let (Some(text_title), Some(paragraph)) = (row.text_title, row.paragraph) {
+            return Result::Ok(DescriptionComponent {
+                component_id: row.component_id,
+                priority: row.priority,
+                product_id: row.product_id,
+                text: Some(TextComponent {
+                    text_title,
+                    paragraph,
+                }),
+                image: None,
+            });
         }
     // image component
     } else if row.image_id.is_some() {
-        match (row.image_path, row.alt_text) {
-            (Some(image_path), Some(alt_text)) => {
-                return Result::Ok(DescriptionComponent {
-                    component_id: row.component_id,
-                    priority: row.priority,
-                    product_id: row.product_id,
-                    text: None,
-                    image: Some(ImageComponent {
-                        image_path,
-                        alt_text,
-                    }),
-                });
-            }
-            _ => {}
+        if let (Some(image_path), Some(alt_text)) = (row.image_path, row.alt_text) {
+            return Result::Ok(DescriptionComponent {
+                component_id: row.component_id,
+                priority: row.priority,
+                product_id: row.product_id,
+                text: None,
+                image: Some(ImageComponent {
+                    image_path,
+                    alt_text,
+                }),
+            });
         }
     } else {
         // Should never happen, db has constraints
@@ -189,9 +177,9 @@ pub async fn get_description_component(
             "Could not decode description component, corrupt data".into(),
         ));
     }
-    return Err(sqlx::Error::Decode(
+    Err(sqlx::Error::Decode(
         "Could not decode description component, corrupt data".into(),
-    ));
+    ))
 }
 
 /// Creates a new description component, and returns newly created component.
@@ -253,7 +241,7 @@ pub async fn create_component(
             })
         }
         ComponentType::Invalid => {
-            return Err(DescriptionCompError::InvalidComponent(
+            Err(DescriptionCompError::InvalidComponent(
                 "Invalid component".into(),
             ))
         }
@@ -281,11 +269,11 @@ async fn create_text_component(
             Err(err) => return Err(DescriptionCompError::SqlxError(err)),
         };
 
-        return Result::Ok(row.text_id);
+        Result::Ok(row.text_id)
     } else {
-        return Err(DescriptionCompError::InvalidComponent(
+        Err(DescriptionCompError::InvalidComponent(
             "Invalid text component.".into(),
-        ));
+        ))
     }
 }
 
@@ -310,10 +298,10 @@ async fn create_image_component(
             Err(err) => return Err(DescriptionCompError::SqlxError(err)),
         };
 
-        return Result::Ok(row.image_id);
+        Result::Ok(row.image_id)
     } else {
-        return Err(DescriptionCompError::InvalidComponent(
+        Err(DescriptionCompError::InvalidComponent(
             "Invalid image component.".into(),
-        ));
+        ))
     }
 }
