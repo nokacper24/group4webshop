@@ -11,7 +11,7 @@ export type SelectTableProps = {
     }[];
   };
   rows: SelectTableRowProps[];
-  outsideButton: { text: string; type: string };
+  actionButton: { text: string; type: string };
 };
 
 /**
@@ -22,19 +22,19 @@ export type SelectTableProps = {
  * @returns A Select Table component.
  */
 export default function SelectTable(props: SelectTableProps) {
-  let outsideButton;
-  switch (props.outsideButton.type) {
+  let actionButton;
+  switch (props.actionButton.type) {
     case "button":
-      outsideButton = (
+      actionButton = (
         <button className="default-button small-button">
-          {props.outsideButton.text}
+          {props.actionButton.text}
         </button>
       );
       break;
     case "danger-button":
-      outsideButton = (
+      actionButton = (
         <button className="default-button danger small-button">
-          {props.outsideButton.text}
+          {props.actionButton.text}
         </button>
       );
       break;
@@ -61,7 +61,7 @@ export default function SelectTable(props: SelectTableProps) {
           </tbody>
         </table>
       </div>
-      {outsideButton}
+      {actionButton}
     </React.Fragment>
   );
 }
