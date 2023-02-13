@@ -1,7 +1,7 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 
-use crate::data_access::category::{get_categories, get_category_by_id, Category};
+use crate::data_access::category::{get_categories, get_category_by_id};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(categories);
@@ -32,7 +32,8 @@ async fn category_by_id(
     pool: web::Data<Pool<Postgres>>,
     category_id: web::Path<i32>,
 ) -> impl Responder {
-    let category = get_category_by_id(&pool, category_by_id).await;
+    let category_id = category_id.into_inner();
+    let category = get_category_by_id(&pool, &category_id).await;
 
     // Error check
     if category.is_err() {
