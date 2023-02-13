@@ -818,7 +818,7 @@ form a:hover {
 
 .slide-button {
   background: rgba(0, 0, 0, 0.306);
-  border-radius: 50%;
+  border-radius: 1.5rem;
   color: white;
   font-size: var(--gallery-button-size);
   height: 1em;
@@ -836,7 +836,7 @@ form a:hover {
 }
 
 .slides-view {
-  --slides-width: 70em;
+  --slides-width: 1000px;
   overflow: hidden;
   width: var(--slides-width);
 }
@@ -847,6 +847,7 @@ form a:hover {
 
 .slide {
   /* outline: black 1px solid; */
+  display: inline-block;
   width: var(--slides-width)
 }
 
@@ -870,7 +871,7 @@ form a:hover {
 
 .reviewer-picture {
   border-radius: 1rem;
-  margin: 1em;
+  margin-right: 1em;
 }
 
 /* || PURCHASE LICENSE PAGE */
