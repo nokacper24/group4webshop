@@ -76,6 +76,7 @@ h3 {
 }
 
 button {
+  font-size: 0.9em;
   font-family: var(--ff-primary);
   cursor: pointer;
 }
@@ -102,8 +103,8 @@ button {
 
 .icon-button.expand-button {
   display: block;
+  color: var(--text-primary);
   margin-inline: auto;
-  fill: currentColor;
 }
 
 table {
@@ -166,7 +167,6 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-  outline: 1px solid transparent;
 }
 
 .header-container {
@@ -249,6 +249,7 @@ nav {
 
 .icon-button {
   display: inline-block;
+  fill: currentColor;
   margin-left: 0.5em;
   border: none;
   background: transparent;
@@ -291,6 +292,11 @@ nav {
     top: 0;
     right: 0;
     overflow-x: hidden;
+    outline: 1px solid transparent;
+  }
+
+  .icon-text {
+    margin-left: 0.5em;
   }
 
   #search-input {
@@ -426,6 +432,10 @@ nav {
 /* Navbar -- Desktop */
 @media (min-width: 900px) {
   .toggle-container {
+    display: none;
+  }
+
+  .icon-text {
     display: none;
   }
 
@@ -891,10 +901,7 @@ form a:hover {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
-
-.user-details button {
-  max-height: 3em;
+  align-items: flex-start;
 }
 
 .user-details p {
