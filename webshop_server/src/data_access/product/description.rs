@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, {Pool, Postgres},
+    query, {Pool, Postgres}, error::DatabaseError, Executor,
 };
 
 
@@ -304,4 +304,48 @@ async fn create_image_component(
             "Invalid image component.".into(),
         ))
     }
+}
+
+/// swaps the priority of two components
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database pool
+/// * `product_id` - The product id
+/// * `component_ids` - The component ids to swap priority
+pub async fn swap_priority (
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    component_ids: (i32, i32),
+) -> Result<(), sqlx::Error> {
+    let all_components = get_product_description_components(pool, product_id).await?;
+
+    let component_1 = match all_components.iter().find(|component| component.component_id == component_ids.0) {
+        Some(component) => component,
+        None => return Err(sqlx::Error::RowNotFound),
+    };
+    let component_2 = match all_components.iter().find(|component| component.component_id == component_ids.1) {
+        Some(component) => component,
+        None => return Err(sqlx::Error::RowNotFound),
+    };
+
+    let query1 = query!(
+        r#"
+        UPDATE description_component
+        SET priority = $1
+        WHERE component_id = $2;
+        "#, component_1.component_id, component_1.priority);
+
+    let query2 = query!(
+        r#"UPDATE description_component
+        SET priority = $1
+        WHERE component_id = $2;
+        "#, component_2.component_id, component_2.priority);
+
+
+    let mut transaction = pool.begin().await?;
+    transaction.execute(query1).await?;
+    transaction.execute(query2).await?;
+    transaction.commit().await?;
+    Ok(())
 }
