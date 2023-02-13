@@ -14,10 +14,14 @@ export type SelectTableRowProps = {
 export default function SelectTableRow(props: SelectTableRowProps) {
   const [selected, setSelected] = useState(false);
 
+  const toggleSelect = () => {
+    setSelected((selected) => !selected);
+  };
+
   return (
-    <tr>
+    <tr className={`${selected ? "selected-row" : ""}`}>
       <td>
-        <input type="checkbox" />
+        <input type="checkbox" onClick={toggleSelect} />
       </td>
       {props.columns.map((column, index) => (
         <SelectTableCell key={index} text={column.text} type={column.type} />
