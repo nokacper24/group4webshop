@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, {Pool, Postgres}, error::DatabaseError, Executor,
+    query, Executor, {Pool, Postgres},
 };
-
 
 /// Description component. Contains either text or image.
 /// Database has constraints to ensure that only one of them is Some.
@@ -31,6 +30,9 @@ impl PartialDescriptionComponent {
         } else {
             return ComponentType::Invalid;
         }
+    }
+    fn set_priority(&mut self, priority: i32) {
+        self.priority = priority;
     }
 }
 enum ComponentType {
@@ -240,11 +242,9 @@ pub async fn create_component(
                 image: component.image,
             })
         }
-        ComponentType::Invalid => {
-            Err(DescriptionCompError::InvalidComponent(
-                "Invalid component".into(),
-            ))
-        }
+        ComponentType::Invalid => Err(DescriptionCompError::InvalidComponent(
+            "Invalid component".into(),
+        )),
     }
 }
 
@@ -307,24 +307,34 @@ async fn create_image_component(
 }
 
 /// swaps the priority of two components
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database pool
 /// * `product_id` - The product id
 /// * `component_ids` - The component ids to swap priority
-pub async fn swap_priority (
+///
+/// # Returns
+///
+/// * `Result<Vec<DescriptionComponent>, sqlx::Error>` - All description component after priority swap
+pub async fn swap_priority(
     pool: &Pool<Postgres>,
     product_id: &str,
     component_ids: (i32, i32),
-) -> Result<(), sqlx::Error> {
+) -> Result<Vec<DescriptionComponent>, sqlx::Error> {
     let all_components = get_product_description_components(pool, product_id).await?;
 
-    let component_1 = match all_components.iter().find(|component| component.component_id == component_ids.0) {
+    let component_1 = match all_components
+        .iter()
+        .find(|component| component.component_id == component_ids.0)
+    {
         Some(component) => component,
         None => return Err(sqlx::Error::RowNotFound),
     };
-    let component_2 = match all_components.iter().find(|component| component.component_id == component_ids.1) {
+    let component_2 = match all_components
+        .iter()
+        .find(|component| component.component_id == component_ids.1)
+    {
         Some(component) => component,
         None => return Err(sqlx::Error::RowNotFound),
     };
@@ -334,18 +344,25 @@ pub async fn swap_priority (
         UPDATE description_component
         SET priority = $1
         WHERE component_id = $2;
-        "#, component_1.component_id, component_1.priority);
+        "#,
+        component_2.priority,
+        component_1.component_id
+    );
 
     let query2 = query!(
         r#"UPDATE description_component
         SET priority = $1
         WHERE component_id = $2;
-        "#, component_2.component_id, component_2.priority);
-
+        "#,
+        component_1.priority,
+        component_2.component_id
+    );
 
     let mut transaction = pool.begin().await?;
     transaction.execute(query1).await?;
     transaction.execute(query2).await?;
     transaction.commit().await?;
-    Ok(())
+
+    let updated_components = get_product_description_components(pool, product_id).await?;
+    Ok(updated_components)
 }
