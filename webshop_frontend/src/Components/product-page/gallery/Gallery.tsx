@@ -22,21 +22,56 @@ export default function Gallery(props: SlidesProps) {
 
   return (
     <div className="gallery">
-      <button className="slide-button" onClick={() => changeSlide(-1)}>&#8249;</button>
-      {props.slides.map((prop) => {
-        switch (prop.slideType) {
-          case SlideType.PARAGRAPH: {
-            return (
-              <ParagraphSlide
-                key={prop.id}
-                paragraph={prop.mainContent}
-                reviewerProfile={prop.reviewerProfile}
-              />
-            );
+      <button
+        className="icon-button slide-button"
+        onClick={() => changeSlide(-1)}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <title>Previous slide</title>
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="48"
+            d="M328 112L184 256l144 144"
+          />
+        </svg>
+      </button>
+      <div className="slides-container">
+        {props.slides.map((prop) => {
+          switch (
+            prop.slideType //Used for future prrofing in case we want to use gallery again with other type of slides
+          ) {
+            case SlideType.PARAGRAPH: {
+              return (
+                <ParagraphSlide
+                  key={prop.id}
+                  paragraph={prop.mainContent}
+                  reviewerProfile={prop.reviewerProfile}
+                />
+              );
+            }
           }
-        }
-      })}
-      <button className="slide-button" onClick={() => changeSlide(1)}>&#8250;</button>
+        })}
+      </div>
+
+      <button
+        className="icon-button slide-button"
+        onClick={() => changeSlide(1)}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <title>Next slide</title>
+          <path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="48"
+            d="M184 112l144 144-144 144"
+          />
+        </svg>
+      </button>
     </div>
   );
 }
@@ -45,5 +80,4 @@ function changeSlide(amount: number) {
   //code here to go to next slide, needs to wait on mounting
   //to continue
   index += amount;
-
 }
