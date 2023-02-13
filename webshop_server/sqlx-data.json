@@ -1,30 +1,48 @@
 {
   "db": "PostgreSQL",
-  "40e5b26d2df5aa2cc92c1a45c47560092b4cbb50dd1aa24320afc6a729f16cfe": {
+  "0b0608a99868530c1894508cfedbc6d59f2c9e77722999e7faa0e35c659327ea": {
     "describe": {
       "columns": [
         {
-          "name": "product_name",
+          "name": "user_id",
           "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
           "type_info": "Text"
         },
         {
-          "name": "price_per_user",
-          "ordinal": 1,
-          "type_info": "Float4"
-        },
-        {
-          "name": "short_description",
+          "name": "pass_hash",
           "ordinal": 2,
           "type_info": "Text"
         },
         {
-          "name": "main_image",
+          "name": "company_id",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
         }
       ],
       "nullable": [
+        false,
         false,
         false,
         false,
@@ -34,33 +52,446 @@
         "Left": []
       }
     },
-    "query": "SELECT * FROM product"
+    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\" FROM app_user"
   },
-  "d803bb8a76f3757f3440d40378e0c23846af7233fdd6706acb7d03d5523b38ca": {
+  "0d22e4eb1a7fcdbf58f170ec4ea84093ba997a2f80ea22a6f5473249181bc29f": {
     "describe": {
       "columns": [
         {
-          "name": "product_name",
+          "name": "text_id",
           "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO product_text (text_title, paragraph)\n        VALUES ($1, $2)\n        RETURNING text_id"
+  },
+  "6deac307775cddce44e599b02c2fd93213487bd17840e9e0e198e018839496ab": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
           "type_info": "Text"
         },
         {
-          "name": "price_per_user",
-          "ordinal": 1,
-          "type_info": "Float4"
-        },
-        {
-          "name": "short_description",
+          "name": "pass_hash",
           "ordinal": 2,
           "type_info": "Text"
         },
         {
-          "name": "main_image",
+          "name": "company_id",
           "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\" FROM app_user WHERE user_id = $1"
+  },
+  "71072fb15cc64c083b0598548e833165d21ec456c653f07772647eb4e2c52c2a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "component_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO description_component (priority, product_id, text_id)\n            VALUES ($1, $2, $3)\n            RETURNING component_id"
+  },
+  "74d197dfedcfc3f1ec2d388638c95e4625475f66858e49451769ebef3f8306c1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "component_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO description_component (priority, product_id, image_id)\n            VALUES ($1, $2, $3)\n            RETURNING component_id"
+  },
+  "77a09ba47fc1133b0f9408b612444dbe22132de0c84e73f9924e2d814f69c4f7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
           "type_info": "Text"
         }
       ],
       "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT * FROM category WHERE id = $1"
+  },
+  "8cb563a6f713f6c14a757bb23997864c4b8e33351921dcaab00cab8b9fea03bf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "product_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_per_user",
+          "ordinal": 2,
+          "type_info": "Float4"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "main_image",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "available",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT *\n        FROM product WHERE available = true"
+  },
+  "8fc1b18a7ec30714780d06d9afe11e7d83bd21f2ca4a53b463ec239ebcf0c379": {
+    "describe": {
+      "columns": [
+        {
+          "name": "component_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "priority",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "text_id?",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "text_title?",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "paragraph?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "image_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "image_path?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "alt_text?",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT component_id, priority, product_id,\n        description_component.text_id AS \"text_id?\",\n        text_title AS \"text_title?\", paragraph AS \"paragraph?\",\n        description_component.image_id, image_path AS \"image_path?\",\n        alt_text AS \"alt_text?\"\n        FROM description_component\n        FULL JOIN product_text ON  description_component.text_id = product_text.text_id\n        FULL JOIN product_image ON description_component.image_id = product_image.image_id\n        WHERE description_component.component_id = $1"
+  },
+  "a8946ccbb55d43952edd408578a6897bba7e623f735115b7d461a20c3da8012b": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Float4",
+          "Text",
+          "Text",
+          "Bool",
+          "Text"
+        ]
+      }
+    },
+    "query": "UPDATE product\n        SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5\n        WHERE product_id = $6"
+  },
+  "b6866e254f562a1bb239abe465363296c6021b89cdcc8d654aeff0d4b6be3d23": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Float4",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      }
+    },
+    "query": "INSERT INTO product\n        (product_id, display_name, price_per_user, short_description, main_image, available)\n        VALUES ($1, $2, $3, $4, $5, $6)"
+  },
+  "b83f0ee40c528ea85ad5be5fccb03de3456f82632fcd22a218252da6d55ab365": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM category"
+  },
+  "c84afa7b04115a0d39500d27d3aa79d4855334658f49564c343b4d5f15b5750e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "component_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "priority",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "text_id?",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "text_title?",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "paragraph?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "image_id",
+          "ordinal": 6,
+          "type_info": "Int4"
+        },
+        {
+          "name": "image_path?",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "alt_text?",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT component_id, priority, product_id,\n        description_component.text_id AS \"text_id?\",\n        text_title AS \"text_title?\", paragraph AS \"paragraph?\",\n        description_component.image_id, image_path AS \"image_path?\",\n        alt_text AS \"alt_text?\"\n        FROM description_component\n        FULL JOIN product_text ON  description_component.text_id = product_text.text_id\n        FULL JOIN product_image ON description_component.image_id = product_image.image_id\n        WHERE description_component.product_id = $1\n        ORDER BY priority ASC"
+  },
+  "f03ec16afb02f9f1357ac254b60ca483c0d171606feacbb7c0950881963594c2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "product_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "price_per_user",
+          "ordinal": 2,
+          "type_info": "Float4"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "main_image",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "available",
+          "ordinal": 5,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
         false,
         false,
         false,
@@ -72,6 +503,27 @@
         ]
       }
     },
-    "query": "SELECT * FROM product WHERE product_name = $1"
+    "query": "SELECT product_id, display_name, price_per_user, short_description, main_image, available\n        FROM product WHERE product_id = $1"
+  },
+  "f06f4861f91fe8786bb09cdd90201f61888e2dbbf644b75aa5229c39a0678446": {
+    "describe": {
+      "columns": [
+        {
+          "name": "image_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO product_image (image_path, alt_text)\n        VALUES ($1, $2)\n        RETURNING image_id"
   }
 }
