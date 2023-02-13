@@ -114,7 +114,7 @@ CREATE TABLE description_component (
     FOREIGN KEY (product_id) REFERENCES product(product_id),
     FOREIGN KEY (image_id) REFERENCES product_image(image_id),
     FOREIGN KEY (text_id) REFERENCES product_text(text_id),
-    UNIQUE (product_id, priority), -- Ensure unique priority for components of a product
+    UNIQUE (product_id, priority) DEFERRABLE INITIALLY DEFERRED, -- Ensure unique priority for components of a product
     CHECK ((image_id IS NOT NULL AND text_id IS NULL) OR (image_id IS NULL AND text_id IS NOT NULL)) -- Ensure that it has EITHER an image or a text, not both
 );
 
