@@ -944,6 +944,10 @@ form a:hover {
   background: var(--bg-neutral);
 }
 
+.select-table .checkbox-column {
+  width: 5em;
+}
+
 .select-table th {
   position: sticky;
   top: 0;

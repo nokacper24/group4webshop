@@ -48,7 +48,7 @@ export default function SelectTable(props: SelectTableProps) {
         <table className="select-table table-container">
           <thead>
             <tr>
-              <th>Select</th>
+              <th className="checkbox-column">Select</th>
               {props.header.columns.map((column, index) => (
                 <th key={index}>{column.text}</th>
               ))}
