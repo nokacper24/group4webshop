@@ -42,10 +42,12 @@ CREATE TABLE cookies (
 );
 
 CREATE TABLE product (
-    product_name TEXT PRIMARY KEY,
+    product_id TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
     price_per_user REAL NOT NULL,
     short_description TEXT NOT NULL,
-    main_image TEXT NOT NULL
+    main_image TEXT NOT NULL,
+    available BOOLEAN NOT NULL
 );
 
 CREATE TABLE license (
@@ -55,9 +57,9 @@ CREATE TABLE license (
     end_date DATE NOT NULL,
     amount REAL NOT NULL,
     company_id INT NOT NULL,
-    product_name TEXT NOT NULL,
+    product_id TEXT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company(company_id),
-    FOREIGN KEY (product_name) REFERENCES product(product_name)
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 
 CREATE TABLE user_license (
@@ -75,10 +77,10 @@ CREATE TABLE category (
 );
 
 CREATE TABLE product_category (
-    product_name TEXT NOT NULL,
+    product_id TEXT NOT NULL,
     category_id INT NOT NULL,
-    PRIMARY KEY (product_name, category_id),
-    FOREIGN KEY (product_name) REFERENCES product(product_name),
+    PRIMARY KEY (product_id, category_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id),
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
@@ -87,8 +89,8 @@ CREATE TABLE testemonial (
     author TEXT NOT NULL,
     text TEXT NOT NULL,
     author_pic TEXT NOT NULL,
-    product_name TEXT NOT NULL,
-    FOREIGN KEY (product_name) REFERENCES product(product_name)
+    product_id TEXT NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
 
 CREATE TABLE product_image (
@@ -106,13 +108,13 @@ CREATE TABLE product_text (
 CREATE TABLE description_component (
     component_id SERIAL PRIMARY KEY,
     priority INT NOT NULL,
-    product_name TEXT NOT NULL,
+    product_id TEXT NOT NULL,
     image_id INT,
     text_id INT,
-    FOREIGN KEY (product_name) REFERENCES product(product_name),
+    FOREIGN KEY (product_id) REFERENCES product(product_id),
     FOREIGN KEY (image_id) REFERENCES product_image(image_id),
     FOREIGN KEY (text_id) REFERENCES product_text(text_id),
-    UNIQUE (product_name, priority), -- Ensure unique priority for components of a product
+    UNIQUE (product_id, priority), -- Ensure unique priority for components of a product
     CHECK ((image_id IS NOT NULL AND text_id IS NULL) OR (image_id IS NULL AND text_id IS NOT NULL)) -- Ensure that it has EITHER an image or a text, not both
 );
 

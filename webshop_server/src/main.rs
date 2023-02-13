@@ -2,9 +2,12 @@ use actix_cors::Cors;
 use actix_web::{get, http, web, App, HttpServer, Responder};
 use dotenvy::dotenv;
 
+mod data_access;
 mod routes;
 
 use routes::public::public;
+
+use crate::data_access::create_pool;
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -21,7 +24,16 @@ async fn main() -> std::io::Result<()> {
 
     println!("Starting server at http://{}", address);
 
-    HttpServer::new(|| {
+    //create new pool
+    let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
+
+    let pool = web::Data::new(
+        create_pool(dburl.as_str())
+            .await
+            .expect("Can not connect to database"),
+    );
+
+    HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin() // Should be changed to allow only specific origins in production
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
@@ -32,6 +44,8 @@ async fn main() -> std::io::Result<()> {
         let public = web::scope("/api").configure(public);
 
         App::new()
+            // register sqlx pool
+            .app_data(pool.clone())
             // configure cors
             .wrap(cors)
             .service(index)
@@ -44,22 +58,4 @@ async fn main() -> std::io::Result<()> {
     .expect("Can not bind to port 8080")
     .run()
     .await
-}
-
-
-
-// if you want to see the print run
-// cargo test -- --nocapture
-#[cfg(test)]
-mod tests {
-    // test sqlx pool
-    #[ignore] 
-    #[actix_web::test]
-    async fn test_sqlx_pool() {
-        dotenvy::dotenv().ok();
-        let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
-        let pool = sqlx::PgPool::connect(dburl.as_str()).await.unwrap();
-        let results = sqlx::query!("SELECT * FROM product").fetch_all(&pool).await.unwrap();
-        println!("{:?}",results);
-    }
 }
