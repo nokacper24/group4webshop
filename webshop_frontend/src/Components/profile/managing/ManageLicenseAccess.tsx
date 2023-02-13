@@ -14,75 +14,65 @@ export default function ManageLicenseAccess() {
 
   const withoutAccessTable = {
     header: {
-      columns: [{ text: "Select" }, { text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }, { text: "Access" }],
     },
     rows: [
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Add", type: "button" },
         ],
@@ -93,75 +83,65 @@ export default function ManageLicenseAccess() {
 
   const withAccessTable = {
     header: {
-      columns: [{ text: "Select" }, { text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }, { text: "Access" }],
     },
     rows: [
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],
       },
       {
         columns: [
-          { text: "", type: "checkbox" },
           { text: "user@company.com", type: "string" },
           { text: "Remove", type: "danger-button" },
         ],

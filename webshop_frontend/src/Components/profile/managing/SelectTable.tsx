@@ -2,7 +2,7 @@ import React from "react";
 import SelectTableRow, { SelectTableRowProps } from "./SelectTableRow";
 
 /**
- * The cell type can be either checkbox, string, button, or danger-button.
+ * The cell type can be either string, button, or danger-button.
  */
 export type SelectTableProps = {
   header: {
@@ -48,6 +48,7 @@ export default function SelectTable(props: SelectTableProps) {
         <table className="select-table table-container">
           <thead>
             <tr>
+              <th>Select</th>
               {props.header.columns.map((column, index) => (
                 <th key={index}>{column.text}</th>
               ))}
