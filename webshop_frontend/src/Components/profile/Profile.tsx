@@ -13,16 +13,11 @@ import SignIn from "./SignIn";
  * @returns The Profile page component.
  */
 export default function Profile() {
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (authenticatedUser()) {
-      setAuthenticated(true);
-    }
-  }, []);
+  const [authenticated, setAuthenticated] = useState<boolean>(
+    localStorage.getItem("authenticated") != null
+  );
 
   let element;
-
   if (!authenticated) {
     element = <SignIn />;
   } else {
@@ -37,15 +32,4 @@ export default function Profile() {
       </Routes>
     </React.Fragment>
   );
-}
-
-/**
- * Check if the user is authenticated.
- *
- * @returns true the user is authenticated, false if not.
- */
-function authenticatedUser(): boolean {
-  // Authenticate token
-  // Placeholder authentication
-  return localStorage.getItem("authenticated") != null;
 }
