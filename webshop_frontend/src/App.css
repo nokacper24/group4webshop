@@ -835,16 +835,19 @@ form a:hover {
   background-color: #0000009a;
 }
 
-.slides-container {
+.slides-view {
+  --slides-width: 70em;
   overflow: hidden;
-  max-width: inherit;
-  display: flex;
-  flex-direction: row;
+  width: var(--slides-width);
+}
+
+.slides-container {
+  width: max-content;
 }
 
 .slide {
   /* outline: black 1px solid; */
-  width: calc(inherit - 2 * 40px);
+  width: var(--slides-width)
 }
 
 .reviewer-profile {
