@@ -800,6 +800,12 @@ form a:hover {
   /* outline: #473372 1px solid; */
 }
 
+.testimonial-title {
+  color: inherit;
+  background: initial;
+  -webkit-text-fill-color: initial;
+}
+
 .gallery {
   /* outline: green 1px solid; */
   display: grid;
