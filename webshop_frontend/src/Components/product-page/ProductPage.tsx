@@ -79,7 +79,7 @@ export default function ProductPage() {
         </div>
       </section>
       <hr></hr>
-      <section className="product-description">
+      <section className="product-description container">
         {state.rows.map((productPageRow) => (
           <DescriptionRow
             key={assignUniqueKey("row")}
@@ -88,8 +88,10 @@ export default function ProductPage() {
         ))}
       </section>
       <section className="gallery-wrapper">
-        <h2 className="testimonial-title">Testimonials</h2>
-        <Gallery slides={testimonial.slides} />
+        <div className="container">
+          <h2 className="testimonial-title">Testimonials</h2>
+          <Gallery slides={testimonial.slides} />
+        </div>
       </section>
     </React.Fragment>
   );
