@@ -78,7 +78,7 @@ export default function ManageLicenseAccess() {
         ],
       },
     ],
-    outsideButton: { text: "Add all selected", type: "button" },
+    actionButton: { text: "Add all selected", type: "button" },
   };
 
   const withAccessTable = {
@@ -147,7 +147,7 @@ export default function ManageLicenseAccess() {
         ],
       },
     ],
-    outsideButton: { text: "Remove all selected", type: "danger-button" },
+    actionButton: { text: "Remove all selected", type: "danger-button" },
   };
 
   return (
@@ -166,7 +166,7 @@ export default function ManageLicenseAccess() {
         <SelectTable
           header={withoutAccessTable.header}
           rows={withoutAccessTable.rows}
-          outsideButton={withoutAccessTable.outsideButton}
+          actionButton={withoutAccessTable.actionButton}
         />
       </section>
 
@@ -175,7 +175,7 @@ export default function ManageLicenseAccess() {
         <SelectTable
           header={withAccessTable.header}
           rows={withAccessTable.rows}
-          outsideButton={withAccessTable.outsideButton}
+          actionButton={withAccessTable.actionButton}
         />
       </section>
     </React.Fragment>
