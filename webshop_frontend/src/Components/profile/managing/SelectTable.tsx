@@ -48,7 +48,10 @@ export default function SelectTable(props: SelectTableProps) {
         <table className="select-table table-container">
           <thead>
             <tr>
-              <th className="checkbox-column">Select</th>
+              <th className="checkbox-column">
+                <label>Select</label>
+                <input type="checkbox" />
+              </th>
               {props.header.columns.map((column, index) => (
                 <th key={index}>{column.text}</th>
               ))}
@@ -61,7 +64,7 @@ export default function SelectTable(props: SelectTableProps) {
           </tbody>
         </table>
       </div>
-      {actionButton}
+      <div className="button-container">{actionButton}</div>
     </React.Fragment>
   );
 }
