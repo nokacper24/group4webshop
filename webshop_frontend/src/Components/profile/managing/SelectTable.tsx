@@ -1,5 +1,6 @@
-import React from "react";
-import SelectTableRow, { SelectTableRowProps } from "./SelectTableRow";
+import React, { useState, useEffect } from "react";
+import SelectTableHeader from "./SelectTableHeader";
+import SelectTableRow from "./SelectTableRow";
 
 /**
  * The cell type can be either string, button, or danger-button.
@@ -10,7 +11,12 @@ export type SelectTableProps = {
       text: string;
     }[];
   };
-  rows: SelectTableRowProps[];
+  rows: {
+    columns: {
+      text: string;
+      type: string;
+    }[];
+  }[];
   actionButton: { text: string; type: string };
 };
 
@@ -22,6 +28,41 @@ export type SelectTableProps = {
  * @returns A Select Table component.
  */
 export default function SelectTable(props: SelectTableProps) {
+  const [selectedRows, setSelectedRows] = useState(0);
+  const [selectAll, setSelectAll] = useState("none");
+
+  const toggleSelectAll = () => {
+    if (selectedRows != props.rows.length) {
+      if (selectAll == "all") {
+        setSelectedRows(0);
+      } else {
+        setSelectedRows(props.rows.length);
+      }
+    } else {
+      if (selectAll == "none") {
+        setSelectedRows(props.rows.length);
+      } else {
+        setSelectedRows(0);
+      }
+    }
+  };
+
+  const incrementSelectedRows = () => {
+    setSelectedRows(selectedRows + 1);
+  };
+  const decrementSelectedRows = () => {
+    setSelectedRows(selectedRows - 1);
+  };
+
+  const updateSelected = (checked: boolean) => {
+    setSelectAll("some");
+    if (checked) {
+      incrementSelectedRows();
+    } else {
+      decrementSelectedRows();
+    }
+  };
+
   let actionButton;
   switch (props.actionButton.type) {
     case "button":
@@ -42,24 +83,35 @@ export default function SelectTable(props: SelectTableProps) {
       break;
   }
 
+  useEffect(() => {
+    if (selectedRows == props.rows.length) {
+      setSelectAll("all");
+    } else if (selectedRows == 0) {
+      setSelectAll("none");
+    } else {
+      setSelectAll("some");
+    }
+  });
+
   return (
     <React.Fragment>
       <div className="table-container">
         <table className="select-table table-container">
           <thead>
-            <tr>
-              <th className="checkbox-column">
-                <label>Select</label>
-                <input type="checkbox" />
-              </th>
-              {props.header.columns.map((column, index) => (
-                <th key={index}>{column.text}</th>
-              ))}
-            </tr>
+            <SelectTableHeader
+              columns={props.header.columns}
+              toggleSelectAll={() => toggleSelectAll()}
+              selectAll={selectAll}
+            />
           </thead>
           <tbody>
             {props.rows.map((row, index) => (
-              <SelectTableRow key={index} columns={row.columns} />
+              <SelectTableRow
+                key={index}
+                columns={row.columns}
+                updateSelected={updateSelected}
+                selectAll={selectAll}
+              />
             ))}
           </tbody>
         </table>
