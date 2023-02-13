@@ -37,7 +37,7 @@
 
 body {
   margin: 0;
-  background: rgba(71, 51, 114, 0.10);
+  background-color: rgba(71, 51, 114, 0.10);
   font-family: var(--ff-primary);
   line-height: 2;
 }
@@ -86,7 +86,7 @@ button {
 .default-button {
   padding: 0.75em 2em;
   color: var(--text-secondary);
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
@@ -94,7 +94,7 @@ button {
 }
 
 .default-button:is(:hover, :focus) {
-  background: var(--bg-tertiary);
+  background-color: var(--bg-tertiary);
   outline: 2px solid currentColor;
 }
 
@@ -182,9 +182,9 @@ nav {
 
 #skip-navigation {
   position: absolute;
-  left: 1em;
+  left: 1rem;
   top: -1000px;
-  padding: 0.5rem;
+  padding: 0.5em;
   color: var(--text-secondary);
   background-color: var(--bg-primary);
   border: 3px solid var(--text-secondary);
@@ -280,7 +280,7 @@ nav {
 }
 
 .nav-link:is(:hover, :focus) {
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
   transition: background var(--transition-speed);
   outline: 1px solid transparent;
 }
@@ -308,7 +308,7 @@ nav {
   .nav-list {
     display: block;
     padding-top: var(--header-height);
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
     transform: translateX(100%);
     overflow-y: auto;
@@ -324,7 +324,7 @@ nav {
 
   .nav-link:is(:hover, :focus) {
     font-weight: bold;
-    background: var(--bg-secondary);
+    background-color: var(--bg-secondary);
     transition: background var(--transition-speed);
     outline: 1px solid transparent;
   }
@@ -463,7 +463,7 @@ nav {
 hr {
   margin: 0;
   height: 5px;
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
 }
 
 .m-t-1 {
@@ -494,7 +494,7 @@ form>h1 {
 .form-container {
   width: max(50vw, 600px);
   margin-block: 1em;
-  background: var(--bg-neutral);
+  background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
 }
@@ -602,7 +602,7 @@ form a:hover {
   flex-wrap: wrap;
 
   color: var(--text-secondary);
-  background: linear-gradient(var(--bg-gradient-primary));
+  background-color: linear-gradient(var(--bg-gradient-primary));
   text-align: center;
   text-shadow: 0px 0px 3px var(--text-primary);
 }
@@ -956,36 +956,33 @@ form a:hover {
   overflow-y: auto;
 }
 
-.table-container+button {
+.table-container+.button-container {
   margin-top: 1em;
 }
 
-.select-table tr:nth-child(even) {
-  background: var(--bg-neutral);
-}
-
-.select-table .checkbox-column {
-  width: 5em;
-}
 
 .select-table th {
   position: sticky;
   top: 0;
-  z-index: 1;
 
-  background: var(--bg-neutral);
+  background-color: var(--bg-neutral);
   border-bottom: 1px solid var(--text-primary);
+  z-index: 1;
 }
 
 .select-table th,
 .select-table td {
   border-right: 1px solid var(--text-primary);
-  padding: 0.2em 1em;
+  padding: 0.3em 1em;
 }
 
 .select-table th:last-child,
 .select-table td:last-child {
   border-right: none;
+}
+
+.select-table td {
+  border-bottom: 1px solid var(--text-secondary);
 }
 
 .select-table td>input,
@@ -995,10 +992,24 @@ form a:hover {
 }
 
 .select-table input[type="checkbox"] {
-  height: 1.5em;
-  width: 1.5em;
+  transform: scale(1.5);
+}
+
+.checkbox-column {
+  width: 7em;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.checkbox-column label {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.selected-row {
+  background-color: hsl(195, 45%, 85%) !important;
 }
 
 .danger {
-  background: red;
+  background-color: red;
 }
