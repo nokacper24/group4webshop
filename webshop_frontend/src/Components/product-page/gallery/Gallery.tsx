@@ -38,22 +38,24 @@ export default function Gallery(props: SlidesProps) {
           />
         </svg>
       </button>
-      <div className="slides-container">
-        {props.slides.map((prop) => {
-          switch (
-            prop.slideType //Used for future prrofing in case we want to use gallery again with other type of slides
-          ) {
-            case SlideType.PARAGRAPH: {
-              return (
-                <ParagraphSlide
-                  key={prop.id}
-                  paragraph={prop.mainContent}
-                  reviewerProfile={prop.reviewerProfile}
-                />
-              );
+      <div className="slides-view">
+        <div className="slides-container">
+          {props.slides.map((prop) => {
+            switch (
+              prop.slideType //Used for future prrofing in case we want to use gallery again with other type of slides
+            ) {
+              case SlideType.PARAGRAPH: {
+                return (
+                  <ParagraphSlide
+                    key={prop.id}
+                    paragraph={prop.mainContent}
+                    reviewerProfile={prop.reviewerProfile}
+                  />
+                );
+              }
             }
-          }
-        })}
+          })}
+        </div>
       </div>
 
       <button
