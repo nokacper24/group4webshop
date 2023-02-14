@@ -1,5 +1,6 @@
 use actix_web::{get, post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
+use utoipa::OpenApi;
 
 use crate::data_access::product::{self, PartialProduct, Product};
 
@@ -11,7 +12,27 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_description);
 }
 
-/// Get all products
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        products,
+        product_by_id,
+    ),
+    components(
+        schemas(Product)
+    ),
+    tags(
+        (name = "Products", description = "Api endpoints for products")
+    ),
+)]
+pub struct ApiDoc;
+
+#[utoipa::path(
+    context_path = "",
+    responses(
+    (status = 200, description = "List of all available products", body = Vec<Product>)
+)
+)]
 #[get("products")]
 pub async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let products = product::get_products(&pool).await;
@@ -30,6 +51,17 @@ pub async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 }
 
 /// Get a specific product by name
+#[utoipa::path (
+    context_path = "",
+    responses(
+        (status = 200, description = "Returns a specific product", body = Product),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    params(
+        ("product_id", description = "The id of the product"),
+        )
+    )
+]
 #[get("products/{product_id}")]
 pub async fn product_by_id(
     pool: web::Data<Pool<Postgres>>,
