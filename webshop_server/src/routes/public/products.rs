@@ -5,7 +5,7 @@ use utoipa::OpenApi;
 use crate::data_access::product::{self, PartialProduct, Product};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg.service(products);
+    cfg.service(all_products);
     cfg.service(product_by_id);
     cfg.service(create_product);
     cfg.service(update_product);
@@ -15,7 +15,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        products,
+        all_products,
         product_by_id,
     ),
     components(
@@ -34,7 +34,7 @@ pub struct ProductsApiDoc;
 )
 )]
 #[get("products")]
-pub async fn products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let products = product::get_products(&pool).await;
 
     //error check
