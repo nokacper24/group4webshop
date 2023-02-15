@@ -836,7 +836,7 @@ form a:hover {
 }
 
 .slides-view {
-  --slides-width: 1000px;
+  --slides-width: min(60vw, 900px);
   overflow: hidden;
   width: var(--slides-width);
 }
@@ -939,6 +939,10 @@ form a:hover {
 .row-header,
 .row-details {
   border-bottom: 1px solid var(--text-primary);
+}
+
+.row-image {
+  display: block;
 }
 
 .collapsed {
