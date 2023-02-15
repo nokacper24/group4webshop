@@ -28,12 +28,14 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 pub struct ProductsApiDoc;
 
 #[utoipa::path(
-    context_path = "api/",
+    context_path = "/api",
+    get,
     responses(
-    (status = 200, description = "List of all available products", body = Vec<Product>)
+    (status = 200, description = "List of all available products", body = Vec<Product>),
+    (status = 500, description = "Internal Server Error"),
 )
 )]
-#[get("products")]
+#[get("/products")]
 pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let products = product::get_products(&pool).await;
 
@@ -52,9 +54,11 @@ pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 
 /// Get a specific product by name
 #[utoipa::path (
-    context_path = "api/",
+    context_path = "/api",
+    get,
     responses(
         (status = 200, description = "Returns a specific product", body = Product),
+        (status = 404, description = "Product not found"),
         (status = 500, description = "Internal Server Error"),
         ),
     params(
@@ -62,7 +66,7 @@ pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
         )
     )
 ]
-#[get("products/{product_id}")]
+#[get("/products/{product_id}")]
 pub async fn product_by_id(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
