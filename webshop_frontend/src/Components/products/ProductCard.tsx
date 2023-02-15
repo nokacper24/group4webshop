@@ -16,7 +16,7 @@ export const ProductCard = ({ props: product }: ProductCardProps) => {
           height={200}
           width={300}
           src={product.sourceImage}
-          alt={"Product image of " + product.name}
+          alt={product.name}
           className="card-image"
         ></img>
         <h2>{product.name}</h2>
