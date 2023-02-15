@@ -8,36 +8,55 @@ use crate::{
 };
 
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
-    let info = InfoBuilder::new()
-        .title("My api")
-        .version("1.0.0")
-        .contact(Some(
-            ContactBuilder::new()
-                .name(Some("Admin Admin"))
-                .email(Some("amdin@petapi.com"))
-                .build(),
-        ))
-        .build();
-    
-    let productsdoc = OpenApiBuilder::from(ProductsApiDoc::openapi())
-        .info(info.clone())
-        .build();
 
-    let usersdoc = OpenApiBuilder::from(UserApiDoc::openapi())
-        .info(info.clone())
-        .build();
+    let info = build_info();    
 
     cfg.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![
         (
             Url::new("Products", "/api-doc/openapi_products.json"),
-            productsdoc,
+            build_products_doc(info.clone()),
         ),
         (
             Url::new("Users", "/api-doc/openapi_users.json"),
-            usersdoc,
+            build_users_doc(info.clone()),
         ),
     ]));
 }
+
+fn build_info() -> openapi::Info {
+    InfoBuilder::new()
+    .title("ProFlex API")
+        .version("1.0.0")
+        .contact(Some(
+            ContactBuilder::new()
+                .name(Some("ProFlex"))
+                .email(Some("amdin@proflexdomain.com"))
+                .url(Some("https://proflexdomain.com"))
+                .build(),
+        ))
+        .license(
+            Some(
+                openapi::LicenseBuilder::new()
+                    .name("GNU")
+                    .url(Some("https://www.gnu.org/licenses/gpl-3.0.en.html"))
+                    .build(),
+            ),
+        )
+        .build()
+}
+
+fn build_products_doc(info: openapi::Info) -> openapi::OpenApi {
+    OpenApiBuilder::from(ProductsApiDoc::openapi())
+        .info(info)
+        .build()
+}
+
+fn build_users_doc(info: openapi::Info) -> openapi::OpenApi {
+    OpenApiBuilder::from(UserApiDoc::openapi())
+        .info(info)
+        .build()
+}
+    
 
 #[derive(OpenApi)]
 #[openapi(
