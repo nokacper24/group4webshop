@@ -252,7 +252,6 @@ nav {
 .icon-button {
   display: inline-block;
   fill: currentColor;
-  margin-left: 0.5em;
   border: none;
   background: transparent;
 }
@@ -798,9 +797,8 @@ form a:hover {
   flex-direction: column;
   text-align: center;
   align-items: center;
-  background: linear-gradient(var(--bg-gradient-secondary));
   color: white;
-  /* outline: #473372 1px solid; */
+  background: linear-gradient(var(--bg-gradient-secondary));
 }
 
 .testimonial-title {
@@ -816,6 +814,14 @@ form a:hover {
   max-width: 70em;
 }
 
+.gallery button:first-child {
+  margin-right: 0.5em;
+}
+
+.gallery button:last-child {
+  margin-left: 0.5em;
+}
+
 .slide-button {
   background: rgba(0, 0, 0, 0.306);
   border-radius: 1.5rem;
@@ -826,7 +832,6 @@ form a:hover {
   width: 1em;
   align-self: center;
   font-family: sans-serif;
-  margin: 0.5em;
   outline: 1px solid transparent;
   border: 0;
 }
@@ -836,7 +841,8 @@ form a:hover {
 }
 
 .slides-view {
-  --slides-width: min(60vw, 900px);
+  --slides-width: min(70vw, 900px);
+
   overflow: hidden;
   width: var(--slides-width);
 }
