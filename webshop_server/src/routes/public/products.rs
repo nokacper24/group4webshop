@@ -74,17 +74,13 @@ pub async fn product_by_id(
 ) -> impl Responder {
     let product = product::get_product_by_id(&pool, product_id.as_str()).await;
 
-    //error check
-    if product.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+    match product {
+        Ok(product) => HttpResponse::Ok().json(product),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
     }
-
-    //parse to json
-    if let Ok(product) = product {
-        return HttpResponse::Ok().json(product);
-    }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
 #[post("/products")]
