@@ -28,7 +28,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 pub struct ProductsApiDoc;
 
 #[utoipa::path(
-    context_path = "",
+    context_path = "api/",
     responses(
     (status = 200, description = "List of all available products", body = Vec<Product>)
 )
@@ -52,7 +52,7 @@ pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 
 /// Get a specific product by name
 #[utoipa::path (
-    context_path = "",
+    context_path = "api/",
     responses(
         (status = 200, description = "Returns a specific product", body = Product),
         (status = 500, description = "Internal Server Error"),

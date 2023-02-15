@@ -1,7 +1,7 @@
 use crate::data_access::user::{get_all_users, get_user_by_id, User};
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
-use utoipa::{openapi, OpenApi};
+use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
@@ -23,12 +23,12 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 pub struct UserApiDoc;
 
 #[utoipa::path(
-    context_path = "",
+    context_path = "api/",
     responses(
     (status = 200, description = "List of all available users", body = Vec<User>)
     )
 )]
-#[get("/users")]
+#[get("users")]
 async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let users = get_all_users(&pool).await;
 
@@ -45,7 +45,7 @@ async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
-#[get("/users/{id}")]
+#[get("users/{id}")]
 async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> impl Responder {
     let id = match id.parse::<i32>() {
         Ok(id) => id,
