@@ -10,7 +10,7 @@ use crate::routes::public::{products, users};
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
     let info = build_info();
 
-    cfg.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![
+    cfg.service(SwaggerUi::new("/api-doc/swagger-ui/{_:.*}").urls(vec![
         (
             Url::new("Products", "/api-doc/openapi_products.json"),
             build_products_doc(info.clone()),
