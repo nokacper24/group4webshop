@@ -17,7 +17,7 @@ export const ParagraphSlide = (props: ParagraphSlideProps) => {
       }
     </p>
     <div className="reviewer-profile">
-      <img src={props.reviewerProfile.picturePath} alt="" />
+      <img src={props.reviewerProfile.picturePath} alt="" className="reviewer-picture"/>
       <div className="reviewer-details">
         <p>{props.reviewerProfile.name}</p>
         <p>{props.reviewerProfile.title}</p>

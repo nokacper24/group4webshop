@@ -1,12 +1,34 @@
-use crate::data_access::user::{get_all_users, get_user_by_id};
+use crate::data_access::user::{get_all_users, get_user_by_id, User};
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
+use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        users,
+    ),
+    components(
+        schemas(User)
+    ),
+    tags(
+        (name = "Users", description = "Api endpoints for users")
+    ),
+)]
+pub struct UserApiDoc;
+
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "List of all available users", body = Vec<User>),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/users")]
 async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let users = get_all_users(&pool).await;

@@ -1,9 +1,12 @@
 use actix_cors::Cors;
 use actix_web::{get, http, web, App, HttpServer, Responder};
 use dotenvy::dotenv;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 mod data_access;
 mod routes;
+mod openapi_doc;
 
 use routes::public::public;
 
@@ -51,6 +54,9 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
+
+            .configure(openapi_doc::configure_opanapi)
+            
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })

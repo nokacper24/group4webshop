@@ -76,6 +76,7 @@ h3 {
 }
 
 button {
+  font-size: 0.9em;
   font-family: var(--ff-primary);
   cursor: pointer;
 }
@@ -96,13 +97,14 @@ button {
 }
 
 .small-button {
+  display: block;
   padding: 0.5em 1em;
 }
 
 .icon-button.expand-button {
   display: block;
+  color: var(--text-primary);
   margin-inline: auto;
-  fill: currentColor;
 }
 
 table {
@@ -165,7 +167,6 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-  outline: 1px solid transparent;
 }
 
 .header-container {
@@ -248,6 +249,7 @@ nav {
 
 .icon-button {
   display: inline-block;
+  fill: currentColor;
   margin-left: 0.5em;
   border: none;
   background: transparent;
@@ -290,6 +292,11 @@ nav {
     top: 0;
     right: 0;
     overflow-x: hidden;
+    outline: 1px solid transparent;
+  }
+
+  .icon-text {
+    margin-left: 0.5em;
   }
 
   #search-input {
@@ -425,6 +432,10 @@ nav {
 /* Navbar -- Desktop */
 @media (min-width: 900px) {
   .toggle-container {
+    display: none;
+  }
+
+  .icon-text {
     display: none;
   }
 
@@ -785,23 +796,31 @@ form a:hover {
   flex-direction: column;
   text-align: center;
   align-items: center;
-  background: var(--text-secondary);
+  background: linear-gradient(var(--text-gradient));
+  color: white;
   /* outline: #473372 1px solid; */
+}
+
+.testimonial-title {
+  color: inherit;
+  background: initial;
+  -webkit-text-fill-color: initial;
 }
 
 .gallery {
   /* outline: green 1px solid; */
   display: grid;
   grid-template-columns: auto auto auto;
+  max-width: 70em;
 }
 
 .slide-button {
   background: rgba(0, 0, 0, 0.306);
   border-radius: 50%;
   color: white;
-  font-size: 40px;
+  font-size: 2.5rem;
   height: 1em;
-  line-height: 1em;
+  line-height: 2.5rem;
   width: 1em;
   align-self: center;
   font-family: sans-serif;
@@ -814,11 +833,16 @@ form a:hover {
   background-color: #0000009a;
 }
 
+.slides-container {
+  overflow: hidden;
+  max-width: inherit;
+  display: flex;
+  flex-direction: row;
+}
+
 .slide {
   /* outline: black 1px solid; */
-  min-height: 25vh;
-  padding-top: 2em;
-  padding-bottom: 2em;
+  width: calc(inherit - 2 * 40px);
 }
 
 .reviewer-profile {
@@ -837,6 +861,11 @@ form a:hover {
 
 .reviewer-details p {
   margin: 0;
+}
+
+.reviewer-picture {
+  border-radius: 1rem;
+  margin: 1em;
 }
 
 /* || PURCHASE LICENSE PAGE */
@@ -890,10 +919,7 @@ form a:hover {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
-
-.user-details button {
-  max-height: 3em;
+  align-items: flex-start;
 }
 
 .user-details p {
@@ -918,6 +944,10 @@ form a:hover {
   gap: 1em;
 }
 
+.button-container>a {
+  text-decoration: none;
+}
+
 /* || MANAGE LICENSE PAGE */
 .table-container {
   max-height: 20em;
@@ -930,6 +960,10 @@ form a:hover {
 
 .select-table tr:nth-child(even) {
   background: var(--bg-neutral);
+}
+
+.select-table .checkbox-column {
+  width: 5em;
 }
 
 .select-table th {

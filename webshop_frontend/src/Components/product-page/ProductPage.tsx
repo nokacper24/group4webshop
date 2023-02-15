@@ -53,6 +53,17 @@ export default function ProductPage() {
         },
         slideType: SlideType.PARAGRAPH,
       },
+      {
+        id: "slide2",
+        mainContent:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
+        reviewerProfile: {
+          picturePath: "https://picsum.photos/100",
+          name: "Bat mann",
+          title: "Genius acrobat",
+        },
+        slideType: SlideType.PARAGRAPH,
+      },
     ],
   };
   return (
@@ -76,8 +87,8 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      <section className="gallery-wrapper container">
-        <h2>Testimonials</h2>
+      <section className="gallery-wrapper">
+        <h2 className="testimonial-title">Testimonials</h2>
         <Gallery slides={testimonial.slides} />
       </section>
     </React.Fragment>
