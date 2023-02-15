@@ -28,7 +28,7 @@ export default function App() {
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
           <Route path="profile/*" element={<Profile />} />
-          <Route path="product-page" element={<ProductPage />} />
+          <Route path="product/*" element={<ProductPage />} />
           {/* TODO: Fix path of Purchase License */}
           <Route path="purchase-license" element={<PurchaseLicense />} />
           <Route path="create-account/*" element={<CreateCompanyAccount />} />

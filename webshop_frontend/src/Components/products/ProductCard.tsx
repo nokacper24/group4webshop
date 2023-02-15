@@ -11,7 +11,7 @@ export type ProductCardProps = {
 export const ProductCard = ({ props: product }: ProductCardProps) => {
   return (
     <li>
-      <Link className="product-card" to={"/product-page"}>
+      <Link className="product-card" to={"/product"}>
         <img
           height={200}
           width={300}
