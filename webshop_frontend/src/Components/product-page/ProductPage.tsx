@@ -1,9 +1,10 @@
 import React from "react";
+import { Link, Route, Routes } from "react-router-dom";
 import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
 import { SlidesProps } from "./gallery/Gallery";
-import { ParagraphSlide } from "./gallery/ParagraphSlide";
 import { SlideType } from "./gallery/SlideTypes";
+import PurchaseLicense from "./PurchaseLicense";
 
 let counter = 0;
 
@@ -74,7 +75,11 @@ export default function ProductPage() {
             <h1 className="banner-title banner-element hero-title">
               Product Name
             </h1>
-            <button className="banner-element hero-button">Buy license</button>
+            <Link to="purchase-license">
+              <button className="banner-element hero-button">
+                Buy license
+              </button>
+            </Link>
           </div>
         </div>
       </section>
