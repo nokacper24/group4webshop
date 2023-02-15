@@ -1,11 +1,26 @@
-use crate::data_access::user::{get_all_users, get_user_by_id};
+use crate::data_access::user::{get_all_users, get_user_by_id, User};
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
+use utoipa::{openapi, OpenApi};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
 }
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        users,
+    ),
+    components(
+        schemas(User)
+    ),
+    tags(
+        (name = "Users", description = "Api endpoints for users")
+    ),
+)]
+pub struct UserApiDoc;
 
 #[utoipa::path(
     context_path = "",
