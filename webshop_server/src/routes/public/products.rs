@@ -87,7 +87,7 @@ pub async fn product_by_id(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
-#[post("products")]
+#[post("/products")]
 pub async fn create_product(
     pool: web::Data<Pool<Postgres>>,
     product: web::Json<PartialProduct>,
@@ -107,7 +107,7 @@ pub async fn create_product(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
-#[put("products")]
+#[put("/products")]
 pub async fn update_product(
     pool: web::Data<Pool<Postgres>>,
     product: web::Json<Product>,
@@ -121,7 +121,7 @@ pub async fn update_product(
     }
 }
 
-#[get("products/{product_id}/description")]
+#[get("/products/{product_id}/description")]
 pub async fn get_product_description(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
@@ -138,7 +138,7 @@ pub async fn get_product_description(
     }
 }
 
-#[patch("products/{product_id}/description/priorityswap")]
+#[patch("/products/{product_id}/description/priorityswap")]
 pub async fn description_swap_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
