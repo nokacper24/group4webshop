@@ -98,6 +98,11 @@ export default function ProductPage() {
           <Gallery slides={testimonial.slides} />
         </div>
       </section>
+      <section className="container">
+        <Link to="purchase-license">
+          <button className="banner-element hero-button">Buy license</button>
+        </Link>
+      </section>
     </React.Fragment>
   );
 }
