@@ -160,8 +160,12 @@ header {
 
 .header-container {
   position: relative;
-  height: inherit;
   max-width: var(--max-width);
+  height: var(--header-height);
+  margin-inline: auto;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
   transition: transform var(--transition-speed);
 }
 
@@ -169,15 +173,6 @@ nav {
   position: absolute;
   top: 0;
   right: 0;
-}
-
-.header-container {
-  height: var(--header-height);
-  max-width: var(--max-width);
-  margin-inline: auto;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
 }
 
 #skip-navigation {
