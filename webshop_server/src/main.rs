@@ -1,5 +1,6 @@
 use actix_cors::Cors;
 use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder};
+use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
 use log::info;
 
@@ -15,6 +16,8 @@ use crate::data_access::create_pool;
 async fn index() -> impl Responder {
     "Hello world!"
 }
+
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -58,6 +61,7 @@ async fn main() -> std::io::Result<()> {
             // load routes from routes/public/public.rs
             .service(public)
             .configure(openapi_doc::configure_opanapi)
+            .service(ResourceFiles::new("/resources", generate()))
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })
