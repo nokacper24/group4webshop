@@ -6,6 +6,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 mod data_access;
 mod routes;
+mod openapi_doc;
 
 use routes::public::public;
 
@@ -53,10 +54,9 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
-            .service(
-                SwaggerUi::new("/swagger-ui/{_:.*}")
-                    .url("/api-doc/openapi.json", routes::public::products::ApiDoc::openapi()),
-            )
+
+            .configure(openapi_doc::configure_opanapi)
+            
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })

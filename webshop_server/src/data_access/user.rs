@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::{
     query_as, {Pool, Postgres},
 };
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct User {
     user_id: i32,
     email: String,

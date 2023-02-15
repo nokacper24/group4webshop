@@ -7,9 +7,9 @@ use actix_web::{get, web, Responder};
 
 use crate::data_access::product::Product;
 
-mod categories;
+pub mod categories;
 pub mod products;
-mod users;
+pub mod users;
 
 #[get("")]
 async fn index() -> impl Responder {

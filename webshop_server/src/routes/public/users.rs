@@ -7,6 +7,12 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(user_by_id);
 }
 
+#[utoipa::path(
+    context_path = "",
+    responses(
+    (status = 200, description = "List of all available users", body = Vec<User>)
+    )
+)]
 #[get("/users")]
 async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let users = get_all_users(&pool).await;

@@ -12,21 +12,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_description);
 }
 
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        products,
-        product_by_id,
-    ),
-    components(
-        schemas(Product)
-    ),
-    tags(
-        (name = "Products", description = "Api endpoints for products")
-    ),
-)]
-pub struct ApiDoc;
-
 #[utoipa::path(
     context_path = "",
     responses(
