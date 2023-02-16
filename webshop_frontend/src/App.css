@@ -151,6 +151,7 @@ label {
   text-align: left !important;
 }
 
+/* Header */
 header {
   height: var(--header-height);
   background-color: rgba(71, 51, 114, 0.8);
@@ -226,7 +227,7 @@ nav {
   margin-left: 0.5em;
 }
 
-/* Navbar */
+/* Nav */
 .logo,
 .nav-icon {
   display: block;
@@ -1023,6 +1024,17 @@ form a:hover {
   background-color: hsl(195, 45%, 85%) !important;
 }
 
-.danger {
+.bg-danger {
   background-color: red;
+}
+
+.text-danger {
+  color: red;
+}
+
+.table-text {
+  margin-block: 0;
+  padding-inline: 0.5em;
+  font-weight: bold;
+  border-bottom: 1px dotted currentColor;
 }
