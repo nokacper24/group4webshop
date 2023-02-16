@@ -36,7 +36,7 @@ CREATE TABLE register_user (
 CREATE TABLE cookies (
     id SERIAL PRIMARY KEY,
     cookie TEXT NOT NULL,
-    exp DATE NOT NULL,
+    exp timestamptz NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id)
 );
