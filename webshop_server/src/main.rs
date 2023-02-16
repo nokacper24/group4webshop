@@ -1,19 +1,22 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder};
+use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
 use dotenvy::dotenv;
 use log::info;
 
 mod data_access;
-mod routes;
-mod openapi_doc;
 mod middlewares;
+mod openapi_doc;
+mod routes;
 
 use routes::public::public;
 
 use crate::data_access::create_pool;
+use crate::data_access::user::Role;
+use crate::middlewares::auth::{AuthenticatedUser, validate_auth};
+
 
 #[get("/")]
-async fn index() -> impl Responder {
+async fn index()  -> impl Responder {
     "Hello world!"
 }
 
@@ -55,6 +58,7 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
+            .wrap_fn(|req, mut srv| validate_auth(req,  &mut srv, &pool))
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
