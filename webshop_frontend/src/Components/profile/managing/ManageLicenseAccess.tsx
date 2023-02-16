@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
 
@@ -11,143 +11,53 @@ import SelectTable from "./SelectTable";
  */
 export default function ManageLicenseAccess() {
   const { id } = useParams();
+  const [usersWithoutAccess, setUsersWithoutAccess] = useState([
+    { id: "user 1", columns: [{ text: "email 1" }] },
+    { id: "user 2", columns: [{ text: "email 2" }] },
+    { id: "user 3", columns: [{ text: "email 3" }] },
+    { id: "user 4", columns: [{ text: "email 4" }] },
+  ]);
+
+  const [usersWithAccess, setUsersWithAccess] = useState([
+    { id: "user 5", columns: [{ text: "email 5" }] },
+  ]);
+
+  const addUser = (index: number) => {
+    /* Get the user to be moved from "without access" to "with access" */
+    let user = withoutAccessTable.rows[index];
+
+    /* Remove user from the "without access" list */
+    let newWithoutAccessArray = [
+      ...withoutAccessTable.rows.slice(0, index),
+      ...withoutAccessTable.rows.slice(index + 1),
+    ];
+    setUsersWithoutAccess(newWithoutAccessArray);
+
+    /* Add user to the "with access" list */
+    withAccessTable.rows.push(user);
+    setUsersWithAccess(withAccessTable.rows);
+  };
+
+  const removeUser = (index: number) => {
+    console.log("Removing user... " + index);
+  };
 
   const withoutAccessTable = {
     header: {
       columns: [{ text: "Users" }, { text: "Access" }],
     },
-    rows: [
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Add", type: "button" },
-        ],
-      },
-    ],
-    actionButton: { text: "Add all selected", type: "button" },
+    rows: usersWithoutAccess,
+    button: { text: "Add", action: addUser },
+    outsideButtons: [{ text: "Add all selected" }],
   };
 
   const withAccessTable = {
     header: {
       columns: [{ text: "Users" }, { text: "Access" }],
     },
-    rows: [
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-      {
-        columns: [
-          { text: "user@company.com", type: "string" },
-          { text: "Remove", type: "danger-button" },
-        ],
-      },
-    ],
-    actionButton: { text: "Remove all selected", type: "danger-button" },
+    rows: usersWithAccess,
+    button: { text: "Remove", action: removeUser },
+    outsideButtons: [{ text: "Remove all selected" }],
   };
 
   return (
@@ -166,7 +76,8 @@ export default function ManageLicenseAccess() {
         <SelectTable
           header={withoutAccessTable.header}
           rows={withoutAccessTable.rows}
-          actionButton={withoutAccessTable.actionButton}
+          button={withoutAccessTable.button}
+          outsideButtons={withoutAccessTable.outsideButtons}
         />
       </section>
 
@@ -175,7 +86,8 @@ export default function ManageLicenseAccess() {
         <SelectTable
           header={withAccessTable.header}
           rows={withAccessTable.rows}
-          actionButton={withAccessTable.actionButton}
+          button={withAccessTable.button}
+          outsideButtons={withAccessTable.outsideButtons}
         />
       </section>
     </React.Fragment>

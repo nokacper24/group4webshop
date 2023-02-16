@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import SelectTableHeader from "./SelectTableHeader";
 import SelectTableRow from "./SelectTableRow";
+import SelectTableButton from "./SelectTableButton";
 
-/**
- * The cell type can be either string, button, or danger-button.
- */
 export type SelectTableProps = {
   header: {
     columns: {
@@ -12,17 +10,23 @@ export type SelectTableProps = {
     }[];
   };
   rows: {
+    id: string;
     columns: {
       text: string;
-      type: string;
     }[];
   }[];
-  actionButton: { text: string; type: string };
+  button: {
+    text: string;
+    action: (index: number) => void;
+  };
+  outsideButtons: { text: string /* action: () => void  */ }[];
 };
 
 /**
  * Represents a Select Table component.
  * A table where multiple rows can be selected for an action.
+ * The table starts with a "select" column, and ends with a column
+ * of buttons that perform an action of the row it is in.
  *
  * @param props Table header and rows, and button after table.
  * @returns A Select Table component.
@@ -63,26 +67,6 @@ export default function SelectTable(props: SelectTableProps) {
     }
   };
 
-  let actionButton;
-  switch (props.actionButton.type) {
-    case "button":
-      actionButton = (
-        <button className="default-button small-button">
-          {props.actionButton.text}
-        </button>
-      );
-      break;
-    case "danger-button":
-      actionButton = (
-        <button className="default-button danger small-button">
-          {props.actionButton.text}
-        </button>
-      );
-      break;
-    default:
-      break;
-  }
-
   useEffect(() => {
     if (selectedRows == props.rows.length) {
       setSelectAll("all");
@@ -91,6 +75,8 @@ export default function SelectTable(props: SelectTableProps) {
     } else {
       setSelectAll("some");
     }
+
+    console.log("Rerendered table");
   });
 
   return (
@@ -107,16 +93,32 @@ export default function SelectTable(props: SelectTableProps) {
           <tbody>
             {props.rows.map((row, index) => (
               <SelectTableRow
-                key={index}
+                key={row.id}
+                rowIndex={index}
                 columns={row.columns}
                 updateSelected={updateSelected}
                 selectAll={selectAll}
+                button={props.button}
               />
             ))}
           </tbody>
         </table>
       </div>
-      <div className="button-container">{actionButton}</div>
+      <div className="button-container">
+        {props.outsideButtons.map((button, index) => {
+          return (
+            <SelectTableButton
+              key={button.text}
+              rowIndex={-1}
+              text={button.text}
+              action={props.button.action}
+            />
+          );
+        })}
+        <p className="table-text">
+          New active users: <span className="active-users text-danger">15</span>
+        </p>
+      </div>
     </React.Fragment>
   );
 }

@@ -17,8 +17,8 @@ export default function SelectTableHeader(props: SelectTableHeaderProps) {
           onChange={props.toggleSelectAll}
         />
       </th>
-      {props.columns.map((column, index) => (
-        <th key={index}>{column.text}</th>
+      {props.columns.map((column) => (
+        <th key={column.text}>{column.text}</th>
       ))}
     </tr>
   );
