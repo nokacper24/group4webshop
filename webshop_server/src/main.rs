@@ -6,6 +6,7 @@ use log::info;
 mod data_access;
 mod routes;
 mod openapi_doc;
+mod middlewares;
 
 use routes::public::public;
 

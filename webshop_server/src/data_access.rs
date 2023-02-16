@@ -2,6 +2,7 @@ use sqlx::{Pool, Postgres};
 pub mod category;
 pub mod product;
 pub mod user;
+pub mod auth;
 
 /// Creates a connection pool to the database
 /// This should be called once and a reference to the pool
