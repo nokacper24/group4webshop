@@ -59,7 +59,7 @@ async fn main() -> std::io::Result<()> {
             // load routes from routes/public/public.rs
             .service(public)
             .configure(openapi_doc::configure_opanapi)
-            .service(serving_images::get_image)
+            .service(web::scope("/resources/images").configure(serving_images::config))
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })
