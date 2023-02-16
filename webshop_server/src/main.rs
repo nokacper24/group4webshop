@@ -6,6 +6,7 @@ use log::info;
 mod data_access;
 mod routes;
 mod openapi_doc;
+mod serving_images;
 
 use routes::public::public;
 
@@ -58,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             // load routes from routes/public/public.rs
             .service(public)
             .configure(openapi_doc::configure_opanapi)
+            .service(serving_images::get_image)
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })
