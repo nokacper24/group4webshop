@@ -75,8 +75,6 @@ export default function SelectTable(props: SelectTableProps) {
     } else {
       setSelectAll("some");
     }
-
-    console.log("Rerendered table");
   });
 
   return (
