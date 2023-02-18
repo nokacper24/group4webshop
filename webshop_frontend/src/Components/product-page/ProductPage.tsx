@@ -66,6 +66,17 @@ export default function ProductPage() {
         },
         slideType: SlideType.PARAGRAPH,
       },
+      {
+        slideId: "slide3",
+        mainContent:
+          "Phasellus id nibh eget justo blandit rhoncus et ut libero. Nunc ullamcorper, elit id interdum faucibus, leo ipsum tristique libero, nec varius ante nunc ut purus. In blandit in odio vel convallis. Curabitur non elementum elit, sed vestibulum dui. Phasellus eu dolor magna. Maecenas viverra orci id pellentesque auctor. Duis eu efficitur nunc. Proin ut interdum est. Proin sed volutpat tellus, venenatis dictum augue. Cras ante enim, convallis quis enim eget, scelerisque aliquam nibh. Nunc id sagittis dolor. Praesent luctus et felis vitae laoreet. Quisque ultricies sapien risus, in faucibus odio faucibus non. Aliquam erat volutpat. Proin consectetur blandit ex in aliquam.",
+        reviewerProfile: {
+          picturePath: "https://picsum.photos/100",
+          name: "Pene Guin",
+          title: "Animal",
+        },
+        slideType: SlideType.PARAGRAPH,
+      },
     ],
   };
   return (
