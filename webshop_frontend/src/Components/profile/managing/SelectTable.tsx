@@ -113,9 +113,6 @@ export default function SelectTable(props: SelectTableProps) {
             />
           );
         })}
-        <p className="table-text">
-          New active users: <span className="active-users text-danger">15</span>
-        </p>
       </div>
     </React.Fragment>
   );
