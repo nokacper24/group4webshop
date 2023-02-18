@@ -11,15 +11,17 @@ import SelectTable from "./SelectTable";
  */
 export default function ManageLicenseAccess() {
   const { id } = useParams();
+  const totalUsers = 4;
+
   const [usersWithoutAccess, setUsersWithoutAccess] = useState([
-    { id: "user 1", columns: [{ text: "email 1" }] },
-    { id: "user 2", columns: [{ text: "email 2" }] },
-    { id: "user 3", columns: [{ text: "email 3" }] },
-    { id: "user 4", columns: [{ text: "email 4" }] },
+    { id: "user 1", columns: [{ text: "user1@companymail.com" }] },
+    { id: "user 2", columns: [{ text: "user2@companymail.com" }] },
+    { id: "user 3", columns: [{ text: "user3@companymail.com" }] },
+    { id: "user 4", columns: [{ text: "user4@companymail.com" }] },
   ]);
 
   const [usersWithAccess, setUsersWithAccess] = useState([
-    { id: "user 5", columns: [{ text: "email 5" }] },
+    { id: "user 5", columns: [{ text: "user5@companymail.com" }] },
   ]);
 
   const addUser = (index: number) => {
@@ -40,6 +42,20 @@ export default function ManageLicenseAccess() {
 
   const removeUser = (index: number) => {
     console.log("Removing user... " + index);
+
+    /* Get the user to be moved from "with access" to "without access" */
+    let user = withAccessTable.rows[index];
+
+    /* Remove user from the "with access" list */
+    let newWithAccessArray = [
+      ...withAccessTable.rows.slice(0, index),
+      ...withAccessTable.rows.slice(index + 1),
+    ];
+    setUsersWithAccess(newWithAccessArray);
+
+    /* Add user to the "without access" list */
+    withoutAccessTable.rows.push(user);
+    setUsersWithoutAccess(withoutAccessTable.rows);
   };
 
   const withoutAccessTable = {
@@ -89,6 +105,19 @@ export default function ManageLicenseAccess() {
           button={withAccessTable.button}
           outsideButtons={withAccessTable.outsideButtons}
         />
+      </section>
+      <section className="container left-aligned button-container">
+        <button className="default-button small-button">Save changes</button>
+        <p className="table-text">
+          New active users:{" "}
+          <span
+            className={`active-users ${
+              totalUsers < usersWithAccess.length ? "text-danger" : ""
+            }`}
+          >
+            {usersWithAccess.length}
+          </span>
+        </p>
       </section>
     </React.Fragment>
   );
