@@ -14,13 +14,14 @@ pub struct User {
 }
 
 #[derive(sqlx::Type, Serialize, Deserialize, Debug)]
-#[sqlx(type_name = "role", rename_all = "SCREAMING_SNAKE_CASE")]
+#[sqlx(type_name = "role_enum", rename_all = "snake_case" )]
 pub enum Role {
     Admin,
     CompanyItHead,
     CompanyIt,
     Default,
 }
+
 
 pub struct RoleStruct {
     role: Role,
