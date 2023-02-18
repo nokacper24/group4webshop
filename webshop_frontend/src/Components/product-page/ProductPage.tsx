@@ -12,6 +12,11 @@ export type State = {
   rows: ProductPageRow[];
 };
 
+/**
+ * The product page component.
+ * 
+ * @returns the product page component
+ */
 export default function ProductPage() {
   let rowTextItem: RowItem = {
     title: "Lorem",

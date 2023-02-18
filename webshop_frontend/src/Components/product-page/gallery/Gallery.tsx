@@ -2,9 +2,12 @@ import { Component, useEffect, useRef, useState } from "react";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
+/**
+ * The props of the gallery component.
+ */
 export type GalleryProps = {
   galleryName: string;
-  slides: {
+  slides: { // The slides of the gallery
     slideId: string;
     mainContent: string;
     reviewerProfile: {
@@ -16,12 +19,19 @@ export type GalleryProps = {
   }[];
 };
 
+/**
+ * Renders a gallery with the given slides.
+ * 
+ * @param props the props of the gallery, must be of type GalleryProps
+ * @returns the gallery HTML element
+ */
 export default function Gallery(props: GalleryProps) {
   let container = useRef<HTMLDivElement>(null);
   let prevButton = useRef<HTMLAnchorElement>(null);
   let nextButton = useRef<HTMLAnchorElement>(null);
   const [index, setIndex] = useState<number>(0);
 
+  // If there is only one slide, hide the buttons, otherwise the buttons are initialized.
   useEffect(() => {
     if (props.slides.length > 1) {
       changeSlide(0);
@@ -36,9 +46,16 @@ export default function Gallery(props: GalleryProps) {
   const [prevSlide, setPrevSlide] = useState<string>("");
   const [nextSlide, setNextSlide] = useState<string>("");
 
+  /**
+   * Updates the index of the current slide and the previous and next slide and
+   * changes the href of the buttons to the correct slide.
+   * 
+   * @param amount 
+   */
   const changeSlide = (amount: number) => {
     let currentIndex = index + amount;
 
+    // If the index is out of bounds, set it to the first or last slide
     if (currentIndex >= props.slides.length) {
       currentIndex = 0;
     } else if (currentIndex < 0) {
@@ -54,6 +71,7 @@ export default function Gallery(props: GalleryProps) {
     if (next >= props.slides.length) {
       next = 0;
     }
+    // Update the previous and next slide
     setPrevSlide(props.slides[prev].slideId);
     setNextSlide(props.slides[next].slideId);
     console.log(
