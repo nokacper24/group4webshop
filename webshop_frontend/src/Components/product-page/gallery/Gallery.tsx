@@ -2,9 +2,10 @@ import { Component } from "react";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
-export type SlidesProps = {
+export type GalleryProps = {
+  galleryName: string;
   slides: {
-    id: string;
+    slideId: string;
     mainContent: string;
     reviewerProfile: {
       picturePath: string;
