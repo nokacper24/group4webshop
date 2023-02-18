@@ -104,15 +104,17 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      <section className="gallery-wrapper">
-        <div className="container">
-          <h2 className="testimonial-title">Testimonials</h2>
-          <Gallery
-            slides={testimonial.slides}
-            galleryName={testimonial.galleryName}
-          />
-        </div>
-      </section>
+      { testimonial.slides.length > 0 &&
+        <section className="gallery-wrapper">
+          <div className="container">
+            <h2 className="testimonial-title">Testimonials</h2>
+            <Gallery
+              slides={testimonial.slides}
+              galleryName={testimonial.galleryName}
+            />
+          </div>
+        </section>
+      }
       <section className="container">
         <Link to="purchase-license">
           <button className="banner-element hero-button">Buy license</button>
