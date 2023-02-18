@@ -845,16 +845,20 @@ form a:hover {
 
   overflow: hidden;
   width: var(--slides-width);
+  position: relative;
 }
 
 .slides-container {
   width: max-content;
+  position: static;
+  left: 50px;
 }
 
 .slide {
   /* outline: black 1px solid; */
   display: inline-block;
-  width: var(--slides-width)
+  width: var(--slides-width);
+  
 }
 
 .reviewer-profile {
