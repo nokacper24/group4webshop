@@ -1,5 +1,8 @@
 use actix_cors::Cors;
+use actix_web::HttpResponse;
+use actix_web::web::ReqData;
 use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
 use log::info;
 
@@ -9,15 +12,47 @@ mod openapi_doc;
 mod routes;
 
 use routes::public::public;
+use serde::{Serialize, Deserialize};
+use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
 use crate::data_access::user::Role;
-use crate::middlewares::auth::{AuthenticatedUser, validate_auth};
+use crate::middlewares::auth::validator;
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct Token {
+    token: String,
+}
 
 #[get("/")]
-async fn index()  -> impl Responder {
-    "Hello world!"
+async fn index(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>> )  -> impl Responder {
+    match req_token {
+        Some(token) => {
+            let token = token.into_inner();
+            let token = token.token;
+            let pool = pool.get_ref();
+            let cookie = middlewares::auth::get_cookie(&token, &pool).await;
+            match cookie {
+                Ok(cookie) => {
+                    let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
+                    match user {
+                        Ok(user) => {
+                            match user.role {
+                                Role::Admin => HttpResponse::Ok().json("Admin"),
+                                Role::Default => HttpResponse::Ok().json("User"),
+                                Role::CompanyIt => HttpResponse::Ok().json("CompanyIt"),
+                                Role::CompanyItHead => HttpResponse::Ok().json("CompanyItHead"),
+                            }
+                        }
+                        Err(e) => HttpResponse::Unauthorized().json(format!("Unauthorized3: {}", e))
+                    }
+                }
+                Err(_) => HttpResponse::Unauthorized().json("Unauthorized2")
+            }
+        }
+        _ => HttpResponse::Unauthorized().json("Unauthorized1")
+
+    }
 }
 
 #[actix_web::main]
@@ -52,13 +87,16 @@ async fn main() -> std::io::Result<()> {
 
         let public = web::scope("/api").configure(public);
 
+        let bearer_middleware = HttpAuthentication::bearer(validator);
+
         App::new()
             // register sqlx pool
             .app_data(pool.clone())
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .wrap_fn(|req, mut srv| validate_auth(req,  &mut srv, &pool))
+            .wrap(bearer_middleware)
+            
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
