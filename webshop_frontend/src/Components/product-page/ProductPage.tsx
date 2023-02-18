@@ -14,7 +14,7 @@ export type State = {
 
 /**
  * The product page component.
- * 
+ *
  * @returns the product page component
  */
 export default function ProductPage() {
@@ -109,7 +109,7 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      { testimonial.slides.length > 0 &&
+      {testimonial.slides.length > 0 && (
         <section className="gallery-wrapper">
           <div className="container">
             <h2 className="testimonial-title">Testimonials</h2>
@@ -119,7 +119,7 @@ export default function ProductPage() {
             />
           </div>
         </section>
-      }
+      )}
       <section className="container">
         <Link to="purchase-license">
           <button className="banner-element hero-button">Buy license</button>

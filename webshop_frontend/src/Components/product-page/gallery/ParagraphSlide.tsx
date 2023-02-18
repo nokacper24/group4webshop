@@ -16,7 +16,7 @@ export type ParagraphSlideProps = {
 /**
  * Renders a slide that contains a paragraph and a short profile
  * of the reviewer.
- * 
+ *
  * @param props  the props of the slide, must be of type ParagraphSlideProps
  * @returns the slide HTML element
  */

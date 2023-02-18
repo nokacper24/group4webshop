@@ -7,7 +7,8 @@ import { SlideType } from "./SlideTypes";
  */
 export type GalleryProps = {
   galleryName: string;
-  slides: { // The slides of the gallery
+  slides: {
+    // The slides of the gallery
     slideId: string;
     mainContent: string;
     reviewerProfile: {
@@ -21,7 +22,7 @@ export type GalleryProps = {
 
 /**
  * Renders a gallery with the given slides.
- * 
+ *
  * @param props the props of the gallery, must be of type GalleryProps
  * @returns the gallery HTML element
  */
@@ -49,8 +50,8 @@ export default function Gallery(props: GalleryProps) {
   /**
    * Updates the index of the current slide and the previous and next slide and
    * changes the href of the buttons to the correct slide.
-   * 
-   * @param amount 
+   *
+   * @param amount
    */
   const changeSlide = (amount: number) => {
     let currentIndex = index + amount;
