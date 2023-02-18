@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { Component, useRef, useState } from "react";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
@@ -16,15 +16,35 @@ export type GalleryProps = {
   }[];
 };
 
-let index: number;
+export default function Gallery(props: GalleryProps) {
+  let container = useRef<HTMLDivElement>(null);
+  let index: number = 0;
 
-export default function Gallery(props: SlidesProps) {
-  let slides: JSX.Element[];
+  const [prevSlide, setPrevSlide] = useState<string>("");
+  const [nextSlide, setNextSlide] = useState<string>("");
+
+  const changeSlide = (amount: number) => {
+    index += amount;
+    let prev = index - 1;
+    if (prev < 0) {
+      prev = props.slides.length - 1;
+    }
+    let next = index + 1;
+    if (next >= props.slides.length) {
+      next = 0;
+    }
+    setPrevSlide(props.slides[prev].slideId);
+    setNextSlide(props.slides[next].slideId);
+    console.log(
+      "prev: " + prevSlide + " current: " + index + " next: " + nextSlide
+    );
+  };
 
   return (
     <div className="gallery">
-      <button
+      <a
         className="icon-button slide-button"
+        href={"#" + prevSlide}
         onClick={() => changeSlide(-1)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -38,19 +58,21 @@ export default function Gallery(props: SlidesProps) {
             d="M328 112L184 256l144 144"
           />
         </svg>
-      </button>
+      </a>
       <div className="slides-view">
-        <div className="slides-container">
-          {props.slides.map((prop) => {
+        <div className="slides-container" ref={container}>
+          {props.slides.map((slide) => {
             switch (
-              prop.slideType //Used for future prrofing in case we want to use gallery again with other type of slides
+              // Used for future proofing in case we want to use gallery again with other type of slides
+              slide.slideType
             ) {
               case SlideType.PARAGRAPH: {
                 return (
                   <ParagraphSlide
-                    key={prop.id}
-                    paragraph={prop.mainContent}
-                    reviewerProfile={prop.reviewerProfile}
+                    id={slide.slideId}
+                    key={slide.slideId}
+                    paragraph={slide.mainContent}
+                    reviewerProfile={slide.reviewerProfile}
                   />
                 );
               }
@@ -59,8 +81,9 @@ export default function Gallery(props: SlidesProps) {
         </div>
       </div>
 
-      <button
+      <a
         className="icon-button slide-button"
+        href={"#" + nextSlide}
         onClick={() => changeSlide(1)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -74,13 +97,7 @@ export default function Gallery(props: SlidesProps) {
             d="M184 112l144 144-144 144"
           />
         </svg>
-      </button>
+      </a>
     </div>
   );
-}
-
-function changeSlide(amount: number) {
-  //code here to go to next slide, needs to wait on mounting
-  //to continue
-  index += amount;
 }
