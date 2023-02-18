@@ -9,7 +9,7 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import CreateCompanyAccount from "./Components/profile/CreateCompanyAccount";
+import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
 
 /**
  * Represents the website content.
