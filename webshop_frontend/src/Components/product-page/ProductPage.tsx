@@ -2,7 +2,7 @@ import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
-import { SlidesProps } from "./gallery/Gallery";
+import { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
 import PurchaseLicense from "./PurchaseLicense";
 
@@ -24,14 +24,14 @@ export default function ProductPage() {
     content: "https://unsplash.it/300/200",
     isTextNotImage: false,
   };
-  const row_data = [
+  const rowData = [
     { item1: rowTextItem, item2: rowImageItem, textToLeft: true },
     { item1: rowImageItem, item2: rowTextItem, textToLeft: false },
   ];
   let state: State = {
     rows: [],
   };
-  row_data.forEach((row) => {
+  rowData.forEach((row) => {
     let newRow: ProductPageRow = {
       props: {
         item1: row.item1,
@@ -41,10 +41,11 @@ export default function ProductPage() {
     };
     state.rows.push(newRow);
   });
-  let testimonial: SlidesProps = {
+  let testimonial: GalleryProps = {
+    galleryName: "testGallery",
     slides: [
       {
-        id: "slide1",
+        slideId: "slide1",
         mainContent:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
         reviewerProfile: {
@@ -55,9 +56,9 @@ export default function ProductPage() {
         slideType: SlideType.PARAGRAPH,
       },
       {
-        id: "slide2",
+        slideId: "slide2",
         mainContent:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in tellus nibh. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque a malesuada nunc, quis aliquam ante. Nulla elementum rutrum magna quis condimentum. Integer nunc enim, semper ut sodales eu, blandit quis leo. Ut blandit mollis est, sit amet ultrices ligula facilisis sed. Morbi non est rutrum, aliquet metus non, iaculis nisl. Donec nec magna hendrerit, elementum elit sit amet, sodales tortor. Pellentesque nulla orci, tincidunt vel lacinia condimentum, euismod ut mi. Integer tristique metus a eros luctus, ac sollicitudin dui iaculis. Vestibulum iaculis consequat dui a lacinia. Fusce id leo eu eros fringilla efficitur id vel nisi.",
         reviewerProfile: {
           picturePath: "https://picsum.photos/100",
           name: "Bat mann",
