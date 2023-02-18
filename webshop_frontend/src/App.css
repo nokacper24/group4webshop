@@ -1015,6 +1015,10 @@ form a:hover {
   text-align: center;
 }
 
+.select-table td:last-child {
+  width: 10em;
+}
+
 .checkbox-column label {
   display: inline-block;
   margin-right: 0.5rem;
