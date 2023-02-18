@@ -59,7 +59,7 @@ export default function SelectTableRow(props: SelectTableRowProps) {
         <SelectTableButton
           key={props.button.text}
           rowIndex={props.rowIndex}
-          text={props.button.text + " #" + props.rowIndex}
+          text={props.button.text}
           action={props.button.action}
         />
       </td>
