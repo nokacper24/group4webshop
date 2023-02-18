@@ -96,7 +96,10 @@ export default function ProductPage() {
       <section className="gallery-wrapper">
         <div className="container">
           <h2 className="testimonial-title">Testimonials</h2>
-          <Gallery slides={testimonial.slides} />
+          <Gallery
+            slides={testimonial.slides}
+            galleryName={testimonial.galleryName}
+          />
         </div>
       </section>
       <section className="container">
