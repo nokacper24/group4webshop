@@ -121,6 +121,8 @@ export default function ProductPage() {
         </section>
       )}
       <section className="container">
+        <h2>Purchase</h2>
+        <p>Purchase licenses for this product for your enterprise today!</p>
         <Link to="purchase-license">
           <button className="banner-element hero-button">Buy license</button>
         </Link>
