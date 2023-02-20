@@ -16,6 +16,7 @@ export default function Products() {
         const products = data.map((product: any) => {
             return {
                 props: {
+                    product_id: product.product_id,
                     name: product.display_name,
                     description: product.short_description,
                     sourceImage: product.main_image,

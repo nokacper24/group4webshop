@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 export type ProductCardProps = {
   props: {
+    product_id: string;
     name: string;
     description: string;
     sourceImage: string;
@@ -11,7 +12,7 @@ export type ProductCardProps = {
 export const ProductCard = ({ props: product }: ProductCardProps) => {
   return (
     <li>
-      <Link className="product-card" to={"/product"}>
+      <Link className="product-card" to={`/product/${product.product_id}`}>
         <img
           height={200}
           width={300}
