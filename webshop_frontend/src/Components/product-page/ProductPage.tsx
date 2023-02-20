@@ -12,37 +12,34 @@ export type State = {
 };
 
 export interface Product {
-    product_id: string;
-    display_name: string;
-    price_per_user: number;
-    short_description: string;
-    main_image: string;
-    available: boolean;
+  product_id: string;
+  display_name: string;
+  price_per_user: number;
+  short_description: string;
+  main_image: string;
+  available: boolean;
 }
 
-
 export interface Text {
-    text_title: string;
-    paragraph: string;
+  text_title: string;
+  paragraph: string;
 }
 
 export interface Image {
-    image_path: string;
-    alt_text: string;
+  image_path: string;
+  alt_text: string;
 }
 
 export interface Description {
-    component_id: number;
-    priority: number;
-    product_id: string;
-    text: Text;
-    image: Image;
-    isTextNotImage: boolean;
+  component_id: number;
+  priority: number;
+  product_id: string;
+  text: Text;
+  image: Image;
+  isTextNotImage: boolean;
 }
 
-
-let baseUrl = "http://localhost:8081";
-
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 
 /**
  * The product page component.
@@ -50,133 +47,126 @@ let baseUrl = "http://localhost:8081";
  * @returns the product page component
  */
 export default function ProductPage() {
+  const [product, setProduct] = useState<Product>();
+  // array of rows
+  const [descriptionRow, setDescriptionRow] = useState<ProductPageRow[]>([]);
 
-    const [product, setProduct] = useState<Product>();
-    // array of rows
-    const [descriptionRow, setDescriptionRow] = useState<ProductPageRow[]>([]);
+  //get product id from url
+  const productId = window.location.pathname.split("/")[2];
 
-    //get product id from url
-    const productId = window.location.pathname.split("/")[2];
-
-    const fetchProduct = async () => {
-        const response = await fetch(`${baseUrl}/api/products/${productId}`);
-        const data = await response.json();
-        const product = {
-            product_id: data.product_id,
-            display_name: data.display_name,
-            price_per_user: data.price_per_user,
-            short_description: data.short_description,
-            main_image: data.main_image,
-            available: data.available,
-        };
-        setProduct(product);
+  const fetchProduct = async () => {
+    const response = await fetch(`${baseUrl}/api/products/${productId}`);
+    const data = await response.json();
+    const product = {
+      product_id: data.product_id,
+      display_name: data.display_name,
+      price_per_user: data.price_per_user,
+      short_description: data.short_description,
+      main_image: data.main_image,
+      available: data.available,
     };
+    setProduct(product);
+  };
 
-    const fetchDescriptions = async () => {
-        const response = await fetch(`${baseUrl}/api/products/${productId}/description`);
-        const data = await response.json();
-        const descriptions = data.map((description: any) => {
-            // check if text or image, by seeing if either text or image is null
+  const fetchDescriptions = async () => {
+    const response = await fetch(
+      `${baseUrl}/api/products/${productId}/description`
+    );
+    const data = await response.json();
+    const descriptions = data.map((description: any) => {
+      // check if text or image, by seeing if either text or image is null
 
-            if (description.text == null) {
-                return {
-                    component_id: description.component_id,
-                    priority: description.priority,
-                    product_id: description.product_id,
-                    text: {
-                        text_title: null,
-                        paragraph: null,
-                    },
-                    image: {
-                        image_path: description.image.image_path,
-                        alt_text: description.image.alt_text,
-                    },
-                    isTextNotImage: true,
-                };
-            } else {
-                return {
-                    component_id: description.component_id,
-                    priority: description.priority,
-                    product_id: description.product_id,
-                    text: {
-                        text_title: description.text.text_title,
-                        paragraph: description.text.paragraph,
-                    },
-                    image: {
-                        image_path: null,
-                        alt_text: null,
-                    },
-                    isTextNotImage: false
-                };
-            }
-            
-        });
+      if (description.text == null) {
+        return {
+          component_id: description.component_id,
+          priority: description.priority,
+          product_id: description.product_id,
+          text: {
+            text_title: null,
+            paragraph: null,
+          },
+          image: {
+            image_path: description.image.image_path,
+            alt_text: description.image.alt_text,
+          },
+          isTextNotImage: true,
+        };
+      } else {
+        return {
+          component_id: description.component_id,
+          priority: description.priority,
+          product_id: description.product_id,
+          text: {
+            text_title: description.text.text_title,
+            paragraph: description.text.paragraph,
+          },
+          image: {
+            image_path: null,
+            alt_text: null,
+          },
+          isTextNotImage: false,
+        };
+      }
+    });
 
-        // sort by priority
-        descriptions.sort((a: { priority: number; }, b: { priority: number; }) => a.priority - b.priority);
-        
-        // create rows
-        let rows: ProductPageRow[] = [];
-        
-        descriptions.forEach((description: Description) => {
-            // check if description is text or image
-            if (description.isTextNotImage) {
-                // create row with text
-                let row: ProductPageRow = {
-                    props: {
-                        item1: {
-                            title: description.text.text_title,
-                            content: description.text.paragraph,
-                            isTextNotImage: true,
-                    },
-                    item2: {
-                        title: "",
-                        content: description.image.image_path,
-                        isTextNotImage: false,
-                    },
-                    textToLeft: true,
-                }
-                }
-                rows.push(row);
-            }
-                else {
-                    // create row with image
-                    let row: ProductPageRow = {
-                        props: {
-                            item1: {
-                                title: "",
-                                content: description.image.image_path,
-                                isTextNotImage: false,
-                        },
-                        item2: {
-                            title: description.text.text_title,
-                            content: description.text.paragraph,
-                            isTextNotImage: true,
-                        },
-                        textToLeft: false,
+    // sort by priority
+    descriptions.sort(
+      (a: { priority: number }, b: { priority: number }) =>
+        a.priority - b.priority
+    );
 
-                }
-                
-            }
-            rows.push(row);
-        }
+    // create rows
+    let rows: ProductPageRow[] = [];
+
+    descriptions.forEach((description: Description) => {
+      // check if description is text or image
+      if (description.isTextNotImage) {
+        // create row with text
+        let row: ProductPageRow = {
+          props: {
+            item1: {
+              title: description.text.text_title,
+              content: description.text.paragraph,
+              isTextNotImage: true,
+            },
+            item2: {
+              title: "",
+              content: description.image.image_path,
+              isTextNotImage: false,
+            },
+            textToLeft: true,
+          },
+        };
+        rows.push(row);
+      } else {
+        // create row with image
+        let row: ProductPageRow = {
+          props: {
+            item1: {
+              title: "",
+              content: description.image.image_path,
+              isTextNotImage: false,
+            },
+            item2: {
+              title: description.text.text_title,
+              content: description.text.paragraph,
+              isTextNotImage: true,
+            },
+            textToLeft: false,
+          },
+        };
+        rows.push(row);
+      }
     });
 
     setDescriptionRow(rows);
-    };
+  };
 
-       
-    
+  useEffect(() => {
+    fetchProduct();
+    fetchDescriptions();
+  }, []);
 
-    useEffect(() => {
-        fetchProduct();
-        fetchDescriptions();
-    }, []);
-   
-
-
-
-  
   let testimonial: GalleryProps = {
     galleryName: "testGallery",
     slides: [
@@ -216,59 +206,59 @@ export default function ProductPage() {
     ],
   };
   return (
-    
     <React.Fragment>
-        {product && (
+      {product && (
         <>
-      <section className="banner">
-        <div className="banner-inner">
-          <div className="banner-highlight">
-            <h1 className="banner-title banner-element hero-title">
-                {product.display_name}
-            </h1>
+          <section className="banner">
+            <div className="banner-inner">
+              <div className="banner-highlight">
+                <h1 className="banner-title banner-element hero-title">
+                  {product.display_name}
+                </h1>
+                <Link to="purchase-license">
+                  <button className="banner-element hero-button">
+                    Buy license
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </section>
+          <hr></hr>
+          <section className="product-description container">
+            {descriptionRow.map((productPageRow) => (
+              <DescriptionRow
+                key={assignUniqueKey("row")}
+                props={productPageRow.props}
+              />
+            ))}
+          </section>
+          {testimonial.slides.length > 0 && (
+            <section className="gallery-wrapper">
+              <div className="container">
+                <h2 className="testimonial-title">Testimonials</h2>
+                <Gallery
+                  slides={testimonial.slides}
+                  galleryName={testimonial.galleryName}
+                />
+              </div>
+            </section>
+          )}
+          <section className="container">
+            <h2>Purchase</h2>
+            <p>Purchase licenses for this product for your enterprise today!</p>
             <Link to="purchase-license">
               <button className="banner-element hero-button">
                 Buy license
               </button>
             </Link>
-          </div>
-        </div>
-      </section>
-      <hr></hr>
-      <section className="product-description container">
-        {descriptionRow.map((productPageRow) => (
-          <DescriptionRow
-            key={assignUniqueKey("row")}
-            props={productPageRow.props}
-          />
-        ))}
-      </section>
-      {testimonial.slides.length > 0 && (
-        <section className="gallery-wrapper">
-          <div className="container">
-            <h2 className="testimonial-title">Testimonials</h2>
-            <Gallery
-              slides={testimonial.slides}
-              galleryName={testimonial.galleryName}
-            />
-          </div>
-        </section>
-      )}
-      <section className="container">
-        <h2>Purchase</h2>
-        <p>Purchase licenses for this product for your enterprise today!</p>
-        <Link to="purchase-license">
-          <button className="banner-element hero-button">Buy license</button>
-        </Link>
-      </section>
+          </section>
         </>
-        )}
-        {!product && (
-            <div className="container">
-                <h1>Product not found</h1>
-                </div>
-                )
-        }
+      )}
+      {!product && (
+        <div className="container">
+          <h1>Product not found</h1>
+        </div>
+      )}
     </React.Fragment>
   );
 }
