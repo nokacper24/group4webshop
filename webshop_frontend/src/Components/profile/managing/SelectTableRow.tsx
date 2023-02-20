@@ -13,7 +13,7 @@ export type SelectTableRowProps = {
   columns: {
     text: string;
   }[];
-  updateSelected: (checked: boolean) => void;
+  updateSelected: (checked: boolean, index: number) => void;
   selectAll: string;
   button: {
     text: string;
@@ -39,7 +39,7 @@ export default function SelectTableRow(props: SelectTableRowProps) {
   });
 
   const toggleSelect = () => {
-    props.updateSelected(!selected);
+    props.updateSelected(!selected, props.rowIndex);
     setSelected((selected) => !selected);
   };
 

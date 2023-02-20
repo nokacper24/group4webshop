@@ -58,13 +58,48 @@ export default function ManageLicenseAccess() {
     setUsersWithoutAccess(withoutAccessTable.rows);
   };
 
+  const addSelectedUsers = (selectedRowsIndices: number[]) => {
+    let sortedIndices = selectedRowsIndices.sort();
+
+    for (let i = sortedIndices.length - 1; i >= 0; i--) {
+      let index = sortedIndices[i];
+      let user = withoutAccessTable.rows[index];
+      withoutAccessTable.rows = [
+        ...withoutAccessTable.rows.slice(0, index),
+        ...withoutAccessTable.rows.slice(index + 1),
+      ];
+
+      withAccessTable.rows.push(user);
+    }
+    setUsersWithoutAccess(withoutAccessTable.rows);
+    setUsersWithAccess(withAccessTable.rows);
+  };
+
+  const removeSelectedUsers = (selectedRowsIndices: number[]) => {
+    let sortedIndices = selectedRowsIndices.sort();
+
+    for (let i = sortedIndices.length - 1; i >= 0; i--) {
+      let index = sortedIndices[i];
+      let user = withAccessTable.rows[index];
+      withAccessTable.rows = [
+        ...withAccessTable.rows.slice(0, index),
+        ...withAccessTable.rows.slice(index + 1),
+      ];
+
+      withoutAccessTable.rows.push(user);
+    }
+
+    setUsersWithAccess(withAccessTable.rows);
+    setUsersWithoutAccess(withoutAccessTable.rows);
+  };
+
   const withoutAccessTable = {
     header: {
       columns: [{ text: "Users" }, { text: "Access" }],
     },
     rows: usersWithoutAccess,
     button: { text: "Add", action: addUser },
-    outsideButtons: [{ text: "Add all selected" }],
+    outsideButtons: [{ text: "Add all selected", action: addSelectedUsers }],
   };
 
   const withAccessTable = {
@@ -73,7 +108,9 @@ export default function ManageLicenseAccess() {
     },
     rows: usersWithAccess,
     button: { text: "Remove", action: removeUser },
-    outsideButtons: [{ text: "Remove all selected" }],
+    outsideButtons: [
+      { text: "Remove all selected", action: removeSelectedUsers },
+    ],
   };
 
   return (

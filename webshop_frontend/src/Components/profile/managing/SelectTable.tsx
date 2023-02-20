@@ -19,7 +19,7 @@ export type SelectTableProps = {
     text: string;
     action: (index: number) => void;
   };
-  outsideButtons: { text: string /* action: () => void  */ }[];
+  outsideButtons: { text: string; action: (selectedIndex: number[]) => void }[];
 };
 
 /**
@@ -33,21 +33,32 @@ export type SelectTableProps = {
  */
 export default function SelectTable(props: SelectTableProps) {
   const [selectedRows, setSelectedRows] = useState(0);
+  const [selectedRowsIndices, setSelectedRowsIndices] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState("none");
+
+  const clearSelected = () => {
+    setSelectedRowsIndices([]);
+  };
+
+  const selectAllIndices = () => {
+    let allIndices = [];
+    for (let i = 0; i < props.rows.length; i++) {
+      allIndices.push(i);
+    }
+    setSelectedRowsIndices([...allIndices]);
+  };
+
+  const selectNoIndices = () => {
+    setSelectedRowsIndices([]);
+  };
 
   const toggleSelectAll = () => {
     if (selectedRows != props.rows.length) {
-      if (selectAll == "all") {
-        setSelectedRows(0);
-      } else {
-        setSelectedRows(props.rows.length);
-      }
+      setSelectedRows(props.rows.length);
+      selectAllIndices();
     } else {
-      if (selectAll == "none") {
-        setSelectedRows(props.rows.length);
-      } else {
-        setSelectedRows(0);
-      }
+      setSelectedRows(0);
+      selectNoIndices();
     }
   };
 
@@ -58,12 +69,15 @@ export default function SelectTable(props: SelectTableProps) {
     setSelectedRows(selectedRows - 1);
   };
 
-  const updateSelected = (checked: boolean) => {
+  const updateSelected = (checked: boolean, index: number) => {
     setSelectAll("some");
     if (checked) {
       incrementSelectedRows();
+      setSelectedRowsIndices([...selectedRowsIndices, index]);
     } else {
       decrementSelectedRows();
+      let newSelected = selectedRowsIndices.filter((item) => item != index);
+      setSelectedRowsIndices(newSelected);
     }
   };
 
@@ -103,7 +117,7 @@ export default function SelectTable(props: SelectTableProps) {
         </table>
       </div>
       <div className="button-container">
-        {props.outsideButtons.map((button, index) => {
+        {props.outsideButtons.map((button) => {
           return (
             <SelectTableOutsideButton
               key={button.text}
