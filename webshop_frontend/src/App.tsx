@@ -9,7 +9,6 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
 
 /**
  * Represents the website content.
@@ -33,7 +32,6 @@ export default function App() {
             path="product/purchase-license"
             element={<PurchaseLicense />}
           />
-          <Route path="create-account/*" element={<CreateCompanyAccount />} />
         </Routes>
       </main>
 

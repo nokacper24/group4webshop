@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
+import CreateCompanyAccount from "./register/CreateCompanyAccount";
 
 /**
  * The user Profile page.
@@ -16,6 +17,7 @@ export default function Profile() {
     <React.Fragment>
       <Routes>
         <Route path="/" element={<SignIn />} />
+        <Route path="/create-account/*" element={<CreateCompanyAccount />} />
         <Route path="/:id" element={<MyAccount />} />
         <Route path="manage-license/:id" element={<ManageLicenseAccess />} />
       </Routes>
