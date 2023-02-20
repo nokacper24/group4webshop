@@ -1,28 +1,42 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, HttpServer, Responder};
+use actix_web::http::Error;
+use actix_web::web::ReqData;
+use actix_web::HttpResponse;
+use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
+use log::info;
 
 mod data_access;
+mod middlewares;
+mod openapi_doc;
 mod routes;
 
 use routes::public::public;
+use serde::{Deserialize, Serialize};
+use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
+use crate::data_access::user::Role;
+use crate::middlewares::auth::{check_role, validator, Token};
 
 #[get("/")]
 async fn index() -> impl Responder {
-    "Hello world!"
+    HttpResponse::Ok().body("Hello world!")
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "info,sqlx=off");
+    env_logger::init();
+
     // check if .env file exists and load it
     dotenv().ok();
     let host = std::env::var("HOST").expect("HOST environment variable not set");
     let port = std::env::var("PORT").expect("PORT environment variable not set");
     let address = format!("{}:{}", host, port);
 
-    println!("Starting server at http://{}", address);
+    info!("Starting server at http://{}", address);
 
     //create new pool
     let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
@@ -43,14 +57,18 @@ async fn main() -> std::io::Result<()> {
 
         let public = web::scope("/api").configure(public);
 
+        let bearer_middleware = HttpAuthentication::bearer(validator);
+
         App::new()
             // register sqlx pool
             .app_data(pool.clone())
             // configure cors
             .wrap(cors)
+            .wrap(Logger::default())
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
+            .configure(openapi_doc::configure_opanapi)
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })

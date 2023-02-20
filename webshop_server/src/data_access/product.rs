@@ -1,13 +1,12 @@
-
-
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, {Pool, Postgres},
 };
+use utoipa::ToSchema;
 
 pub mod description;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct Product {
     product_id: String,
     display_name: String,

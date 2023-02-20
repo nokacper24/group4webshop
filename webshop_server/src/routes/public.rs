@@ -4,9 +4,11 @@
 
 use actix_web::{get, web, Responder};
 
-mod categories;
-mod products;
-mod users;
+use crate::data_access::product::Product;
+
+pub mod categories;
+pub mod products;
+pub mod users;
 
 #[get("")]
 async fn index() -> impl Responder {
