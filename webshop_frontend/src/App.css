@@ -24,6 +24,7 @@
   --header-height: 3.5em;
   --max-width: 1200px;
   --gallery-button-size: 2.5rem;
+  --scrollbar-width: 15px;
 
   /* Miscellaneous */
   --transition-speed: 250ms;
@@ -36,12 +37,12 @@
 
 ::-webkit-scrollbar {
   background: transparent;
-  width: 15px;
+  width: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {
   background: rgba(113, 113, 113, 0.35);
-  
+
 }
 
 ::-webkit-scrollbar-thumb {
@@ -361,7 +362,7 @@ nav {
   .toggle-container {
     position: absolute;
     top: 0;
-    right: 0;
+    right: var(--scrollbar-width);
     display: block;
     height: var(--header-height);
     width: var(--header-height);
@@ -1076,4 +1077,3 @@ form a:hover {
   font-weight: bold;
   border-bottom: 1px dotted currentColor;
 }
-
