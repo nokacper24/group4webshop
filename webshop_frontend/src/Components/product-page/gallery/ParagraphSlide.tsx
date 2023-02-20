@@ -1,5 +1,3 @@
-import { GalleryProps } from "./Gallery";
-
 /**
  * The props of the ParagraphSlide component.
  */

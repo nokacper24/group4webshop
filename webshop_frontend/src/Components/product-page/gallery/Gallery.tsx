@@ -1,4 +1,4 @@
-import { Component, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
@@ -75,9 +75,6 @@ export default function Gallery(props: GalleryProps) {
     // Update the previous and next slide
     setPrevSlide(props.slides[prev].slideId);
     setNextSlide(props.slides[next].slideId);
-    console.log(
-      "prev: " + prevSlide + " current: " + index + " next: " + nextSlide
-    );
   };
 
   return (

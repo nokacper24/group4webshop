@@ -703,16 +703,23 @@ form a:hover {
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 25em);
+  grid-template-rows: auto 1fr;
   column-gap: 4em;
   row-gap: 4em;
   justify-content: center;
   align-items: center;
 }
 
+.grid-container > li {
+  height: 100%;
+}
+
 .product-card {
+  height: 100%;
   padding: 1em;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   background-color: var(--text-secondary);
   -webkit-box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
@@ -732,13 +739,18 @@ form a:hover {
   margin-inline: auto;
 }
 
+.product-card > h2 {
+  line-height: 1.2em;
+  margin-bottom: 0.5em;
+}
+
 .card-description {
-  line-height: 1rem;
+  line-height: 1em;
   margin-top: 0;
   color: var(--text-primary);
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1100px) {
   .grid-container {
     grid-template-columns: 75vw;
   }

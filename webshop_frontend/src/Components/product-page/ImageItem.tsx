@@ -1,10 +1,10 @@
-import {RowItem} from './DescriptionRow'
+import { RowItem } from "./DescriptionRow";
 
 const baseurl = 'http://localhost:8081/'
 
 /**
  * Creates an image in a row
- * 
+ *
  * @param rowItem image based RowItem
  * @returns JSX element
  */
