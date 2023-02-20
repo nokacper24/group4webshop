@@ -1,5 +1,6 @@
 use actix_cors::Cors;
 use actix_web::HttpResponse;
+use actix_web::http::Error;
 use actix_web::web::ReqData;
 use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
 use actix_web_httpauth::middleware::HttpAuthentication;
@@ -17,41 +18,25 @@ use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
 use crate::data_access::user::Role;
-use crate::middlewares::auth::validator;
+use crate::middlewares::auth::{validator, checkRole, Token};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-struct Token {
-    token: String,
-}
+
+
+
 
 #[get("/")]
 async fn index(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>> )  -> impl Responder {
-    match req_token {
-        Some(token) => {
-            let token = token.into_inner();
-            let token = token.token;
-            let pool = pool.get_ref();
-            let cookie = middlewares::auth::get_cookie(&token, &pool).await;
-            match cookie {
-                Ok(cookie) => {
-                    let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
-                    match user {
-                        Ok(user) => {
-                            match user.role {
-                                Role::Admin => HttpResponse::Ok().json("Admin"),
-                                Role::Default => HttpResponse::Ok().json("User"),
-                                Role::CompanyIt => HttpResponse::Ok().json("CompanyIt"),
-                                Role::CompanyItHead => HttpResponse::Ok().json("CompanyItHead"),
-                            }
-                        }
-                        Err(e) => HttpResponse::Unauthorized().json(format!("Unauthorized3: {}", e))
-                    }
-                }
-                Err(_) => HttpResponse::Unauthorized().json("Unauthorized2")
+    let role = checkRole(req_token, pool).await;
+    match role {
+        Ok(role) => {
+            match role {
+                Role::Admin => HttpResponse::Ok().body("Hello Admin"),
+                Role::CompanyItHead => HttpResponse::Ok().body("Hello Company IT Head"),
+                Role::CompanyIt => HttpResponse::Ok().body("Hello Company IT"),
+                Role::Default => HttpResponse::Ok().body("Hello Default"),
             }
         }
-        _ => HttpResponse::Unauthorized().json("Unauthorized1")
-
+        Err(e) => HttpResponse::Unauthorized().body(e),
     }
 }
 

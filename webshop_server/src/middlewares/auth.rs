@@ -1,9 +1,10 @@
-use crate::{data_access::auth::{self}, Token};
+use crate::{data_access::{auth::{self}, self, user::Role}};
 
 use actix_web::{
-    dev::ServiceRequest, web, Error, Result, HttpMessage,
+    dev::ServiceRequest, web::{self, ReqData}, Error, Result, HttpMessage,
 };
 
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
 pub async fn check_auth(cookie: &str, pool: &Pool<Postgres>) -> bool {
@@ -32,5 +33,33 @@ let cookie = credentials.token();
         Ok(req)
     } else {
         Err((actix_web::error::ErrorUnauthorized("Unauthorized"), req))
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Token {
+    token: String,
+}
+
+pub async fn checkRole(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>>) -> Result<Role, String> {
+    match req_token {
+        Some(token) => {
+            let token = token.into_inner();
+            let token = token.token;
+            let pool = pool.get_ref();
+            let cookie = get_cookie(&token, &pool).await;
+            match cookie {
+                Ok(cookie) => {
+                    let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
+                    match user {
+                        Ok(role) => Ok(role.role),
+                        Err(e) => Err(e.to_string()),
+                    }
+                }
+                Err(_) => Err("Unauthorized".to_string()),
+            }
+        }
+        _ => Err("Unauthorized".to_string()),
+
     }
 }
