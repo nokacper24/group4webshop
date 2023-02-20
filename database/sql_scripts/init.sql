@@ -84,8 +84,8 @@ CREATE TABLE product_category (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
-CREATE TABLE testemonial (
-    testemonial_id SERIAL PRIMARY KEY,
+CREATE TABLE testimonial (
+    testimonial_id SERIAL PRIMARY KEY,
     author TEXT NOT NULL,
     text TEXT NOT NULL,
     author_pic TEXT NOT NULL,

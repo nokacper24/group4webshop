@@ -40,7 +40,7 @@ INSERT INTO product_category (product_id, category_id)
 VALUES ('time_managment_software', 1),
        ('tax_and_accounting_software', 2);
 
-INSERT INTO testemonial (testemonial_id, author, text, author_pic, product_id)
+INSERT INTO testimonial (testimonial_id, author, text, author_pic, product_id)
 VALUES (1, 'Jane Doe', 'I am extremely impressed with the time management software provided by the company. It has greatly improved the efficiency of my team.', 'jane.jpg', 'time_managment_software'),
        (2, 'John Smith', 'The tax software is a lifesaver. The software makes tax season a breeze and saves me so much time.', 'john.jpg', 'tax_and_accounting_software');
 
