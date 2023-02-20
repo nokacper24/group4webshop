@@ -41,7 +41,7 @@ pub struct Token {
     token: String,
 }
 
-pub async fn checkRole(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>>) -> Result<Role, String> {
+pub async fn check_role(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>>) -> Result<Role, String> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();

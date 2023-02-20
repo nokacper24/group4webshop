@@ -18,7 +18,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
 use crate::data_access::user::Role;
-use crate::middlewares::auth::{validator, checkRole, Token};
+use crate::middlewares::auth::{validator, check_role, Token};
 
 
 
