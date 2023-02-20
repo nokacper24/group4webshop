@@ -55,7 +55,7 @@ CREATE TABLE license (
     valid BOOLEAN NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    amount REAL NOT NULL,
+    amount INT NOT NULL,
     company_id INT NOT NULL,
     product_id TEXT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company(company_id),
@@ -71,7 +71,7 @@ CREATE TABLE user_license (
 );
 
 CREATE TABLE category (
-    id SERIAL PRIMARY KEY,
+    category_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL
 );
@@ -81,7 +81,7 @@ CREATE TABLE product_category (
     category_id INT NOT NULL,
     PRIMARY KEY (product_id, category_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id),
-    FOREIGN KEY (category_id) REFERENCES category(id)
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
 CREATE TABLE testimonial (

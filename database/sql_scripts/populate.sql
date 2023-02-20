@@ -25,14 +25,14 @@ VALUES ('time_managment_software', 'Time Management System', 999.99, 'A comprehe
        ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises', 'tax_accounting.jpg', true);
 
 INSERT INTO license (license_id, valid, start_date, end_date, amount, company_id, product_id)
-VALUES (1, true, '2021-01-01', '2021-12-31', 10000, 1, 'time_managment_software'),
-       (2, true, '2021-07-01', '2022-06-30', 5000, 2, 'tax_and_accounting_software');
+VALUES (1, true, '2021-01-01', '2021-12-31', 100, 1, 'time_managment_software'),
+       (2, true, '2021-07-01', '2022-06-30', 50, 2, 'tax_and_accounting_software');
 
 INSERT INTO user_license (license_id, user_id)
 VALUES (1, 1),
        (2, 2);
 
-INSERT INTO category (id, name, description)
+INSERT INTO category (category_id, name, description)
 VALUES (1, 'Enterprise Software', 'Software solutions for enterprises'),
        (2, 'Financial Software', 'Financial software solutions for enterprises');
 
