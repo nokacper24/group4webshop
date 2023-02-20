@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SelectTableHeader from "./SelectTableHeader";
 import SelectTableRow from "./SelectTableRow";
-import SelectTableButton from "./SelectTableButton";
+import SelectTableOutsideButton from "./SelectTableOutsideButton";
 
 export type SelectTableProps = {
   header: {
@@ -105,11 +105,12 @@ export default function SelectTable(props: SelectTableProps) {
       <div className="button-container">
         {props.outsideButtons.map((button, index) => {
           return (
-            <SelectTableButton
+            <SelectTableOutsideButton
               key={button.text}
-              rowIndex={-1}
               text={button.text}
-              action={props.button.action}
+              indices={selectedRowsIndices}
+              action={button.action}
+              clearSelected={clearSelected}
             />
           );
         })}
