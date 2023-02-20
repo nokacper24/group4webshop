@@ -26,7 +26,7 @@ use crate::middlewares::auth::{validator, check_role, Token};
 
 #[get("/")]
 async fn index(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>> )  -> impl Responder {
-    let role = checkRole(req_token, pool).await;
+    let role = check_role(req_token, pool).await;
     match role {
         Ok(role) => {
             match role {
