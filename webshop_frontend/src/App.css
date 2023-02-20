@@ -7,7 +7,8 @@
   --bg-secondary: #2E74B5;
   --bg-tertiary: #5F8B05;
   --bg-neutral: #D9D9D9;
-  --bg-gradient: 125deg, rgba(46, 116, 181, 0.4) 10%, rgba(95, 139, 5, 0.4) 100%;
+  --bg-gradient-primary: 125deg, rgba(46, 116, 181, 0.4) 10%, rgba(95, 139, 5, 0.4) 100%;
+  --bg-gradient-secondary: 125deg, rgba(46, 116, 181, 1) 10%, rgba(95, 139, 5, 1) 100%;
 
   /* Text colour variables */
   --text-primary: #000;
@@ -22,6 +23,7 @@
   /* Sizes */
   --header-height: 3.5em;
   --max-width: 1200px;
+  --gallery-button-size: 2.5rem;
 
   /* Miscellaneous */
   --transition-speed: 250ms;
@@ -29,15 +31,41 @@
 }
 
 /* || SITEWIDE STYLES */
+
+/* SCROLL BAR */
+
+::-webkit-scrollbar {
+  background: transparent;
+  width: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(113, 113, 113, 0.362);
+  
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 1rem;
+  border: 3px solid transparent;
+  background-color: rgba(39, 39, 39, 0.75);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: black;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: rgba(71, 51, 114, 0.10);
+  background-color: rgba(71, 51, 114, 0.10);
   font-family: var(--ff-primary);
   line-height: 2;
+  /* For scrollbar to overlay the page without having hard border */
+  overflow: overlay;
 }
 
 #root {
@@ -84,7 +112,7 @@ button {
 .default-button {
   padding: 0.75em 2em;
   color: var(--text-secondary);
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
@@ -92,7 +120,7 @@ button {
 }
 
 .default-button:is(:hover, :focus) {
-  background: var(--bg-tertiary);
+  background-color: var(--bg-tertiary);
   outline: 2px solid currentColor;
 }
 
@@ -149,6 +177,7 @@ label {
   text-align: left !important;
 }
 
+/* Header */
 header {
   height: var(--header-height);
   background-color: rgba(71, 51, 114, 0.8);
@@ -158,8 +187,12 @@ header {
 
 .header-container {
   position: relative;
-  height: inherit;
   max-width: var(--max-width);
+  height: var(--header-height);
+  margin-inline: auto;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
   transition: transform var(--transition-speed);
 }
 
@@ -169,20 +202,11 @@ nav {
   right: 0;
 }
 
-.header-container {
-  height: var(--header-height);
-  max-width: var(--max-width);
-  margin-inline: auto;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-}
-
 #skip-navigation {
   position: absolute;
-  left: 1em;
+  left: 1rem;
   top: -1000px;
-  padding: 0.5rem;
+  padding: 0.5em;
   color: var(--text-secondary);
   background-color: var(--bg-primary);
   border: 3px solid var(--text-secondary);
@@ -225,7 +249,11 @@ nav {
   overflow: hidden;
 }
 
-/* Navbar */
+.nav-search>button {
+  margin-left: 0.5em;
+}
+
+/* Nav */
 .logo,
 .nav-icon {
   display: block;
@@ -250,7 +278,6 @@ nav {
 .icon-button {
   display: inline-block;
   fill: currentColor;
-  margin-left: 0.5em;
   border: none;
   background: transparent;
 }
@@ -278,9 +305,13 @@ nav {
 }
 
 .nav-link:is(:hover, :focus) {
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
   transition: background var(--transition-speed);
   outline: 1px solid transparent;
+}
+
+.nav-link.active {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Navbar -- Mobile */
@@ -306,7 +337,7 @@ nav {
   .nav-list {
     display: block;
     padding-top: var(--header-height);
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
     transform: translateX(100%);
     overflow-y: auto;
@@ -322,7 +353,7 @@ nav {
 
   .nav-link:is(:hover, :focus) {
     font-weight: bold;
-    background: var(--bg-secondary);
+    background-color: var(--bg-secondary);
     transition: background var(--transition-speed);
     outline: 1px solid transparent;
   }
@@ -461,7 +492,7 @@ nav {
 hr {
   margin: 0;
   height: 5px;
-  background: var(--bg-secondary);
+  background-color: var(--bg-secondary);
 }
 
 .m-t-1 {
@@ -492,7 +523,7 @@ form>h1 {
 .form-container {
   width: max(50vw, 600px);
   margin-block: 1em;
-  background: var(--bg-neutral);
+  background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
 }
@@ -600,7 +631,7 @@ form a:hover {
   flex-wrap: wrap;
 
   color: var(--text-secondary);
-  background: linear-gradient(var(--bg-gradient));
+  background-image: linear-gradient(var(--bg-gradient-primary));
   text-align: center;
   text-shadow: 0px 0px 3px var(--text-primary);
 }
@@ -727,7 +758,7 @@ form a:hover {
 .banner {
   width: 100%;
   height: 80vh;
-  background-image: url(https://unsplash.it/1200/800);
+  background-image: url(https://unsplash.it/1200/500);
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -796,9 +827,8 @@ form a:hover {
   flex-direction: column;
   text-align: center;
   align-items: center;
-  background: linear-gradient(var(--text-gradient));
   color: white;
-  /* outline: #473372 1px solid; */
+  background: linear-gradient(var(--bg-gradient-secondary));
 }
 
 .testimonial-title {
@@ -808,41 +838,57 @@ form a:hover {
 }
 
 .gallery {
-  /* outline: green 1px solid; */
   display: grid;
   grid-template-columns: auto auto auto;
   max-width: 70em;
 }
 
+.gallery a:first-child {
+  margin-right: 0.5em;
+}
+
+.gallery a:last-child {
+  margin-left: 0.5em;
+}
+
 .slide-button {
   background: rgba(0, 0, 0, 0.306);
-  border-radius: 50%;
+  border-radius: 1.5rem;
   color: white;
-  font-size: 2.5rem;
+  font-size: var(--gallery-button-size);
+  line-height: var(--gallery-button-size);
   height: 1em;
-  line-height: 2.5rem;
   width: 1em;
+  padding: 0.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   align-self: center;
-  font-family: sans-serif;
-  margin: 0.5em;
   outline: 1px solid transparent;
-  border: 0;
 }
 
 .slide-button:hover {
   background-color: #0000009a;
 }
 
-.slides-container {
+.slides-view {
+  --slides-width: min(70vw, 900px);
+
   overflow: hidden;
-  max-width: inherit;
-  display: flex;
-  flex-direction: row;
+  width: var(--slides-width);
+  position: relative;
+}
+
+.slides-container {
+  width: max-content;
+  position: static;
+  left: 50px;
 }
 
 .slide {
   /* outline: black 1px solid; */
-  width: calc(inherit - 2 * 40px);
+  display: inline-block;
+  width: var(--slides-width);
 }
 
 .reviewer-profile {
@@ -865,7 +911,7 @@ form a:hover {
 
 .reviewer-picture {
   border-radius: 1rem;
-  margin: 1em;
+  margin-right: 1em;
 }
 
 /* || PURCHASE LICENSE PAGE */
@@ -935,6 +981,10 @@ form a:hover {
   border-bottom: 1px solid var(--text-primary);
 }
 
+.row-image {
+  display: block;
+}
+
 .collapsed {
   visibility: collapse;
 }
@@ -954,36 +1004,33 @@ form a:hover {
   overflow-y: auto;
 }
 
-.table-container+button {
+.table-container+.button-container {
   margin-top: 1em;
 }
 
-.select-table tr:nth-child(even) {
-  background: var(--bg-neutral);
-}
-
-.select-table .checkbox-column {
-  width: 5em;
-}
 
 .select-table th {
   position: sticky;
   top: 0;
-  z-index: 1;
 
-  background: var(--bg-neutral);
+  background-color: var(--bg-neutral);
   border-bottom: 1px solid var(--text-primary);
+  z-index: 1;
 }
 
 .select-table th,
 .select-table td {
   border-right: 1px solid var(--text-primary);
-  padding: 0.2em 1em;
+  padding: 0.3em 1em;
 }
 
 .select-table th:last-child,
 .select-table td:last-child {
   border-right: none;
+}
+
+.select-table td {
+  border-bottom: 1px solid var(--text-secondary);
 }
 
 .select-table td>input,
@@ -993,10 +1040,40 @@ form a:hover {
 }
 
 .select-table input[type="checkbox"] {
-  height: 1.5em;
-  width: 1.5em;
+  transform: scale(1.5);
 }
 
-.danger {
-  background: red;
+.checkbox-column {
+  width: 7em;
+  vertical-align: middle;
+  text-align: center;
 }
+
+.select-table td:last-child {
+  width: 10em;
+}
+
+.checkbox-column label {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.selected-row {
+  background-color: hsl(195, 45%, 85%) !important;
+}
+
+.bg-danger {
+  background-color: red;
+}
+
+.text-danger {
+  color: red;
+}
+
+.table-text {
+  margin-block: 0;
+  margin-inline: 0.5em;
+  font-weight: bold;
+  border-bottom: 1px dotted currentColor;
+}
+

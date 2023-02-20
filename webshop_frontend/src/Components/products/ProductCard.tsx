@@ -11,12 +11,12 @@ export type ProductCardProps = {
 export const ProductCard = ({ props: product }: ProductCardProps) => {
   return (
     <li>
-      <Link className="product-card" to={"/product-page"}>
+      <Link className="product-card" to={"/product"}>
         <img
           height={200}
           width={300}
           src={product.sourceImage}
-          alt={"Product image of " + product.name}
+          alt={product.name}
           className="card-image"
         ></img>
         <h2>{product.name}</h2>

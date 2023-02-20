@@ -1,9 +1,10 @@
 import React from "react";
+import { Link, Route, Routes } from "react-router-dom";
 import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
-import { SlidesProps } from "./gallery/Gallery";
-import { ParagraphSlide } from "./gallery/ParagraphSlide";
+import { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
+import PurchaseLicense from "./PurchaseLicense";
 
 let counter = 0;
 
@@ -11,6 +12,11 @@ export type State = {
   rows: ProductPageRow[];
 };
 
+/**
+ * The product page component.
+ *
+ * @returns the product page component
+ */
 export default function ProductPage() {
   let rowTextItem: RowItem = {
     title: "Lorem",
@@ -23,14 +29,14 @@ export default function ProductPage() {
     content: "https://unsplash.it/300/200",
     isTextNotImage: false,
   };
-  const row_data = [
+  const rowData = [
     { item1: rowTextItem, item2: rowImageItem, textToLeft: true },
     { item1: rowImageItem, item2: rowTextItem, textToLeft: false },
   ];
   let state: State = {
     rows: [],
   };
-  row_data.forEach((row) => {
+  rowData.forEach((row) => {
     let newRow: ProductPageRow = {
       props: {
         item1: row.item1,
@@ -40,10 +46,11 @@ export default function ProductPage() {
     };
     state.rows.push(newRow);
   });
-  let testimonial: SlidesProps = {
+  let testimonial: GalleryProps = {
+    galleryName: "testGallery",
     slides: [
       {
-        id: "slide1",
+        slideId: "slide1",
         mainContent:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
         reviewerProfile: {
@@ -54,13 +61,24 @@ export default function ProductPage() {
         slideType: SlideType.PARAGRAPH,
       },
       {
-        id: "slide2",
+        slideId: "slide2",
         mainContent:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in tellus nibh. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque a malesuada nunc, quis aliquam ante. Nulla elementum rutrum magna quis condimentum. Integer nunc enim, semper ut sodales eu, blandit quis leo. Ut blandit mollis est, sit amet ultrices ligula facilisis sed. Morbi non est rutrum, aliquet metus non, iaculis nisl. Donec nec magna hendrerit, elementum elit sit amet, sodales tortor. Pellentesque nulla orci, tincidunt vel lacinia condimentum, euismod ut mi. Integer tristique metus a eros luctus, ac sollicitudin dui iaculis. Vestibulum iaculis consequat dui a lacinia. Fusce id leo eu eros fringilla efficitur id vel nisi.",
         reviewerProfile: {
           picturePath: "https://picsum.photos/100",
           name: "Bat mann",
           title: "Genius acrobat",
+        },
+        slideType: SlideType.PARAGRAPH,
+      },
+      {
+        slideId: "slide3",
+        mainContent:
+          "Phasellus id nibh eget justo blandit rhoncus et ut libero. Nunc ullamcorper, elit id interdum faucibus, leo ipsum tristique libero, nec varius ante nunc ut purus. In blandit in odio vel convallis. Curabitur non elementum elit, sed vestibulum dui. Phasellus eu dolor magna. Maecenas viverra orci id pellentesque auctor. Duis eu efficitur nunc. Proin ut interdum est. Proin sed volutpat tellus, venenatis dictum augue. Cras ante enim, convallis quis enim eget, scelerisque aliquam nibh. Nunc id sagittis dolor. Praesent luctus et felis vitae laoreet. Quisque ultricies sapien risus, in faucibus odio faucibus non. Aliquam erat volutpat. Proin consectetur blandit ex in aliquam.",
+        reviewerProfile: {
+          picturePath: "https://picsum.photos/100",
+          name: "Pene Guin",
+          title: "Animal",
         },
         slideType: SlideType.PARAGRAPH,
       },
@@ -74,12 +92,16 @@ export default function ProductPage() {
             <h1 className="banner-title banner-element hero-title">
               Product Name
             </h1>
-            <button className="banner-element hero-button">Buy license</button>
+            <Link to="purchase-license">
+              <button className="banner-element hero-button">
+                Buy license
+              </button>
+            </Link>
           </div>
         </div>
       </section>
       <hr></hr>
-      <section className="product-description">
+      <section className="product-description container">
         {state.rows.map((productPageRow) => (
           <DescriptionRow
             key={assignUniqueKey("row")}
@@ -87,9 +109,23 @@ export default function ProductPage() {
           />
         ))}
       </section>
-      <section className="gallery-wrapper">
-        <h2 className="testimonial-title">Testimonials</h2>
-        <Gallery slides={testimonial.slides} />
+      {testimonial.slides.length > 0 && (
+        <section className="gallery-wrapper">
+          <div className="container">
+            <h2 className="testimonial-title">Testimonials</h2>
+            <Gallery
+              slides={testimonial.slides}
+              galleryName={testimonial.galleryName}
+            />
+          </div>
+        </section>
+      )}
+      <section className="container">
+        <h2>Purchase</h2>
+        <p>Purchase licenses for this product for your enterprise today!</p>
+        <Link to="purchase-license">
+          <button className="banner-element hero-button">Buy license</button>
+        </Link>
       </section>
     </React.Fragment>
   );
