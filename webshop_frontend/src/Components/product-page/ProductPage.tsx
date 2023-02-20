@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, Route, Routes } from "react-router-dom";
-import DescriptionRow, { ProductPageRow, RowItem } from "./DescriptionRow";
+import { Link } from "react-router-dom";
+import DescriptionRow, { ProductPageRow } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
 import { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
-import PurchaseLicense from "./PurchaseLicense";
 
 let counter = 0;
 
@@ -282,6 +281,5 @@ export default function ProductPage() {
  */
 function assignUniqueKey(base: string) {
   counter++;
-  console.log(base + counter);
   return base + counter;
 }

@@ -37,26 +37,12 @@ export default function DescriptionRow(row: ProductPageRow) {
         TextItem(row.props.item1),
         ImageItem(row.props.item2),
       ];
-      console.log(
-        "Item 1: " +
-          row.props.item1.content +
-          " Item 2: " +
-          row.props.item2 +
-          " functionID: 1"
-      );
     } else {
       rowElement = [
         "rowID",
         ImageItem(row.props.item2),
         TextItem(row.props.item1),
       ];
-      console.log(
-        "Item 1: " +
-          row.props.item1.content +
-          " Item 2: " +
-          row.props.item2 +
-          " functionID: 2"
-      );
     }
   } else if (
     !row.props.item1?.isTextNotImage &&
@@ -69,18 +55,12 @@ export default function DescriptionRow(row: ProductPageRow) {
         TextItem(row.props.item2),
         ImageItem(row.props.item1),
       ];
-      console.log(
-        "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 3"
-      );
     } else {
       rowElement = [
         "rowID",
         ImageItem(row.props.item1),
         TextItem(row.props.item2),
       ];
-      console.log(
-        "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 4"
-      );
     }
   } else {
     //if item1 and item2 is the same the order will be item1 > item2
@@ -90,22 +70,12 @@ export default function DescriptionRow(row: ProductPageRow) {
         TextItem(row.props.item1),
         TextItem(row.props.item2),
       ];
-      console.log(
-        "Item 1: " +
-          row.props.item1.content +
-          " Item 2: " +
-          row.props.item2 +
-          " functionID: 5"
-      );
     } else {
       rowElement = [
         "rowID",
         ImageItem(row.props.item1),
         ImageItem(row.props.item2),
       ];
-      console.log(
-        "Item 1: " + " Item 2: " + row.props.item2 + " functionID: 6"
-      );
     }
   }
   return (

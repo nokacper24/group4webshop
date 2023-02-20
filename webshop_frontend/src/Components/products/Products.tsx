@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 
-let baseUrl = "http://localhost:8081";
+let baseUrl = "http://localhost:8083";
 export type State = {
   products: ProductCardProps[];
 };
