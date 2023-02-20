@@ -10,7 +10,7 @@ import SelectTable from "./SelectTable";
  * @returns A Manage License Access page component.
  */
 export default function ManageLicenseAccess() {
-  const { id } = useParams();
+  const { userId } = useParams();
   const totalUsers = 4;
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState([
@@ -124,7 +124,7 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           {/* TODO: Fetch product name of license */}
-          License {id}
+          {userId}
         </p>
       </section>
 

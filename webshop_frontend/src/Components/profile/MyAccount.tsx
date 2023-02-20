@@ -9,6 +9,16 @@ type UserProps = {
   companyId: string;
 };
 
+export type LicenseProps = {
+  licenseId: number;
+  valid: boolean;
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  companyId?: number;
+  productId: string;
+};
+
 /**
  * Represents the My Account page.
  * Contains information about the user acccount and owned licenses.
@@ -16,21 +26,45 @@ type UserProps = {
  * @returns The My Account page component.
  */
 export default function MyAccount() {
-  const { id } = useParams();
+  const { userId } = useParams();
   const [user, setUser] = useState<UserProps>();
+  const [licenses, setLicenses] = useState<LicenseProps[]>([]);
 
   const fetchUser = async () => {
-    const response = await fetch(`${baseUrl}/api/users/${id}`);
+    const response = await fetch(`${baseUrl}/api/users/${userId}`);
     const data = await response.json();
     const user = {
       email: data.email,
       companyId: data.company_id,
     };
     setUser(user);
+    return user;
+  };
+
+  const fetchLicenses = async (user: any) => {
+    const response = await fetch(
+      `${baseUrl}/api/licenses/company/${user?.companyId}`
+    );
+    const data = await response.json();
+    const licenses = data.map((license: any) => {
+      return {
+        licenseId: license.license_id,
+        valid: license.valid,
+        startDate: license.start_date,
+        endDate: license.end_date,
+        amount: license.amount,
+        productId: license.product_id,
+      };
+    });
+    setLicenses(licenses);
   };
 
   useEffect(() => {
-    fetchUser();
+    fetchUser()
+      .then((user) => fetchLicenses(user))
+      .catch((e) =>
+        console.log("An error occurred while trying to get the licenses.", e)
+      );
   }, []);
 
   return (
@@ -49,7 +83,7 @@ export default function MyAccount() {
       </section>
       <section className="container left-aligned">
         <h2>Licenses</h2>
-        <LicenseList />
+        <LicenseList licenses={licenses} />
       </section>
     </React.Fragment>
   );

@@ -18,8 +18,11 @@ export default function Profile() {
       <Routes>
         <Route path="/" element={<SignIn />} />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
-        <Route path="/:id" element={<MyAccount />} />
-        <Route path="manage-license/:id" element={<ManageLicenseAccess />} />
+        <Route path="/:userId" element={<MyAccount />} />
+        <Route
+          path="manage-license/:userId"
+          element={<ManageLicenseAccess />}
+        />
       </Routes>
     </React.Fragment>
   );
