@@ -1,13 +1,16 @@
 use actix_files::NamedFile;
-use actix_multipart_extract::{File, Multipart, MultipartForm};
+use actix_multipart_extract::{File, MultipartForm};
+use actix_multipart::Multipart;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
-use log::{error, info};
+use log::{error, info, warn};
 use serde::Deserialize;
 use std::fs;
+use futures_util::StreamExt as _;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(get_image);
     cfg.service(post_image);
+    cfg.service(upload_image);
 }
 
 #[get("/{filename:.*}")]
@@ -30,8 +33,8 @@ pub struct ImageUploadForm {
     product_id: String,
 }
 
-#[post("")]
-async fn post_image(payload: Multipart<ImageUploadForm>) -> impl Responder {
+#[post("/")]
+async fn post_image(payload: actix_multipart_extract::Multipart<ImageUploadForm>) -> impl Responder {
     // save file in resources/images/{product_id}/{filename}
     let folder_path = format!("resources/images/{}", payload.product_id);
     if let Err(e) = fs::create_dir_all(&folder_path) {
@@ -50,4 +53,39 @@ async fn post_image(payload: Multipart<ImageUploadForm>) -> impl Responder {
             HttpResponse::InternalServerError().finish()
         }
     }
+}
+#[post("/upload/{product_id}")]
+async fn upload_image(mut payload: Multipart, product_id: web::Path<String>,) -> impl Responder {
+    
+    //TODO check if product exists
+    warn!("Product id: {:?}", product_id);
+
+    let mut image_buffer = Vec::new();
+    // get payload in chunks and collect the image
+    while let Some(mut item) = payload.next().await {
+        let fild = match item{
+            Ok(ref mut field) => field,
+            Err(_) => return HttpResponse::InternalServerError().body("Error getting content disposition"),
+        };
+        let name = match fild.content_disposition().get_name() {
+            Some(name) => name,
+            None => return HttpResponse::BadRequest().body("No field name provided, expected 'image'"),
+        };
+        if name == "image" {
+            while let Some(chunk) = fild.next().await {
+                let data = match chunk {
+                    Ok(data) => data,
+                    Err(_) => return HttpResponse::InternalServerError().body("Error getting chunk"),
+                };
+                image_buffer.extend_from_slice(&data);
+                warn!("Chunk: {:?}", data);
+            }
+        } else {
+            return HttpResponse::BadRequest().body(format!("Wrong field name provided, expected 'image', got: '{}'", name));
+        }
+    }
+    
+    HttpResponse::Ok().body("File saved")
+
+
 }
