@@ -33,7 +33,7 @@ async fn get_image(req: HttpRequest) -> impl Responder {
 
 #[post("/{product_id}")]
 async fn upload_image(
-    mut payload: Multipart,
+    payload: Multipart,
     product_id: web::Path<String>,
     pool: web::Data<Pool<Postgres>>,
 ) -> impl Responder {
@@ -48,67 +48,14 @@ async fn upload_image(
         }
     };
 
-    let mut image_buffer = Vec::new();
-    let mut file_name = String::new();
-    // get payload in chunks and collect the image
-    while let Some(mut item) = payload.next().await {
-        let fild = match item {
-            Ok(ref mut field) => field,
-            Err(_) => {
-                return HttpResponse::InternalServerError()
-                    .json("Error getting content disposition")
-            }
-        };
-        let name = match fild.content_disposition().get_name() {
-            Some(name) => name,
-            None => {
-                return HttpResponse::BadRequest().json("No field name provided, expected 'image'")
-            }
-        };
+    let (image_buffer, file_name) = match get_file_from_multipart(payload).await {
+        Ok((image_buffer, file_name)) => (image_buffer, file_name),
+        Err(error_response) => return error_response,
+    };
 
-        if let Some(filename) = fild.content_disposition().get_filename() {
-            file_name = filename.to_string();
-        } else {
-            return HttpResponse::BadRequest().json("No file name provided");
-        }
-
-        if name == "image" {
-            while let Some(chunk) = fild.next().await {
-                let data = match chunk {
-                    Ok(data) => data,
-                    Err(_) => {
-                        return HttpResponse::InternalServerError().json("Error getting chunk")
-                    }
-                };
-                if (image_buffer.len() + data.len()) > MAX_SIZE {
-                    return HttpResponse::PayloadTooLarge().json("File too large");
-                }
-                image_buffer.extend_from_slice(&data);
-            }
-        } else {
-            return HttpResponse::BadRequest().json(format!(
-                "Wrong field name provided, expected 'image', got: '{}'",
-                name
-            ));
-        }
+    if let Err(error_response) = is_image_valid(&image_buffer) {
+        return error_response;
     }
-
-    let image = match ImageReader::new(Cursor::new(&image_buffer)).with_guessed_format() {
-        Ok(image) => image,
-        Err(_) => return HttpResponse::UnprocessableEntity().json("Not a valid image"),
-    };
-    match image.format() {
-        Some(format) => {
-            if !ALLOWED_FORMATS.contains(&format) {
-                return HttpResponse::UnsupportedMediaType().json(format!(
-                    "File format not allowed, allowed formats: {:?}",
-                    ALLOWED_FORMATS
-                ));
-            }
-            format
-        }
-        None => return HttpResponse::UnprocessableEntity().json("Not an image"),
-    };
 
     // save file in resources/images/{product_id}/{filename}
     let folder_path = format!("resources/images/{}", product_id);
@@ -119,9 +66,8 @@ async fn upload_image(
     let file_path = format!("{}/{}", folder_path, file_name);
     match fs::write(&file_path, &image_buffer) {
         Ok(_) => {
-            let success = json!({
-                "path": format!("/resources/images/{}/{}", product_id, file_name)
-            });
+            let success =
+                json!({ "path": format!("/resources/images/{}/{}", product_id, file_name) });
             info!("File saved: {}", file_path);
             HttpResponse::Created().json(success)
         }
@@ -130,4 +76,78 @@ async fn upload_image(
             HttpResponse::InternalServerError().finish()
         }
     }
+}
+
+/// Takes multipart request and returns buffered file and file name
+async fn get_file_from_multipart(mut payload: Multipart) -> Result<(Vec<u8>, String), HttpResponse> {
+    let mut image_buffer = Vec::new();
+    let mut file_name = String::new();
+    // get payload in chunks and collect the image
+    while let Some(mut item) = payload.next().await {
+        let fild = match item {
+            Ok(ref mut field) => field,
+            Err(_) => {
+                return Err(
+                    HttpResponse::InternalServerError().json("Error getting content disposition")
+                );
+            }
+        };
+        let name = match fild.content_disposition().get_name() {
+            Some(name) => name,
+            None => {
+                return Err(
+                    HttpResponse::BadRequest().json("No field name provided, expected 'image'")
+                );
+            }
+        };
+        if let Some(filename) = fild.content_disposition().get_filename() {
+            file_name = filename.to_string();
+        } else {
+            return Err(HttpResponse::BadRequest().json("No file name provided"));
+        }
+        if name == "image" {
+            while let Some(chunk) = fild.next().await {
+                let data = match chunk {
+                    Ok(data) => data,
+                    Err(_) => {
+                        return Err(HttpResponse::InternalServerError().json("Error getting chunk"));
+                    }
+                };
+                if (image_buffer.len() + data.len()) > MAX_SIZE {
+                    return Err(HttpResponse::PayloadTooLarge().json("File too large"));
+                }
+                image_buffer.extend_from_slice(&data);
+            }
+        } else {
+            return Err(HttpResponse::BadRequest().json(format!(
+                "Wrong field name provided, expected 'image', got: '{}'",
+                name
+            )));
+        }
+    }
+    Ok((image_buffer, file_name))
+}
+
+
+fn is_image_valid(
+    image_buffer: &Vec<u8>,
+) -> Result<(), HttpResponse>
+{
+    let image = match ImageReader::new(Cursor::new(&image_buffer)).with_guessed_format() {
+        Ok(image) => image,
+        Err(_) => return Err(HttpResponse::UnprocessableEntity().json("Not a valid image")),
+    };
+    match image.format() {
+        Some(format) => {
+            if !ALLOWED_FORMATS.contains(&format) {
+                return Err(HttpResponse::UnsupportedMediaType().json(format!(
+                    "File format not allowed, allowed formats: {:?}",
+                    ALLOWED_FORMATS
+                )));
+            }
+            format
+        }
+        None => return Err(HttpResponse::UnprocessableEntity().json("Not an image")),
+    };
+    Ok(())
 }
