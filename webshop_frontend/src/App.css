@@ -24,6 +24,7 @@
   --header-height: 3.5em;
   --max-width: 1200px;
   --gallery-button-size: 2.5rem;
+  --scrollbar-width: 15px;
 
   /* Miscellaneous */
   --transition-speed: 250ms;
@@ -36,12 +37,12 @@
 
 ::-webkit-scrollbar {
   background: transparent;
-  width: 15px;
+  width: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(113, 113, 113, 0.362);
-  
+  background: rgba(113, 113, 113, 0.35);
+
 }
 
 ::-webkit-scrollbar-thumb {
@@ -361,7 +362,7 @@ nav {
   .toggle-container {
     position: absolute;
     top: 0;
-    right: 0;
+    right: var(--scrollbar-width);
     display: block;
     height: var(--header-height);
     width: var(--header-height);
@@ -702,16 +703,23 @@ form a:hover {
 .grid-container {
   display: grid;
   grid-template-columns: repeat(2, 25em);
+  grid-template-rows: auto 1fr;
   column-gap: 4em;
   row-gap: 4em;
   justify-content: center;
   align-items: center;
 }
 
+.grid-container>li {
+  height: 100%;
+}
+
 .product-card {
+  height: 100%;
   padding: 1em;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   background-color: var(--text-secondary);
   -webkit-box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.75);
@@ -731,13 +739,18 @@ form a:hover {
   margin-inline: auto;
 }
 
+.product-card>h2 {
+  line-height: 1.2em;
+  margin-bottom: 0.5em;
+}
+
 .card-description {
-  line-height: 1rem;
+  line-height: 1em;
   margin-top: 0;
   color: var(--text-primary);
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1100px) {
   .grid-container {
     grid-template-columns: 75vw;
   }
@@ -827,7 +840,7 @@ form a:hover {
   flex-direction: column;
   text-align: center;
   align-items: center;
-  color: white;
+  color: var(--text-secondary);
   background: linear-gradient(var(--bg-gradient-secondary));
 }
 
@@ -839,7 +852,7 @@ form a:hover {
 
 .gallery {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: repeat(3, auto);
   max-width: 70em;
 }
 
@@ -852,9 +865,9 @@ form a:hover {
 }
 
 .slide-button {
-  background: rgba(0, 0, 0, 0.306);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 1.5rem;
-  color: white;
+  color: var(--text-secondary);
   font-size: var(--gallery-button-size);
   line-height: var(--gallery-button-size);
   height: 1em;
@@ -868,7 +881,7 @@ form a:hover {
 }
 
 .slide-button:hover {
-  background-color: #0000009a;
+  background-color: rgba(0, 0, 0, 0.60);
 }
 
 .slides-view {
@@ -1076,4 +1089,3 @@ form a:hover {
   font-weight: bold;
   border-bottom: 1px dotted currentColor;
 }
-

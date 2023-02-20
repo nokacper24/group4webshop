@@ -11,7 +11,7 @@ import SelectTable from "./SelectTable";
  */
 export default function ManageLicenseAccess() {
   const { id } = useParams();
-  const totalUsers = 10;
+  const totalUsers = 4;
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState([
     { id: "user 1", columns: [{ text: "user1@companymail.com" }] },
@@ -64,7 +64,7 @@ export default function ManageLicenseAccess() {
   };
 
   const addSelectedUsers = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort();
+    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
       let index = sortedIndices[i];
@@ -81,7 +81,7 @@ export default function ManageLicenseAccess() {
   };
 
   const removeSelectedUsers = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort();
+    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
       let index = sortedIndices[i];

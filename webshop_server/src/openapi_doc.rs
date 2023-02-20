@@ -29,7 +29,7 @@ fn build_info() -> openapi::Info {
         .contact(Some(
             ContactBuilder::new()
                 .name(Some("ProFlex"))
-                .email(Some("amdin@proflexdomain.com"))
+                .email(Some("admin@proflexdomain.com"))
                 .url(Some("https://proflexdomain.com"))
                 .build(),
         ))

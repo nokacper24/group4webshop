@@ -1,35 +1,34 @@
 import { useEffect, useState } from "react";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 
-let baseUrl = "http://localhost:8081";
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 export type State = {
   products: ProductCardProps[];
 };
 
 export default function Products() {
+  const [products, setProducts] = useState<ProductCardProps[]>([]);
 
-    const [products, setProducts] = useState<ProductCardProps[]>([]);
+  const fetchProducts = async () => {
+    const response = await fetch(`${baseUrl}/api/products`);
+    const data = await response.json();
+    const products = data.map((product: any) => {
+      return {
+        props: {
+          product_id: product.product_id,
+          name: product.display_name,
+          description: product.short_description,
+          sourceImage: product.main_image,
+        },
+      };
+    });
 
-    const fetchProducts = async () => {
-        const response = await fetch(`${baseUrl}/api/products`);
-        const data = await response.json();
-        const products = data.map((product: any) => {
-            return {
-                props: {
-                    name: product.display_name,
-                    description: product.short_description,
-                    sourceImage: product.main_image,
-                },
-            };
-        });
+    setProducts(products);
+  };
 
-        setProducts(products);
-    };
-
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-    
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <div>

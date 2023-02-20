@@ -1,9 +1,9 @@
 import React from "react";
-import { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
+import CreateCompanyAccount from "./register/CreateCompanyAccount";
 
 /**
  * The user Profile page.
@@ -13,21 +13,12 @@ import SignIn from "./SignIn";
  * @returns The Profile page component.
  */
 export default function Profile() {
-  const [authenticated, setAuthenticated] = useState<boolean>(
-    localStorage.getItem("authenticated") != null
-  );
-
-  let element;
-  if (!authenticated) {
-    element = <SignIn />;
-  } else {
-    element = <MyAccount />;
-  }
-
   return (
     <React.Fragment>
       <Routes>
-        <Route path="/" element={element} />
+        <Route path="/" element={<SignIn />} />
+        <Route path="/create-account/*" element={<CreateCompanyAccount />} />
+        <Route path="/:id" element={<MyAccount />} />
         <Route path="manage-license/:id" element={<ManageLicenseAccess />} />
       </Routes>
     </React.Fragment>
