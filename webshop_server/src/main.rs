@@ -21,20 +21,8 @@ use crate::data_access::user::Role;
 use crate::middlewares::auth::{check_role, validator, Token};
 
 #[get("/")]
-async fn index(
-    req_token: Option<ReqData<Token>>,
-    pool: web::Data<Pool<Postgres>>,
-) -> impl Responder {
-    let role = check_role(req_token, pool).await;
-    match role {
-        Ok(role) => match role {
-            Role::Admin => HttpResponse::Ok().body("Hello Admin"),
-            Role::CompanyItHead => HttpResponse::Ok().body("Hello Company IT Head"),
-            Role::CompanyIt => HttpResponse::Ok().body("Hello Company IT"),
-            Role::Default => HttpResponse::Ok().body("Hello Default"),
-        },
-        Err(e) => HttpResponse::Unauthorized().body(e),
-    }
+async fn index() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
 }
 
 #[actix_web::main]
@@ -77,7 +65,6 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .wrap(bearer_middleware)
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
