@@ -61,6 +61,11 @@ async fn upload_image(
 }
 
 /// Takes multipart request and returns buffered file and file name
+///
+/// # Returns
+///
+/// * `Ok((Vec<u8>, String))` - Returns a tuple of the image buffer and the file name
+/// * `Err(HttpResponse)` - Returns approperate error response if something went wrong
 async fn get_file_from_multipart(
     mut payload: Multipart,
 ) -> Result<(Vec<u8>, String), HttpResponse> {
@@ -112,6 +117,13 @@ async fn get_file_from_multipart(
     Ok((image_buffer, file_name))
 }
 
+/// Checks if the image is valid
+/// Returns approperate error `HttpResponse` if the image is not valid
+///
+/// # Returns
+///
+/// * `Ok(())` if the image is valid
+/// * `Err(HttpResponse)` if the image is not valid
 fn is_image_valid(image_buffer: &Vec<u8>) -> Result<(), HttpResponse> {
     let image = match ImageReader::new(Cursor::new(&image_buffer)).with_guessed_format() {
         Ok(image) => image,
@@ -132,6 +144,12 @@ fn is_image_valid(image_buffer: &Vec<u8>) -> Result<(), HttpResponse> {
     Ok(())
 }
 
+/// Creates a file in the resources/images/{product_id} folder
+///
+/// # Returns
+///
+/// * `HttpResponse::Created` if the file was created successfully
+/// * `HttpResponse::InternalServerError` if there was an error creating the file
 fn do_file_create(image_buffer: Vec<u8>, file_name: &str, product_id: &str) -> HttpResponse {
     // save file in resources/images/{product_id}/{filename}
     let folder_path = format!("resources/images/{}", product_id);
