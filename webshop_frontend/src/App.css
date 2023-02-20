@@ -710,7 +710,7 @@ form a:hover {
   align-items: center;
 }
 
-.grid-container > li {
+.grid-container>li {
   height: 100%;
 }
 
@@ -739,7 +739,7 @@ form a:hover {
   margin-inline: auto;
 }
 
-.product-card > h2 {
+.product-card>h2 {
   line-height: 1.2em;
   margin-bottom: 0.5em;
 }
@@ -840,7 +840,7 @@ form a:hover {
   flex-direction: column;
   text-align: center;
   align-items: center;
-  color: white;
+  color: var(--text-secondary);
   background: linear-gradient(var(--bg-gradient-secondary));
 }
 
@@ -852,7 +852,7 @@ form a:hover {
 
 .gallery {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: repeat(3, auto);
   max-width: 70em;
 }
 
@@ -865,9 +865,9 @@ form a:hover {
 }
 
 .slide-button {
-  background: rgba(0, 0, 0, 0.306);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 1.5rem;
-  color: white;
+  color: var(--text-secondary);
   font-size: var(--gallery-button-size);
   line-height: var(--gallery-button-size);
   height: 1em;
@@ -881,7 +881,7 @@ form a:hover {
 }
 
 .slide-button:hover {
-  background-color: #0000009a;
+  background-color: rgba(0, 0, 0, 0.60);
 }
 
 .slides-view {
