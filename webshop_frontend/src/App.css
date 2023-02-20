@@ -308,6 +308,10 @@ nav {
   outline: 1px solid transparent;
 }
 
+.nav-link.active {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
 /* Navbar -- Mobile */
 @media (max-width: 900px) {
   nav {
