@@ -1,7 +1,13 @@
-use crate::{data_access::{auth::{self}, self, user::Role}};
+use crate::data_access::{
+    self,
+    auth::{self},
+    user::Role,
+};
 
 use actix_web::{
-    dev::ServiceRequest, web::{self, ReqData}, Error, Result, HttpMessage,
+    dev::ServiceRequest,
+    web::{self, ReqData},
+    Error, HttpMessage, Result,
 };
 
 use serde::{Deserialize, Serialize};
@@ -24,12 +30,15 @@ pub async fn validator(
     req: ServiceRequest,
     credentials: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-
-    let pool = req.app_data::<web::Data<Pool<Postgres>>>().expect("No pool found");
-let cookie = credentials.token();
+    let pool = req
+        .app_data::<web::Data<Pool<Postgres>>>()
+        .expect("No pool found");
+    let cookie = credentials.token();
     let valid = check_auth(cookie, &pool).await;
     if valid {
-        req.extensions_mut().insert(Token { token: cookie.to_string() });
+        req.extensions_mut().insert(Token {
+            token: cookie.to_string(),
+        });
         Ok(req)
     } else {
         Err((actix_web::error::ErrorUnauthorized("Unauthorized"), req))
@@ -41,7 +50,10 @@ pub struct Token {
     token: String,
 }
 
-pub async fn check_role(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>>) -> Result<Role, String> {
+pub async fn check_role(
+    req_token: Option<ReqData<Token>>,
+    pool: web::Data<Pool<Postgres>>,
+) -> Result<Role, String> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();
@@ -60,6 +72,5 @@ pub async fn check_role(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<
             }
         }
         _ => Err("Unauthorized".to_string()),
-
     }
 }

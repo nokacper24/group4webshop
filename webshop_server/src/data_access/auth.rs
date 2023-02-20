@@ -7,8 +7,8 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Cookie {
-   pub id: i32,
-   pub cookie: String,
+    pub id: i32,
+    pub cookie: String,
     pub exp: DateTime<Utc>,
     pub user_id: i32,
 }

@@ -3,7 +3,6 @@ use sqlx::{
     query, {Pool, Postgres},
 };
 
-
 /// Description component. Contains either text or image.
 /// Database has constraints to ensure that only one of them is Some.
 #[derive(Debug, Serialize, Deserialize)]
@@ -240,11 +239,9 @@ pub async fn create_component(
                 image: component.image,
             })
         }
-        ComponentType::Invalid => {
-            Err(DescriptionCompError::InvalidComponent(
-                "Invalid component".into(),
-            ))
-        }
+        ComponentType::Invalid => Err(DescriptionCompError::InvalidComponent(
+            "Invalid component".into(),
+        )),
     }
 }
 

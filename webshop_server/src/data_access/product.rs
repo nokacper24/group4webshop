@@ -1,5 +1,3 @@
-
-
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, {Pool, Postgres},

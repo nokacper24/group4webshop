@@ -14,14 +14,13 @@ pub struct User {
 }
 
 #[derive(sqlx::Type, Serialize, Deserialize, Debug)]
-#[sqlx(type_name = "role_enum", rename_all = "snake_case" )]
+#[sqlx(type_name = "role_enum", rename_all = "snake_case")]
 pub enum Role {
     Admin,
     CompanyItHead,
     CompanyIt,
     Default,
 }
-
 
 pub struct RoleStruct {
     role: Role,
@@ -45,8 +44,12 @@ pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<User,
 }
 
 pub async fn get_role_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<Role, sqlx::Error> {
-    let role = query_as!(RoleStruct, r#"SELECT role as "role: _" FROM app_user WHERE user_id = $1"#, user_id)
-        .fetch_one(pool)
-        .await?;
+    let role = query_as!(
+        RoleStruct,
+        r#"SELECT role as "role: _" FROM app_user WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(role.role)
 }

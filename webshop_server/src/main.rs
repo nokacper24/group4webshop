@@ -1,7 +1,7 @@
 use actix_cors::Cors;
-use actix_web::HttpResponse;
 use actix_web::http::Error;
 use actix_web::web::ReqData;
+use actix_web::HttpResponse;
 use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
@@ -13,29 +13,26 @@ mod openapi_doc;
 mod routes;
 
 use routes::public::public;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
 use crate::data_access::user::Role;
-use crate::middlewares::auth::{validator, check_role, Token};
-
-
-
-
+use crate::middlewares::auth::{check_role, validator, Token};
 
 #[get("/")]
-async fn index(req_token: Option<ReqData<Token>>, pool: web::Data<Pool<Postgres>> )  -> impl Responder {
+async fn index(
+    req_token: Option<ReqData<Token>>,
+    pool: web::Data<Pool<Postgres>>,
+) -> impl Responder {
     let role = check_role(req_token, pool).await;
     match role {
-        Ok(role) => {
-            match role {
-                Role::Admin => HttpResponse::Ok().body("Hello Admin"),
-                Role::CompanyItHead => HttpResponse::Ok().body("Hello Company IT Head"),
-                Role::CompanyIt => HttpResponse::Ok().body("Hello Company IT"),
-                Role::Default => HttpResponse::Ok().body("Hello Default"),
-            }
-        }
+        Ok(role) => match role {
+            Role::Admin => HttpResponse::Ok().body("Hello Admin"),
+            Role::CompanyItHead => HttpResponse::Ok().body("Hello Company IT Head"),
+            Role::CompanyIt => HttpResponse::Ok().body("Hello Company IT"),
+            Role::Default => HttpResponse::Ok().body("Hello Default"),
+        },
         Err(e) => HttpResponse::Unauthorized().body(e),
     }
 }
@@ -81,7 +78,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .wrap(bearer_middleware)
-            
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
