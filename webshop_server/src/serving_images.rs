@@ -4,7 +4,11 @@ use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use futures_util::StreamExt;
 use image::{io::Reader as ImageReader, ImageFormat};
 use log::{error, info};
+use serde_json::json;
+use sqlx::{Pool, Postgres};
 use std::{fs, io::Cursor};
+
+use crate::data_access::product;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(get_image);
@@ -25,8 +29,21 @@ async fn get_image(req: HttpRequest) -> impl Responder {
 }
 
 #[post("/{product_id}")]
-async fn upload_image(mut payload: Multipart, product_id: web::Path<String>) -> impl Responder {
-    //TODO check if product exists
+async fn upload_image(
+    mut payload: Multipart,
+    product_id: web::Path<String>,
+    pool: web::Data<Pool<Postgres>>,
+) -> impl Responder {
+    match product::product_exists(&pool, product_id.as_str()).await {
+        Ok(exists) => {
+            if !exists {
+                return HttpResponse::NotFound().json("Product not found");
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
 
     let max_size = 5 * 1024 * 1024;
     let allowed_formats = vec![ImageFormat::Jpeg, ImageFormat::Png];
@@ -39,20 +56,20 @@ async fn upload_image(mut payload: Multipart, product_id: web::Path<String>) -> 
             Ok(ref mut field) => field,
             Err(_) => {
                 return HttpResponse::InternalServerError()
-                    .body("Error getting content disposition")
+                    .json("Error getting content disposition")
             }
         };
         let name = match fild.content_disposition().get_name() {
             Some(name) => name,
             None => {
-                return HttpResponse::BadRequest().body("No field name provided, expected 'image'")
+                return HttpResponse::BadRequest().json("No field name provided, expected 'image'")
             }
         };
 
         if let Some(filename) = fild.content_disposition().get_filename() {
             file_name = filename.to_string();
         } else {
-            return HttpResponse::BadRequest().body("No file name provided");
+            return HttpResponse::BadRequest().json("No file name provided");
         }
 
         if name == "image" {
@@ -60,16 +77,16 @@ async fn upload_image(mut payload: Multipart, product_id: web::Path<String>) -> 
                 let data = match chunk {
                     Ok(data) => data,
                     Err(_) => {
-                        return HttpResponse::InternalServerError().body("Error getting chunk")
+                        return HttpResponse::InternalServerError().json("Error getting chunk")
                     }
                 };
                 if (image_buffer.len() + data.len()) > max_size {
-                    return HttpResponse::PayloadTooLarge().body("File too large");
+                    return HttpResponse::PayloadTooLarge().json("File too large");
                 }
                 image_buffer.extend_from_slice(&data);
             }
         } else {
-            return HttpResponse::BadRequest().body(format!(
+            return HttpResponse::BadRequest().json(format!(
                 "Wrong field name provided, expected 'image', got: '{}'",
                 name
             ));
@@ -78,19 +95,19 @@ async fn upload_image(mut payload: Multipart, product_id: web::Path<String>) -> 
 
     let image = match ImageReader::new(Cursor::new(&image_buffer)).with_guessed_format() {
         Ok(image) => image,
-        Err(_) => return HttpResponse::UnprocessableEntity().body("Not a valid image"),
+        Err(_) => return HttpResponse::UnprocessableEntity().json("Not a valid image"),
     };
     match image.format() {
         Some(format) => {
             if !allowed_formats.contains(&format) {
-                return HttpResponse::UnsupportedMediaType().body(format!(
+                return HttpResponse::UnsupportedMediaType().json(format!(
                     "File format not allowed, allowed formats: {:?}",
                     allowed_formats
                 ));
             }
             format
         }
-        None => return HttpResponse::UnprocessableEntity().body("Not an image"),
+        None => return HttpResponse::UnprocessableEntity().json("Not an image"),
     };
 
     // save file in resources/images/{product_id}/{filename}
@@ -102,9 +119,11 @@ async fn upload_image(mut payload: Multipart, product_id: web::Path<String>) -> 
     let file_path = format!("{}/{}", folder_path, file_name);
     match fs::write(&file_path, &image_buffer) {
         Ok(_) => {
-            let success = format!("File saved: {}", file_path);
-            info!("{}", success);
-            HttpResponse::Created().body(success)
+            let success = json!({
+                "path": format!("/resources/images/{}/{}", product_id, file_name)
+            });
+            info!("File saved: {}", file_path);
+            HttpResponse::Created().json(success)
         }
         Err(e) => {
             error!("Error writing file: {}", e);
