@@ -37,6 +37,7 @@ export default function SelectTable(props: SelectTableProps) {
   const [selectAll, setSelectAll] = useState("none");
 
   const clearSelected = () => {
+    setSelectedRows(0);
     setSelectedRowsIndices([]);
   };
 
