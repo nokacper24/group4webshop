@@ -10,6 +10,9 @@ use std::{fs, io::Cursor};
 
 use crate::data_access::product;
 
+const MAX_SIZE: usize = 1024 * 1024 * 5; // 5 MB
+const ALLOWED_FORMATS: [ImageFormat; 2] = [ImageFormat::Png, ImageFormat::Jpeg];
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(get_image);
     cfg.service(upload_image);
@@ -45,9 +48,6 @@ async fn upload_image(
         }
     };
 
-    let max_size = 5 * 1024 * 1024;
-    let allowed_formats = vec![ImageFormat::Jpeg, ImageFormat::Png];
-
     let mut image_buffer = Vec::new();
     let mut file_name = String::new();
     // get payload in chunks and collect the image
@@ -80,7 +80,7 @@ async fn upload_image(
                         return HttpResponse::InternalServerError().json("Error getting chunk")
                     }
                 };
-                if (image_buffer.len() + data.len()) > max_size {
+                if (image_buffer.len() + data.len()) > MAX_SIZE {
                     return HttpResponse::PayloadTooLarge().json("File too large");
                 }
                 image_buffer.extend_from_slice(&data);
@@ -99,10 +99,10 @@ async fn upload_image(
     };
     match image.format() {
         Some(format) => {
-            if !allowed_formats.contains(&format) {
+            if !ALLOWED_FORMATS.contains(&format) {
                 return HttpResponse::UnsupportedMediaType().json(format!(
                     "File format not allowed, allowed formats: {:?}",
-                    allowed_formats
+                    ALLOWED_FORMATS
                 ));
             }
             format
