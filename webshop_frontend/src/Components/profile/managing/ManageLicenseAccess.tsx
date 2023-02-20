@@ -11,17 +11,24 @@ import SelectTable from "./SelectTable";
  */
 export default function ManageLicenseAccess() {
   const { id } = useParams();
-  const totalUsers = 4;
+  const totalUsers = 10;
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState([
     { id: "user 1", columns: [{ text: "user1@companymail.com" }] },
     { id: "user 2", columns: [{ text: "user2@companymail.com" }] },
     { id: "user 3", columns: [{ text: "user3@companymail.com" }] },
     { id: "user 4", columns: [{ text: "user4@companymail.com" }] },
+    { id: "user 5", columns: [{ text: "user5@companymail.com" }] },
+    { id: "user 6", columns: [{ text: "user6@companymail.com" }] },
   ]);
 
   const [usersWithAccess, setUsersWithAccess] = useState([
-    { id: "user 5", columns: [{ text: "user5@companymail.com" }] },
+    { id: "user 7", columns: [{ text: "user7@companymail.com" }] },
+    { id: "user 8", columns: [{ text: "user8@companymail.com" }] },
+    { id: "user 9", columns: [{ text: "user9@companymail.com" }] },
+    { id: "user 10", columns: [{ text: "user10@companymail.com" }] },
+    { id: "user 11", columns: [{ text: "user11@companymail.com" }] },
+    { id: "user 12", columns: [{ text: "user12@companymail.com" }] },
   ]);
 
   const addUser = (index: number) => {
@@ -41,8 +48,6 @@ export default function ManageLicenseAccess() {
   };
 
   const removeUser = (index: number) => {
-    console.log("Removing user... " + index);
-
     /* Get the user to be moved from "with access" to "without access" */
     let user = withAccessTable.rows[index];
 
