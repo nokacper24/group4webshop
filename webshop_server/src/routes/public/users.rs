@@ -1,4 +1,4 @@
-use crate::data_access::user::{get_all_users, get_user_by_id, User};
+use crate::data_access::user::{self, User};
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
@@ -6,6 +6,7 @@ use utoipa::OpenApi;
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
+    cfg.service(users_by_company);
 }
 
 #[derive(OpenApi)]
@@ -17,7 +18,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         schemas(User)
     ),
     tags(
-        (name = "Users", description = "Api endpoints for users")
+        (name = "Users", description = "API endpoints for users")
     ),
 )]
 pub struct UserApiDoc;
@@ -31,7 +32,7 @@ pub struct UserApiDoc;
 )]
 #[get("/users")]
 async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    let users = get_all_users(&pool).await;
+    let users = user::get_all_users(&pool).await;
 
     //error check
     if users.is_err() {
@@ -52,7 +53,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let user = get_user_by_id(&pool, id).await;
+    let user = user::get_user_by_id(&pool, id).await;
 
     //error check
     if user.is_err() {
@@ -60,6 +61,30 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     }
 
     //parse to json
+    if let Ok(user) = user {
+        return HttpResponse::Ok().json(user);
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+#[get("/company/{company_id}/users")]
+async fn users_by_company(
+    pool: web::Data<Pool<Postgres>>,
+    company_id: web::Path<String>,
+) -> impl Responder {
+    let company_id = match company_id.parse::<i32>() {
+        Ok(company_id) => company_id,
+        Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
+    };
+    let user = user::get_users_by_company(&pool, &company_id).await;
+
+    // Error check
+    if user.is_err() {
+        return HttpResponse::InternalServerError().json("Internal Server Error");
+    }
+
+    // Parse to JSON
     if let Ok(user) = user {
         return HttpResponse::Ok().json(user);
     }
