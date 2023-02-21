@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { LicenseProps } from "../MyAccount";
 
 type LicenseRowProps = {
@@ -14,6 +14,7 @@ type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
+  const { userId } = useParams();
   const [collapsed, setCollapsed] = useState(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
@@ -23,7 +24,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     <button className="default-button small-button">Cancel renewal</button>
   );
   const manageButton = (
-    <Link to={"manage-license/" + license.licenseId}>
+    <Link to={`/profile/manage-license/${license.licenseId}`}>
       <button className="default-button small-button">Manage access</button>
     </Link>
   );

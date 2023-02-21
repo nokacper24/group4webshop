@@ -1,4 +1,3 @@
-import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
@@ -14,16 +13,16 @@ import CreateCompanyAccount from "./register/CreateCompanyAccount";
  */
 export default function Profile() {
   return (
-    <React.Fragment>
+    <>
       <Routes>
         <Route path="/" element={<SignIn />} />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
         <Route path="/:userId" element={<MyAccount />} />
         <Route
-          path="manage-license/:userId"
+          path="/manage-license/:licenseId"
           element={<ManageLicenseAccess />}
         />
       </Routes>
-    </React.Fragment>
+    </>
   );
 }
