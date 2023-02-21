@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import LicenseList from "./managing/LicenseList";
 
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-
-type UserProps = {
+export type UserProps = {
   email: string;
   companyId: string;
 };
@@ -26,6 +24,8 @@ export type LicenseProps = {
  * @returns The My Account page component.
  */
 export default function MyAccount() {
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+
   const { userId } = useParams();
   const [user, setUser] = useState<UserProps>();
   const [licenses, setLicenses] = useState<LicenseProps[]>([]);
@@ -41,9 +41,9 @@ export default function MyAccount() {
     return user;
   };
 
-  const fetchLicenses = async (user: any) => {
+  const fetchLicenses = async (companyId: string) => {
     const response = await fetch(
-      `${baseUrl}/api/licenses/company/${user?.companyId}`
+      `${baseUrl}/api/company/${companyId}/licenses`
     );
     const data = await response.json();
     const licenses = data.map((license: any) => {
@@ -61,14 +61,14 @@ export default function MyAccount() {
 
   useEffect(() => {
     fetchUser()
-      .then((user) => fetchLicenses(user))
+      .then((user) => fetchLicenses(user.companyId))
       .catch((e) =>
         console.log("An error occurred while trying to get the licenses.", e)
       );
   }, []);
 
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>My account</h1>
         <div className="user-details">
@@ -85,6 +85,6 @@ export default function MyAccount() {
         <h2>Licenses</h2>
         <LicenseList licenses={licenses} />
       </section>
-    </React.Fragment>
+    </>
   );
 }
