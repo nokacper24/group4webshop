@@ -24,7 +24,7 @@ export type LicenseProps = {
  * @returns The My Account page component.
  */
 export default function MyAccount() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 
   const { userId } = useParams();
   const [user, setUser] = useState<UserProps>();
