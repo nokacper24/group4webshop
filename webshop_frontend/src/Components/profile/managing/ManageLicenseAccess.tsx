@@ -1,7 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
 import { UserProps, LicenseProps } from "../MyAccount";
+
+type UserRowProps = {
+  id: string;
+  columns: { text: string }[];
+};
 
 /**
  * A Manage License Access page.
@@ -13,26 +18,13 @@ import { UserProps, LicenseProps } from "../MyAccount";
 export default function ManageLicenseAccess() {
   const { licenseId } = useParams();
   const [license, setLicense] = useState<LicenseProps>();
-  const [users, setUsers] = useState<UserProps>();
+  const [users, setUsers] = useState<UserProps[]>([]);
   const totalUsers = 4;
 
-  const [usersWithoutAccess, setUsersWithoutAccess] = useState([
-    { id: "user 1", columns: [{ text: "user1@companymail.com" }] },
-    { id: "user 2", columns: [{ text: "user2@companymail.com" }] },
-    { id: "user 3", columns: [{ text: "user3@companymail.com" }] },
-    { id: "user 4", columns: [{ text: "user4@companymail.com" }] },
-    { id: "user 5", columns: [{ text: "user5@companymail.com" }] },
-    { id: "user 6", columns: [{ text: "user6@companymail.com" }] },
-  ]);
-
-  const [usersWithAccess, setUsersWithAccess] = useState([
-    { id: "user 7", columns: [{ text: "user7@companymail.com" }] },
-    { id: "user 8", columns: [{ text: "user8@companymail.com" }] },
-    { id: "user 9", columns: [{ text: "user9@companymail.com" }] },
-    { id: "user 10", columns: [{ text: "user10@companymail.com" }] },
-    { id: "user 11", columns: [{ text: "user11@companymail.com" }] },
-    { id: "user 12", columns: [{ text: "user12@companymail.com" }] },
-  ]);
+  const [usersWithoutAccess, setUsersWithoutAccess] = useState<UserRowProps[]>(
+    []
+  );
+  const [usersWithAccess, setUsersWithAccess] = useState<UserRowProps[]>([]);
 
   const addUserAccess = (index: number) => {
     /* Get the user to be moved from "without access" to "with access" */
@@ -124,6 +116,7 @@ export default function ManageLicenseAccess() {
   };
 
   const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  const isInitialMount = useRef(true);
 
   const fetchLicense = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
@@ -142,24 +135,71 @@ export default function ManageLicenseAccess() {
   };
 
   const fetchCompanyUsers = async (companyId: string) => {
-    const response = await fetch(`${baseUrl}/api/company/${companyId}/users`);
+    const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
     const users = data.map((user: any) => {
       return {
         userId: user.user_id,
         email: user.email,
+        companyId: user.company_id,
       };
     });
     setUsers(users);
   };
 
+  const fetchUsersWithAccess = async () => {
+    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
+    const data = await response.json();
+    const users: UserProps[] = data.map((user: any) => {
+      return {
+        userId: user.user_id,
+        email: user.email,
+        companyId: user.company_id,
+      };
+    });
+    return users;
+  };
+
   useEffect(() => {
+    // Get license and users
     fetchLicense()
       .then((license) => fetchCompanyUsers(license.companyId))
       .catch((e) =>
-        console.log("An error occurred while trying to get the license.", e)
+        console.log(
+          "An error occurred while trying to get the license or users."
+        )
       );
   }, []);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      // Sort users between those with and without license access
+      fetchUsersWithAccess()
+        .then((x) => {
+          var withoutAccess: UserProps[] = [];
+          var withAccess: UserProps[] = [];
+
+          withoutAccess = users.filter(
+            (arr1) => !x.find((arr2) => arr2.userId === arr1.userId)
+          );
+          withAccess = x;
+
+          setUsersWithoutAccess(
+            withoutAccess.map((user) => {
+              return { id: user.userId, columns: [{ text: user.email }] };
+            })
+          );
+          setUsersWithAccess(
+            withAccess.map((user) => {
+              return { id: user.userId, columns: [{ text: user.email }] };
+            })
+          );
+        })
+        .catch(() => console.log("Error fetching users with license access."));
+    }
+  }, [users]);
 
   return (
     <>
