@@ -212,6 +212,13 @@ export default function ManageLicenseAccess() {
           Active users: {usersWithAccess.length}
           <br></br>
           Total allowed: {license?.amount}
+          <br></br>
+          Start date: {license?.startDate}
+          <br></br>
+          End date: {license?.endDate}
+          <br></br>
+          Status: {license?.valid ? "Active" : "Expired"}
+          <br></br>
         </p>
       </section>
 
