@@ -69,9 +69,12 @@ pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 #[get("/licenses/{license_id}")]
 async fn license_by_id(
     pool: web::Data<Pool<Postgres>>,
-    license_id: web::Path<i32>,
+    license_id: web::Path<String>,
 ) -> impl Responder {
-    let license_id = license_id.into_inner();
+    let license_id = match license_id.parse::<i32>() {
+        Ok(license_id) => license_id,
+        Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
+    };
     let license = license::get_license_by_id(&pool, &license_id).await;
 
     // Error check
@@ -103,9 +106,12 @@ async fn license_by_id(
 #[get("/company/{company_id}/licenses")]
 async fn licenses_by_company(
     pool: web::Data<Pool<Postgres>>,
-    company_id: web::Path<i32>,
+    company_id: web::Path<String>,
 ) -> impl Responder {
-    let company_id = company_id.into_inner();
+    let company_id = match company_id.parse::<i32>() {
+        Ok(company_id) => company_id,
+        Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
+    };
     let license = license::get_licenses_by_company(&pool, &company_id).await;
 
     // Error check
