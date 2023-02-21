@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import LicenseList from "./managing/LicenseList";
 
 export type UserProps = {
+  userId: string;
   email: string;
   companyId: string;
 };
@@ -34,6 +35,7 @@ export default function MyAccount() {
     const response = await fetch(`${baseUrl}/api/users/${userId}`);
     const data = await response.json();
     const user = {
+      userId: data.user_id,
       email: data.email,
       companyId: data.company_id,
     };
@@ -43,7 +45,7 @@ export default function MyAccount() {
 
   const fetchLicenses = async (companyId: string) => {
     const response = await fetch(
-      `${baseUrl}/api/company/${companyId}/licenses`
+      `${baseUrl}/api/companies/${companyId}/licenses`
     );
     const data = await response.json();
     const licenses = data.map((license: any) => {
@@ -62,8 +64,10 @@ export default function MyAccount() {
   useEffect(() => {
     fetchUser()
       .then((user) => fetchLicenses(user.companyId))
-      .catch((e) =>
-        console.log("An error occurred while trying to get the licenses.", e)
+      .catch(() =>
+        console.log(
+          "An error occurred while trying to get the user or licenses."
+        )
       );
   }, []);
 
