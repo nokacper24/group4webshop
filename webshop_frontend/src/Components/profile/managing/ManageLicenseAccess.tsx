@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
+import { UserProps, LicenseProps } from "../MyAccount";
 
 /**
  * A Manage License Access page.
@@ -10,7 +11,9 @@ import SelectTable from "./SelectTable";
  * @returns A Manage License Access page component.
  */
 export default function ManageLicenseAccess() {
-  const { userId } = useParams();
+  const { licenseId } = useParams();
+  const [license, setLicense] = useState<LicenseProps>();
+  const [users, setUsers] = useState<UserProps>();
   const totalUsers = 4;
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState([
@@ -31,7 +34,7 @@ export default function ManageLicenseAccess() {
     { id: "user 12", columns: [{ text: "user12@companymail.com" }] },
   ]);
 
-  const addUser = (index: number) => {
+  const addUserAccess = (index: number) => {
     /* Get the user to be moved from "without access" to "with access" */
     let user = withoutAccessTable.rows[index];
 
@@ -47,7 +50,7 @@ export default function ManageLicenseAccess() {
     setUsersWithAccess(withAccessTable.rows);
   };
 
-  const removeUser = (index: number) => {
+  const removeUserAccess = (index: number) => {
     /* Get the user to be moved from "with access" to "without access" */
     let user = withAccessTable.rows[index];
 
@@ -63,7 +66,7 @@ export default function ManageLicenseAccess() {
     setUsersWithoutAccess(withoutAccessTable.rows);
   };
 
-  const addSelectedUsers = (selectedRowsIndices: number[]) => {
+  const addSelectedUsersAccess = (selectedRowsIndices: number[]) => {
     let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
@@ -80,7 +83,7 @@ export default function ManageLicenseAccess() {
     setUsersWithAccess(withAccessTable.rows);
   };
 
-  const removeSelectedUsers = (selectedRowsIndices: number[]) => {
+  const removeSelectedUsersAccess = (selectedRowsIndices: number[]) => {
     let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
@@ -103,8 +106,10 @@ export default function ManageLicenseAccess() {
       columns: [{ text: "Users" }, { text: "Access" }],
     },
     rows: usersWithoutAccess,
-    button: { text: "Add", action: addUser },
-    outsideButtons: [{ text: "Add all selected", action: addSelectedUsers }],
+    button: { text: "Add", action: addUserAccess },
+    outsideButtons: [
+      { text: "Add all selected", action: addSelectedUsersAccess },
+    ],
   };
 
   const withAccessTable = {
@@ -112,19 +117,56 @@ export default function ManageLicenseAccess() {
       columns: [{ text: "Users" }, { text: "Access" }],
     },
     rows: usersWithAccess,
-    button: { text: "Remove", action: removeUser },
+    button: { text: "Remove", action: removeUserAccess },
     outsideButtons: [
-      { text: "Remove all selected", action: removeSelectedUsers },
+      { text: "Remove all selected", action: removeSelectedUsersAccess },
     ],
   };
 
+  const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+
+  const fetchLicense = async () => {
+    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
+    const data = await response.json();
+    const license = {
+      licenseId: data.license_id,
+      valid: data.valid,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      amount: data.amount,
+      companyId: data.company_id,
+      productId: data.product_id,
+    };
+    setLicense(license);
+    return license;
+  };
+
+  const fetchCompanyUsers = async (companyId: string) => {
+    const response = await fetch(`${baseUrl}/api/company/${companyId}/users`);
+    const data = await response.json();
+    const users = data.map((user: any) => {
+      return {
+        userId: user.user_id,
+        email: user.email,
+      };
+    });
+    console.log(users);
+    setUsers(users);
+  };
+
+  useEffect(() => {
+    fetchLicense()
+      .then((license) => fetchCompanyUsers(license.companyId))
+      .catch((e) => console.log(e, "License: ", license));
+  }, []);
+
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>Manage license access</h1>
         <p>
           {/* TODO: Fetch product name of license */}
-          {userId}
+          {license?.productId}
         </p>
       </section>
 
@@ -161,6 +203,6 @@ export default function ManageLicenseAccess() {
           </span>
         </p>
       </section>
-    </React.Fragment>
+    </>
   );
 }
