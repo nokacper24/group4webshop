@@ -1,7 +1,8 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
+use utoipa::OpenApi;
 
-use crate::data_access::license::{get_license_by_id, get_licenses, get_licenses_by_company};
+use crate::data_access::license::{self, License};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(licenses);
@@ -9,10 +10,34 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(licenses_by_company);
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        licenses,
+        license_by_id,
+        licenses_by_company
+    ),
+    components(
+        schemas(License)
+    ),
+    tags(
+        (name = "Licenses", description = "API endpoints for licenses")
+    ),
+)]
+pub struct LicensesOpenApi;
+
 /// Get all licenses.
-#[get("licenses")]
+#[utoipa::path(
+    context_path = "/api",
+    get,
+    responses(
+    (status = 200, description = "List of all licenses", body = Vec<License>),
+    (status = 500, description = "Internal Server Error"),
+)
+)]
+#[get("/licenses")]
 pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    let licenses = get_licenses(&pool).await;
+    let licenses = license::get_licenses(&pool).await;
 
     // Error check
     if licenses.is_err() {
@@ -28,13 +53,26 @@ pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 }
 
 /// Get a specific license by ID.
-#[get("licenses/{license_id}")]
+#[utoipa::path (
+    context_path = "/api",
+    get,
+    responses(
+        (status = 200, description = "Returns a specific license", body = License),
+        (status = 404, description = "License not found"),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    params(
+        ("license_id", description = "The ID of the license"),
+        )
+    )
+]
+#[get("/licenses/{license_id}")]
 async fn license_by_id(
     pool: web::Data<Pool<Postgres>>,
     license_id: web::Path<i32>,
 ) -> impl Responder {
     let license_id = license_id.into_inner();
-    let license = get_license_by_id(&pool, &license_id).await;
+    let license = license::get_license_by_id(&pool, &license_id).await;
 
     // Error check
     if license.is_err() {
@@ -50,13 +88,25 @@ async fn license_by_id(
 }
 
 /// Get all licenses for a company.
-#[get("licenses/company/{company_id}")]
+#[utoipa::path (
+    context_path = "/api",
+    get,
+    responses(
+        (status = 200, description = "Returns all licenses for a specific company", body = Vec<License>),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    params(
+        ("company_id", description = "The ID of the company"),
+        )
+    )
+]
+#[get("/company/{company_id}/licenses")]
 async fn licenses_by_company(
     pool: web::Data<Pool<Postgres>>,
     company_id: web::Path<i32>,
 ) -> impl Responder {
     let company_id = company_id.into_inner();
-    let license = get_licenses_by_company(&pool, &company_id).await;
+    let license = license::get_licenses_by_company(&pool, &company_id).await;
 
     // Error check
     if license.is_err() {
