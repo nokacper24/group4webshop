@@ -7,6 +7,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
     cfg.service(users_by_company);
+    cfg.service(users_by_license);
 }
 
 #[derive(OpenApi)]
@@ -68,7 +69,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
-#[get("/company/{company_id}/users")]
+#[get("/companies/{company_id}/users")]
 async fn users_by_company(
     pool: web::Data<Pool<Postgres>>,
     company_id: web::Path<String>,
@@ -77,16 +78,40 @@ async fn users_by_company(
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let user = user::get_users_by_company(&pool, &company_id).await;
+    let other_users = user::get_users_by_company(&pool, &company_id).await;
 
     // Error check
-    if user.is_err() {
+    if other_users.is_err() {
         return HttpResponse::InternalServerError().json("Internal Server Error");
     }
 
     // Parse to JSON
-    if let Ok(user) = user {
-        return HttpResponse::Ok().json(user);
+    if let Ok(other_users) = other_users {
+        return HttpResponse::Ok().json(other_users);
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+#[get("/licenses/{license_id}/users")]
+async fn users_by_license(
+    pool: web::Data<Pool<Postgres>>,
+    license_id: web::Path<String>,
+) -> impl Responder {
+    let license_id = match license_id.parse::<i32>() {
+        Ok(license_id) => license_id,
+        Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
+    };
+    let other_users = user::get_users_by_license(&pool, &license_id).await;
+
+    // Error check
+    if other_users.is_err() {
+        return HttpResponse::InternalServerError().json("Internal Server Error");
+    }
+
+    // Parse to JSON
+    if let Ok(other_users) = other_users {
+        return HttpResponse::Ok().json(other_users);
     }
 
     HttpResponse::InternalServerError().json("Internal Server Error")

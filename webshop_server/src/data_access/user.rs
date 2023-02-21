@@ -60,6 +60,24 @@ pub async fn get_users_by_company(
     Ok(users)
 }
 
+/// Returns all the users for a license
+pub async fn get_users_by_license(
+    pool: &Pool<Postgres>,
+    license_id: &i32,
+) -> Result<Vec<User>, sqlx::Error> {
+    let users = query_as!(
+        User,
+        r#"SELECT app_user.user_id, email, pass_hash, company_id, role as "role: _"
+        FROM app_user
+        INNER JOIN user_license USING (user_id)
+        WHERE license_id = $1"#,
+        license_id
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(users)
+}
+
 pub async fn get_role_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<Role, sqlx::Error> {
     let role = query_as!(
         RoleStruct,
