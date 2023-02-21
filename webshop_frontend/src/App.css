@@ -1062,7 +1062,7 @@ form a:hover {
   text-align: center;
 }
 
-.select-table td:last-child {
+.select-table th:last-child {
   width: 10em;
 }
 
