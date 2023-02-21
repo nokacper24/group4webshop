@@ -150,14 +150,15 @@ export default function ManageLicenseAccess() {
         email: user.email,
       };
     });
-    console.log(users);
     setUsers(users);
   };
 
   useEffect(() => {
     fetchLicense()
       .then((license) => fetchCompanyUsers(license.companyId))
-      .catch((e) => console.log(e, "License: ", license));
+      .catch((e) =>
+        console.log("An error occurred while trying to get the license.", e)
+      );
   }, []);
 
   return (
