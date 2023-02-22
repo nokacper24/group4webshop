@@ -821,6 +821,7 @@ form a:hover {
 .row-text {
   max-width: 50vw;
   line-height: 1.5em;
+  margin-inline: auto;
 }
 
 @media (max-width: 800px) {
