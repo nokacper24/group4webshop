@@ -12,7 +12,7 @@ CREATE TABLE register_company_user (
     id SERIAL PRIMARY KEY,
     key TEXT NOT NULL,
     email TEXT NOT NULL,
-    exp_date DATE NOT NULL,
+    exp_date timestamptz NOT NULL,
     company_id INT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company(company_id)
 );
@@ -30,7 +30,7 @@ CREATE TABLE register_user (
     id SERIAL PRIMARY KEY,
     key TEXT NOT NULL,
     email TEXT NOT NULL,
-    exp_date DATE NOT NULL
+    exp_date timestamptz NOT NULL
 );
 
 CREATE TABLE cookies (
@@ -53,8 +53,8 @@ CREATE TABLE product (
 CREATE TABLE license (
     license_id SERIAL PRIMARY KEY,
     valid BOOLEAN NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    start_date timestamptz NOT NULL,
+    end_date timestamptz NOT NULL,
     amount INT NOT NULL,
     company_id INT NOT NULL,
     product_id TEXT NOT NULL,
