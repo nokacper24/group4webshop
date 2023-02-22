@@ -91,14 +91,9 @@ pub async fn create_invite(
     // create a 64 character long key based on A-Z, a-z, 0-9. wihtout using uuid.
     let mut key = String::new();
     for _ in 0..64 {
-        let c = rand::random::<u8>();
-        if c < 10 {
-            key.push_str(&c.to_string());
-        } else if c < 36 {
-            key.push((c + 55) as char);
-        } else {
-            key.push((c + 61) as char);
-        }
+        //generate a random ASCII character
+        let ascii = rand::random::<u8>() % 26 + 65;
+        key.push(ascii as char);
     }
 
     let exp_date = Utc::now() + Duration::days(1);
