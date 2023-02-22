@@ -17,15 +17,57 @@ type UserRowProps = {
  */
 export default function ManageLicenseAccess() {
   const { licenseId } = useParams();
-  const [license, setLicense] = useState<LicenseProps>();
+  const [license, setLicense] = useState<LicenseProps>({
+    licenseId: 0,
+    valid: false,
+    startDate: new Date("2020-01-01"),
+    endDate: new Date("2020-01-01"),
+    amount: 0,
+    companyId: 0,
+    productId: "0",
+  });
   const [users, setUsers] = useState<UserProps[]>([]);
   const totalUsers = 4;
+
+  const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
+  const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState<UserRowProps[]>(
     []
   );
   const [usersWithAccess, setUsersWithAccess] = useState<UserRowProps[]>([]);
 
+  /**
+   * Update if the user access has been changed (from original) when adding user.
+   *
+   * @param user The user to check if their access has changed.
+   */
+  const updateChangedOnAdd = (user: UserRowProps) => {
+    if (changedUsersWithoutAccess.has(user.id)) {
+      changedUsersWithoutAccess.delete(user.id);
+    } else if (!changedUsersWithAccess.has(user.id)) {
+      changedUsersWithAccess.set(user.id, user.columns[0].text);
+    }
+  };
+
+  /**
+   * Update if the user access has been changed (from original) when removing user.
+   *
+   * @param user The user to check if their access has changed.
+   */
+  const updateChangedOnRemove = (user: UserRowProps) => {
+    if (changedUsersWithAccess.has(user.id)) {
+      changedUsersWithAccess.delete(user.id);
+    } else if (!changedUsersWithoutAccess.has(user.id)) {
+      changedUsersWithoutAccess.set(user.id, user.columns[0].text);
+    }
+  };
+
+  /**
+   * Add a user to the list of users with license access.
+   *
+   * @param index The index of the user in the current list.
+   */
   const addUserAccess = (index: number) => {
     /* Get the user to be moved from "without access" to "with access" */
     let user = withoutAccessTable.rows[index];
@@ -40,8 +82,15 @@ export default function ManageLicenseAccess() {
     /* Add user to the "with access" list */
     withAccessTable.rows.push(user);
     setUsersWithAccess(withAccessTable.rows);
+
+    updateChangedOnAdd(user);
   };
 
+  /**
+   * Remove a user from the list of users with license access.
+   *
+   * @param index The index of the user in the current list.
+   */
   const removeUserAccess = (index: number) => {
     /* Get the user to be moved from "with access" to "without access" */
     let user = withAccessTable.rows[index];
@@ -56,6 +105,8 @@ export default function ManageLicenseAccess() {
     /* Add user to the "without access" list */
     withoutAccessTable.rows.push(user);
     setUsersWithoutAccess(withoutAccessTable.rows);
+
+    updateChangedOnRemove(user);
   };
 
   const addSelectedUsersAccess = (selectedRowsIndices: number[]) => {
@@ -70,6 +121,8 @@ export default function ManageLicenseAccess() {
       ];
 
       withAccessTable.rows.push(user);
+
+      updateChangedOnAdd(user);
     }
     setUsersWithoutAccess(withoutAccessTable.rows);
     setUsersWithAccess(withAccessTable.rows);
@@ -87,6 +140,8 @@ export default function ManageLicenseAccess() {
       ];
 
       withoutAccessTable.rows.push(user);
+
+      updateChangedOnRemove(user);
     }
 
     setUsersWithAccess(withAccessTable.rows);
@@ -207,18 +262,20 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           {/* TODO: Fetch product name of license */}
-          Product: {license?.productId}
-          <br></br>
-          Active users: {usersWithAccess.length}
-          <br></br>
-          Total allowed: {license?.amount}
-          <br></br>
-          Start date: {license?.startDate}
-          <br></br>
-          End date: {license?.endDate}
-          <br></br>
-          Status: {license?.valid ? "Active" : "Expired"}
-          <br></br>
+          <>
+            Product: {license.productId}
+            <br></br>
+            Active users: {usersWithAccess.length}
+            <br></br>
+            Total allowed: {license.amount}
+            <br></br>
+            Start date: {license.startDate}
+            <br></br>
+            End date: {license.endDate}
+            <br></br>
+            Status: {license.valid ? "Active" : "Expired"}
+            <br></br>
+          </>
         </p>
       </section>
 
