@@ -247,8 +247,8 @@ nav {
 }
 
 .nav-search>label {
-  height: 1px;
-  width: 1px;
+  height: 0px;
+  width: 0px;
   overflow: hidden;
 }
 
@@ -1023,7 +1023,6 @@ form a:hover {
   margin-top: 1em;
 }
 
-
 .select-table th {
   position: sticky;
   top: 0;
@@ -1056,6 +1055,12 @@ form a:hover {
 
 .select-table input[type="checkbox"] {
   transform: scale(1.5);
+}
+
+.select-table>tbody label {
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
 }
 
 .checkbox-column {
