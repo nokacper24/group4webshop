@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DescriptionRow, { ProductPageRow } from "./DescriptionRow";
-import Gallery from "./gallery/Gallery";
-import { GalleryProps } from "./gallery/Gallery";
+import Gallery, { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
 
 let counter = 0;
@@ -206,7 +205,7 @@ export default function ProductPage() {
     ],
   };
   return (
-    <React.Fragment>
+    <>
       {product && (
         <>
           <section className="banner">
@@ -259,7 +258,7 @@ export default function ProductPage() {
           <h1>Product not found</h1>
         </div>
       )}
-    </React.Fragment>
+    </>
   );
 }
 /**

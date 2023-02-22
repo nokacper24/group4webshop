@@ -1,4 +1,3 @@
-import React from "react";
 import SupportForm from "./SupportForm";
 
 /**
@@ -8,7 +7,7 @@ import SupportForm from "./SupportForm";
  */
 export default function Support() {
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>Support</h1>
         <p>
@@ -31,6 +30,6 @@ export default function Support() {
         </p>
       </section>
       <SupportForm />
-    </React.Fragment>
+    </>
   );
 }

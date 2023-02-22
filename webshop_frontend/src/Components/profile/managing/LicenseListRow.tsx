@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export type LicenseRowProps = {
@@ -47,7 +47,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   }
 
   return (
-    <React.Fragment>
+    <>
       <tr className="row-header">
         <td>{license.name}</td>
         <td>{license.activeUsers}</td>
@@ -80,6 +80,6 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
           </p>
         </td>
       </tr>
-    </React.Fragment>
+    </>
   );
 }

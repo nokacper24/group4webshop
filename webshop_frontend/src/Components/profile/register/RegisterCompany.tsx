@@ -1,4 +1,4 @@
-import React from "react";
+import { MouseEvent as ReactMouseEvent } from "react";
 
 /**
  * Represents the Register Company component on the Create Account page.
@@ -8,7 +8,7 @@ import React from "react";
  */
 export default function RegisterCompany() {
   return (
-    <React.Fragment>
+    <>
       <p>Fill out all the fields to create your account.</p>
 
       <label htmlFor="create-account_email">E-mail</label>
@@ -67,7 +67,7 @@ export default function RegisterCompany() {
         Register
       </button>
       <p className="form-alert"></p>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -78,7 +78,7 @@ export default function RegisterCompany() {
  * @param event Mouse Event on button
  */
 function validateForm(
-  event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  event: ReactMouseEvent<HTMLButtonElement, MouseEvent>
 ): void {
   const formAlert: HTMLParagraphElement | null =
     document.querySelector(".form-alert");

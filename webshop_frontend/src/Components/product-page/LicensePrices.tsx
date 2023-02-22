@@ -1,8 +1,8 @@
-import React from "react";
+import { ChangeEvent } from "react";
 
 export type LicensePricesProps = {
   price: number;
-  updatePrice: (arg: React.ChangeEvent<HTMLSelectElement>) => void;
+  updatePrice: (arg: ChangeEvent<HTMLSelectElement>) => void;
 };
 
 /**
@@ -20,7 +20,7 @@ export default function LicensePrices(props: LicensePricesProps) {
   };
 
   return (
-    <React.Fragment>
+    <>
       <label htmlFor="prices">Choose a plan: </label>
       <select
         id="prices"
@@ -43,6 +43,6 @@ export default function LicensePrices(props: LicensePricesProps) {
           </option>
         ))}
       </select>
-    </React.Fragment>
+    </>
   );
 }

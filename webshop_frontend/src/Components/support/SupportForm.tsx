@@ -1,4 +1,4 @@
-import React from "react";
+import { MouseEvent as ReactMouseEvent } from "react";
 import ProductSelect from "./ProductSelect";
 
 /**
@@ -65,7 +65,7 @@ export default function SupportForm() {
  * @param event Mouse Event on button
  */
 function validateForm(
-  event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  event: ReactMouseEvent<HTMLButtonElement, MouseEvent>
 ): void {
   const productSelect: HTMLSelectElement | null =
     document.querySelector("#product-select");

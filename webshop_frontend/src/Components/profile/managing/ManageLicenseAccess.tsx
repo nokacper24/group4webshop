@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
 
@@ -119,7 +119,7 @@ export default function ManageLicenseAccess() {
   };
 
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>Manage license access</h1>
         <p>
@@ -161,6 +161,6 @@ export default function ManageLicenseAccess() {
           </span>
         </p>
       </section>
-    </React.Fragment>
+    </>
   );
 }

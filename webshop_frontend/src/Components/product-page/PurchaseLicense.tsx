@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, ChangeEvent, MouseEvent as ReactMouseEvent } from "react";
 import LicensePrices from "./LicensePrices";
 
 /**
@@ -20,7 +20,7 @@ export default function PurchaseLicense() {
    *
    * @param event The user event.
    */
-  const updatePrice = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const updatePrice = (event: ChangeEvent<HTMLSelectElement>) => {
     setTotalPrice(parseInt(event.target.value));
   };
 
@@ -64,7 +64,7 @@ export default function PurchaseLicense() {
  *
  * @param event Mouse Event on button
  */
-function validateForm(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+function validateForm(event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) {
   const prices: HTMLSelectElement | null = document.querySelector("#prices");
   const formAlert: HTMLElement | null = document.querySelector(".form-alert");
 

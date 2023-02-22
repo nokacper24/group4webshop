@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import LicenseList from "./managing/LicenseList";
 
@@ -34,7 +34,7 @@ export default function MyAccount() {
   }, []);
 
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>My account</h1>
         <div className="user-details">
@@ -51,6 +51,6 @@ export default function MyAccount() {
         <h2>Licenses</h2>
         <LicenseList />
       </section>
-    </React.Fragment>
+    </>
   );
 }
