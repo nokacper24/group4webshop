@@ -4,6 +4,7 @@ pub mod category;
 pub mod license;
 pub mod product;
 pub mod user;
+pub mod company;
 
 /// Creates a connection pool to the database
 /// This should be called once and a reference to the pool
