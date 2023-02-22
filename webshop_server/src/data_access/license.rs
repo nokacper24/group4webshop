@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query_as, {Pool, Postgres},
@@ -10,9 +10,9 @@ pub struct License {
     license_id: i32,
     valid: bool,
     #[schema(value_type = String)]
-    start_date: NaiveDate,
+    start_date: DateTime<Utc>,
     #[schema(value_type = String)]
-    end_date: NaiveDate,
+    end_date: DateTime<Utc>,
     amount: i32,
     company_id: i32,
     product_id: String,
