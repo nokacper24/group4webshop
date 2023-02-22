@@ -1,13 +1,16 @@
-use crate::data_access::user::{self, User};
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
+
+use crate::data_access::user::{self, LicenseUser, User};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
     cfg.service(users_by_company);
     cfg.service(users_by_license);
+    cfg.service(add_license_users);
 }
 
 #[derive(OpenApi)]
@@ -115,4 +118,36 @@ async fn users_by_license(
     }
 
     HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+#[derive(Serialize, Deserialize)]
+struct LicenseUsers {
+    users: Vec<LicenseUser>,
+}
+
+/// Add rows into the user license table.
+/// The JSON for `other_users` can be like this:
+/// ```
+/// {
+///     "users": [
+///         {
+///             "user_id": 1,
+///             "license_id": 1
+///         }
+///     ]
+/// }
+/// ```
+#[post("/license_users")]
+async fn add_license_users(
+    pool: web::Data<Pool<Postgres>>,
+    other_users: web::Json<LicenseUsers>,
+) -> impl Responder {
+    let other_users = &other_users.users;
+    match user::add_license_users(&pool, &other_users).await {
+        Ok(other_users) => HttpResponse::Created().json(other_users),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("License Users not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
 }
