@@ -1,5 +1,6 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, Utc, NaiveDate};
 use serde::{Deserialize, Serialize};
+
 use sqlx::{
     query_as, {Pool, Postgres},
 };
@@ -11,6 +12,13 @@ pub struct Cookie {
     pub cookie: String,
     pub exp: DateTime<Utc>,
     pub user_id: i32,
+}
+
+pub struct UserInvite {
+    pub id: i32,
+    pub key: String,
+    pub email: String,
+    pub exp_date: DateTime<Utc>,
 }
 
 /// Returns Auth Cookies by cookie, and checks if it is valid.
@@ -73,4 +81,35 @@ pub async fn get_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<Cookie, s
         return Err(sqlx::Error::RowNotFound);
     }
     Ok(cookie)
+}
+
+
+pub async fn create_invite(
+    pool: &Pool<Postgres>,
+    email: &str,
+) -> Result<UserInvite, sqlx::Error> {
+    // create a 64 character long key based on A-Z, a-z, 0-9. wihtout using uuid.
+    let mut key = String::new();
+    for _ in 0..64 {
+        let c = rand::random::<u8>();
+        if c < 10 {
+            key.push_str(&c.to_string());
+        } else if c < 36 {
+            key.push((c + 55) as char);
+        } else {
+            key.push((c + 61) as char);
+        }
+    }
+
+    let exp_date = Utc::now() + Duration::days(1);
+    let invite = sqlx::query_as!(
+        UserInvite,
+        "INSERT INTO register_user (key, email, exp_date) VALUES ($1, $2, $3) RETURNING *",
+        key,
+        email,
+        exp_date
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(invite)
 }
