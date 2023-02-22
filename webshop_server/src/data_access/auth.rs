@@ -108,3 +108,20 @@ pub async fn create_invite(
     .await?;
     Ok(invite)
 }
+
+pub async fn get_invite(pool: &Pool<Postgres>, key: &str) -> Result<UserInvite, sqlx::Error> {
+    let invite = sqlx::query_as!(
+        UserInvite,
+        "SELECT * FROM register_user WHERE key = $1 LIMIT 1",
+        key
+    )
+    .fetch_one(pool)
+    .await?;
+    if invite.exp_date < Utc::now() {
+        sqlx::query!("DELETE FROM register_user WHERE key = $1", key)
+            .execute(pool)
+            .await?;
+        return Err(sqlx::Error::RowNotFound);
+    }
+    Ok(invite)
+}
