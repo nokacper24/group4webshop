@@ -259,6 +259,12 @@ pub enum PostgresDBError {
 }
 
 impl PostgresDBError {
+    /// Method to take error code from postgres and turn it into an readable error
+    /// Link to error codes: https://www.postgresql.org/docs/current/errcodes-appendix.html
+    /// # Arguments
+    /// * `error` - The error code from postgres
+    /// # Returns
+    /// * `Self` - The error code as a readable error as a enum variant from PostgresDBError
     pub fn from_str(error: Box<dyn sqlx::error::DatabaseError>) -> Self {
         match error.code() {
             Some(e) => match e.as_ref() {
