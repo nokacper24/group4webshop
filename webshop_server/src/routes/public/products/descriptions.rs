@@ -1,4 +1,5 @@
-use actix_web::{get, patch, web, HttpResponse, Responder};
+use actix_multipart::Multipart;
+use actix_web::{get, patch, web, HttpResponse, Responder, post};
 use sqlx::{Pool, Postgres};
 
 use crate::data_access::product;
@@ -47,4 +48,37 @@ pub async fn description_swap_priorities(
             _ => HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e)),
         },
     }
+}
+
+struct ImageComponentDetails {
+    
+}
+
+#[post("/{product_id}/descriptions/image")]
+async fn upload_image(
+    payload: Multipart,
+    product_id: web::Path<String>,
+    pool: web::Data<Pool<Postgres>>,
+) -> impl Responder {
+    match product::product_exists(&pool, product_id.as_str()).await {
+        Ok(exists) => {
+            if !exists {
+                return HttpResponse::NotFound().json("Product not found");
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let (image_component_details, file_name, image_buffer) = match image_comp_from_multipart(payload) {
+        Ok((form_details, image_buffer, file_name)) => (form_details, image_buffer, file_name),
+        Err(_) => todo!("Handle error"),
+    };
+    
+    HttpResponse::Ok().json("Image uploaded")
+}
+
+fn image_comp_from_multipart(payload: Multipart) -> Result<(ImageComponentDetails, Vec<u8>, String), ()> {
+    todo!()
 }
