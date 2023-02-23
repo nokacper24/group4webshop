@@ -215,15 +215,47 @@ export default function ManageLicenseAccess() {
     return users;
   };
 
+  const addUsersPostRequest = () => {
+    // Check if there has been any changes
+    // If no changes: don't send request
+
+    fetch(`${baseUrl}/api/license_users`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        users: Array.from(changedUsersWithAccess, (item) => {
+          return {
+            user_id: item[0],
+            license_id: licenseId ? parseInt(licenseId) : NaN,
+          };
+        }),
+      }),
+    })
+      .then((response) => {
+        const status = response.status;
+        if (status == 201) {
+          location.reload();
+        } else if (status == 400) {
+          alert("Failed to save changes, because users already have access");
+        } else {
+          alert("Something went wrong when saving users");
+        }
+      })
+      .catch(() => console.error("Failed to save license access for users"));
+  };
+
+  const handleSave = () => {
+    addUsersPostRequest();
+  };
+
   useEffect(() => {
     // Get license and users
     fetchLicense()
       .then((license) => fetchCompanyUsers(license.companyId))
-      .catch((e) =>
-        console.log(
-          "An error occurred while trying to get the license or users."
-        )
-      );
+      .catch((e) => console.error("Failed to get license or users"));
   }, []);
 
   useEffect(() => {
@@ -252,7 +284,9 @@ export default function ManageLicenseAccess() {
             })
           );
         })
-        .catch(() => console.log("Error fetching users with license access."));
+        .catch(() =>
+          console.error("Failed to fetch users with license access")
+        );
     }
   }, [users]);
 
@@ -262,20 +296,19 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           {/* TODO: Fetch product name of license */}
-          <>
-            Product: {license.productId}
-            <br></br>
-            Active users: {usersWithAccess.length}
-            <br></br>
-            Total allowed: {license.amount}
-            <br></br>
-            Start date: {license.startDate}
-            <br></br>
-            End date: {license.endDate}
-            <br></br>
-            Status: {license.valid ? "Active" : "Expired"}
-            <br></br>
-          </>
+          Product:
+          {license.productId}
+          <br></br>
+          Active users: {usersWithAccess.length}
+          <br></br>
+          Total allowed: {license.amount}
+          <br></br>
+          Start date: {license.startDate.toString()}
+          <br></br>
+          End date: {license.endDate.toString()}
+          <br></br>
+          Status: {license.valid ? "Active" : "Expired"}
+          <br></br>
         </p>
       </section>
 
@@ -300,7 +333,9 @@ export default function ManageLicenseAccess() {
         />
       </section>
       <section className="container left-aligned button-container">
-        <button className="default-button small-button">Save changes</button>
+        <button className="default-button small-button" onClick={handleSave}>
+          Save changes
+        </button>
         <p className="table-text">
           New active users:{" "}
           <span
