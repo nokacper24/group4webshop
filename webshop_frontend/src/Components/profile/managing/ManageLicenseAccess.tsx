@@ -363,8 +363,7 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           {/* TODO: Fetch product name of license */}
-          Product:
-          {license.productId}
+          Product: {license.productId}
           <br></br>
           Active users: {usersWithAccess.length}
           <br></br>
