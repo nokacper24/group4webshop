@@ -216,35 +216,34 @@ export default function ManageLicenseAccess() {
   };
 
   const addUsersPostRequest = () => {
-    // Check if there has been any changes
-    // If no changes: don't send request
-
-    fetch(`${baseUrl}/api/license_users`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        users: Array.from(changedUsersWithAccess, (item) => {
-          return {
-            user_id: item[0],
-            license_id: licenseId ? parseInt(licenseId) : NaN,
-          };
+    if (changedUsersWithAccess.size > 0) {
+      fetch(`${baseUrl}/api/license_users`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          users: Array.from(changedUsersWithAccess, (item) => {
+            return {
+              user_id: item[0],
+              license_id: licenseId ? parseInt(licenseId) : NaN,
+            };
+          }),
         }),
-      }),
-    })
-      .then((response) => {
-        const status = response.status;
-        if (status == 201) {
-          location.reload();
-        } else if (status == 400) {
-          alert("Failed to save changes, because users already have access");
-        } else {
-          alert("Something went wrong when saving users");
-        }
       })
-      .catch(() => console.error("Failed to save license access for users"));
+        .then((response) => {
+          const status = response.status;
+          if (status == 201) {
+            location.reload();
+          } else if (status == 400) {
+            alert("Failed to save changes, because users already have access");
+          } else {
+            alert("Something went wrong when saving users");
+          }
+        })
+        .catch(() => console.error("Failed to save license access for users"));
+    }
   };
 
   const handleSave = () => {
