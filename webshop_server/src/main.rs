@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder};
+use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder, HttpResponse};
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
 use log::info;
@@ -11,11 +11,6 @@ mod openapi_doc;
 use routes::public::public;
 
 use crate::data_access::create_pool;
-
-#[get("/")]
-async fn index() -> impl Responder {
-    "Hello world!"
-}
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -57,16 +52,26 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .service(index)
-            // load routes from routes/public/public.rs
             .service(public)
             .configure(openapi_doc::configure_opanapi)
-            .service(ResourceFiles::new("/resources", generate()))
-            // Configure custom 404 page
-            .default_service(web::route().to(|| async { "404 - Not Found" }))
+            .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
+            .default_service(web::route().to(not_found))
     })
     .bind(address)
     .expect("Can not bind to port 8080")
     .run()
     .await
+}
+
+async fn not_found() -> impl Responder {
+    HttpResponse::NotFound().body(
+        r#"<html>
+            <head>
+                <title>404 Not Found</title>
+            </head>
+            <body>
+                <h1>404 Not Found</h1>
+                <p>The resource could not be found.</p>
+            </body>
+        </html>"#)
 }
