@@ -27,7 +27,6 @@ export default function ManageLicenseAccess() {
     productId: "0",
   });
   const [users, setUsers] = useState<UserProps[]>([]);
-  const totalUsers = 4;
 
   const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
   const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
@@ -311,8 +310,14 @@ export default function ManageLicenseAccess() {
   };
 
   const handleSave = () => {
-    sendAddUsersRequest();
-    sendRemoveUsersRequest();
+    if (usersWithAccess.length <= license.amount) {
+      sendAddUsersRequest();
+      sendRemoveUsersRequest();
+    } else {
+      alert(
+        "You cannot exceed the license user amount. Please select fewer users to give access to."
+      );
+    }
   };
 
   useEffect(() => {
@@ -406,7 +411,7 @@ export default function ManageLicenseAccess() {
           New active users:{" "}
           <span
             className={`active-users ${
-              totalUsers < usersWithAccess.length ? "text-danger" : ""
+              license.amount < usersWithAccess.length ? "text-danger" : ""
             }`}
           >
             {usersWithAccess.length}
