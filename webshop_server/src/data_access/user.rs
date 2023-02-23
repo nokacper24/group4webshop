@@ -111,3 +111,20 @@ pub async fn add_license_users(
     }
     Ok(())
 }
+
+pub async fn remove_license_users(
+    pool: &Pool<Postgres>,
+    users: &Vec<LicenseUser>,
+) -> Result<(), sqlx::Error> {
+    for user in users.iter() {
+        query!(
+            r#"DELETE FROM user_license
+            WHERE license_id = $1 AND user_id = $2"#,
+            user.license_id,
+            user.user_id,
+        )
+        .execute(pool)
+        .await?;
+    }
+    Ok(())
+}
