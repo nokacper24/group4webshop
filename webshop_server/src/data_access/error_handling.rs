@@ -265,6 +265,24 @@ impl PostgresDBError {
     /// * `error` - The error code from postgres
     /// # Returns
     /// * `Self` - The error code as a readable error as a enum variant from PostgresDBError
+    /// # Example
+    /// ```rust
+    /// async fn companies(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+    ///     let companies = company::get_all_companies(&pool).await;
+    ///     match companies {
+    ///         Ok(companies) => HttpResponse::Ok().json(companies),
+    ///         Err(e) => match e {
+    ///             sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+    ///                 error_handling::PostgresDBError::NoDataFound => HttpResponse::NotFound().json("No companies found"),
+    ///                 // if the data already exists, return a Conflict
+    ///                 error_handling::PostgresDBError::UniqueViolation => HttpResponse::Conflict().json("Company already exists"),
+    ///                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+    ///             },
+    ///             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+    ///         },
+    ///     }
+    /// }
+    /// ```
     pub fn from_str(error: Box<dyn sqlx::error::DatabaseError>) -> Self {
         match error.code() {
             Some(e) => match e.as_ref() {
