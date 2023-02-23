@@ -46,6 +46,7 @@ export default function SelectTableRow(props: SelectTableRowProps) {
   return (
     <tr className={`${selected ? "selected-row" : ""}`}>
       <td>
+        <label>Select</label>
         <input
           type="checkbox"
           checked={selected}

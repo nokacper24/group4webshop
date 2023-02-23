@@ -10,6 +10,8 @@ VALUES (1, 'abc123', 'es_hr@enterprisesolutions.com', '2021-06-01', 1),
 
 INSERT INTO app_user (user_id, email, pass_hash, company_id, role)
 VALUES (1, 'es_it_head@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
+       (3, 'it_manager@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
+       (4, 'it_manager_2@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
        (2, 'bs_it_head@businesssolutions.com', 'pass', 2, 'company_it_head');
 
 INSERT INTO register_user (id, key, email, exp_date)

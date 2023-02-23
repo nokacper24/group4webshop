@@ -18,7 +18,7 @@ export default function Home() {
             Software for <span className="vibrate">your</span> enterprise
           </p>
           <Link className="hero-button" to={"/products"}>
-            Offers
+            Explore
           </Link>
         </div>
       </section>

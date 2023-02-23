@@ -103,7 +103,7 @@ async fn license_by_id(
         )
     )
 ]
-#[get("/company/{company_id}/licenses")]
+#[get("/companies/{company_id}/licenses")]
 async fn licenses_by_company(
     pool: web::Data<Pool<Postgres>>,
     company_id: web::Path<String>,

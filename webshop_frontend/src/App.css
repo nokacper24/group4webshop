@@ -15,6 +15,8 @@
   --text-secondary: #fff;
   --text-gradient: -35deg, rgba(46, 116, 181, 1) 0%, rgba(95, 139, 5, 1) 100%;
 
+  --clr-danger: #bc0000;
+
   /* Font family variables */
   --ff-primary: 'Open Sans', 'Arial', sans-serif;
   --ff-title: 'Lalezar', 'Arial Black', 'Geneva', sans-serif;
@@ -120,14 +122,18 @@ button {
   transition: background var(--transition-speed);
 }
 
-.default-button:is(:hover, :focus) {
+.default-button:is(:hover) {
   background-color: var(--bg-tertiary);
   outline: 2px solid currentColor;
 }
 
+.default-button:is(:focus) {
+  outline: 3px solid var(--text-primary);
+}
+
 .small-button {
   display: block;
-  padding: 0.5em 1em;
+  padding: 0.5em 1em !important;
 }
 
 .icon-button.expand-button {
@@ -245,8 +251,8 @@ nav {
 }
 
 .nav-search>label {
-  height: 1px;
-  width: 1px;
+  height: 0px;
+  width: 0px;
   overflow: hidden;
 }
 
@@ -318,13 +324,12 @@ nav {
 /* Navbar -- Mobile */
 @media (max-width: 900px) {
   nav {
-    width: var(--header-height);
+    width: calc(var(--header-height) + var(--scrollbar-width));
     height: var(--header-height);
     position: absolute;
     top: 0;
     right: 0;
     overflow-x: hidden;
-    outline: 1px solid transparent;
   }
 
   .icon-text {
@@ -647,21 +652,22 @@ form a:hover {
 }
 
 .hero-text {
+  font-size: 1.3rem;
   margin: 0 0 2em 0;
 }
 
 .hero-button {
-  padding: 0.5em 1.5em;
+  padding: 0.2em 1.5em;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
   border: 2px solid var(--text-secondary);
   border-radius: 0.5em;
+  font-size: 1.3rem;
   font-weight: 700;
+  font-variant: small-caps;
   text-decoration: none;
-  text-transform: uppercase;
   outline: 1px solid transparent;
-  transition:
-    color var(--transition-speed),
+  transition: color var(--transition-speed),
     background var(--transition-speed);
   text-shadow: initial;
 }
@@ -1022,7 +1028,6 @@ form a:hover {
   margin-top: 1em;
 }
 
-
 .select-table th {
   position: sticky;
   top: 0;
@@ -1057,6 +1062,12 @@ form a:hover {
   transform: scale(1.5);
 }
 
+.select-table>tbody label {
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
+}
+
 .checkbox-column {
   width: 7em;
   vertical-align: middle;
@@ -1077,11 +1088,11 @@ form a:hover {
 }
 
 .bg-danger {
-  background-color: red;
+  background-color: var(--clr-danger);
 }
 
 .text-danger {
-  color: red;
+  color: var(--clr-danger);
 }
 
 .table-text {
