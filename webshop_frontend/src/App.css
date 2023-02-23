@@ -122,14 +122,18 @@ button {
   transition: background var(--transition-speed);
 }
 
-.default-button:is(:hover, :focus) {
+.default-button:is(:hover) {
   background-color: var(--bg-tertiary);
   outline: 2px solid currentColor;
 }
 
+.default-button:is(:focus) {
+  outline: 3px solid var(--text-primary);
+}
+
 .small-button {
   display: block;
-  padding: 0.5em 1em;
+  padding: 0.5em 1em !important;
 }
 
 .icon-button.expand-button {
@@ -320,13 +324,12 @@ nav {
 /* Navbar -- Mobile */
 @media (max-width: 900px) {
   nav {
-    width: var(--header-height);
+    width: calc(var(--header-height) + var(--scrollbar-width));
     height: var(--header-height);
     position: absolute;
     top: 0;
     right: 0;
     overflow-x: hidden;
-    outline: 1px solid transparent;
   }
 
   .icon-text {
@@ -664,8 +667,7 @@ form a:hover {
   font-variant: small-caps;
   text-decoration: none;
   outline: 1px solid transparent;
-  transition:
-    color var(--transition-speed),
+  transition: color var(--transition-speed),
     background var(--transition-speed);
   text-shadow: initial;
 }

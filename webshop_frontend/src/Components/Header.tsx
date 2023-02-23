@@ -38,7 +38,8 @@ export default function Header() {
 
         if (nav.current) {
           nav.current.style.height = "var(--header-height)";
-          nav.current.style.width = " var(--header-height)";
+          nav.current.style.width =
+            "calc(var(--header-height) + var(--scrollbar-width))";
         }
       },
       { once: true }
