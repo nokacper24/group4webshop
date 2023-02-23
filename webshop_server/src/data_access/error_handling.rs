@@ -521,6 +521,7 @@ impl PostgresDBError {
                 "XX000" => Self::internal_error,
                 "XX001" => Self::data_corrupted,
                 "XX002" => Self::index_corrupted,
+                _ => Self::NoErrorCode,
             },
             None => Self::NoErrorCode,
         }
