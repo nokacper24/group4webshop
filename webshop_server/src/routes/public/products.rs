@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use actix_web::{get, patch, post, put, web, HttpResponse, Responder};
+use actix_web::{get, post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
