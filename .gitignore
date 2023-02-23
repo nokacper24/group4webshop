@@ -1,6 +1,7 @@
 target
 .env
 .obsidian/
+webshop_server/resources/
 
 # Logs
 logs

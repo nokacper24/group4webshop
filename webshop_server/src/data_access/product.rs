@@ -114,3 +114,15 @@ pub async fn update_product(
     .await?;
     Ok(())
 }
+
+/// Returns true if the product exists, false otherwise.
+pub async fn product_exists(pool: &Pool<Postgres>, product_id: &str) -> Result<bool, sqlx::Error> {
+    let product = query!(
+        r#"SELECT product_id
+        FROM product WHERE product_id = $1"#,
+        product_id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(product.is_some())
+}

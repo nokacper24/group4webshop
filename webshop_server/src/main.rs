@@ -1,12 +1,12 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, HttpServer, Responder};
+use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder};
 use dotenvy::dotenv;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use log::info;
 
 mod data_access;
 mod routes;
 mod openapi_doc;
+mod serving_images;
 
 use routes::public::public;
 
@@ -19,13 +19,16 @@ async fn index() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "info,sqlx=off");
+    env_logger::init();
+
     // check if .env file exists and load it
     dotenv().ok();
     let host = std::env::var("HOST").expect("HOST environment variable not set");
     let port = std::env::var("PORT").expect("PORT environment variable not set");
     let address = format!("{}:{}", host, port);
 
-    println!("Starting server at http://{}", address);
+    info!("Starting server at http://{}", address);
 
     //create new pool
     let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
@@ -51,12 +54,12 @@ async fn main() -> std::io::Result<()> {
             .app_data(pool.clone())
             // configure cors
             .wrap(cors)
+            .wrap(Logger::default())
             .service(index)
             // load routes from routes/public/public.rs
             .service(public)
-
             .configure(openapi_doc::configure_opanapi)
-            
+            .service(web::scope("/resources/images").configure(serving_images::config))
             // Configure custom 404 page
             .default_service(web::route().to(|| async { "404 - Not Found" }))
     })
