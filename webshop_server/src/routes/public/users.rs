@@ -145,8 +145,15 @@ async fn add_license_users(
     let other_users = &other_users.users;
     match user::add_license_users(&pool, &other_users).await {
         Ok(other_users) => HttpResponse::Created().json(other_users),
+
         Err(e) => match e {
-            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("License Users not found"),
+            sqlx::Error::Database(e) => match e.code() {
+                Some(cow) => match cow.as_ref() {
+                    "23505" => HttpResponse::BadRequest().json("Record already exists"),
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                },
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
