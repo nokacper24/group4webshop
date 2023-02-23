@@ -1,8 +1,7 @@
-use actix_web::{web, Responder, HttpResponse, get, patch};
-use sqlx::{Postgres, Pool};
+use actix_web::{get, patch, web, HttpResponse, Responder};
+use sqlx::{Pool, Postgres};
 
 use crate::data_access::product;
-
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
