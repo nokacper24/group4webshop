@@ -66,7 +66,8 @@ export default function ManageLicenseAccess() {
   /**
    * Add a user to the list of users with license access.
    *
-   * @param index The index of the user in the current list.
+   * @param index The index of the user in the list of users without
+   *        access to be added to the list of users with access.
    */
   const addUserAccess = (index: number) => {
     /* Get the user to be moved from "without access" to "with access" */
@@ -89,7 +90,8 @@ export default function ManageLicenseAccess() {
   /**
    * Remove a user from the list of users with license access.
    *
-   * @param index The index of the user in the current list.
+   * @param index The index of the user in the list of users with
+   *        access to be added to the list of users without access.
    */
   const removeUserAccess = (index: number) => {
     /* Get the user to be moved from "with access" to "without access" */
@@ -109,6 +111,12 @@ export default function ManageLicenseAccess() {
     updateChangedOnRemove(user);
   };
 
+  /**
+   * Add all selected users to the list of users with license access.
+   *
+   * @param selectedRowsIndices The indices of the users in the list of users without
+   *        access to be added to the list of users with access.
+   */
   const addSelectedUsersAccess = (selectedRowsIndices: number[]) => {
     let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
@@ -128,6 +136,12 @@ export default function ManageLicenseAccess() {
     setUsersWithAccess(withAccessTable.rows);
   };
 
+  /**
+   * Remove all selected users to the list of users with license access.
+   *
+   * @param selectedRowsIndices The indices of the users in the list of users with
+   *        access to be added to the list of users without access.
+   */
   const removeSelectedUsersAccess = (selectedRowsIndices: number[]) => {
     let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
 
@@ -173,6 +187,11 @@ export default function ManageLicenseAccess() {
   const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   const isInitialMount = useRef(true);
 
+  /**
+   * Send a GET request to get the license information.
+   *
+   * @returns The license object
+   */
   const fetchLicense = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
     const data = await response.json();
@@ -185,10 +204,15 @@ export default function ManageLicenseAccess() {
       companyId: data.company_id,
       productId: data.product_id,
     };
-    setLicense(license);
     return license;
   };
 
+  /**
+   * Send a GET request to get the company users.
+   *
+   * @param companyId The ID of the company
+   * @returns A list of all company users
+   */
   const fetchCompanyUsers = async (companyId: string) => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
@@ -199,9 +223,14 @@ export default function ManageLicenseAccess() {
         companyId: user.company_id,
       };
     });
-    setUsers(users);
+    return users;
   };
 
+  /**
+   * Send a GET request to get the users with access to the license.
+   *
+   * @returns A list of users with license access.
+   */
   const fetchUsersWithAccess = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
     const data = await response.json();
@@ -215,6 +244,9 @@ export default function ManageLicenseAccess() {
     return users;
   };
 
+  /**
+   * Send a POST request to add users' access to the license.
+   */
   const sendAddUsersRequest = () => {
     if (changedUsersWithAccess.size > 0) {
       fetch(`${baseUrl}/api/license_users`, {
@@ -246,6 +278,9 @@ export default function ManageLicenseAccess() {
     }
   };
 
+  /**
+   * Send a DELETE request to remove users' access to the license.
+   */
   const sendRemoveUsersRequest = () => {
     if (changedUsersWithoutAccess.size > 0) {
       fetch(`${baseUrl}/api/license_users`, {
@@ -283,7 +318,10 @@ export default function ManageLicenseAccess() {
   useEffect(() => {
     // Get license and users
     fetchLicense()
-      .then((license) => fetchCompanyUsers(license.companyId))
+      .then((license) => {
+        setLicense(license);
+        fetchCompanyUsers(license.companyId).then((users) => setUsers(users));
+      })
       .catch((e) => console.error("Failed to get license or users"));
   }, []);
 
