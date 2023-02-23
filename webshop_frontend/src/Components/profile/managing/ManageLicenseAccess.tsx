@@ -215,7 +215,7 @@ export default function ManageLicenseAccess() {
     return users;
   };
 
-  const addUsersPostRequest = () => {
+  const sendAddUsersRequest = () => {
     if (changedUsersWithAccess.size > 0) {
       fetch(`${baseUrl}/api/license_users`, {
         method: "POST",
@@ -246,8 +246,38 @@ export default function ManageLicenseAccess() {
     }
   };
 
+  const sendRemoveUsersRequest = () => {
+    if (changedUsersWithoutAccess.size > 0) {
+      fetch(`${baseUrl}/api/license_users`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          users: Array.from(changedUsersWithoutAccess, (item) => {
+            return {
+              user_id: item[0],
+              license_id: licenseId ? parseInt(licenseId) : NaN,
+            };
+          }),
+        }),
+      })
+        .then((response) => {
+          const status = response.status;
+          if (status == 200) {
+            location.reload();
+          } else {
+            alert("Something went wrong when saving users");
+          }
+        })
+        .catch(() => console.error("Failed to save license access for users"));
+    }
+  };
+
   const handleSave = () => {
-    addUsersPostRequest();
+    sendAddUsersRequest();
+    sendRemoveUsersRequest();
   };
 
   useEffect(() => {
