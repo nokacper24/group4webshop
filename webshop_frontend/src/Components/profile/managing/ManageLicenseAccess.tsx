@@ -20,14 +20,13 @@ export default function ManageLicenseAccess() {
   const [license, setLicense] = useState<LicenseProps>({
     licenseId: 0,
     valid: false,
-    startDate: new Date("2020-01-01"),
-    endDate: new Date("2020-01-01"),
+    startDate: new Date("1970-01-01"),
+    endDate: new Date("1970-01-01"),
     amount: 0,
     companyId: 0,
     productId: "0",
   });
   const [users, setUsers] = useState<UserProps[]>([]);
-  const totalUsers = 4;
 
   const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
   const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
@@ -195,11 +194,11 @@ export default function ManageLicenseAccess() {
   const fetchLicense = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
     const data = await response.json();
-    const license = {
+    const license: LicenseProps = {
       licenseId: data.license_id,
       valid: data.valid,
-      startDate: data.start_date,
-      endDate: data.end_date,
+      startDate: new Date(data.start_date),
+      endDate: new Date(data.end_date),
       amount: data.amount,
       companyId: data.company_id,
       productId: data.product_id,
@@ -213,7 +212,7 @@ export default function ManageLicenseAccess() {
    * @param companyId The ID of the company
    * @returns A list of all company users
    */
-  const fetchCompanyUsers = async (companyId: string) => {
+  const fetchCompanyUsers = async (companyId: number | undefined) => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
     const users = data.map((user: any) => {
@@ -311,8 +310,14 @@ export default function ManageLicenseAccess() {
   };
 
   const handleSave = () => {
-    sendAddUsersRequest();
-    sendRemoveUsersRequest();
+    if (usersWithAccess.length <= license.amount) {
+      sendAddUsersRequest();
+      sendRemoveUsersRequest();
+    } else {
+      alert(
+        "You cannot exceed the license user amount. Please select fewer users to give access to."
+      );
+    }
   };
 
   useEffect(() => {
@@ -369,9 +374,9 @@ export default function ManageLicenseAccess() {
           <br></br>
           Total allowed: {license.amount}
           <br></br>
-          Start date: {license.startDate.toString()}
+          Start date: {license.startDate.toDateString()}
           <br></br>
-          End date: {license.endDate.toString()}
+          End date: {license.endDate.toDateString()}
           <br></br>
           Status: {license.valid ? "Active" : "Expired"}
           <br></br>
@@ -406,7 +411,7 @@ export default function ManageLicenseAccess() {
           New active users:{" "}
           <span
             className={`active-users ${
-              totalUsers < usersWithAccess.length ? "text-danger" : ""
+              license.amount < usersWithAccess.length ? "text-danger" : ""
             }`}
           >
             {usersWithAccess.length}

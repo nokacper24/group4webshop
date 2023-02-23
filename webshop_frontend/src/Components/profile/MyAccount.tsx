@@ -48,7 +48,7 @@ export default function MyAccount() {
       `${baseUrl}/api/companies/${companyId}/licenses`
     );
     const data = await response.json();
-    const licenses = data.map((license: any) => {
+    const licenses: LicenseProps[] = data.map((license: any) => {
       return {
         licenseId: license.license_id,
         valid: license.valid,
