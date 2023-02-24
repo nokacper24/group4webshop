@@ -36,23 +36,26 @@ fn main() -> std::io::Result<()> {
 
 fn dummy_hmtl() -> String {
     String::from(
-        r#"
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Webshop</title>
-        </head>
-        <body>
-            <h1>Dummy hmtl</h1>
-            <p>Server built without React. In order to build react either:</p>
-            <ul>
-                <li>Set <emp>BUILD_REACT</emp> environment variable to <emp>true</emp></li>
-                <li>Set <emp>BUILD_REACT=true</emp> in <emp>.env</emp></li>
-                <li>Run <emp>cargo build --release</emp></li>
-        </body>
-        </html>
-        "#,
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webshop</title>
+    <style>
+        emp {font-weight: bold;}
+    </style>
+</head>
+<body>
+    <h1>Dummy hmtl</h1>
+    <p>Server built without React. In order to build with React, do one of the following:</p>
+    <ul>
+        <li>Set <emp>BUILD_REACT</emp> environment variable to <emp>true</emp></li>
+        <li>Set <emp>BUILD_REACT=true</emp> in <emp>.env</emp></li>
+        <li>Build in release mode; run <emp>cargo build --release</emp></li>
+    </ul>
+</body>
+</html>
+"#,
     )
 }
