@@ -3,7 +3,7 @@ use std::process::Command;
 
 const FRONTEND_DIR: &str = "../webshop_frontend";
 const REACT_OUT_DIR: &str = "../webshop_frontend/dist";
-const DUMMY_OUT_DIR: &str = "/target/debug/build/webshop_server-dummy-hmtl";
+const DUMMY_OUT_DIR: &str = "./target/debug/build/webshop_server-dummy-hmtl";
 
 fn main() -> std::io::Result<()> {
     println!("cargo:rerun-if-changed={}", FRONTEND_DIR);
