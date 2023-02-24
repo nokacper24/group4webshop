@@ -1,20 +1,29 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder};
+use actix_web::http::Error;
+use actix_web::web::ReqData;
+use actix_web::HttpResponse;
+use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenvy::dotenv;
 use log::info;
 
 mod data_access;
-mod routes;
+mod middlewares;
 mod openapi_doc;
+mod routes;
 mod serving_images;
 
 use routes::public::public;
+use serde::{Deserialize, Serialize};
+use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
+use crate::data_access::user::Role;
+use crate::middlewares::auth::{check_role, validator, Token};
 
 #[get("/")]
 async fn index() -> impl Responder {
-    "Hello world!"
+    HttpResponse::Ok().body("Hello world!")
 }
 
 #[actix_web::main]
@@ -48,6 +57,8 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         let public = web::scope("/api").configure(public);
+
+        let bearer_middleware = HttpAuthentication::bearer(validator);
 
         App::new()
             // register sqlx pool

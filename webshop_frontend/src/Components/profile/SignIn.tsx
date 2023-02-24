@@ -23,7 +23,7 @@ export default function SignIn() {
         <h1>Sign in</h1>
         <p>
           Not a customer yet?
-          <Link to="/create-account"> Register here!</Link>
+          <Link to="create-account"> Register here!</Link>
         </p>
 
         <label htmlFor="sign-in-email">E-mail</label>
