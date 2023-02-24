@@ -1,16 +1,22 @@
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, middleware::Logger, HttpServer, Responder, HttpResponse};
+use actix_web::{get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpServer, Responder, HttpResponse};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
 use log::info;
 
 mod data_access;
-mod routes;
+mod middlewares;
 mod openapi_doc;
+mod routes;
 
 use routes::public::public;
+use serde::{Deserialize, Serialize};
+use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
+use crate::data_access::user::Role;
+use crate::middlewares::auth::{check_role, validator, Token};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -45,6 +51,8 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         let public = web::scope("/api").configure(public);
+
+        let bearer_middleware = HttpAuthentication::bearer(validator);
 
         App::new()
             // register sqlx pool

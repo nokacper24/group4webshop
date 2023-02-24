@@ -1,5 +1,7 @@
 use sqlx::{Pool, Postgres};
+pub mod auth;
 pub mod category;
+pub mod license;
 pub mod product;
 pub mod user;
 

@@ -1,7 +1,7 @@
 DROP TABLE description_component;
 DROP TABLE product_text;
 DROP TABLE product_image;
-DROP TABLE testemonial;
+DROP TABLE testimonial;
 DROP TABLE product_category;
 DROP TABLE category;
 DROP TABLE user_license;

@@ -12,7 +12,7 @@ CREATE TABLE register_company_user (
     id SERIAL PRIMARY KEY,
     key TEXT NOT NULL,
     email TEXT NOT NULL,
-    exp_date DATE NOT NULL,
+    exp_date timestamptz NOT NULL,
     company_id INT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company(company_id)
 );
@@ -30,13 +30,13 @@ CREATE TABLE register_user (
     id SERIAL PRIMARY KEY,
     key TEXT NOT NULL,
     email TEXT NOT NULL,
-    exp_date DATE NOT NULL
+    exp_date timestamptz NOT NULL
 );
 
 CREATE TABLE cookies (
     id SERIAL PRIMARY KEY,
     cookie TEXT NOT NULL,
-    exp DATE NOT NULL,
+    exp timestamptz NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id)
 );
@@ -53,9 +53,9 @@ CREATE TABLE product (
 CREATE TABLE license (
     license_id SERIAL PRIMARY KEY,
     valid BOOLEAN NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    amount REAL NOT NULL,
+    start_date timestamptz NOT NULL,
+    end_date timestamptz NOT NULL,
+    amount INT NOT NULL,
     company_id INT NOT NULL,
     product_id TEXT NOT NULL,
     FOREIGN KEY (company_id) REFERENCES company(company_id),
@@ -71,7 +71,7 @@ CREATE TABLE user_license (
 );
 
 CREATE TABLE category (
-    id SERIAL PRIMARY KEY,
+    category_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT NOT NULL
 );
@@ -81,11 +81,11 @@ CREATE TABLE product_category (
     category_id INT NOT NULL,
     PRIMARY KEY (product_id, category_id),
     FOREIGN KEY (product_id) REFERENCES product(product_id),
-    FOREIGN KEY (category_id) REFERENCES category(id)
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
-CREATE TABLE testemonial (
-    testemonial_id SERIAL PRIMARY KEY,
+CREATE TABLE testimonial (
+    testimonial_id SERIAL PRIMARY KEY,
     author TEXT NOT NULL,
     text TEXT NOT NULL,
     author_pic TEXT NOT NULL,
