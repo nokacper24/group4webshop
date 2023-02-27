@@ -1,5 +1,6 @@
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::ToSchema;
@@ -109,8 +110,6 @@ async fn add_text_description(
     }
 }
 
-struct ImageComponentDetails {}
-
 #[post("/{product_id}/descriptions/image")]
 async fn upload_image(
     payload: Multipart,
@@ -128,17 +127,54 @@ async fn upload_image(
         }
     };
 
-    let (image_component_details, file_name, image_buffer) =
-        match image_comp_from_multipart(payload) {
-            Ok((form_details, image_buffer, file_name)) => (form_details, image_buffer, file_name),
-            Err(_) => todo!("Handle error"),
-        };
+    let (alt_text, file_name, image_buffer) = match extract_image_component_multipart(payload).await
+    {
+        Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
+        Err(_) => todo!("Handle error"),
+    };
 
     HttpResponse::Ok().json("Image uploaded")
 }
 
-fn image_comp_from_multipart(
-    payload: Multipart,
-) -> Result<(ImageComponentDetails, Vec<u8>, String), ()> {
-    todo!()
+async fn extract_image_component_multipart(
+    mut payload: Multipart,
+) -> Result<(String, Vec<u8>, String), ImageExtractorError> {
+    todo!("Implement");
+    
+    let mut alt_text = String::new();
+    let mut file_name = String::new();
+    let mut image_buffer = Vec::new();
+
+    while let Some(mut item) = payload.next().await {
+        let field = match item {
+            Ok(ref mut field) => field,
+            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+        };
+        let name = match field.content_disposition().get_name() {
+            Some(name) => name,
+            None => return Err(ImageExtractorError::MissingField("name".to_string())),
+        };
+        if name == "alt_text" {
+            while let Some(chunk) = field.next().await {
+                let data = match chunk {
+                    Ok(data) => data,
+                    Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+                };
+                let string = match std::str::from_utf8(&data) {
+                    Ok(s) => s,
+                    Err(e) => return Err(ImageExtractorError::Utf8Error(e)),
+                };
+                alt_text.push_str(string);
+            }
+        }
+    }
+
+    Ok((alt_text, image_buffer, file_name))
+}
+
+enum ImageExtractorError {
+    Utf8Error(std::str::Utf8Error),
+    IoError(std::io::Error),
+    MultipartError(actix_multipart::MultipartError),
+    MissingField(String),
 }
