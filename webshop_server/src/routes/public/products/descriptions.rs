@@ -1,5 +1,6 @@
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use serde::{Serialize, Deserialize};
 use sqlx::{Pool, Postgres};
 
 use crate::data_access::product::{self, description::DescriptionCompError};
@@ -8,6 +9,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
     cfg.service(description_swap_priorities);
     cfg.service(add_text_description);
+    cfg.service(update_priority);
 }
 
 #[get("/{product_id}/descriptions")]
@@ -27,18 +29,37 @@ pub async fn get_product_descriptions(
     }
 }
 
-#[patch("/{product_id}/descriptions/{}")]
-pub async fn update_priority(
+#[derive(Debug, Serialize, Deserialize)]
+struct RequestNewPriority {
+    current_priority: i32,
+    new_priority: i32,
+}
+#[patch("/{product_id}/descriptions/priority")]
+async fn update_priority(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    description_id: web::Path<i32>,
-    priority: web::Json<i32>,
+    req_body: web::Json<RequestNewPriority>,
 ) -> impl Responder {
-    todo!();
+    let updated_component = product::description::update_priority(
+        &pool,
+        product_id.as_str(),
+        req_body.current_priority,
+        req_body.new_priority,
+    ).await;
+
+    match updated_component {
+        Ok(updated_component) => HttpResponse::Ok().json(updated_component),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product or description not found"),
+            sqlx::Error::Protocol(e) => HttpResponse::BadRequest().json(format!("Invalid priority: {}", e)),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
 }
 
+
 #[patch("/{product_id}/descriptions/priorityswap")]
-pub async fn description_swap_priorities(
+async fn description_swap_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
     description_ids: web::Json<Vec<i32>>,
@@ -62,7 +83,7 @@ pub async fn description_swap_priorities(
 }
 
 #[post("/{product_id}/descriptions/text")]
-pub async fn add_text_description(
+async fn add_text_description(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
     description: web::Json<product::description::TextComponent>,

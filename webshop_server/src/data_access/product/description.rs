@@ -385,6 +385,36 @@ async fn insert_image_component(
     Result::Ok(image_comp)
 }
 
+pub async fn update_priority(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    current_priority: i32,
+    new_priority: i32,
+) -> Result<DescriptionComponent, sqlx::Error> {
+    let component_id = query!(
+        r#"UPDATE description_component
+        SET priority = $1
+        WHERE product_id = $2 AND priority = $3
+        RETURNING component_id;"#,
+        new_priority, product_id, current_priority)
+        .fetch_one(pool)
+        .await;
+
+    let component_id = match component_id {
+        Ok(component_id) => component_id.component_id,
+        Err(e) => return Err(e),
+    };
+    let updated_component = get_description_component(pool, component_id).await?;
+
+    if updated_component.priority != new_priority {
+        // If the priority could not be updated, db should return an error.
+        // The problem is that an error is NOT returned.
+        return Err(sqlx::Error::Protocol(format!("Priority '{}' already in use!",new_priority)));
+    }
+
+    Ok(updated_component)
+}
+
 /// swaps the priority of two components
 ///
 /// # Arguments
