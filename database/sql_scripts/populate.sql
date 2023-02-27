@@ -61,10 +61,10 @@ INSERT INTO product_text (text_id, text_title, paragraph)
 VALUES (1, 'Time Management Software Features', 'Our time management software offers a range of features such as task scheduling, time tracking, and reporting. These features help organizations streamline their work processes and improve productivity.'),
        (2, 'Tax Software Benefits', 'Our tax software is designed to simplify the tax preparation process for businesses. The software eliminates the need for manual calculations and reduces the risk of errors. It also saves time and reduces the stress associated with tax season.');
 
-INSERT INTO description_component (component_id, priority, product_id, image_id, text_id)
-VALUES (1, 1, 'time_management_software', 1, null),
-       (2, 2, 'time_management_software', null, 1),
-       (3, 1, 'tax_and_accounting_software', 2, null),
-       (4, 2, 'tax_and_accounting_software', null, 2);
+INSERT INTO description_component (component_id, product_id, image_id, text_id)
+VALUES (1, 'time_management_software', 1, null),
+       (2, 'time_management_software', null, 1),
+       (3, 'tax_and_accounting_software', 2, null),
+       (4, 'tax_and_accounting_software', null, 2);
 
 COMMIT;

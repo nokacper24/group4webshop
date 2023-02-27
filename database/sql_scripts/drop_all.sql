@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS set_description_component_priority_trigger ON description_component;
+DROP FUNCTION IF EXISTS set_description_component_priority;
 DROP TABLE description_component;
 DROP TABLE product_text;
 DROP TABLE product_image;

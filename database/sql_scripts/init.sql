@@ -118,4 +118,22 @@ CREATE TABLE description_component (
     CHECK ((image_id IS NOT NULL AND text_id IS NULL) OR (image_id IS NULL AND text_id IS NOT NULL)) -- Ensure that it has EITHER an image or a text, not both
 );
 
+CREATE OR REPLACE FUNCTION set_description_component_priority() RETURNS TRIGGER AS $$
+DECLARE
+  max_priority INTEGER;
+BEGIN
+  SELECT MAX(priority) INTO max_priority FROM description_component WHERE product_id = NEW.product_id;
+  IF max_priority IS NULL THEN
+    max_priority := 0;
+  END IF;
+  NEW.priority := max_priority + 1;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_description_component_priority_trigger
+  BEFORE INSERT ON description_component
+  FOR EACH ROW
+  EXECUTE FUNCTION set_description_component_priority();
+
 COMMIT;
