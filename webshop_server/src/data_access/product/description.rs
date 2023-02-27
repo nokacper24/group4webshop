@@ -76,7 +76,7 @@ pub async fn get_product_description_components(
         FULL JOIN product_text ON  description_component.text_id = product_text.text_id
         FULL JOIN product_image ON description_component.image_id = product_image.image_id
         WHERE description_component.product_id = $1
-        ORDER BY priority ASC"#,
+        ORDER BY priority ASC;"#,
         product_id
     )
     .fetch_all(pool)
@@ -87,7 +87,9 @@ pub async fn get_product_description_components(
     for row in rows {
         // text component
         if row.text_id.is_some() {
-            if let (Some(text_id), Some(text_title), Some(paragraph)) = (Some(row.text_id), row.text_title, row.paragraph) {
+            if let (Some(text_id), Some(text_title), Some(paragraph)) =
+                (Some(row.text_id), row.text_title, row.paragraph)
+            {
                 description_components.push(DescriptionComponent {
                     component_id: row.component_id,
                     priority: row.priority,
@@ -102,7 +104,9 @@ pub async fn get_product_description_components(
             }
         // image component
         } else if row.image_id.is_some() {
-            if let (Some(image_id), Some(image_path), Some(alt_text)) = (Some(row.image_id), row.image_path, row.alt_text) {
+            if let (Some(image_id), Some(image_path), Some(alt_text)) =
+                (Some(row.image_id), row.image_path, row.alt_text)
+            {
                 description_components.push(DescriptionComponent {
                     component_id: row.component_id,
                     priority: row.priority,
@@ -139,7 +143,7 @@ pub async fn get_description_component(
         FROM description_component
         FULL JOIN product_text ON  description_component.text_id = product_text.text_id
         FULL JOIN product_image ON description_component.image_id = product_image.image_id
-        WHERE description_component.component_id = $1"#,
+        WHERE description_component.component_id = $1;"#,
         component_id
     )
     .fetch_one(pool)
@@ -147,7 +151,9 @@ pub async fn get_description_component(
 
     // text component
     if row.text_id.is_some() {
-        if let (Some(text_id), Some(text_title), Some(paragraph)) = (Some(row.text_id), row.text_title, row.paragraph) {
+        if let (Some(text_id), Some(text_title), Some(paragraph)) =
+            (Some(row.text_id), row.text_title, row.paragraph)
+        {
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
@@ -162,7 +168,9 @@ pub async fn get_description_component(
         }
     // image component
     } else if row.image_id.is_some() {
-        if let (Some(image_id), Some(image_path), Some(alt_text)) = (Some(row.image_id), row.image_path, row.alt_text) {
+        if let (Some(image_id), Some(image_path), Some(alt_text)) =
+            (Some(row.image_id), row.image_path, row.alt_text)
+        {
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
@@ -192,68 +200,64 @@ pub async fn create_component(
     product_id: &str,
     component: PartialDescriptionComponent,
 ) -> Result<DescriptionComponent, DescriptionCompError> {
-    match component.get_type() {
-        ComponentType::Text => {
-            let text_comp= match component.text {
-                Some(text) => text,
-                None => return Err(DescriptionCompError::InvalidComponent("Text component is missing".into())),
-            };
-            let text_comp = create_text_component(pool, &text_comp).await?;
+    if let ComponentType::Invalid = component.get_type() {
+        return Err(DescriptionCompError::InvalidComponent(
+            "Invalid component type".into(),
+        ));
+    }
 
-            let result_row = query!(
-                r#"INSERT INTO description_component (product_id, text_id)
+    if let Some(text_comp) = component.text {
+        let text_comp = create_text_component(pool, &text_comp).await?;
+
+        let result_row = query!(
+            r#"INSERT INTO description_component (product_id, text_id)
             VALUES ($1, $2)
             RETURNING *;"#,
-                product_id,
-                text_comp.text_id
-            )
-            .fetch_one(pool)
-            .await;
+            product_id,
+            text_comp.text_id
+        )
+        .fetch_one(pool)
+        .await;
 
-            let result_row = match result_row {
-                Ok(result_row) => result_row,
-                Err(err) => return Err(DescriptionCompError::SqlxError(err)),
-            };
+        let result_row = match result_row {
+            Ok(result_row) => result_row,
+            Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        };
 
-            Ok(DescriptionComponent {
-                component_id: result_row.component_id,
-                priority: result_row.priority,
-                product_id: result_row.product_id,
-                text: Some(text_comp),
-                image: None,
-            })
-        }
-        ComponentType::Image => {
-            let image_component = match component.image {
-                Some(image_component) => image_component,
-                None => return Err(DescriptionCompError::InvalidComponent("Image component is missing".into())),
-            };
-            let image_comp = create_image_component(pool, &image_component).await?;
-            let returned_row = query!(
-                r#"INSERT INTO description_component (product_id, image_id)
+        Ok(DescriptionComponent {
+            component_id: result_row.component_id,
+            priority: result_row.priority,
+            product_id: result_row.product_id,
+            text: Some(text_comp),
+            image: None,
+        })
+    } else if let Some(image_comp) = component.image {
+        let image_comp = create_image_component(pool, &image_comp).await?;
+        let returned_row = query!(
+            r#"INSERT INTO description_component (product_id, image_id)
             VALUES ($1, $2)
-            RETURNING *"#,
-                product_id,
-                image_comp.image_id
-            )
-            .fetch_one(pool)
-            .await;
-            let returned_row = match returned_row {
-                Ok(returned_row) => returned_row,
-                Err(err) => return Err(DescriptionCompError::SqlxError(err)),
-            };
+            RETURNING *;"#,
+            product_id,
+            image_comp.image_id
+        )
+        .fetch_one(pool)
+        .await;
+        let returned_row = match returned_row {
+            Ok(returned_row) => returned_row,
+            Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        };
 
-            Ok(DescriptionComponent {
-                component_id: returned_row.component_id,
-                priority: returned_row.priority,
-                product_id: returned_row.product_id,
-                text: None,
-                image: Some(image_comp),
-            })
-        }
-        ComponentType::Invalid => Err(DescriptionCompError::InvalidComponent(
-            "Invalid component".into(),
-        )),
+        Ok(DescriptionComponent {
+            component_id: returned_row.component_id,
+            priority: returned_row.priority,
+            product_id: returned_row.product_id,
+            text: None,
+            image: Some(image_comp),
+        })
+    } else {
+        return Err(DescriptionCompError::InvalidComponent(
+            "Component is missing".into(),
+        ));
     }
 }
 
@@ -265,7 +269,7 @@ async fn create_text_component(
     let result_row = query!(
         r#"INSERT INTO product_text (text_title, paragraph)
         VALUES ($1, $2)
-        RETURNING *"#,
+        RETURNING *;"#,
         text_component.text_title,
         text_component.paragraph
     )
@@ -291,29 +295,28 @@ async fn create_image_component(
     pool: &Pool<Postgres>,
     image_component: &ImageComponent,
 ) -> Result<ImageComponent, DescriptionCompError> {
-        let result_row = query!(
-            r#"INSERT INTO product_image (image_path, alt_text)
+    let result_row = query!(
+        r#"INSERT INTO product_image (image_path, alt_text)
         VALUES ($1, $2)
-        RETURNING *"#,
-            image_component.image_path,
-            image_component.alt_text
-        )
-        .fetch_one(pool)
-        .await;
+        RETURNING *;"#,
+        image_component.image_path,
+        image_component.alt_text
+    )
+    .fetch_one(pool)
+    .await;
 
-        let result_row = match result_row {
-            Ok(result_row) => result_row,
-            Err(err) => return Err(DescriptionCompError::SqlxError(err)),
-        };
+    let result_row = match result_row {
+        Ok(result_row) => result_row,
+        Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+    };
 
-        let image_comp = ImageComponent {
-            image_id: Some(result_row.image_id),
-            image_path: result_row.image_path,
-            alt_text: result_row.alt_text,
-        };
+    let image_comp = ImageComponent {
+        image_id: Some(result_row.image_id),
+        image_path: result_row.image_path,
+        alt_text: result_row.alt_text,
+    };
 
-        Result::Ok(image_comp)
-
+    Result::Ok(image_comp)
 }
 
 /// swaps the priority of two components
