@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+// check if we are in production mode
+if (import.meta.env.PROD) {
+    baseUrl = "";
+}
 export type State = {
   products: ProductCardProps[];
 };

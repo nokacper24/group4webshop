@@ -1,15 +1,19 @@
-use crate::data_access::{user::{self, User}, auth};
-use actix_web::{get, web, HttpResponse, Responder, post};
+use crate::data_access::{user::{self, LicenseUser, User}, auth};
+use actix_web::{get, web, HttpResponse, Responder, post, delete};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::OpenApi;
+use utoipa::{OpenApi};
+
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
     cfg.service(users_by_company);
     cfg.service(users_by_license);
+
     cfg.service(generate_invite);
+
+    cfg.service(remove_license_users);
 }
 
 #[derive(OpenApi)]
@@ -144,4 +148,68 @@ async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invi
     }
 
     HttpResponse::InternalServerError().json("Internal Server Error 2")
+}
+#[derive(Serialize, Deserialize)]
+struct LicenseUsers {
+    users: Vec<LicenseUser>,
+}
+
+/// Add rows into the user license table.
+/// The JSON for `other_users` can be like this:
+/// ```
+/// {
+///     "users": [
+///         {
+///             "user_id": 1,
+///             "license_id": 1
+///         }
+///     ]
+/// }
+/// ```
+#[post("/license_users")]
+async fn add_license_users(
+    pool: web::Data<Pool<Postgres>>,
+    other_users: web::Json<LicenseUsers>,
+) -> impl Responder {
+    let other_users = &other_users.users;
+    match user::add_license_users(&pool, &other_users).await {
+        Ok(_) => HttpResponse::Created().json(other_users),
+
+        Err(e) => match e {
+            sqlx::Error::Database(e) => match e.code() {
+                Some(e) => match e.as_ref() {
+                    "23505" => HttpResponse::BadRequest().json("Record already exists"),
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                },
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            },
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+/// Delete from into the user license table.
+/// The JSON for `other_users` can be like this:
+/// ```
+/// {
+///     "users": [
+///         {
+///             "user_id": 1,
+///             "license_id": 1
+///         }
+///     ]
+/// }
+/// ```
+#[delete("/license_users")]
+async fn remove_license_users(
+    pool: web::Data<Pool<Postgres>>,
+    other_users: web::Json<LicenseUsers>,
+) -> impl Responder {
+    let other_users = &other_users.users;
+    match user::remove_license_users(&pool, &other_users).await {
+        Ok(_) => HttpResponse::Ok().json(other_users),
+        Err(e) => match e {
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
 }

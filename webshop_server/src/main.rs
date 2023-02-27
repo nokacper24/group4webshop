@@ -1,9 +1,7 @@
 use actix_cors::Cors;
-use actix_web::http::Error;
-use actix_web::web::ReqData;
-use actix_web::HttpResponse;
-use actix_web::{get, http, middleware::Logger, web, App, HttpServer, Responder};
+use actix_web::{get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpServer, Responder, HttpResponse};
 use actix_web_httpauth::middleware::HttpAuthentication;
+use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
 use log::info;
 
@@ -20,10 +18,7 @@ use crate::data_access::create_pool;
 use crate::data_access::user::Role;
 use crate::middlewares::auth::{check_role, validator, Token};
 
-#[get("/")]
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -65,15 +60,26 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .service(index)
-            // load routes from routes/public/public.rs
             .service(public)
             .configure(openapi_doc::configure_opanapi)
-            // Configure custom 404 page
-            .default_service(web::route().to(|| async { "404 - Not Found" }))
+            .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
+            .default_service(web::route().to(not_found))
     })
     .bind(address)
     .expect("Can not bind to port 8080")
     .run()
     .await
+}
+
+async fn not_found() -> impl Responder {
+    HttpResponse::NotFound().body(
+        r#"<html>
+            <head>
+                <title>404 Not Found</title>
+            </head>
+            <body>
+                <h1>404 Not Found</h1>
+                <p>The resource could not be found.</p>
+            </body>
+        </html>"#)
 }
