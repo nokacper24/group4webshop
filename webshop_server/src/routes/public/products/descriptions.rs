@@ -1,7 +1,8 @@
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
+use utoipa::ToSchema;
 
 use crate::data_access::product::{self, description::DescriptionCompError};
 
@@ -29,9 +30,9 @@ pub async fn get_product_descriptions(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 struct RequestNewPriority {
-    current_priority: i32,
+    component_id: i32,
     new_priority: i32,
 }
 #[patch("/{product_id}/descriptions/priority")]
@@ -40,23 +41,24 @@ async fn update_priority(
     product_id: web::Path<String>,
     req_body: web::Json<RequestNewPriority>,
 ) -> impl Responder {
-    let updated_component = product::description::update_priority(
+    let query_result = product::description::update_priority(
         &pool,
         product_id.as_str(),
-        req_body.current_priority,
+        req_body.component_id,
         req_body.new_priority,
-    ).await;
+    )
+    .await;
 
-    match updated_component {
-        Ok(updated_component) => HttpResponse::Ok().json(updated_component),
+    match query_result {
+        Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => match e {
-            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product or description not found"),
-            sqlx::Error::Protocol(e) => HttpResponse::BadRequest().json(format!("Invalid priority: {}", e)),
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            sqlx::Error::RowNotFound => {
+                HttpResponse::NotFound().json("Product or description not found")
+            }
+            _ => HttpResponse::Conflict().json(format!("Internal Server Error: {}", e)), //TODO
         },
     }
 }
-
 
 #[patch("/{product_id}/descriptions/priorityswap")]
 async fn description_swap_priorities(
