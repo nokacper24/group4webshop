@@ -11,6 +11,7 @@ mod openapi_doc;
 mod routes;
 
 use routes::public::public;
+use routes::private::private;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -50,9 +51,11 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
-        let public = web::scope("/api").configure(public);
-
         let bearer_middleware = HttpAuthentication::bearer(validator);
+        let public = web::scope("/api").configure(public);
+        let private = web::scope("/secure")
+            .wrap(bearer_middleware)
+            .configure(private);
 
         App::new()
             // register sqlx pool
@@ -61,9 +64,11 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .wrap(Logger::default())
             .service(public)
+            .service(private)
             .configure(openapi_doc::configure_opanapi)
             .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
             .default_service(web::route().to(not_found))
+
     })
     .bind(address)
     .expect("Can not bind to port 8080")

@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 actix-cors = "0.6.4"
 actix-session = {version = "0.7.2", features = ["cookie-session"] }
-actix-web = "4.2.1"
+actix-web = { version = "4.3.1", features = ["cookie"] }
 actix-web-httpauth = "0.8.0"
 chrono = { version = "0.4.23", features = ["serde"] }
 actix-web-static-files = "4.0.0"
