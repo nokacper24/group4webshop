@@ -1,6 +1,9 @@
+use std::io::Cursor;
+
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use futures::StreamExt;
+use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::ToSchema;
@@ -9,6 +12,9 @@ use crate::data_access::{
     error_handling,
     product::{self, description::DescriptionCompError},
 };
+
+const MAX_SIZE: usize = 1024 * 1024 * 5; // 5 MB
+const ALLOWED_FORMATS: [ImageFormat; 3] = [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
@@ -132,7 +138,7 @@ async fn upload_image(
         }
     };
 
-    let (alt_text, file_name, image_buffer) =
+    let (alt_text, image_buffer, file_name) =
         match extract_image_component_from_multipart(payload).await {
             Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
             Err(e) => {
@@ -154,6 +160,27 @@ async fn upload_image(
                 }
             }
         };
+
+    let img = match parse_img(image_buffer) {
+        Ok(img) => img,
+        Err(e) => {
+            return match e {
+                MyImageError::ImageError(e) => {
+                    HttpResponse::UnsupportedMediaType().json(format!("Image error: {}", e))
+                }
+                MyImageError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                    "No format found. Supported formats: {:?}",
+                    ALLOWED_FORMATS
+                )),
+                MyImageError::UnsuppoertedFormat(e) => {
+                    HttpResponse::UnsupportedMediaType().json(format!(
+                        "Unsupported format, found {:?}. Supported formats: {:?}",
+                        e, ALLOWED_FORMATS
+                    ))
+                }
+            }
+        }
+    };
 
     HttpResponse::Ok().json("Image uploaded")
 }
@@ -205,10 +232,32 @@ async fn extract_image_component_from_multipart(
     }
     Ok((alt_text, image_buffer, file_name))
 }
-
 enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
     MultipartError(actix_multipart::MultipartError),
     MissingField(String),
     UnexpectedField(String),
+}
+
+fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
+    let image = ImageReader::new(Cursor::new(&img_buffer));
+    let img_format = image.format();
+    let image = match image.decode() {
+        Ok(image) => image,
+        Err(e) => return Err(MyImageError::ImageError(e)),
+    };
+    match img_format {
+        Some(format) => {
+            if !ALLOWED_FORMATS.contains(&format) {
+                return Err(MyImageError::UnsuppoertedFormat(format));
+            }
+        }
+        None => return Err(MyImageError::NoFormatFound),
+    }
+    Ok(image)
+}
+enum MyImageError {
+    ImageError(ImageError),
+    NoFormatFound,
+    UnsuppoertedFormat(ImageFormat),
 }
