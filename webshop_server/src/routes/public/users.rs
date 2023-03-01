@@ -1,16 +1,18 @@
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use crate::data_access::{user::{self, LicenseUser, User}, auth};
+use actix_web::{get, web, HttpResponse, Responder, post, delete};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::OpenApi;
+use utoipa::{OpenApi};
 
-use crate::data_access::user::{self, LicenseUser, User};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
     cfg.service(user_by_id);
     cfg.service(users_by_company);
     cfg.service(users_by_license);
-    cfg.service(add_license_users);
+
+    cfg.service(generate_invite);
+
     cfg.service(remove_license_users);
 }
 
@@ -121,6 +123,32 @@ async fn users_by_license(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+#[derive(Deserialize, Serialize)]
+struct Invite {
+    email: String,
+}
+
+#[post("/generate_invite")]
+async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
+    let invite = auth::create_invite(&pool, &invite.email).await;
+
+    //error check
+    if invite.is_err() {
+        return HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", invite.err().unwrap()));
+    }
+
+    //parse to json
+    if let Ok(invite) = invite {
+        return HttpResponse::Ok().json(
+            Invite {
+                email: invite.email,
+            }
+        )
+
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error 2")
+}
 #[derive(Serialize, Deserialize)]
 struct LicenseUsers {
     users: Vec<LicenseUser>,

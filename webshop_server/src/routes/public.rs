@@ -8,6 +8,7 @@ pub mod categories;
 pub mod licenses;
 pub mod products;
 pub mod users;
+pub mod auth;
 pub mod company;
 
 #[get("")]
@@ -21,5 +22,6 @@ pub fn public(cfg: &mut web::ServiceConfig) {
     cfg.configure(licenses::configure);
     cfg.configure(products::configure);
     cfg.configure(users::configure);
+    cfg.configure(auth::configure);
     cfg.configure(company::configure);
 }
