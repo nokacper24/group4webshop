@@ -21,6 +21,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(description_swap_priorities);
     cfg.service(add_text_description);
     cfg.service(update_priority);
+    cfg.service(upload_image);
 }
 
 #[get("/{product_id}/descriptions")]
@@ -148,6 +149,9 @@ async fn upload_image(
                     ImageExtractorError::MissingField(field) => {
                         HttpResponse::BadRequest().json(format!("Missing field: {}", field))
                     }
+                    ImageExtractorError::MissingData => {
+                        HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
+                    }
                     ImageExtractorError::UnexpectedField(e) => {
                         HttpResponse::BadRequest().json(format!(
                             "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
@@ -168,8 +172,8 @@ async fn upload_image(
         Ok(img) => img,
         Err(e) => {
             return match e {
-                MyImageError::ImageError(e) => {
-                    HttpResponse::UnsupportedMediaType().json(format!("Image error: {}", e))
+                MyImageError::DecodeError(e) => {
+                    HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
                 }
                 MyImageError::NoFormatFound => HttpResponse::BadRequest().json(format!(
                     "No format found. Supported formats: {:?}",
@@ -180,6 +184,9 @@ async fn upload_image(
                         "Unsupported format, found {:?}. Supported formats: {:?}",
                         e, ALLOWED_FORMATS
                     ))
+                }
+                MyImageError::IoError(e) => {
+                    HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
                 }
             }
         }
@@ -236,24 +243,34 @@ async fn extract_image_component_from_multipart(
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
         }
     }
+    if alt_text.is_empty() || file_name.is_empty() || image_buffer.is_empty() {
+        return Err(ImageExtractorError::MissingData);
+    }
+
     Ok((alt_text, image_buffer, file_name))
 }
 enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
     MultipartError(actix_multipart::MultipartError),
     MissingField(String),
+    MissingData,
     UnexpectedField(String),
     FileTooLarge,
 }
 
 fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
-    let image = ImageReader::new(Cursor::new(&img_buffer));
-    let img_format = image.format();
+    let image = match ImageReader::new(Cursor::new(&img_buffer)).with_guessed_format() {
+        Ok(image) => image,
+        Err(e) => return Err(MyImageError::IoError(e)),
+    };
+    let image_format = image.format();
+
     let image = match image.decode() {
         Ok(image) => image,
-        Err(e) => return Err(MyImageError::ImageError(e)),
+        Err(e) => return Err(MyImageError::DecodeError(e)),
     };
-    match img_format {
+
+    match image_format {
         Some(format) => {
             if !ALLOWED_FORMATS.contains(&format) {
                 return Err(MyImageError::UnsuppoertedFormat(format));
@@ -264,7 +281,8 @@ fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
     Ok(image)
 }
 enum MyImageError {
-    ImageError(ImageError),
+    IoError(std::io::Error),
+    DecodeError(ImageError),
     NoFormatFound,
     UnsuppoertedFormat(ImageFormat),
 }
