@@ -5,7 +5,10 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::ToSchema;
 
-use crate::data_access::{product::{self, description::DescriptionCompError}, error_handling};
+use crate::data_access::{
+    error_handling,
+    product::{self, description::DescriptionCompError},
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
@@ -31,7 +34,6 @@ pub async fn get_product_descriptions(
     }
 }
 
-
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
     pool: web::Data<Pool<Postgres>>,
@@ -52,12 +54,12 @@ async fn update_priority(
         Err(e) => match e {
             sqlx::Error::RowNotFound => {
                 HttpResponse::NotFound().json("Product or description not found")
-            },
-            sqlx::Error::Database(e) => {
-                match error_handling::PostgresDBError::from_str(e) {
-                    error_handling::PostgresDBError::UniqueViolation => HttpResponse::Conflict().json("Conflict: Priority already in use"),
-                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            }
+            sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::Conflict().json("Conflict: Priority already in use")
                 }
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
@@ -130,20 +132,35 @@ async fn upload_image(
         }
     };
 
-    let (alt_text, file_name, image_buffer) = match extract_image_component_multipart(payload).await
-    {
-        Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
-        Err(_) => todo!("Handle error"),
-    };
+    let (alt_text, file_name, image_buffer) =
+        match extract_image_component_from_multipart(payload).await {
+            Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
+            Err(e) => {
+                return match e {
+                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
+                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MissingField(field) => {
+                        HttpResponse::BadRequest().json(format!("Missing field: {}", field))
+                    }
+                    ImageExtractorError::UnexpectedField(e) => {
+                        HttpResponse::BadRequest().json(format!(
+                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                            e
+                        ))
+                    }
+                    ImageExtractorError::Utf8Error(e) => {
+                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                    }
+                }
+            }
+        };
 
     HttpResponse::Ok().json("Image uploaded")
 }
 
-async fn extract_image_component_multipart(
+async fn extract_image_component_from_multipart(
     mut payload: Multipart,
 ) -> Result<(String, Vec<u8>, String), ImageExtractorError> {
-    todo!("Implement");
-    
     let mut alt_text = String::new();
     let mut file_name = String::new();
     let mut image_buffer = Vec::new();
@@ -169,15 +186,29 @@ async fn extract_image_component_multipart(
                 };
                 alt_text.push_str(string);
             }
+        } else if name == "image" {
+            file_name = match field.content_disposition().get_filename() {
+                Some(name) => name.to_string(),
+                None => return Err(ImageExtractorError::MissingField("filename".to_string())),
+            };
+
+            while let Some(chunk) = field.next().await {
+                let data = match chunk {
+                    Ok(data) => data,
+                    Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+                };
+                image_buffer.extend_from_slice(&data);
+            }
+        } else {
+            return Err(ImageExtractorError::UnexpectedField(name.to_string()));
         }
     }
-
     Ok((alt_text, image_buffer, file_name))
 }
 
 enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
-    IoError(std::io::Error),
     MultipartError(actix_multipart::MultipartError),
     MissingField(String),
+    UnexpectedField(String),
 }
