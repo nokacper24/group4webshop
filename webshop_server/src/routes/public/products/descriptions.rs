@@ -157,6 +157,9 @@ async fn upload_image(
                     ImageExtractorError::Utf8Error(e) => {
                         HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
                     }
+                    ImageExtractorError::FileTooLarge => {
+                        HttpResponse::PayloadTooLarge().json("File too large")
+                    }
                 }
             }
         };
