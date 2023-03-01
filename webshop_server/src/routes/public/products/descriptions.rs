@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::ToSchema;
 
-use crate::data_access::product::{self, description::DescriptionCompError};
+use crate::data_access::{product::{self, description::DescriptionCompError}, error_handling};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
@@ -31,22 +31,19 @@ pub async fn get_product_descriptions(
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-struct RequestNewPriority {
-    component_id: i32,
-    new_priority: i32,
-}
-#[patch("/{product_id}/descriptions/priority")]
+
+#[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
     pool: web::Data<Pool<Postgres>>,
-    product_id: web::Path<String>,
-    req_body: web::Json<RequestNewPriority>,
+    path: web::Path<(String, i32)>,
+    new_priority: web::Json<i32>,
 ) -> impl Responder {
+    let (product_id, component_id) = path.into_inner();
     let query_result = product::description::update_priority(
         &pool,
         product_id.as_str(),
-        req_body.component_id,
-        req_body.new_priority,
+        component_id,
+        new_priority.into_inner(),
     )
     .await;
 
@@ -55,8 +52,14 @@ async fn update_priority(
         Err(e) => match e {
             sqlx::Error::RowNotFound => {
                 HttpResponse::NotFound().json("Product or description not found")
-            }
-            _ => HttpResponse::Conflict().json(format!("Internal Server Error: {}", e)), //TODO
+            },
+            sqlx::Error::Database(e) => {
+                match error_handling::PostgresDBError::from_str(e) {
+                    error_handling::PostgresDBError::UniqueViolation => HttpResponse::Conflict().json("Conflict: Priority already in use"),
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                }
+            },
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
 }
