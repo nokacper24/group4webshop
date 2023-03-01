@@ -243,7 +243,7 @@ async fn extract_image_component_from_multipart(
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
         }
     }
-    if alt_text.is_empty() || file_name.is_empty() || image_buffer.is_empty() {
+    if alt_text.trim().is_empty() || file_name.trim().is_empty() || image_buffer.is_empty() {
         return Err(ImageExtractorError::MissingData);
     }
 
