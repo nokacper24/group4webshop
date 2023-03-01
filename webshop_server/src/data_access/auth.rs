@@ -91,14 +91,9 @@ pub async fn create_invite(
     // create a 64 character long key based on A-Z, a-z, 0-9. wihtout using uuid.
     let mut key = String::new();
     for _ in 0..64 {
-        let c = rand::random::<u8>();
-        if c < 10 {
-            key.push_str(&c.to_string());
-        } else if c < 36 {
-            key.push((c + 55) as char);
-        } else {
-            key.push((c + 61) as char);
-        }
+        //generate a random ASCII character
+        let ascii = rand::random::<u8>() % 26 + 65;
+        key.push(ascii as char);
     }
 
     let exp_date = Utc::now() + Duration::days(1);
@@ -111,5 +106,22 @@ pub async fn create_invite(
     )
     .fetch_one(pool)
     .await?;
+    Ok(invite)
+}
+
+pub async fn get_invite(pool: &Pool<Postgres>, key: &str) -> Result<UserInvite, sqlx::Error> {
+    let invite = sqlx::query_as!(
+        UserInvite,
+        "SELECT * FROM register_user WHERE key = $1 LIMIT 1",
+        key
+    )
+    .fetch_one(pool)
+    .await?;
+    if invite.exp_date < Utc::now() {
+        sqlx::query!("DELETE FROM register_user WHERE key = $1", key)
+            .execute(pool)
+            .await?;
+        return Err(sqlx::Error::RowNotFound);
+    }
     Ok(invite)
 }

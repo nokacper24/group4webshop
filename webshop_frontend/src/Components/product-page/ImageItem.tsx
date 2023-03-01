@@ -1,6 +1,10 @@
 import { RowItem } from "./DescriptionRow";
 
-const baseurl = 'http://localhost:8081/'
+let baseurl = 'http://localhost:8081/'
+// check if we are in production mode
+if (import.meta.env.PROD) {
+    baseurl = "";
+}
 
 /**
  * Creates an image in a row
