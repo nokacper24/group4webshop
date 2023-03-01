@@ -13,7 +13,7 @@ use crate::data_access::{
     product::{self, description::DescriptionCompError},
 };
 
-const MAX_SIZE: usize = 1024 * 1024 * 5; // 5 MB
+const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
 const ALLOWED_FORMATS: [ImageFormat; 3] = [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -224,7 +224,10 @@ async fn extract_image_component_from_multipart(
                     Ok(data) => data,
                     Err(e) => return Err(ImageExtractorError::MultipartError(e)),
                 };
-                image_buffer.extend_from_slice(&data);
+                if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
+                    return Err(ImageExtractorError::FileTooLarge);
+                } else {
+                image_buffer.extend_from_slice(&data);}
             }
         } else {
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
@@ -237,6 +240,7 @@ enum ImageExtractorError {
     MultipartError(actix_multipart::MultipartError),
     MissingField(String),
     UnexpectedField(String),
+    FileTooLarge,
 }
 
 fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
