@@ -41,7 +41,7 @@ pub async fn validator(
         });
         Ok(req)
     } else {
-        Err((actix_web::error::ErrorUnauthorized("Unauthorized"), req))
+        Ok(req)
     }
 }
 
