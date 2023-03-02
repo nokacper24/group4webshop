@@ -118,7 +118,8 @@ CREATE TABLE description_component (
     CHECK ((image_id IS NOT NULL AND text_id IS NULL) OR (image_id IS NULL AND text_id IS NOT NULL)) -- Ensure that it has EITHER an image or a text, not both
 );
 
-CREATE OR REPLACE FUNCTION set_description_component_priority() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION set_description_component_priority()
+RETURNS TRIGGER AS $$
 DECLARE
   max_priority INTEGER;
 BEGIN
@@ -135,5 +136,21 @@ CREATE TRIGGER set_description_component_priority_trigger
   BEFORE INSERT ON description_component
   FOR EACH ROW
   EXECUTE FUNCTION set_description_component_priority();
+
+CREATE OR REPLACE FUNCTION delete_description_component()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.image_id IS NOT NULL THEN
+        DELETE FROM product_image WHERE image_id = OLD.image_id;
+    ELSIF OLD.text_id IS NOT NULL THEN
+        DELETE FROM product_text WHERE text_id = OLD.text_id;
+    END IF;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER delete_description_component_trigger
+AFTER DELETE ON description_component
+FOR EACH ROW EXECUTE FUNCTION delete_description_component();
 
 COMMIT;
