@@ -62,6 +62,16 @@ pub struct ImageComponent {
     alt_text: String,
 }
 
+impl ImageComponent {
+    pub fn new(image_id: Option<i32>, image_path: String, alt_text: String) -> Self {
+        Self {
+            image_id,
+            image_path,
+            alt_text,
+        }
+    }
+}
+
 /// Returns all description components of a product.
 pub async fn get_product_description_components(
     pool: &Pool<Postgres>,
@@ -370,6 +380,7 @@ async fn insert_image_component(
     )
     .fetch_one(pool)
     .await;
+    log::error!("{:?}", &result_row);
 
     let result_row = match result_row {
         Ok(result_row) => result_row,
