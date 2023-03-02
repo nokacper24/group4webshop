@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
 import { UserProps, LicenseProps } from "../MyAccount";
 
-type UserRowProps = {
+export type SelectTableRowProps = {
   id: string;
   columns: { text: string }[];
 };
@@ -31,17 +31,19 @@ export default function ManageLicenseAccess() {
   const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
   const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
 
-  const [usersWithoutAccess, setUsersWithoutAccess] = useState<UserRowProps[]>(
+  const [usersWithoutAccess, setUsersWithoutAccess] = useState<
+    SelectTableRowProps[]
+  >([]);
+  const [usersWithAccess, setUsersWithAccess] = useState<SelectTableRowProps[]>(
     []
   );
-  const [usersWithAccess, setUsersWithAccess] = useState<UserRowProps[]>([]);
 
   /**
    * Update if the user access has been changed (from original) when adding user.
    *
    * @param user The user to check if their access has changed.
    */
-  const updateChangedOnAdd = (user: UserRowProps) => {
+  const updateChangedOnAdd = (user: SelectTableRowProps) => {
     if (changedUsersWithoutAccess.has(user.id)) {
       changedUsersWithoutAccess.delete(user.id);
     } else if (!changedUsersWithAccess.has(user.id)) {
@@ -54,7 +56,7 @@ export default function ManageLicenseAccess() {
    *
    * @param user The user to check if their access has changed.
    */
-  const updateChangedOnRemove = (user: UserRowProps) => {
+  const updateChangedOnRemove = (user: SelectTableRowProps) => {
     if (changedUsersWithAccess.has(user.id)) {
       changedUsersWithAccess.delete(user.id);
     } else if (!changedUsersWithoutAccess.has(user.id)) {
@@ -163,7 +165,7 @@ export default function ManageLicenseAccess() {
 
   const withoutAccessTable = {
     header: {
-      columns: [{ text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }],
     },
     rows: usersWithoutAccess,
     button: { text: "Add", action: addUserAccess },
@@ -174,7 +176,7 @@ export default function ManageLicenseAccess() {
 
   const withAccessTable = {
     header: {
-      columns: [{ text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }],
     },
     rows: usersWithAccess,
     button: { text: "Remove", action: removeUserAccess },
