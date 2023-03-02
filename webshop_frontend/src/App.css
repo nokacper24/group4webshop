@@ -174,9 +174,8 @@ label {
 }
 
 .center-container {
-  height: 100%;
-  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -943,7 +942,7 @@ form a:hover {
 }
 
 #prices,
-#product-select {
+.form-container>select {
   min-width: 20em;
   padding: 0.5em;
   font-size: 1.1rem;
@@ -1051,7 +1050,6 @@ form a:hover {
 
 .select-table td {
   border-bottom: 1px solid var(--text-secondary);
-  word-break: break-all;
 }
 
 .select-table td>input,
