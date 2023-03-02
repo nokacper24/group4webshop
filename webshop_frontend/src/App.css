@@ -107,7 +107,6 @@ h3 {
 }
 
 button {
-  font-size: 0.9em;
   font-family: var(--ff-primary);
   cursor: pointer;
 }
@@ -116,6 +115,7 @@ button {
   padding: 0.75em 2em;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
+  font-size: 0.9em;
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
@@ -155,6 +155,7 @@ th {
 th,
 td {
   padding: 0.5em 1em;
+  word-wrap: break-word;
 }
 
 tr {
@@ -1050,6 +1051,7 @@ form a:hover {
 
 .select-table td {
   border-bottom: 1px solid var(--text-secondary);
+  word-break: break-all;
 }
 
 .select-table td>input,
