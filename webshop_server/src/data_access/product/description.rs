@@ -474,3 +474,22 @@ pub async fn swap_priority(
     let updated_components = get_product_description_components(pool, product_id).await?;
     Ok(updated_components)
 }
+
+pub async fn delete_component(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    component_id: i32,
+) -> Result<(), sqlx::Error>
+{
+    let query = query!(
+        r#"DELETE FROM description_component
+        WHERE component_id = $1 AND product_id=$2;"#,
+        component_id,
+        product_id
+    );
+    let x = pool.execute(query).await;
+    match x {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err),
+    }
+}
