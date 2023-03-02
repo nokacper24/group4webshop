@@ -192,17 +192,19 @@ async fn upload_image(
         };
 
     let image_dir = format!("{}/{}", IMAGE_DIR, product_id.as_str());
-    let image_path = format!("{}/{}", image_dir, file_name);
- 
-    if let Err(e) = description_utils::save_image(image, &image_dir, &image_path) {
-        log::error!("Couldnt save image to {}, Error: {}", &image_path, e);
-        return HttpResponse::InternalServerError().json("Internal Server Error while saving image");
-    }
+
+    let path = match description_utils::save_image(image, &image_dir, &file_name) {
+        Ok(path) => path,
+        Err(e) => {
+            log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
+            return HttpResponse::InternalServerError().json("Internal Server Error while saving image");
+        }
+    };
 
     let created_component = product::description::create_image_component(
         &pool,
         product_id.as_str(),
-        product::description::ImageComponent::new(None, image_path, alt_text)
+        product::description::ImageComponent::new(None, path, alt_text)
     ).await;
 
     match created_component {

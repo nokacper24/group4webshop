@@ -126,13 +126,36 @@ pub enum ImageParsingError {
     UnsuppoertedFormat(ImageFormat),
 }
 
-pub fn save_image(image: DynamicImage, dir: &str, path: &str) -> Result<(), std::io::Error> {
+/// Saves an image to the file system.
+/// Does not overwrite existing files, but appends a number to the file name.
+/// 
+/// # Arguments
+/// 
+/// * `image` - The image to save.
+/// * `dir` - The directory to save the image to.
+/// * `file_name` - The file name of the image.
+/// 
+/// # Returns
+/// 
+/// The path to the saved image.
+pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<String, std::io::Error> {
     std::fs::create_dir_all(dir)?;
-    if image.save(path).is_err() {
+
+    let file_name = sanitize_filename::sanitize(file_name).replace(" ", "-");
+
+    let mut path = format!("{}/{}", dir, file_name);
+    let mut i = 1;
+    while std::path::Path::new(&path).exists() {
+        path = format!("{}/{}-{}", dir, i, file_name);
+        i += 1;
+    }
+    
+    if image.save(&path).is_err() {
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "Could not save image",
         ));
     }
-    Ok(())
+    
+    Ok(path)
 }
