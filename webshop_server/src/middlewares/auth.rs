@@ -52,13 +52,12 @@ pub struct Token {
 
 pub async fn check_role(
     req_token: Option<ReqData<Token>>,
-    pool: web::Data<Pool<Postgres>>,
+    pool: &Pool<Postgres>,
 ) -> Result<Role, String> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();
             let token = token.token;
-            let pool = pool.get_ref();
             let cookie = get_cookie(&token, &pool).await;
             match cookie {
                 Ok(cookie) => {

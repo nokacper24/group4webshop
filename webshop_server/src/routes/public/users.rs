@@ -1,5 +1,5 @@
-use crate::data_access::{user::{self, LicenseUser, User}, auth};
-use actix_web::{get, web, HttpResponse, Responder, post, delete};
+use crate::{data_access::{user::{self, LicenseUser, User, create_partial_user, create_invite}, auth}, middlewares::auth::{Token, check_role}};
+use actix_web::{get, web::{self, ReqData}, HttpResponse, Responder, post, delete};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi};
@@ -129,25 +129,53 @@ struct Invite {
 }
 
 #[post("/generate_invite")]
-async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
-    let invite = auth::create_invite(&pool, &invite.email).await;
+async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>, req: Option<ReqData<Token>> ) -> impl Responder {
 
-    //error check
-    if invite.is_err() {
-        return HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", invite.err().unwrap()));
-    }
+let role = check_role(req, &pool).await;
 
-    //parse to json
-    if let Ok(invite) = invite {
-        return HttpResponse::Ok().json(
-            Invite {
-                email: invite.email,
+match role {
+    Ok(role) => {
+        match role {
+            user::Role::Admin => {
+                return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
             }
-        )
+            user::Role::CompanyItHead => {
+                return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
+            }
+            user::Role::CompanyIt => {
+                return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
+            }
+            user::Role::Default => {
+                return HttpResponse::Unauthorized().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
+            }
+        }
+            
+        }
+    Err(_) => {
+        // since the user is not logged in, we can't check the role, so it must be a new user
+        // so we can generate a new user and a company for them
+        let partial_user = create_partial_user(&invite.email, &pool.clone()).await;
+        match partial_user {
+            Ok(partial_user) => {
 
+                let invite = create_invite(Some(partial_user.id), None, &pool).await;
+                match invite {
+                    Ok(invite) => {
+                        return HttpResponse::Ok().json(invite);
+                    }
+                    Err(_) => {
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                }
+            }
+            Err(_) => {
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        }
     }
 
-    HttpResponse::InternalServerError().json("Internal Server Error 2")
+}
+
 }
 #[derive(Serialize, Deserialize)]
 struct LicenseUsers {

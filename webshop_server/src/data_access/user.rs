@@ -284,6 +284,7 @@ pub async fn create_partial_company_user(
 /// * `id` - The id of the invite
 /// * `user_id` - The id of the user that is being invited
 /// * `company_user_id` - The id of the company user that is inviting the user
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Invite {
     pub id: String,
    pub user_id: Option<i32>,
