@@ -1,6 +1,6 @@
 use actix_multipart::Multipart;
 use futures::StreamExt;
-use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
+use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat, ImageResult};
 use std::io::Cursor;
 
 /// Extracts the image component from a multipart request.
@@ -124,4 +124,15 @@ pub enum ImageParsingError {
     DecodeError(ImageError),
     NoFormatFound,
     UnsuppoertedFormat(ImageFormat),
+}
+
+pub fn save_image(image: DynamicImage, dir: &str, path: &str) -> Result<(), std::io::Error> {
+    std::fs::create_dir_all(dir)?;
+    if image.save(path).is_err() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Could not save image",
+        ));
+    }
+    Ok(())
 }
