@@ -4,7 +4,7 @@ use crate::{
         product::{self, description::DescriptionCompError},
     },
     routes::public::products::descriptions::description_utils::{
-        ImageExtractorError, MyImageError,
+        ImageExtractorError, ImageParsingError,
     },
 };
 use actix_multipart::Multipart;
@@ -172,19 +172,19 @@ async fn upload_image(
             Ok(img) => img,
             Err(e) => {
                 return match e {
-                    MyImageError::DecodeError(e) => {
+                    ImageParsingError::DecodeError(e) => {
                         HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
                     }
-                    MyImageError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                    ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
                         "No format found. Supported formats: {:?}",
                         ALLOWED_FORMATS
                     )),
-                    MyImageError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
+                    ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
                         .json(format!(
                             "Unsupported format, found {:?}. Supported formats: {:?}",
                             e, ALLOWED_FORMATS
                         )),
-                    MyImageError::IoError(e) => HttpResponse::InternalServerError()
+                    ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
                         .json(format!("Image reader error: {}", e)),
                 }
             }

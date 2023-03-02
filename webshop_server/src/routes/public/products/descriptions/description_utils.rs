@@ -3,6 +3,22 @@ use futures::StreamExt;
 use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use std::io::Cursor;
 
+/// Extracts the image component from a multipart request.
+/// 
+/// # Arguments
+/// 
+/// * `payload` - The multipart payload to extract the image component from.
+/// 
+/// # Returns
+/// 
+/// A tuple containing the alt text, the image buffer and the file name.
+/// * `alt_text` - The alt text of the image.
+/// * `image_buffer` - Vector containing the image data as bytes.
+/// * `file_name` - The file name of the image.
+/// 
+/// # Errors
+/// 
+/// Returns an `ImageExtractorError` containing the error that occurred.
 pub async fn extract_image_component_from_multipart(
     mut payload: Multipart,
 ) -> Result<(String, Vec<u8>, String), ImageExtractorError> {
@@ -58,6 +74,7 @@ pub async fn extract_image_component_from_multipart(
 
     Ok((alt_text, image_buffer, file_name))
 }
+
 pub enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
     MultipartError(actix_multipart::MultipartError),
@@ -67,29 +84,42 @@ pub enum ImageExtractorError {
     FileTooLarge,
 }
 
-pub fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
+/// Parses an image buffer into a `DynamicImage`.
+/// 
+/// # Arguments
+/// 
+/// * `img_buffer` - The image buffer to parse.
+/// 
+/// # Returns
+/// 
+/// A `DynamicImage` if the image could be parsed successfully.
+/// 
+/// # Errors
+/// 
+/// Returns a `ImageParsingError` if the image could not be parsed.
+pub fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, ImageParsingError> {
     let image = match ImageReader::new(Cursor::new(&img_buffer)).with_guessed_format() {
         Ok(image) => image,
-        Err(e) => return Err(MyImageError::IoError(e)),
+        Err(e) => return Err(ImageParsingError::IoError(e)),
     };
     let image_format = image.format();
 
     let image = match image.decode() {
         Ok(image) => image,
-        Err(e) => return Err(MyImageError::DecodeError(e)),
+        Err(e) => return Err(ImageParsingError::DecodeError(e)),
     };
 
     match image_format {
         Some(format) => {
             if !super::ALLOWED_FORMATS.contains(&format) {
-                return Err(MyImageError::UnsuppoertedFormat(format));
+                return Err(ImageParsingError::UnsuppoertedFormat(format));
             }
         }
-        None => return Err(MyImageError::NoFormatFound),
+        None => return Err(ImageParsingError::NoFormatFound),
     }
     Ok(image)
 }
-pub enum MyImageError {
+pub enum ImageParsingError {
     IoError(std::io::Error),
     DecodeError(ImageError),
     NoFormatFound,
