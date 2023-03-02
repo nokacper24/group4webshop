@@ -1,17 +1,17 @@
-use std::io::Cursor;
-
+use crate::{
+    data_access::{
+        error_handling,
+        product::{self, description::DescriptionCompError},
+    },
+    routes::public::products::descriptions::description_utils::{
+        ImageExtractorError, MyImageError,
+    },
+};
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
-use futures::StreamExt;
-use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
-use serde::{Deserialize, Serialize};
+use image::ImageFormat;
 use sqlx::{Pool, Postgres};
-use utoipa::ToSchema;
-
-use crate::data_access::{
-    error_handling,
-    product::{self, description::DescriptionCompError},
-};
+mod description_utils;
 
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
 const ALLOWED_FORMATS: [ImageFormat; 3] = [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
@@ -140,7 +140,7 @@ async fn upload_image(
     };
 
     let (alt_text, image_buffer, file_name) =
-        match extract_image_component_from_multipart(payload).await {
+        match description_utils::extract_image_component_from_multipart(payload).await {
             Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
             Err(e) => {
                 return match e {
@@ -149,9 +149,8 @@ async fn upload_image(
                     ImageExtractorError::MissingField(field) => {
                         HttpResponse::BadRequest().json(format!("Missing field: {}", field))
                     }
-                    ImageExtractorError::MissingData => {
-                        HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
-                    }
+                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
+                        .json("Missing data, expected 'image' and 'alt_text'"),
                     ImageExtractorError::UnexpectedField(e) => {
                         HttpResponse::BadRequest().json(format!(
                             "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
@@ -168,121 +167,28 @@ async fn upload_image(
             }
         };
 
-    let img = match parse_img(image_buffer) {
-        Ok(img) => img,
-        Err(e) => {
-            return match e {
-                MyImageError::DecodeError(e) => {
-                    HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
-                }
-                MyImageError::NoFormatFound => HttpResponse::BadRequest().json(format!(
-                    "No format found. Supported formats: {:?}",
-                    ALLOWED_FORMATS
-                )),
-                MyImageError::UnsuppoertedFormat(e) => {
-                    HttpResponse::UnsupportedMediaType().json(format!(
-                        "Unsupported format, found {:?}. Supported formats: {:?}",
-                        e, ALLOWED_FORMATS
-                    ))
-                }
-                MyImageError::IoError(e) => {
-                    HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
+    let img =
+        match description_utils::parse_img(image_buffer) {
+            Ok(img) => img,
+            Err(e) => {
+                return match e {
+                    MyImageError::DecodeError(e) => {
+                        HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
+                    }
+                    MyImageError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                        "No format found. Supported formats: {:?}",
+                        ALLOWED_FORMATS
+                    )),
+                    MyImageError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
+                        .json(format!(
+                            "Unsupported format, found {:?}. Supported formats: {:?}",
+                            e, ALLOWED_FORMATS
+                        )),
+                    MyImageError::IoError(e) => HttpResponse::InternalServerError()
+                        .json(format!("Image reader error: {}", e)),
                 }
             }
-        }
-    };
+        };
 
     HttpResponse::Ok().json("Image uploaded")
-}
-
-async fn extract_image_component_from_multipart(
-    mut payload: Multipart,
-) -> Result<(String, Vec<u8>, String), ImageExtractorError> {
-    let mut alt_text = String::new();
-    let mut file_name = String::new();
-    let mut image_buffer = Vec::new();
-
-    while let Some(mut item) = payload.next().await {
-        let field = match item {
-            Ok(ref mut field) => field,
-            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-        };
-        let name = match field.content_disposition().get_name() {
-            Some(name) => name,
-            None => return Err(ImageExtractorError::MissingField("name".to_string())),
-        };
-        if name == "alt_text" {
-            while let Some(chunk) = field.next().await {
-                let data = match chunk {
-                    Ok(data) => data,
-                    Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-                };
-                let string = match std::str::from_utf8(&data) {
-                    Ok(s) => s,
-                    Err(e) => return Err(ImageExtractorError::Utf8Error(e)),
-                };
-                alt_text.push_str(string);
-            }
-        } else if name == "image" {
-            file_name = match field.content_disposition().get_filename() {
-                Some(name) => name.to_string(),
-                None => return Err(ImageExtractorError::MissingField("filename".to_string())),
-            };
-
-            while let Some(chunk) = field.next().await {
-                let data = match chunk {
-                    Ok(data) => data,
-                    Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-                };
-                if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
-                    return Err(ImageExtractorError::FileTooLarge);
-                } else {
-                image_buffer.extend_from_slice(&data);}
-            }
-        } else {
-            return Err(ImageExtractorError::UnexpectedField(name.to_string()));
-        }
-    }
-    if alt_text.trim().is_empty() || file_name.trim().is_empty() || image_buffer.is_empty() {
-        return Err(ImageExtractorError::MissingData);
-    }
-
-    Ok((alt_text, image_buffer, file_name))
-}
-enum ImageExtractorError {
-    Utf8Error(std::str::Utf8Error),
-    MultipartError(actix_multipart::MultipartError),
-    MissingField(String),
-    MissingData,
-    UnexpectedField(String),
-    FileTooLarge,
-}
-
-fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, MyImageError> {
-    let image = match ImageReader::new(Cursor::new(&img_buffer)).with_guessed_format() {
-        Ok(image) => image,
-        Err(e) => return Err(MyImageError::IoError(e)),
-    };
-    let image_format = image.format();
-
-    let image = match image.decode() {
-        Ok(image) => image,
-        Err(e) => return Err(MyImageError::DecodeError(e)),
-    };
-
-    match image_format {
-        Some(format) => {
-            if !ALLOWED_FORMATS.contains(&format) {
-                return Err(MyImageError::UnsuppoertedFormat(format));
-            }
-        }
-        None => return Err(MyImageError::NoFormatFound),
-    }
-    Ok(image)
-}
-enum MyImageError {
-    IoError(std::io::Error),
-    DecodeError(ImageError),
-    NoFormatFound,
-    UnsuppoertedFormat(ImageFormat),
 }
