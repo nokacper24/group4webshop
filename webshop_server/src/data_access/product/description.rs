@@ -380,7 +380,6 @@ async fn insert_image_component(
     )
     .fetch_one(pool)
     .await;
-    log::error!("{:?}", &result_row);
 
     let result_row = match result_row {
         Ok(result_row) => result_row,
