@@ -33,6 +33,16 @@ CREATE TABLE register_user (
     exp_date timestamptz NOT NULL
 );
 
+CREATE TABLE invite_user (
+    id TEXT PRIMARY KEY,
+    /* Optional foreign keys to partial user and partial company user */
+    user_id INT,
+    company_user_id INT,
+
+    FOREIGN KEY (user_id) REFERENCES register_user(id),
+    FOREIGN KEY (company_user_id) REFERENCES register_company_user(id)
+);
+
 CREATE TABLE cookies (
     id SERIAL PRIMARY KEY,
     cookie TEXT NOT NULL,
