@@ -183,7 +183,11 @@ export default function ManageLicenseAccess() {
     ],
   };
 
-  const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  // check if we are in production mode
+if (import.meta.env.PROD) {
+    baseUrl = "";
+}
   const isInitialMount = useRef(true);
 
   /**

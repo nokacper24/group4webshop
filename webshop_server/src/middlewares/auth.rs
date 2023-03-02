@@ -47,7 +47,7 @@ pub async fn validator(
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Token {
-    token: String,
+    pub token: String,
 }
 
 pub async fn check_role(
