@@ -26,10 +26,10 @@ export type LicenseProps = {
  */
 export default function MyAccount() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // check if we are in production mode
-if (import.meta.env.PROD) {
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
     baseUrl = "";
-}
+  }
 
   const { userId } = useParams();
   const [user, setUser] = useState<UserProps>();
