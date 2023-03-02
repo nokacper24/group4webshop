@@ -52,10 +52,8 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         let bearer_middleware = HttpAuthentication::bearer(validator);
-        let public = web::scope("/api").configure(public);
-        let private = web::scope("/secure")
-            .wrap(bearer_middleware)
-            .configure(private);
+        let api_routes = web::scope("/api").wrap(bearer_middleware).configure(public).configure(private);
+
 
         App::new()
             // register sqlx pool
@@ -63,8 +61,7 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .service(public)
-            .service(private)
+            .service(api_routes)
             .configure(openapi_doc::configure_opanapi)
             .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
             .default_service(web::route().to(not_found))
