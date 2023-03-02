@@ -35,6 +35,7 @@ CREATE TABLE register_user (
 
 CREATE TABLE invite_user (
     id TEXT PRIMARY KEY,
+   
     /* Optional foreign keys to partial user and partial company user */
     user_id INT,
     company_user_id INT,

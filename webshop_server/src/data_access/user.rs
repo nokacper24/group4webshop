@@ -224,6 +224,8 @@ pub async fn create_partial_user(email: &str, pool: &Pool<Postgres>) ->  Result<
     }
 }
 
+
+
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
     pub id: i32,
@@ -270,6 +272,51 @@ pub async fn create_partial_company_user(
             .fetch_one(pool)
             .await?;
             Ok(user)
+        }
+        Err(e) => Err(e),
+    }
+}
+
+/// A struct representing an invite to a new user and a company.
+/// This is used to create a new user and link them to a new or existing company.
+/// 
+/// # Fields
+/// * `id` - The id of the invite
+/// * `user_id` - The id of the user that is being invited
+/// * `company_user_id` - The id of the company user that is inviting the user
+pub struct Invite {
+    pub id: String,
+   pub user_id: Option<i32>,
+  pub  company_user_id: Option<i32>,
+}
+
+pub async fn create_invite(
+    user_id: Option<i32>,
+    company_user_id: Option<i32>,
+    pool: &Pool<Postgres>,
+) -> Result<Invite, sqlx::Error> {
+    let id = Uuid::new_v4().to_string();
+
+    let insert = query!(
+        r#"INSERT INTO invite_user (id, user_id, company_user_id)
+        VALUES ($1, $2, $3)"#,
+        id,
+        user_id,
+        company_user_id
+    )
+    .execute(pool)
+    .await;
+
+    match insert {
+        Ok(_) => {
+            let invite = query_as!(
+                Invite,
+                r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
+                id
+            )
+            .fetch_one(pool)
+            .await?;
+            Ok(invite)
         }
         Err(e) => Err(e),
     }
