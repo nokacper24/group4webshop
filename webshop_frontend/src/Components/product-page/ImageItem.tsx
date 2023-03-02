@@ -3,7 +3,7 @@ import { RowItem } from "./DescriptionRow";
 let baseurl = 'http://localhost:8081/'
 // check if we are in production mode
 if (import.meta.env.PROD) {
-    baseurl = "";
+    baseurl = "../";
 }
 
 /**

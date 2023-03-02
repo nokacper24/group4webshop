@@ -74,7 +74,7 @@ export default function ProductPage() {
 
   const fetchDescriptions = async () => {
     const response = await fetch(
-      `${baseUrl}/api/products/${productId}/description`
+      `${baseUrl}/api/products/${productId}/descriptions`
     );
     const data = await response.json();
     const descriptions = data.map((description: any) => {
