@@ -19,6 +19,7 @@ const IMAGE_DIR: &str = "resources/images";
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
+    cfg.service(get_product_description_component_by_id);
     cfg.service(description_swap_priorities);
     cfg.service(add_text_description);
     cfg.service(update_priority);
@@ -37,6 +38,30 @@ pub async fn get_product_descriptions(
         Ok(descriptions) => HttpResponse::Ok().json(descriptions),
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+#[get("/{product_id}/descriptions/{component_id}")]
+pub async fn get_product_description_component_by_id(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(String, i32)>,
+) -> impl Responder {
+    let (product_id, component_id) = path.into_inner();
+    let description = product::description::get_description_component_checked(
+        &pool,
+        product_id.as_str(),
+        component_id,
+    )
+    .await;
+
+    match description {
+        Ok(description) => HttpResponse::Ok().json(description),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                HttpResponse::NotFound().json("Product or description not found")
+            }
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
