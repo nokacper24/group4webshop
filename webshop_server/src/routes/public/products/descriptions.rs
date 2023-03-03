@@ -35,11 +35,20 @@ pub async fn get_product_descriptions(
         product::description::get_product_description_components(&pool, product_id.as_str()).await;
 
     match descriptions {
-        Ok(descriptions) => HttpResponse::Ok().json(descriptions),
-        Err(e) => match e {
-            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Ok(descriptions) => {
+            if descriptions.is_empty() {
+                // if no rows were returned, check if product exists
+                if let Ok(is_valid) = product::product_exists(&pool, product_id.as_str()).await {
+                    if !is_valid {
+                        return HttpResponse::NotFound().json("Product not found");
+                    }
+                } else {
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            }
+            HttpResponse::Ok().json(descriptions)
+        }
+        Err(e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -193,28 +202,28 @@ async fn upload_image(
             }
         };
 
-    let image =
-        match description_utils::parse_img(image_buffer) {
-            Ok(img) => img,
-            Err(e) => {
-                return match e {
-                    ImageParsingError::DecodeError(e) => {
-                        HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
-                    }
-                    ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
-                        "No format found. Supported formats: {:?}",
-                        ALLOWED_FORMATS
+    let image = match description_utils::parse_img(image_buffer) {
+        Ok(img) => img,
+        Err(e) => {
+            return match e {
+                ImageParsingError::DecodeError(e) => {
+                    HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
+                }
+                ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                    "No format found. Supported formats: {:?}",
+                    ALLOWED_FORMATS
+                )),
+                ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
+                    .json(format!(
+                        "Unsupported format, found {:?}. Supported formats: {:?}",
+                        e, ALLOWED_FORMATS
                     )),
-                    ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
-                        .json(format!(
-                            "Unsupported format, found {:?}. Supported formats: {:?}",
-                            e, ALLOWED_FORMATS
-                        )),
-                    ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
-                        .json(format!("Image reader error: {}", e)),
+                ImageParsingError::IoError(e) => {
+                    HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
                 }
             }
-        };
+        }
+    };
 
     let image_dir = format!("{}/{}", IMAGE_DIR, product_id.as_str());
 
@@ -222,15 +231,17 @@ async fn upload_image(
         Ok(path) => path,
         Err(e) => {
             log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
-            return HttpResponse::InternalServerError().json("Internal Server Error while saving image");
+            return HttpResponse::InternalServerError()
+                .json("Internal Server Error while saving image");
         }
     };
 
     let created_component = product::description::create_image_component(
         &pool,
         product_id.as_str(),
-        product::description::ImageComponent::new(None, path, alt_text)
-    ).await;
+        product::description::ImageComponent::new(None, path, alt_text),
+    )
+    .await;
 
     match created_component {
         Ok(created_component) => HttpResponse::Ok().json(created_component),
@@ -243,5 +254,4 @@ async fn upload_image(
             }
         },
     }
-
 }
