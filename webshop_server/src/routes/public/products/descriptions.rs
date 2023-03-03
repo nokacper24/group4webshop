@@ -10,6 +10,7 @@ use crate::{
 use actix_multipart::Multipart;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use image::ImageFormat;
+use log::error;
 use sqlx::{Pool, Postgres};
 mod description_utils;
 
@@ -34,22 +35,28 @@ pub async fn get_product_descriptions(
     let descriptions =
         product::description::get_product_description_components(&pool, product_id.as_str()).await;
 
-    match descriptions {
-        Ok(descriptions) => {
-            if descriptions.is_empty() {
-                // if no rows were returned, check if product exists
-                if let Ok(is_valid) = product::product_exists(&pool, product_id.as_str()).await {
-                    if !is_valid {
-                        return HttpResponse::NotFound().json("Product not found");
-                    }
-                } else {
-                    return HttpResponse::InternalServerError().json("Internal Server Error");
-                }
-            }
-            HttpResponse::Ok().json(descriptions)
+    let descriptions = match descriptions {
+        Ok(descriptions) => descriptions,
+        Err(e) => {
+            error!("Error while getting product descriptions: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
         }
-        Err(e) => HttpResponse::InternalServerError().json("Internal Server Error"),
+    };
+
+    if descriptions.is_empty() {
+        let is_valid = match product::product_exists(&pool, product_id.as_str()).await {
+            Ok(is_valid) => is_valid,
+            Err(e) => {
+                error!("Error while checking if product exists: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        };
+        if !is_valid {
+            return HttpResponse::NotFound().json("Product not found");
+        }
     }
+
+    HttpResponse::Ok().json(descriptions)
 }
 
 #[get("/{product_id}/descriptions/{component_id}")]
