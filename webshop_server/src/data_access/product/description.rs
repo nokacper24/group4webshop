@@ -546,12 +546,26 @@ pub async fn swap_priority(
     Ok(updated_components)
 }
 
+/// Deletes a component from the database.
+/// If the component is an image_component, path to the image is returned.
+///
+/// # Returns
+///
+/// * `Result<Option<String>, sqlx::Error>`
+///     * `Ok(Some(String))` - Path to the image referenced by the deleted component
+///     * `Ok(None)` - No image in the deleted component
+///     * `Err(sqlx::Error)` - Error while deleting component
 pub async fn delete_component(
     pool: &Pool<Postgres>,
     product_id: &str,
     component_id: i32,
-) -> Result<(), sqlx::Error>
-{
+) -> Result<Option<String>, sqlx::Error> {
+    let to_delete = get_description_component_checked(pool, product_id, component_id).await?;
+    let img_path = match to_delete.image {
+        Some(image) => Some(image.image_path),
+        None => None,
+    };
+
     let query = query!(
         r#"DELETE FROM description_component
         WHERE component_id = $1 AND product_id=$2;"#,
@@ -560,7 +574,7 @@ pub async fn delete_component(
     );
     let x = pool.execute(query).await;
     match x {
-        Ok(_) => Ok(()),
+        Ok(_) => Ok(img_path),
         Err(err) => Err(err),
     }
 }
