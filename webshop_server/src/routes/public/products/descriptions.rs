@@ -8,9 +8,9 @@ use crate::{
     },
 };
 use actix_multipart::Multipart;
-use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use image::ImageFormat;
-use log::error;
+use log::{error, warn};
 use sqlx::{Pool, Postgres};
 mod description_utils;
 
@@ -21,6 +21,7 @@ const IMAGE_DIR: &str = "resources/images";
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_product_descriptions);
     cfg.service(get_product_description_component_by_id);
+    cfg.service(delete_description_component);
     cfg.service(description_swap_priorities);
     cfg.service(add_text_description);
     cfg.service(update_priority);
@@ -81,6 +82,36 @@ pub async fn get_product_description_component_by_id(
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
+}
+
+#[delete("/{product_id}/descriptions/{component_id}")]
+async fn delete_description_component(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(String, i32)>,
+) -> impl Responder {
+    let (product_id, component_id) = path.into_inner();
+    let query_result =
+        product::description::delete_component(&pool, product_id.as_str(), component_id).await;
+    let img_path: Option<String> = match query_result {
+        Ok(opt_path) => opt_path,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                return HttpResponse::NotFound().json("Product or description not found")
+            }
+            _ => {
+                error!("Error while deleting description component: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
+    };
+    if let Some(path) = img_path {
+        if let Err(e) = description_utils::remove_image(&path) {
+            error!("Error while deleting image: {}.", e);
+            warn!("Image file may be left in the file system.");
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    }
+    HttpResponse::NoContent().finish()
 }
 
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
