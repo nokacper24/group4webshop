@@ -1,6 +1,3 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-
 export default function ManagePage() {
   return (
     <>
@@ -31,7 +28,7 @@ export default function ManagePage() {
         </form>
       </section>
       <section>
-        <DndProvider backend={HTML5Backend}></DndProvider>
+
       </section>
       <section>
         <iframe src=""></iframe>
