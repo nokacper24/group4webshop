@@ -21,8 +21,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         licenses_vital,
         license_by_id,
         licenses_by_company,
-        add_license,
-        update_license_validation
+        create_license,
+        update_license_validations
     ),
     components(
         schemas(License)
