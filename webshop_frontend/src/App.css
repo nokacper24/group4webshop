@@ -1088,6 +1088,40 @@ form a:hover {
   margin-inline: 0.5em;
   font-weight: bold;
   border-bottom: 1px dotted currentColor;
+}
+
+/* || MANAGE PRODUCTS */
+
+.accordion-wrapper {
+
+}
+
+.accordion-table {
+  border: 1px solid black;
+}
+
+.accordion {
+  width: 100%;
+  position: relative;
+}
+
+.accordion-up-down-button {
+  position: absolute;
+  height: 1em;
+  width: 2em;
+  transform: translate(-125%, 66%);
+}
+
+.accordion-body {
+  border: 1px solid red;
+}
+
+.accordion-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 /* Toggle switch */ 
 
 .toggle-switch {
