@@ -344,8 +344,8 @@ export default function ManageLicenseAccess() {
       // Sort users between those with and without license access
       fetchUsersWithAccess()
         .then((x) => {
-          var withoutAccess: UserProps[] = [];
-          var withAccess: UserProps[] = [];
+          let withoutAccess: UserProps[] = [];
+          let withAccess: UserProps[] = [];
 
           withoutAccess = users.filter(
             (arr1) => !x.find((arr2) => arr2.userId === arr1.userId)
