@@ -1120,13 +1120,25 @@ form a:hover {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: flex-end;
+}
+
+.accordion-row > :first-child {
+  margin-right: auto;
+  margin-left: 1em;
+}
+
+.accordion-remove-button {
+  border: none;
+  
+  width: 3em;
 }
 
 /* Toggle switch */ 
 
 .toggle-switch {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 3.5em;
   height: 2em;
 }
