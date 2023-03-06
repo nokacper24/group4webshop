@@ -10,6 +10,11 @@ type ProductProps = {
   productName: string;
 };
 
+/**
+ * A form for creating a license.
+ *
+ * @returns A create license form component.
+ */
 export default function CreateLicenseForm() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   // Check if we are in production mode
@@ -20,6 +25,11 @@ export default function CreateLicenseForm() {
   const [companies, setCompanies] = useState<CompanyProps[]>([]);
   const [products, setProducts] = useState<ProductProps[]>([]);
 
+  /**
+   * Get all companies.
+   *
+   * @returns All companies.
+   */
   const fetchCompanies = async () => {
     const response = await fetch(`${baseUrl}/api/companies`);
     const data = await response.json();
@@ -32,6 +42,11 @@ export default function CreateLicenseForm() {
     return companies;
   };
 
+  /**
+   * Get all products.
+   *
+   * @returns All products.
+   */
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
@@ -58,6 +73,11 @@ export default function CreateLicenseForm() {
       .catch(() => console.error("Failed to load products"));
   }, []);
 
+  /**
+   * Send a POST request to create a license.
+   *
+   * @param license The license to create.
+   */
   const postLicense = async (license: any) => {
     fetch(`${baseUrl}/api/licenses`, {
       method: "POST",
@@ -83,6 +103,11 @@ export default function CreateLicenseForm() {
   const end = useRef<HTMLInputElement>(null);
   const amount = useRef<HTMLInputElement>(null);
 
+  /**
+   * When user submits the form, take in inputs and create license.
+   *
+   * @param event The form submit event.
+   */
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -104,7 +129,7 @@ export default function CreateLicenseForm() {
 
       postLicense(license);
     } else {
-      console.log("License values are invalid");
+      alert("License values are invalid");
     }
   };
 

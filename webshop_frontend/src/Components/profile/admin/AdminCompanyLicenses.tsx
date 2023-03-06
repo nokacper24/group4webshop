@@ -11,6 +11,12 @@ type LicenseProps = {
   productName: string;
 };
 
+/**
+ * An admin page for managing companies' licenses.
+ * Admin can invalidate licenses, or create new licenses.
+ *
+ * @returns A page for administrating company licenses.
+ */
 export default function AdminCompanyLicenses() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   // Check if we are in production mode
@@ -22,6 +28,11 @@ export default function AdminCompanyLicenses() {
 
   const [invalidatedLicenses] = useState<Set<number>>(new Set());
 
+  /**
+   * Get all licenses.
+   *
+   * @returns All licenses.
+   */
   const fetchLicenses = async () => {
     const response = await fetch(`${baseUrl}/api/licenses_vital`);
     const data = await response.json();
@@ -37,10 +48,20 @@ export default function AdminCompanyLicenses() {
     return licenses;
   };
 
+  /**
+   * Add license as pending to be invalidated.
+   *
+   * @param license The license to invalidate.
+   */
   const updateChangedOnInvalidate = (license: any) => {
     invalidatedLicenses.add(license.id);
   };
 
+  /**
+   * Remove a license from list of valid licenses.
+   *
+   * @param index The index of the license in the list.
+   */
   const invalidateLicense = (index: number) => {
     let license = licensesList.rows[index];
 
@@ -52,6 +73,11 @@ export default function AdminCompanyLicenses() {
     updateChangedOnInvalidate(license);
   };
 
+  /**
+   *  Remove selected licenses from list of valid licenses.
+   *
+   * @param indices The indices of the licenses in the list.
+   */
   const invalidateSelectedLicenses = (indices: number[]) => {
     let sortedIndices = indices.sort((a, b) => a - b);
 
@@ -80,6 +106,9 @@ export default function AdminCompanyLicenses() {
     ],
   };
 
+  /**
+   * Send a PATCH request to set licenses validation to false.
+   */
   const patchInvalidated = () => {
     if (invalidatedLicenses.size > 0) {
       fetch(`${baseUrl}/api/licenses`, {
