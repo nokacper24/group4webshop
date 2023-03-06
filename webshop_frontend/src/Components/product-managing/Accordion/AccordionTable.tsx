@@ -1,9 +1,10 @@
+import { AccordionHeader } from "./AccordionHeader";
+
 export default function AccordionTable() {
     return (
-        <table>
-            <tr>
-                <th></th>
-            </tr>
-        </table>
+        <div className="accordion-table">
+            <AccordionHeader></AccordionHeader>
+            <AccordionHeader></AccordionHeader>
+        </div>
     )
 }
