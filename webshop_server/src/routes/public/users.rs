@@ -1,9 +1,11 @@
-use crate::data_access::{user::{self, LicenseUser, User}, auth};
-use actix_web::{get, web, HttpResponse, Responder, post, delete};
+use crate::data_access::{
+    auth,
+    user::{self, LicenseUser, User},
+};
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::{OpenApi};
-
+use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
@@ -75,6 +77,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+/// Get all the users that work for a specific company.
 #[get("/companies/{company_id}/users")]
 async fn users_by_company(
     pool: web::Data<Pool<Postgres>>,
@@ -99,6 +102,7 @@ async fn users_by_company(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+/// Get all the users that have access to a specific license.
 #[get("/licenses/{license_id}/users")]
 async fn users_by_license(
     pool: web::Data<Pool<Postgres>>,
@@ -129,26 +133,28 @@ struct Invite {
 }
 
 #[post("/generate_invite")]
-async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
+async fn generate_invite(
+    pool: web::Data<Pool<Postgres>>,
+    invite: web::Json<Invite>,
+) -> impl Responder {
     let invite = auth::create_invite(&pool, &invite.email).await;
 
     //error check
     if invite.is_err() {
-        return HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", invite.err().unwrap()));
+        return HttpResponse::InternalServerError()
+            .json(format!("Internal Server Error: {}", invite.err().unwrap()));
     }
 
     //parse to json
     if let Ok(invite) = invite {
-        return HttpResponse::Ok().json(
-            Invite {
-                email: invite.email,
-            }
-        )
-
+        return HttpResponse::Ok().json(Invite {
+            email: invite.email,
+        });
     }
 
     HttpResponse::InternalServerError().json("Internal Server Error 2")
 }
+
 #[derive(Serialize, Deserialize)]
 struct LicenseUsers {
     users: Vec<LicenseUser>,

@@ -49,7 +49,10 @@ pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<User,
     Ok(user)
 }
 
-pub async fn get_user_by_username(pool: &Pool<Postgres>, username: &str) -> Result<User, sqlx::Error> {
+pub async fn get_user_by_username(
+    pool: &Pool<Postgres>,
+    username: &str,
+) -> Result<User, sqlx::Error> {
     let user = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE email = $1"#, username)
         .fetch_one(pool)
         .await?;
@@ -102,6 +105,7 @@ pub async fn get_role_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<Role,
     Ok(role.role)
 }
 
+/// Give users' access to licenses
 pub async fn add_license_users(
     pool: &Pool<Postgres>,
     users: &Vec<LicenseUser>,
@@ -119,6 +123,7 @@ pub async fn add_license_users(
     Ok(())
 }
 
+/// Remove users' access to licenses
 pub async fn remove_license_users(
     pool: &Pool<Postgres>,
     users: &Vec<LicenseUser>,
