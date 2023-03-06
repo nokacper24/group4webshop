@@ -527,17 +527,11 @@ form>h1 {
 }
 
 .form-container {
-  width: max(50vw, 600px);
+  width: min(80vw, 700px);
   margin-block: 1em;
   background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
-}
-
-@media (max-width: 900px) {
-  .form-container {
-    width: 80vw;
-  }
 }
 
 .form-container> :is(label, select, input, textarea, p) {
@@ -941,9 +935,12 @@ form a:hover {
   cursor: pointer;
 }
 
+#prices {
+  min-width: 20em;
+}
+
 #prices,
 .form-container>select {
-  min-width: 20em;
   padding: 0.5em;
   font-size: 1.1rem;
   font-family: var(--ff-primary);
@@ -1021,7 +1018,9 @@ form a:hover {
 /* || MANAGE LICENSE PAGE */
 .table-container {
   max-height: 20em;
-  overflow-y: auto;
+  max-width: 80vw;
+  margin: 0 auto;
+  overflow: auto;
 }
 
 .table-container+.button-container {
