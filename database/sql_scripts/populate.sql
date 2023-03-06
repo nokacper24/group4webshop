@@ -1,26 +1,29 @@
 BEGIN;
 
 INSERT INTO company (company_name, company_address)
-VALUES ('Enterprise Solutions Inc.', 'Cupertino, California'),
-       ('Business Solutions LLC', 'Redmond, Washington');
+VALUES ('Proflex', 'sandbergvegen 98 6009 Ålesund'),
+        ('Enterprise Solutions Inc.', 'Cupertino, California'),
+        ('Business Solutions LLC', 'Redmond, Washington');
 
 INSERT INTO register_company_user (key, email, exp_date, company_id)
-VALUES ('abc123', 'es_hr@enterprisesolutions.com', '2021-06-01', 1),
-       ('def456', 'bs_hr@businesssolutions.com', '2022-01-01', 2);
+VALUES ('abc123', 'es_hr@enterprisesolutions.com', '2021-06-01', 2),
+       ('def456', 'bs_hr@businesssolutions.com', '2022-01-01', 3);
 
 INSERT INTO app_user (email, pass_hash, company_id, role)
-VALUES ('es_it_head@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
-       ('it_manager@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
-       ('it_manager_2@enterprisesolutions.com', 'pass', 1, 'company_it_head'),
-       ('bs_it_head@businesssolutions.com', 'pass', 2, 'company_it_head');
+VALUES ('admin_proflex@gmail.com', 'mmmsecurepass', 1, 'admin'),
+        ('es_it_head@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
+        ('it_manager@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
+        ('it_manager_2@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
+        ('bs_it_head@businesssolutions.com', 'pass', 3, 'company_it_head');
 
 INSERT INTO register_user (key, email, exp_date)
 VALUES ('ghi789', 'jane_enterprise@gmail.com', '2021-12-01'),
        ('jkl101', 'john_business@gmail.com', '2022-03-01');
 
 INSERT INTO cookies (cookie, exp, user_id)
-VALUES ('cookie1', '2026-12-31', 1),
-       ('cookie2', '2027-06-30', 2);
+VALUES ('cookie1', '2026-12-31', 2),
+       ('cookie2', '2027-06-30', 3),
+       ('admin_cookie', '4000-06-30', 1);
 
 INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image, available)
 VALUES ('time_management_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises', 'time_management.jpg', true),
@@ -30,15 +33,15 @@ VALUES ('time_management_software', 'Time Management System', 999.99, 'A compreh
        ('bpa_solutions', 'BPA Solutions', 500, 'Automation of processes. It has an intuitive user interface, and automates workflows', 'bpa.jpg', true);
 
 INSERT INTO license (valid, start_date, end_date, amount, company_id, product_id)
-VALUES (false, '2022-01-01', '2022-12-31', 100, 1, 'time_management_software'),
-       (true, '2023-07-01', '2023-06-30', 50, 2, 'tax_and_accounting_software'),
-       (true, '2023-01-01', '2023-12-31', 50, 1, 'tax_and_accounting_software'),
-       (true, '2023-01-01', '2023-12-31', 15, 1, '3d_modelling_software');
+VALUES (false, '2022-01-01', '2022-12-31', 100, 2, 'time_management_software'),
+       (true, '2023-07-01', '2023-06-30', 50, 3, 'tax_and_accounting_software'),
+       (true, '2023-01-01', '2023-12-31', 50, 2, 'tax_and_accounting_software'),
+       (true, '2023-01-01', '2023-12-31', 15, 2, '3d_modelling_software');
 
 INSERT INTO user_license (license_id, user_id)
-VALUES (1, 1),
-       (2, 1),
-       (2, 2);
+VALUES (1, 2),
+       (2, 2),
+       (2, 3);
 
 INSERT INTO category (name, description)
 VALUES ('Enterprise Software', 'Software solutions for enterprises'),
