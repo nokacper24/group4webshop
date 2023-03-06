@@ -12,6 +12,7 @@ DROP TABLE user_license;
 DROP TABLE license;
 DROP TABLE product;
 DROP TABLE cookies;
+DROP TABLE invite_user;
 DROP TABLE register_user;
 DROP TABLE app_user;
 DROP TABLE register_company_user;

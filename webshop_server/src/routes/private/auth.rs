@@ -12,10 +12,14 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 
 
 #[post("/logout")]
-async fn logout( pool: web::Data<Pool<Postgres>>, req: ReqData<Token>) -> impl Responder {
-    let token = req.into_inner();
-    // delete cookie from db
+async fn logout( pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -> impl Responder {
+    let token = match req {
+        Some(token) => token.into_inner(),
+        None => return HttpResponse::Unauthorized().finish()
+    };
+        // delete cookie from db
     let token = token.token;
+    
     let cookie = delete_cookie(&pool, &token).await;
     match cookie {
         Ok(_) => {
