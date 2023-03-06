@@ -1,8 +1,11 @@
+import { AccordionHeader } from "./Accordion/AccordionHeader";
+import AccordionTable from "./Accordion/AccordionTable";
+
 export default function ManagePage() {
   return (
     <>
       <h2>Manage product</h2>
-      <section>
+      <section className="container">
         <form>
           <label htmlFor="product-name">Product name:</label>
           <input type="text" id="product-name" name="product-name" />
@@ -27,13 +30,13 @@ export default function ManagePage() {
           />
         </form>
       </section>
-      <section>
-
+      <section className="accordion-wrapper container">
+        <AccordionTable></AccordionTable>
       </section>
-      <section>
+      <section className="container">
         <iframe src=""></iframe>
       </section>
-      <section>
+      <section className="container">
         <button>Delete product permanently</button>
         <button>Save</button>
       </section>
