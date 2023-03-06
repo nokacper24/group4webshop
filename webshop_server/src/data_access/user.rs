@@ -23,7 +23,7 @@ pub struct LicenseUser {
     license_id: i32,
 }
 
-#[derive(sqlx::Type, Serialize, Deserialize, Debug)]
+#[derive(sqlx::Type, Serialize, Deserialize, Debug, PartialEq)]
 #[sqlx(type_name = "role_enum", rename_all = "snake_case")]
 pub enum Role {
     Admin,
