@@ -35,6 +35,7 @@ pub struct LicenseVitalInfo {
     company_name: String,
     product_id: String,
     display_name: String,
+    valid: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -61,7 +62,7 @@ pub async fn get_licenses_vital_info(
 ) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
     let licenses = query_as!(
         LicenseVitalInfo,
-        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name
+        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)"#

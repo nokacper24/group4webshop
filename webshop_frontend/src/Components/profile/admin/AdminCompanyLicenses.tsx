@@ -9,6 +9,7 @@ type LicenseProps = {
   companyName: string;
   productId: string;
   productName: string;
+  valid: boolean;
 };
 
 /**
@@ -43,6 +44,7 @@ export default function AdminCompanyLicenses() {
         companyName: license.company_name,
         productId: license.product_id,
         productName: license.display_name,
+        valid: license.valid,
       };
     });
     return licenses;
@@ -134,7 +136,7 @@ export default function AdminCompanyLicenses() {
             alert("Something went wrong when saving licenses");
           }
         })
-        .catch(() => console.error("Failed to save license validation status"));
+        .catch(() => alert("Failed to save license validation status"));
     }
   };
 
@@ -145,18 +147,21 @@ export default function AdminCompanyLicenses() {
   useEffect(() => {
     fetchLicenses()
       .then((licenses) => {
-        setLicenses(
-          licenses.map((license) => {
-            return {
+        let validLicenses: SelectTableRowProps[] = [];
+        licenses.map((license) => {
+          if (license.valid) {
+            validLicenses.push({
               id: license.licenseId.toString(),
               columns: [
                 { text: license.licenseId.toString() },
                 { text: license.companyName },
                 { text: license.productName },
               ],
-            };
-          })
-        );
+            });
+          }
+        });
+
+        setLicenses(validLicenses);
       })
       .catch(() => console.error("Failed to load licenses"));
   }, []);
