@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import LicenseList from "./managing/LicenseList";
 
 export type UserProps = {
   userId: string;
   email: string;
   companyId: string;
+  role: string;
 };
 
 export type LicenseProps = {
@@ -26,10 +27,10 @@ export type LicenseProps = {
  */
 export default function MyAccount() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // check if we are in production mode
-if (import.meta.env.PROD) {
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
     baseUrl = "";
-}
+  }
 
   const { userId } = useParams();
   const [user, setUser] = useState<UserProps>();
@@ -42,6 +43,7 @@ if (import.meta.env.PROD) {
       userId: data.user_id,
       email: data.email,
       companyId: data.company_id,
+      role: data.role,
     };
     setUser(user);
     return user;
@@ -75,6 +77,42 @@ if (import.meta.env.PROD) {
       );
   }, []);
 
+  const companyLicenses = (
+    <>
+      <h2>Licenses</h2>
+      <LicenseList licenses={licenses} />
+    </>
+  );
+
+  const adminButtons = (
+    <div className="button-container">
+      <Link
+        to="../admin-company-licenses"
+        className="default-button small-button"
+      >
+        Manage company licenses
+      </Link>
+      <Link to="#" className="default-button small-button">
+        Manage users
+      </Link>
+      <Link to="#" className="default-button small-button">
+        Manage products
+      </Link>
+    </div>
+  );
+
+  let userRoleSection;
+  switch (user?.role) {
+    case "Admin":
+      userRoleSection = adminButtons;
+      break;
+    case "CompanyItHead" || "CompanyIt":
+      userRoleSection = companyLicenses;
+      break;
+    default:
+      userRoleSection = <p>Placeholder</p>;
+  }
+
   return (
     <>
       <section className="container left-aligned">
@@ -89,10 +127,7 @@ if (import.meta.env.PROD) {
           <button className="default-button small-button">Edit</button>
         </div>
       </section>
-      <section className="container left-aligned">
-        <h2>Licenses</h2>
-        <LicenseList licenses={licenses} />
-      </section>
+      <section className="container left-aligned">{userRoleSection}</section>
     </>
   );
 }

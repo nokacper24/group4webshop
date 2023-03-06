@@ -95,7 +95,7 @@ export default function SelectTable(props: SelectTableProps) {
   return (
     <React.Fragment>
       <div className="table-container">
-        <table className="select-table table-container">
+        <table className="select-table">
           <thead>
             <SelectTableHeader
               columns={props.header.columns}
