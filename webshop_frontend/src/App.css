@@ -1130,9 +1130,34 @@ form a:hover {
 
 .accordion-remove-button {
   border: none;
-  
+  background-color: transparent;
   width: 3em;
 }
+
+.accordion-edit-button {
+  border: none;
+  background-color: transparent;
+  width: 3em;
+}
+
+.pencil {
+  margin-right: 0.5em;
+}
+
+.pencil-s0 {
+  fill: none;
+  stroke: #000000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 12.5 
+} 
+.pencil-s1 { 
+  fill: none;
+  stroke: #000000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5 
+} 
 
 /* Toggle switch */ 
 
