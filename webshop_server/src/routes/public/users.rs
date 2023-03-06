@@ -1,6 +1,6 @@
 use crate::{
     data_access::{
-        auth,
+        auth, error_handling,
         user::{self, create_invite, create_partial_user, LicenseUser, User},
     },
     middlewares::auth::{check_role, Token},
@@ -214,11 +214,10 @@ async fn add_license_users(
         Ok(_) => HttpResponse::Created().json(other_users),
 
         Err(e) => match e {
-            sqlx::Error::Database(e) => match e.code() {
-                Some(e) => match e.as_ref() {
-                    "23505" => HttpResponse::BadRequest().json("Record already exists"),
-                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-                },
+            sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::BadRequest().json("Record already exists")
+                }
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
