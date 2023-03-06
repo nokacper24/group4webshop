@@ -37,6 +37,12 @@ pub struct LicenseVitalInfo {
     display_name: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct InvalidLicense {
+    license_id: i32,
+    valid: bool,
+}
+
 /// Returns all info from all licenses
 pub async fn get_licenses(pool: &Pool<Postgres>) -> Result<Vec<License>, sqlx::Error> {
     let licenses = query_as!(
@@ -96,7 +102,7 @@ pub async fn get_licenses_by_company(
 }
 
 /// Create a license
-pub async fn add_license(
+pub async fn create_license(
     pool: &Pool<Postgres>,
     license: &PartialLicense,
 ) -> Result<(), sqlx::Error> {
@@ -113,5 +119,24 @@ pub async fn add_license(
     )
     .execute(pool)
     .await?;
+    Ok(())
+}
+
+/// Update the validation of licenses
+pub async fn update_license_validations(
+    pool: &Pool<Postgres>,
+    licenses: &Vec<InvalidLicense>,
+) -> Result<(), sqlx::Error> {
+    for license in licenses.iter() {
+        query!(
+            r#"UPDATE license
+            SET valid = $1
+            WHERE license_id = $2"#,
+            license.valid,
+            license.license_id,
+        )
+        .execute(pool)
+        .await?;
+    }
     Ok(())
 }
