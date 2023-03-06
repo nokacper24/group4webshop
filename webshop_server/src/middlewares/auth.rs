@@ -70,7 +70,7 @@ pub struct Token {
 pub async fn get_user_from_token(
     req_token: Option<ReqData<Token>>,
     pool: &Pool<Postgres>,
-) -> Result<data_access::user::User, String> {
+) -> Result<data_access::user::User, AuthError> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();
@@ -81,13 +81,13 @@ pub async fn get_user_from_token(
                     let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
                     match user {
                         Ok(user) => Ok(user),
-                        Err(e) => Err(e.to_string()),
+                        Err(e) => Err(AuthError::SqlxError(e)),
                     }
                 }
-                Err(_) => Err("Unauthorized".to_string()),
+                Err(_) => Err(AuthError::BadToken),
             }
         }
-        _ => Err("Unauthorized".to_string()),
+        _ => Err(AuthError::BadToken),
     }
 }
 
@@ -108,7 +108,7 @@ pub async fn get_user_from_token(
 pub async fn check_role(
     req_token: Option<ReqData<Token>>,
     pool: &Pool<Postgres>,
-) -> Result<Role, String> {
+) -> Result<Role, AuthError> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();
@@ -119,12 +119,19 @@ pub async fn check_role(
                     let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
                     match user {
                         Ok(role) => Ok(role.role),
-                        Err(e) => Err(e.to_string()),
+                        Err(e) => Err(AuthError::SqlxError(e)),
                     }
                 }
-                Err(_) => Err("Unauthorized".to_string()),
+                Err(_) => Err(AuthError::BadToken),
             }
         }
-        _ => Err("Unauthorized".to_string()),
+        _ => Err(AuthError::BadToken),
     }
+}
+/// Error type for auth
+/// BadToken: The token was not found or is invalid - do 401 Unauthorized
+/// SqlxError: An error occured while querying the database - probably 500 Internal Server Error
+enum AuthError {
+    SqlxError(sqlx::Error),
+    BadToken,
 }
