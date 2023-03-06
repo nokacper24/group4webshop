@@ -11,7 +11,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(license_by_id);
     cfg.service(licenses_by_company);
     cfg.service(create_license);
-    cfg.service(update_license_validation);
+    cfg.service(update_license_validations);
 }
 
 #[derive(OpenApi)]
