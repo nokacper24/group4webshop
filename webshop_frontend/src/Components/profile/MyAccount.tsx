@@ -58,8 +58,8 @@ export default function MyAccount() {
       return {
         licenseId: license.license_id,
         valid: license.valid,
-        startDate: license.start_date,
-        endDate: license.end_date,
+        startDate: new Date(license.start_date),
+        endDate: new Date(license.end_date),
         amount: license.amount,
         productId: license.product_id,
       };

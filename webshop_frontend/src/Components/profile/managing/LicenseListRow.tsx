@@ -47,7 +47,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
         <td>{license.productId}</td>
         <td>{0}</td>
         <td>{license.amount}</td>
-        <td>{license.valid ? "Active" : "Expired"}</td>
+        <td>{license.valid ? "Valid" : "Invalid"}</td>
         <td>
           <button
             className="icon-button expand-button"
@@ -70,8 +70,8 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
-            Active period: {license.startDate.toString()} to{" "}
-            {license.endDate.toString()}
+            Active period: {license.startDate.toLocaleDateString()} to{" "}
+            {license.endDate.toLocaleDateString()}
             {buttons}
           </p>
         </td>

@@ -377,7 +377,7 @@ export default function ManageLicenseAccess() {
           {/* TODO: Fetch product name of license */}
           Product: {license.productId}
           <br></br>
-          Active users: {usersWithAccess.length}
+          Active users: {usersWithAccess.length - changedUsersWithAccess.size}
           <br></br>
           Total allowed: {license.amount}
           <br></br>
@@ -385,7 +385,7 @@ export default function ManageLicenseAccess() {
           <br></br>
           End date: {license.endDate.toDateString()}
           <br></br>
-          Status: {license.valid ? "Active" : "Expired"}
+          Status: {license.valid ? "Valid" : "Invalid"}
           <br></br>
         </p>
       </section>
