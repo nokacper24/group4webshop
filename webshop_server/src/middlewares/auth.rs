@@ -131,7 +131,7 @@ pub async fn check_role(
 /// Error type for auth
 /// BadToken: The token was not found or is invalid - do 401 Unauthorized
 /// SqlxError: An error occured while querying the database - probably 500 Internal Server Error
-enum AuthError {
+pub enum AuthError {
     SqlxError(sqlx::Error),
     BadToken,
 }
