@@ -1,5 +1,6 @@
 use actix_multipart::Multipart;
 use actix_web::{post, put, web, HttpResponse, Responder};
+use serde_json::json;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -74,18 +75,18 @@ pub async fn create_product(
         .await
         {
             Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
-            Err(e) => match e {
-                ImageExtractorError::Utf8Error(_) => todo!(),
-                ImageExtractorError::MultipartError(_) => todo!(),
-                ImageExtractorError::MissingField(_) => todo!(),
-                ImageExtractorError::MissingData => todo!(),
-                ImageExtractorError::UnexpectedField(_) => todo!(),
-                ImageExtractorError::FileTooLarge => todo!(),
+            Err(e) => return match e {
+                ImageExtractorError::Utf8Error(e) => HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e)),
+                ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError().json(format!("Couldnt extract multipart: {}", e)),
+                ImageExtractorError::MissingField(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
+                ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'product_name', 'price_per_unit', 'short_description', 'image'"),
+                ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'product_name', 'price_per_unit', 'short_description', 'image', got '{}'",field)),
+                ImageExtractorError::FileTooLarge => ,
             },
         };
     let image = match description_utils::parse_img(image_buffer) {
         Ok(image) => image,
-        Err(e) => match e {
+        Err(e) => return match e {
             ImageParsingError::DecodeError(_) => todo!(),
             ImageParsingError::IoError(_) => todo!(),
             ImageParsingError::NoFormatFound => todo!(),
@@ -122,8 +123,10 @@ pub async fn create_product(
         false,
     );
 
-
-    unimplemented!();
+    match product::create_product(&pool, &product).await {
+        Ok(product) => HttpResponse::Created().json(product),
+        Err(_) => HttpResponse::InternalServerError().json("Internal Server Error"),
+    }
 }
 
 #[utoipa::path(
