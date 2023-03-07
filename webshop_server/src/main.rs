@@ -1,5 +1,8 @@
 use actix_cors::Cors;
-use actix_web::{get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpServer, Responder, HttpResponse};
+use actix_web::{
+    get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpResponse, HttpServer,
+    Responder,
+};
 use actix_web_httpauth::middleware::HttpAuthentication;
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
@@ -11,8 +14,8 @@ mod openapi_doc;
 mod routes;
 mod serving_images;
 
-use routes::public::public;
 use routes::private::private;
+use routes::public::public;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -53,8 +56,13 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         let bearer_middleware = HttpAuthentication::bearer(validator);
-        let api_routes = web::scope("/api").wrap(bearer_middleware).configure(public).configure(private);
 
+        // public enpoints at `/api`, private endpoints at `/api/priv`
+        let api_endpoints = web::scope("/api").configure(public).service(
+            web::scope("/priv")
+                .wrap(bearer_middleware)
+                .configure(private),
+        );
 
         App::new()
             // register sqlx pool
@@ -62,12 +70,11 @@ async fn main() -> std::io::Result<()> {
             // configure cors
             .wrap(cors)
             .wrap(Logger::default())
-            .service(api_routes)
+            .service(api_endpoints)
             .configure(openapi_doc::configure_opanapi)
             .service(web::scope("/resources/images").configure(serving_images::config))
             .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
             .default_service(web::route().to(not_found))
-
     })
     .bind(address)
     .expect("Can not bind to port 8080")
@@ -85,5 +92,6 @@ async fn not_found() -> impl Responder {
                 <h1>404 Not Found</h1>
                 <p>The resource could not be found.</p>
             </body>
-        </html>"#)
+        </html>"#,
+    )
 }
