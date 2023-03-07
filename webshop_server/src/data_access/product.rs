@@ -25,6 +25,21 @@ pub struct PartialProduct {
     available: bool,
 }
 impl PartialProduct {
+    pub fn new(
+        display_name: String,
+        price_per_user: f32,
+        short_description: String,
+        main_image: String,
+        available: bool,
+    ) -> Self {
+        Self {
+            display_name,
+            price_per_user,
+            short_description,
+            main_image,
+            available,
+        }
+    }
     fn generate_id(&self) -> String {
         self.display_name
             .to_lowercase()

@@ -1,10 +1,20 @@
+use actix_multipart::Multipart;
 use actix_web::{post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub mod descriptions_protected;
 
-use crate::data_access::product::{self, PartialProduct, Product};
+use crate::{
+    data_access::user,
+    routes::private::products_protected::descriptions_protected::description_utils::{
+        self, ImageExtractorError, ImageParsingError,
+    },
+    {
+        data_access::product::{self, PartialProduct, Product},
+        middlewares::auth,
+    },
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_product);
@@ -27,7 +37,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 )]
 pub struct ProtectedProductsApiDoc;
 
-
 #[utoipa::path(
     context_path = "/api",
     post,
@@ -39,22 +48,82 @@ pub struct ProtectedProductsApiDoc;
 )]
 #[post("/products")]
 pub async fn create_product(
+    payload: Multipart,
     pool: web::Data<Pool<Postgres>>,
-    product: web::Json<PartialProduct>,
+    req_token: Option<web::ReqData<auth::Token>>,
 ) -> impl Responder {
-    let product = product::create_product(&pool, &product).await;
+    match auth::check_role(req_token, &pool).await {
+        Ok(role) => {
+            if role != user::Role::Admin {
+                return HttpResponse::Forbidden().json("Forbidden");
+            }
+        }
+        Err(e) => match e {
+            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
+            auth::AuthError::SqlxError(_) => {
+                return HttpResponse::InternalServerError().json("Internal Server Error")
+            }
+        },
+    };
 
-    //error check
-    if product.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
-    }
+    let (image_buffer, file_name, text_fields) =
+        match description_utils::extract_image_and_texts_from_multipart(
+            payload,
+            vec!["product_name", "price_per_unit", "short_description"],
+        )
+        .await
+        {
+            Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
+            Err(e) => match e {
+                ImageExtractorError::Utf8Error(_) => todo!(),
+                ImageExtractorError::MultipartError(_) => todo!(),
+                ImageExtractorError::MissingField(_) => todo!(),
+                ImageExtractorError::MissingData => todo!(),
+                ImageExtractorError::UnexpectedField(_) => todo!(),
+                ImageExtractorError::FileTooLarge => todo!(),
+            },
+        };
+    let image = match description_utils::parse_img(image_buffer) {
+        Ok(image) => image,
+        Err(e) => match e {
+            ImageParsingError::DecodeError(_) => todo!(),
+            ImageParsingError::IoError(_) => todo!(),
+            ImageParsingError::NoFormatFound => todo!(),
+            ImageParsingError::UnsuppoertedFormat(_) => todo!(),
+        },
+    };
 
-    //parse to json
-    if let Ok(product) = product {
-        return HttpResponse::Ok().json(product);
-    }
+    let file_name =
+        match description_utils::save_image(image, descriptions_protected::IMAGE_DIR, &file_name) {
+            Ok(file_name) => file_name,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        };
 
-    HttpResponse::InternalServerError().json("Internal Server Error")
+    let prod_name = match text_fields.get("product_name") {
+        Some(prod_name) => prod_name,
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let price_per_unit = match text_fields.get("price_per_unit") {
+        Some(price_per_unit) => match price_per_unit.parse::<f32>() {
+            Ok(price_per_unit) => price_per_unit,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        },
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let short_description = match text_fields.get("short_description") {
+        Some(short_description) => short_description,
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let product = PartialProduct::new(
+        prod_name.to_string(),
+        price_per_unit,
+        short_description.to_string(),
+        file_name,
+        false,
+    );
+
+
+    unimplemented!();
 }
 
 #[utoipa::path(

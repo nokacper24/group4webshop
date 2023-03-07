@@ -18,11 +18,11 @@ use actix_web::{
 use image::ImageFormat;
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
-mod description_utils;
+pub mod description_utils;
 
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
 const ALLOWED_FORMATS: [ImageFormat; 3] = [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
-const IMAGE_DIR: &str = "resources/images";
+pub const IMAGE_DIR: &str = "resources/images";
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(delete_description_component);
