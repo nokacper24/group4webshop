@@ -95,7 +95,7 @@ export default function MyAccount() {
       <Link to="#" className="default-button small-button">
         Manage users
       </Link>
-      <Link to="#" className="default-button small-button">
+      <Link to="../admin-products" className="default-button small-button">
         Manage products
       </Link>
     </div>
