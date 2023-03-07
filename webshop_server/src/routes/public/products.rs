@@ -9,8 +9,6 @@ use crate::data_access::product::{self, PartialProduct, Product};
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(all_products);
     cfg.service(product_by_id);
-    cfg.service(create_product);
-    cfg.service(update_product);
     cfg.service(web::scope("/products").configure(descriptions::configure));
 }
 
@@ -77,40 +75,6 @@ pub async fn product_by_id(
 
     match product {
         Ok(product) => HttpResponse::Ok().json(product),
-        Err(e) => match e {
-            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
-    }
-}
-
-#[post("/products")]
-pub async fn create_product(
-    pool: web::Data<Pool<Postgres>>,
-    product: web::Json<PartialProduct>,
-) -> impl Responder {
-    let product = product::create_product(&pool, &product).await;
-
-    //error check
-    if product.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
-    }
-
-    //parse to json
-    if let Ok(product) = product {
-        return HttpResponse::Ok().json(product);
-    }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
-}
-
-#[put("/products")]
-pub async fn update_product(
-    pool: web::Data<Pool<Postgres>>,
-    product: web::Json<Product>,
-) -> impl Responder {
-    match product::update_product(&pool, &product).await {
-        Ok(product) => HttpResponse::Created().json(product),
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
