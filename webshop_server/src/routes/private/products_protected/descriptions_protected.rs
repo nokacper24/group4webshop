@@ -235,9 +235,9 @@ async fn upload_image(
         }
     };
 
-    let (alt_text, image_buffer, file_name) =
-        match description_utils::extract_image_component_from_multipart(payload).await {
-            Ok((alt_text, image_buffer, file_name)) => (alt_text, image_buffer, file_name),
+    let (image_buffer, file_name, mut text_fields) =
+        match description_utils::extract_image_and_texts_from_multipart(payload, vec!("alt_text")).await {
+            Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
             Err(e) => {
                 return match e {
                     ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
@@ -294,6 +294,13 @@ async fn upload_image(
             log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
             return HttpResponse::InternalServerError()
                 .json("Internal Server Error while saving image");
+        }
+    };
+
+    let alt_text = match text_fields.remove("alt_text"){
+        Some(alt_text) => alt_text,
+        None => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
         }
     };
 
