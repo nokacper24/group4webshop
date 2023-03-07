@@ -112,6 +112,7 @@ pub async fn extract_image_and_texts_from_multipart(
     let mut fields_found: HashMap<String, String> = HashMap::new();
 
     while let Some(mut item) = payload.next().await {
+        log::warn!("item: {:?}", item);
         let field = match item {
             Ok(ref mut field) => field,
             Err(e) => return Err(ImageExtractorError::MultipartError(e)),

@@ -81,16 +81,27 @@ pub async fn create_product(
                 ImageExtractorError::MissingField(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
                 ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'product_name', 'price_per_unit', 'short_description', 'image'"),
                 ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'product_name', 'price_per_unit', 'short_description', 'image', got '{}'",field)),
-                ImageExtractorError::FileTooLarge => ,
+                ImageExtractorError::FileTooLarge => HttpResponse::PayloadTooLarge().json("File too large"),
             },
         };
     let image = match description_utils::parse_img(image_buffer) {
         Ok(image) => image,
         Err(e) => return match e {
-            ImageParsingError::DecodeError(_) => todo!(),
-            ImageParsingError::IoError(_) => todo!(),
-            ImageParsingError::NoFormatFound => todo!(),
-            ImageParsingError::UnsuppoertedFormat(_) => todo!(),
+            ImageParsingError::DecodeError(e) => {
+                HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
+            }
+            ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                "No format found. Supported formats: {:?}",
+                descriptions_protected::ALLOWED_FORMATS
+            )),
+            ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
+                .json(format!(
+                    "Unsupported format, found {:?}. Supported formats: {:?}",
+                    e, descriptions_protected::ALLOWED_FORMATS
+                )),
+            ImageParsingError::IoError(e) => {
+                HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
+            }
         },
     };
 
