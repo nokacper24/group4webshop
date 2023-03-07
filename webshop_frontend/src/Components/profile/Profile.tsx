@@ -3,6 +3,7 @@ import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
 import CreateCompanyAccount from "./register/CreateCompanyAccount";
+import AdminCompanyLicenses from "./admin/AdminCompanyLicenses";
 
 /**
  * The user Profile page.
@@ -22,6 +23,10 @@ export default function Profile() {
           path="/manage-license/:licenseId"
           element={<ManageLicenseAccess />}
         />
+        <Route
+          path="/admin-company-licenses"
+          element={<AdminCompanyLicenses />}
+        ></Route>
       </Routes>
     </>
   );

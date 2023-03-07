@@ -1,3 +1,5 @@
+import { dangerWords } from "./SelectTableButton";
+
 type SelectTableButtonProps = {
   text: string;
   indices: number[];
@@ -22,7 +24,9 @@ export default function SelectTableOutsideButton(
   return (
     <button
       className={`default-button small-button ${
-        props.text.toLowerCase().includes("remove") ? "bg-danger" : ""
+        dangerWords.some((el) => props.text.toLowerCase().includes(el))
+          ? "bg-danger"
+          : ""
       }`}
       onClick={() => handleClick()}
     >

@@ -107,7 +107,6 @@ h3 {
 }
 
 button {
-  font-size: 0.9em;
   font-family: var(--ff-primary);
   cursor: pointer;
 }
@@ -116,6 +115,7 @@ button {
   padding: 0.75em 2em;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
+  font-size: 0.9em;
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
@@ -155,6 +155,7 @@ th {
 th,
 td {
   padding: 0.5em 1em;
+  word-wrap: break-word;
 }
 
 tr {
@@ -173,9 +174,8 @@ label {
 }
 
 .center-container {
-  height: 100%;
-  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -527,17 +527,11 @@ form>h1 {
 }
 
 .form-container {
-  width: max(50vw, 600px);
+  width: min(80vw, 700px);
   margin-block: 1em;
   background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
-}
-
-@media (max-width: 900px) {
-  .form-container {
-    width: 80vw;
-  }
 }
 
 .form-container> :is(label, select, input, textarea, p) {
@@ -941,9 +935,12 @@ form a:hover {
   cursor: pointer;
 }
 
-#prices,
-#product-select {
+#prices {
   min-width: 20em;
+}
+
+#prices,
+.form-container>select {
   padding: 0.5em;
   font-size: 1.1rem;
   font-family: var(--ff-primary);
@@ -1021,7 +1018,9 @@ form a:hover {
 /* || MANAGE LICENSE PAGE */
 .table-container {
   max-height: 20em;
-  overflow-y: auto;
+  max-width: 80vw;
+  margin: 0 auto;
+  overflow: auto;
 }
 
 .table-container+.button-container {

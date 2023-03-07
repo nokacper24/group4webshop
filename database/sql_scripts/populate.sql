@@ -29,7 +29,7 @@ INSERT INTO product (product_id, display_name, price_per_user, short_description
 VALUES ('time_management_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises', 'time_management.jpg', true),
        ('3d_modelling_software', '3D Modelling', 29.99, 'A fast and easy-to-learn software for 3D modelling, with extensive tools for perfecting details', '3d_modelling.jpg', true),
        ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises', 'tax_accounting.jpg', true),
-       ('online_scheduling_software', 'Online Scheduling Software', 200, ' Our software is designed to help you effectively manage and streamline the scheduling process. It helps you automate the scheduling process, allowing you to save time and reduce errors', 'online_scheduling.jpg', true),
+       ('online_scheduling_software', 'Online Scheduling Software', 200, 'Our software is designed to help you effectively manage and streamline the scheduling process. It helps you automate the scheduling process, allowing you to save time and reduce errors', 'online_scheduling.jpg', true),
        ('bpa_solutions', 'BPA Solutions', 500, 'Automation of processes. It has an intuitive user interface, and automates workflows', 'bpa.jpg', true);
 
 INSERT INTO license (valid, start_date, end_date, amount, company_id, product_id)

@@ -1,9 +1,18 @@
-use crate::{data_access::{user::{self, LicenseUser, User, create_partial_user, create_invite}, auth}, middlewares::auth::{Token, check_role}};
-use actix_web::{get, web::{self, ReqData}, HttpResponse, Responder, post, delete};
+use crate::{
+    data_access::{
+        auth, error_handling,
+        user::{self, create_invite, create_partial_user, LicenseUser, User},
+    },
+    middlewares::auth::{check_role, Token},
+};
+use actix_web::{
+    delete, get, post,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::{OpenApi};
-
+use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
@@ -75,6 +84,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+/// Get all the users that work for a specific company.
 #[get("/companies/{company_id}/users")]
 async fn users_by_company(
     pool: web::Data<Pool<Postgres>>,
@@ -99,6 +109,7 @@ async fn users_by_company(
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+/// Get all the users that have access to a specific license.
 #[get("/licenses/{license_id}/users")]
 async fn users_by_license(
     pool: web::Data<Pool<Postgres>>,
@@ -129,13 +140,15 @@ struct Invite {
 }
 
 #[post("/generate_invite")]
-async fn generate_invite(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>, req: Option<ReqData<Token>> ) -> impl Responder {
+async fn generate_invite(
+    pool: web::Data<Pool<Postgres>>,
+    invite: web::Json<Invite>,
+    req: Option<ReqData<Token>>,
+) -> impl Responder {
+    let role = check_role(req, &pool).await;
 
-let role = check_role(req, &pool).await;
-
-match role {
-    Ok(role) => {
-        match role {
+    match role {
+        Ok(role) => match role {
             user::Role::Admin => {
                 return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
             }
@@ -148,35 +161,32 @@ match role {
             user::Role::Default => {
                 return HttpResponse::Unauthorized().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
             }
-        }
-            
-        }
-    Err(_) => {
-        // since the user is not logged in, we can't check the role, so it must be a new user
-        // so we can generate a new user and a company for them
-        let partial_user = create_partial_user(&invite.email, &pool.clone()).await;
-        match partial_user {
-            Ok(partial_user) => {
-
-                let invite = create_invite(Some(partial_user.id), None, &pool).await;
-                match invite {
-                    Ok(invite) => {
-                        return HttpResponse::Ok().json(invite);
-                    }
-                    Err(_) => {
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
+        },
+        Err(_) => {
+            // since the user is not logged in, we can't check the role, so it must be a new user
+            // so we can generate a new user and a company for them
+            let partial_user = create_partial_user(&invite.email, &pool.clone()).await;
+            match partial_user {
+                Ok(partial_user) => {
+                    let invite = create_invite(Some(partial_user.id), None, &pool).await;
+                    match invite {
+                        Ok(invite) => {
+                            return HttpResponse::Ok().json(invite);
+                        }
+                        Err(_) => {
+                            return HttpResponse::InternalServerError()
+                                .json("Internal Server Error");
+                        }
                     }
                 }
-            }
-            Err(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error");
+                Err(_) => {
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
             }
         }
     }
-
 }
 
-}
 #[derive(Serialize, Deserialize)]
 struct LicenseUsers {
     users: Vec<LicenseUser>,
@@ -204,11 +214,10 @@ async fn add_license_users(
         Ok(_) => HttpResponse::Created().json(other_users),
 
         Err(e) => match e {
-            sqlx::Error::Database(e) => match e.code() {
-                Some(e) => match e.as_ref() {
-                    "23505" => HttpResponse::BadRequest().json("Record already exists"),
-                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-                },
+            sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::BadRequest().json("Record already exists")
+                }
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
