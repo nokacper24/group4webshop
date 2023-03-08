@@ -1,4 +1,11 @@
-export function AccordionRow() {
+export type AccordionRowProps = {
+  title: string;
+  id: number;
+  editFunction: (id: number) => void;
+  removeFunction: (id: number) => void;
+};
+
+export function AccordionRow(props: AccordionRowProps) {
   if (props.title.length <= 0) {
     props.title = "Title";
   }
