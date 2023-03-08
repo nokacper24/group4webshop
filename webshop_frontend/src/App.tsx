@@ -24,9 +24,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="products" element={<Products />} />
-          <Route path="product/:productId" element={<ProductPage />} />
+          <Route path="products/:productId" element={<ProductPage />} />
           <Route
-            path="product/:productId/purchase-license"
+            path="products/:productId/purchase-license"
             element={<PurchaseLicense />}
           />
           <Route path="about" element={<About />} />
