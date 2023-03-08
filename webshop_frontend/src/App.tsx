@@ -24,14 +24,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="products" element={<Products />} />
+          <Route path="product/:productId" element={<ProductPage />} />
+          <Route
+            path="product/:productId/purchase-license"
+            element={<PurchaseLicense />}
+          />
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
           <Route path="profile/*" element={<Profile />} />
-          <Route path="product/*" element={<ProductPage />} />
-          <Route
-            path="product/purchase-license"
-            element={<PurchaseLicense />}
-          />
         </Routes>
       </main>
 

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import DescriptionRow, { ProductPageRow } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
 import { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
+import PurchaseLicenseButton from "./PurchaseLicenseButton";
 
 let counter = 0;
 
@@ -42,7 +43,7 @@ export interface Description {
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // check if we are in production mode
 if (import.meta.env.PROD) {
-    baseUrl = "";
+  baseUrl = "";
 }
 
 /**
@@ -56,7 +57,7 @@ export default function ProductPage() {
   const [descriptionRow, setDescriptionRow] = useState<ProductPageRow[]>([]);
 
   //get product id from url
-  const productId = window.location.pathname.split("/")[2];
+  const { productId } = useParams();
 
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
@@ -210,7 +211,7 @@ export default function ProductPage() {
     ],
   };
   return (
-    <React.Fragment>
+    <>
       {product && (
         <>
           <section className="banner">
@@ -219,11 +220,7 @@ export default function ProductPage() {
                 <h1 className="banner-title banner-element hero-title">
                   {product.display_name}
                 </h1>
-                <Link to="purchase-license">
-                  <button className="banner-element hero-button">
-                    Buy license
-                  </button>
-                </Link>
+                <PurchaseLicenseButton />
               </div>
             </div>
           </section>
@@ -250,11 +247,7 @@ export default function ProductPage() {
           <section className="container">
             <h2>Purchase</h2>
             <p>Purchase licenses for this product for your enterprise today!</p>
-            <Link to="purchase-license">
-              <button className="banner-element hero-button">
-                Buy license
-              </button>
-            </Link>
+            <PurchaseLicenseButton />
           </section>
         </>
       )}
@@ -263,7 +256,7 @@ export default function ProductPage() {
           <h1>Product not found</h1>
         </div>
       )}
-    </React.Fragment>
+    </>
   );
 }
 /**
