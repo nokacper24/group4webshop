@@ -1,5 +1,5 @@
-use argon2::{password_hash::SaltString, Argon2, PasswordHasher, PasswordHash, PasswordVerifier};
-use chrono::{DateTime, Utc, Duration};
+use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use chrono::{DateTime, Duration, Utc};
 use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -145,9 +145,7 @@ pub async fn remove_license_users(
     Ok(())
 }
 
-pub
-
-fn hash(pass: &str) -> Result<String, argon2::password_hash::Error> {
+pub fn hash(pass: &str) -> Result<String, argon2::password_hash::Error> {
     //pass to bytes
     let pass = pass.as_bytes();
 
@@ -181,7 +179,6 @@ fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> 
     }
 }
 
-
 /// A struct to represent a user that is registering themselves and a company.
 pub struct RegisterUser {
     pub id: i32,
@@ -192,15 +189,18 @@ pub struct RegisterUser {
 
 /// Creates a new user that is registering themselves and a company.
 /// Returns the partial user that was created.
-/// # Arguments 
+/// # Arguments
 /// * `email` - The email of the user
 /// * `pool` - The database pool
 /// # Returns
 /// * `RegisterUser` - The partial user that was created
-pub async fn create_partial_user(email: &str, pool: &Pool<Postgres>) ->  Result<RegisterUser, sqlx::Error> {
+pub async fn create_partial_user(
+    email: &str,
+    pool: &Pool<Postgres>,
+) -> Result<RegisterUser, sqlx::Error> {
     let key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
-    
+
     let insert = query!(
         r#"INSERT INTO register_user (key, email, exp_date)
         VALUES ($1, $2, $3)"#,
@@ -225,8 +225,6 @@ pub async fn create_partial_user(email: &str, pool: &Pool<Postgres>) ->  Result<
         Err(e) => Err(e),
     }
 }
-
-
 
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
@@ -281,7 +279,7 @@ pub async fn create_partial_company_user(
 
 /// A struct representing an invite to a new user and a company.
 /// This is used to create a new user and link them to a new or existing company.
-/// 
+///
 /// # Fields
 /// * `id` - The id of the invite
 /// * `user_id` - The id of the user that is being invited
@@ -289,8 +287,8 @@ pub async fn create_partial_company_user(
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Invite {
     pub id: String,
-   pub user_id: Option<i32>,
-  pub  company_user_id: Option<i32>,
+    pub user_id: Option<i32>,
+    pub company_user_id: Option<i32>,
 }
 
 pub async fn create_invite(
@@ -323,4 +321,46 @@ pub async fn create_invite(
         }
         Err(e) => Err(e),
     }
+}
+
+/// Get all users that are IT responsible for a company
+pub async fn get_users_by_role(
+    pool: &Pool<Postgres>,
+    role: &Role,
+) -> Result<Vec<User>, sqlx::Error> {
+    let users = query_as!(
+        User,
+        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+        FROM app_user
+        WHERE role = $1"#,
+        role as _
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(users)
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct UserRole {
+    user_id: i32,
+    role: Role,
+}
+
+/// Update users' roles
+pub async fn update_user_roles(
+    pool: &Pool<Postgres>,
+    users: &Vec<UserRole>,
+) -> Result<(), sqlx::Error> {
+    for user in users.iter() {
+        query!(
+            r#"UPDATE app_user
+            SET role = $1
+            WHERE user_id = $2"#,
+            user.role as _,
+            user.user_id
+        )
+        .execute(pool)
+        .await?;
+    }
+    Ok(())
 }

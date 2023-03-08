@@ -1,12 +1,12 @@
 use crate::{
     data_access::{
         auth, error_handling,
-        user::{self, create_invite, create_partial_user, LicenseUser, User},
+        user::{self, create_invite, create_partial_user, LicenseUser, Role, User, UserRole},
     },
     middlewares::auth::{check_role, Token},
 };
 use actix_web::{
-    delete, get, post,
+    delete, get, patch, post,
     web::{self, ReqData},
     HttpResponse, Responder,
 };
@@ -19,16 +19,24 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(user_by_id);
     cfg.service(users_by_company);
     cfg.service(users_by_license);
-
     cfg.service(generate_invite);
-
+    cfg.service(add_license_users);
     cfg.service(remove_license_users);
+    cfg.service(get_users_by_role);
+    cfg.service(update_user_roles);
 }
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         users,
+        user_by_id,
+        users_by_company,
+        users_by_license,
+        add_license_users,
+        remove_license_users,
+        get_users_by_role,
+        update_user_roles
     ),
     components(
         schemas(User)
@@ -63,6 +71,14 @@ async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "User with specific ID", body = User),
+    (status = 400, description = "User ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/users/{id}")]
 async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> impl Responder {
     let id = match id.parse::<i32>() {
@@ -85,6 +101,14 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
 }
 
 /// Get all the users that work for a specific company.
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "List of all users in a specific company", body = Vec<User>),
+    (status = 400, description = "Company ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/companies/{company_id}/users")]
 async fn users_by_company(
     pool: web::Data<Pool<Postgres>>,
@@ -110,6 +134,14 @@ async fn users_by_company(
 }
 
 /// Get all the users that have access to a specific license.
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "List of all users with access to a speecific license", body = Vec<User>),
+    (status = 400, description = "License ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/licenses/{license_id}/users")]
 async fn users_by_license(
     pool: web::Data<Pool<Postgres>>,
@@ -204,6 +236,14 @@ struct LicenseUsers {
 ///     ]
 /// }
 /// ```
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 201, description = "License user successfully added", body = Vec<User>),
+    (status = 400, description = "License user already existed"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/license_users")]
 async fn add_license_users(
     pool: web::Data<Pool<Postgres>>,
@@ -237,6 +277,13 @@ async fn add_license_users(
 ///     ]
 /// }
 /// ```
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "License users successfully removed", body = Vec<User>),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[delete("/license_users")]
 async fn remove_license_users(
     pool: web::Data<Pool<Postgres>>,
@@ -244,6 +291,63 @@ async fn remove_license_users(
 ) -> impl Responder {
     let other_users = &other_users.users;
     match user::remove_license_users(&pool, &other_users).await {
+        Ok(_) => HttpResponse::Ok().json(other_users),
+        Err(e) => match e {
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+/// Get all users that are the IT responsible for their company.
+#[utoipa::path(
+    context_path = "/api",
+    responses(
+    (status = 200, description = "List of all users who's IT responsible for their company", body = Vec<User>),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
+#[get("/users/role/{role}")]
+async fn get_users_by_role(
+    pool: web::Data<Pool<Postgres>>,
+    role: web::Path<Role>,
+) -> impl Responder {
+    let other_users = user::get_users_by_role(&pool, &role).await;
+
+    // Error check
+    if other_users.is_err() {
+        return HttpResponse::InternalServerError().json("Internal Server Error");
+    }
+
+    // Parse to JSON
+    if let Ok(other_users) = other_users {
+        return HttpResponse::Ok().json(other_users);
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+#[derive(Deserialize, Serialize)]
+struct UserRoles {
+    users: Vec<UserRole>,
+}
+
+/// Update users' roles.
+#[utoipa::path (
+    context_path = "/api",
+    patch,
+    responses(
+        (status = 200, description = "Users' roles have been updated", body = Vec<UserRole>),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    )
+  ]
+#[patch("/user_roles")]
+async fn update_user_roles(
+    pool: web::Data<Pool<Postgres>>,
+    other_users: web::Json<UserRoles>,
+) -> impl Responder {
+    let other_users = &other_users.users;
+    match user::update_user_roles(&pool, &other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(e) => match e {
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
