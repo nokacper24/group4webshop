@@ -40,6 +40,13 @@ export interface Description {
   isTextNotImage: boolean;
 }
 
+interface Testimonial {
+  testimonialId: number;
+  author: string;
+  text: string;
+  author_pic: string;
+}
+
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // check if we are in production mode
 if (import.meta.env.PROD) {
@@ -167,49 +174,56 @@ export default function ProductPage() {
     setDescriptionRow(rows);
   };
 
-  useEffect(() => {
-    fetchProduct();
-    fetchDescriptions();
-  }, []);
-
-  let testimonial: GalleryProps = {
-    galleryName: "testGallery",
+  const [testimonials, setTestimonials] = useState<GalleryProps>({
+    galleryName: "PLACEHOLDER",
     slides: [
       {
-        slideId: "slide1",
-        mainContent:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sapien orci, varius quis mauris a, blandit imperdiet tellus. Donec a cursus leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tincidunt ex vel libero porttitor, quis vulputate mauris condimentum. Mauris blandit purus at mauris fringilla pretium. Donec pharetra justo in ultricies accumsan. Duis ullamcorper condimentum porttitor. Nunc pellentesque vestibulum est, et dictum metus pellentesque nec. Morbi luctus turpis vitae facilisis tristique. Duis sed posuere magna. Aliquam sodales, turpis in consequat tristique, nibh odio luctus libero, quis fringilla metus turpis vitae lorem.",
+        slideId: "PLACEHOLDER",
+        mainContent: "PLACEHOLDER",
         reviewerProfile: {
-          picturePath: "https://picsum.photos/100",
-          name: "Joe Kerr",
-          title: "Professional Clown",
-        },
-        slideType: SlideType.PARAGRAPH,
-      },
-      {
-        slideId: "slide2",
-        mainContent:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in tellus nibh. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque a malesuada nunc, quis aliquam ante. Nulla elementum rutrum magna quis condimentum. Integer nunc enim, semper ut sodales eu, blandit quis leo. Ut blandit mollis est, sit amet ultrices ligula facilisis sed. Morbi non est rutrum, aliquet metus non, iaculis nisl. Donec nec magna hendrerit, elementum elit sit amet, sodales tortor. Pellentesque nulla orci, tincidunt vel lacinia condimentum, euismod ut mi. Integer tristique metus a eros luctus, ac sollicitudin dui iaculis. Vestibulum iaculis consequat dui a lacinia. Fusce id leo eu eros fringilla efficitur id vel nisi.",
-        reviewerProfile: {
-          picturePath: "https://picsum.photos/100",
-          name: "Bat mann",
-          title: "Genius acrobat",
-        },
-        slideType: SlideType.PARAGRAPH,
-      },
-      {
-        slideId: "slide3",
-        mainContent:
-          "Phasellus id nibh eget justo blandit rhoncus et ut libero. Nunc ullamcorper, elit id interdum faucibus, leo ipsum tristique libero, nec varius ante nunc ut purus. In blandit in odio vel convallis. Curabitur non elementum elit, sed vestibulum dui. Phasellus eu dolor magna. Maecenas viverra orci id pellentesque auctor. Duis eu efficitur nunc. Proin ut interdum est. Proin sed volutpat tellus, venenatis dictum augue. Cras ante enim, convallis quis enim eget, scelerisque aliquam nibh. Nunc id sagittis dolor. Praesent luctus et felis vitae laoreet. Quisque ultricies sapien risus, in faucibus odio faucibus non. Aliquam erat volutpat. Proin consectetur blandit ex in aliquam.",
-        reviewerProfile: {
-          picturePath: "https://picsum.photos/100",
-          name: "Pene Guin",
-          title: "Animal",
+          picturePath: "PLACEHOLDER",
+          name: "PLACEHOLDER",
         },
         slideType: SlideType.PARAGRAPH,
       },
     ],
+  });
+
+  const fetchTestimonials = async () => {
+    const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
+    const data = await response.json();
+    const testimonials: Testimonial[] = data.map((testimonial: any) => {
+      return {
+        testimonialId: testimonial.testimonial_id,
+        author: testimonial.author,
+        text: testimonial.text,
+        author_pic: "https://picsum.photos/100",
+      };
+    });
+    return testimonials;
   };
+
+  useEffect(() => {
+    fetchProduct();
+    fetchDescriptions();
+    fetchTestimonials().then((testimonials) => {
+      setTestimonials({
+        galleryName: "Testimonials",
+        slides: testimonials.map((testimonial) => {
+          return {
+            slideId: testimonial.author,
+            mainContent: testimonial.text,
+            reviewerProfile: {
+              picturePath: testimonial.author_pic,
+              name: testimonial.author,
+            },
+            slideType: SlideType.PARAGRAPH,
+          };
+        }),
+      });
+    });
+  }, []);
+
   return (
     <>
       {product && (
@@ -233,13 +247,13 @@ export default function ProductPage() {
               />
             ))}
           </section>
-          {testimonial.slides.length > 0 && (
+          {testimonials.slides.length > 0 && (
             <section className="gallery-wrapper">
               <div className="container">
                 <h2 className="testimonial-title">Testimonials</h2>
                 <Gallery
-                  slides={testimonial.slides}
-                  galleryName={testimonial.galleryName}
+                  slides={testimonials.slides}
+                  galleryName={testimonials.galleryName}
                 />
               </div>
             </section>

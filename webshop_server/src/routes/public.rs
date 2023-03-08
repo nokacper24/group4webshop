@@ -4,12 +4,13 @@
 
 use actix_web::{get, web, Responder};
 
+pub mod auth;
 pub mod categories;
+pub mod companies;
 pub mod licenses;
 pub mod products;
+pub mod testimonials;
 pub mod users;
-pub mod auth;
-pub mod company;
 
 #[get("")]
 async fn index() -> impl Responder {
@@ -23,5 +24,6 @@ pub fn public(cfg: &mut web::ServiceConfig) {
     cfg.configure(products::configure);
     cfg.configure(users::configure);
     cfg.configure(auth::configure);
-    cfg.configure(company::configure);
+    cfg.configure(companies::configure);
+    cfg.configure(testimonials::configure);
 }

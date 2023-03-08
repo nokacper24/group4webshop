@@ -14,7 +14,6 @@ export type GalleryProps = {
     reviewerProfile: {
       picturePath: string;
       name: string;
-      title: string;
     };
     slideType: SlideType;
   }[];
