@@ -25,6 +25,12 @@ export default function AccordionTable() {
     setRows((rows) => rows.filter((row) => row.id !== id));
   };
 
+  const addChange = (id: string, change: ChangeType) => {
+    if (!changes.get(change)?.includes(id)) {
+        changes.get(change)?.push(id);
+      }
+  };
+
   const rows: AccordionRowProps[] = [
     {
       title: "Test",
