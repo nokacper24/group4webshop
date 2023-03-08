@@ -1,4 +1,7 @@
 export function AccordionRow() {
+  if (props.title.length <= 0) {
+    props.title = "Title";
+  }
   return (
     <div className="accordion-row">
       <p>Title</p>
