@@ -4,8 +4,11 @@ export function AccordionRow() {
   }
   return (
     <div className="accordion-row">
-      <p>Title</p>
-      <button className="accordion-edit-button">
+      <p>{props.title}</p>
+      <button
+        className="accordion-edit-button"
+        onClick={() => props.editFunction(props.id)}
+      >
         <svg
           version="1.2"
           xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +36,10 @@ export function AccordionRow() {
         <input type="checkbox" />
         <span className="slider"></span>
       </label>
-      <button className="accordion-remove-button">
+      <button
+        className="accordion-remove-button"
+        onClick={() => props.removeFunction(props.id)}
+      >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
           <title>Remove</title>
           <path
