@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AccordionHeader } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
+import { ChangeType } from "./ChangeTypes";
 
 export default function AccordionTable() {
+  const [changes, setChanges] = useState<Map<String, string[]>>(new Map());
+
+  useEffect(() => {
+    // Sets up the map so that it can register changes
+    setChanges((changes) => {
+      for (let type in ChangeType) {
+        changes.set(type, []);
+      }
+      return changes;
+    });
+  });
+
   const editAccordion = (id: number) => {
     console.log("edit: " + id);
   };
