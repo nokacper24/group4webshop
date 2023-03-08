@@ -1,7 +1,6 @@
-use crate::data_access::license::{self, InvalidLicense, License, PartialLicense};
+use crate::data_access::license::{self, License};
 
 use actix_web::{get, web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
