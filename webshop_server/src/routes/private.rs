@@ -3,6 +3,7 @@ use actix_web::{get, web, Responder};
 
 pub mod auth;
 pub mod products_protected;
+pub mod me;
 
 #[get("")]
 async fn index() -> impl Responder {
@@ -12,4 +13,5 @@ async fn index() -> impl Responder {
 pub fn private(cfg: &mut web::ServiceConfig) {
     cfg.configure(auth::configure);
     cfg.configure(products_protected::configure);
+    cfg.configure(me::configure);
 }
