@@ -8,6 +8,12 @@ type UserProps = {
   companyId: number;
 };
 
+/**
+ * A Manage Users page.
+ * The website admins can choose which users get to be IT heads for their companies.
+ *
+ * @returns A Manage Users page component.
+ */
 export default function ManageUsers() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   // Check if we are in production mode
@@ -16,11 +22,17 @@ export default function ManageUsers() {
   }
 
   const [itHeads, setItHeads] = useState<SelectTableRowProps[]>([]);
-  const [defaultUser, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
-
   const [newItHeads] = useState<Set<number>>(new Set());
+
+  const [defaultUser, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
   const [newDefaultUsers] = useState<Set<number>>(new Set());
 
+  /**
+   * Update the lists of new IT heads and default users
+   * when a user gets removed from the list of IT heads.
+   *
+   * @param userId The ID of the user to update.
+   */
   const updateNewUsersOnRemove = (userId: number) => {
     if (newItHeads.has(userId)) {
       newItHeads.delete(userId);
@@ -28,6 +40,13 @@ export default function ManageUsers() {
       newDefaultUsers.add(userId);
     }
   };
+
+  /**
+   * Update the lists of new IT heads and default users
+   * when a user gets added to the list of IT heads.
+   *
+   * @param userId The ID of the user to update.
+   */
   const updateNewUsersOnAdd = (userId: number) => {
     if (newDefaultUsers.has(userId)) {
       newDefaultUsers.delete(userId);
@@ -36,6 +55,11 @@ export default function ManageUsers() {
     }
   };
 
+  /**
+   * Remove a user from the list of IT heads.
+   *
+   * @param index The index of the user in the list of IT  heads.
+   */
   const removeItHead = (index: number) => {
     /* Get user who's being moved from "IT heads" to "default users" */
     let user = itHeadsList.rows[index];
@@ -54,6 +78,11 @@ export default function ManageUsers() {
     updateNewUsersOnRemove(parseInt(user.id));
   };
 
+  /**
+   * Remove all the selected users from the list of IT heads.
+   *
+   * @param index The indices of the users in the list of IT  heads.
+   */
   const removeSelectedItHeads = (indices: number[]) => {
     let sortedIndices = indices.sort((a, b) => a - b);
 
@@ -85,6 +114,11 @@ export default function ManageUsers() {
     ],
   };
 
+  /**
+   * Add a user to the list of IT heads.
+   *
+   * @param index The index of the user in the list of IT  heads.
+   */
   const addItHead = (index: number) => {
     /* Get user who's being moved from "default users" to "IT heads" */
     let user = defaultUsersList.rows[index];
@@ -103,6 +137,11 @@ export default function ManageUsers() {
     updateNewUsersOnAdd(parseInt(user.id));
   };
 
+  /**
+   * Add all the selected users to the list of IT heads.
+   *
+   * @param index The indices of the users in the list of IT  heads.
+   */
   const addSelectedItHeads = (indices: number[]) => {
     let sortedIndices = indices.sort((a, b) => a - b);
 
@@ -131,6 +170,11 @@ export default function ManageUsers() {
     outsideButtons: [{ text: "Add all selected", action: addSelectedItHeads }],
   };
 
+  /**
+   * Send a GET request to get all users with the role 'Company IT Head'
+   *
+   * @returns A list of all company IT head users.
+   */
   const fetchCompanyItHead = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyItHead`);
     const data = await response.json();
@@ -144,6 +188,11 @@ export default function ManageUsers() {
     return users;
   };
 
+  /**
+   * Send a GET request to get all users with the role 'Company IT'
+   *
+   * @returns A list of all company IT users.
+   */
   const fetchCompanyIt = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyIt`);
     const data = await response.json();
@@ -157,6 +206,11 @@ export default function ManageUsers() {
     return users;
   };
 
+  /**
+   * Send a GET request to get all users with the role 'Default'
+   *
+   * @returns A list of all default users.
+   */
   const fetchDefaultUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/Default`);
     const data = await response.json();
@@ -170,6 +224,9 @@ export default function ManageUsers() {
     return users;
   };
 
+  /**
+   * Send a PATCH request to give some users the 'Company IT Head' role.
+   */
   const patchAddItHeadsRequest = () => {
     if (newItHeads.size > 0) {
       fetch(`${baseUrl}/api/user_roles`, {
@@ -199,6 +256,9 @@ export default function ManageUsers() {
     }
   };
 
+  /**
+   * Send a PATCH request to give some users the 'Default' role.
+   */
   const patchAddDefaultUsersRequest = () => {
     if (newDefaultUsers.size > 0) {
       fetch(`${baseUrl}/api/user_roles`, {
@@ -228,6 +288,9 @@ export default function ManageUsers() {
     }
   };
 
+  /**
+   * Save the changes made to the user lists.
+   */
   const handleSave = () => {
     patchAddItHeadsRequest();
     patchAddDefaultUsersRequest();
