@@ -30,7 +30,7 @@ export default function AccordionTable() {
 
   useEffect(() => {
     setRows(rows);
-  });
+  }, []);
 
   return (
     <div className="accordion-table">
