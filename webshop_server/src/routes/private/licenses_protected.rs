@@ -56,7 +56,7 @@ struct InvalidLicenses {
   context_path = "/api/priv",
   patch,
   responses(
-      (status = 200, description = "Licenses' validity have been updated"),
+      (status = 200, description = "Licenses' validity have been updated", body = Vec<InvalidLicense>),
       (status = 500, description = "Internal Server Error"),
       ),
   )
