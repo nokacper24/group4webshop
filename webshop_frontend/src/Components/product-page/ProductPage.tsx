@@ -181,7 +181,7 @@ export default function ProductPage() {
         slideId: "PLACEHOLDER",
         mainContent: "PLACEHOLDER",
         reviewerProfile: {
-          picturePath: "PLACEHOLDER",
+          picturePath: "",
           name: "PLACEHOLDER",
         },
         slideType: SlideType.PARAGRAPH,
