@@ -1,6 +1,10 @@
 import { AccordionRow } from "./AccordionRow";
+export type AccordionHeaderProps = {
+  rows: AccordionRowProps[];
+};
 
-export function AccordionHeader() {
+export function AccordionHeader(props: AccordionHeaderProps) {
+
   return (
     <div>
       <button className="accordion">Testing</button>
