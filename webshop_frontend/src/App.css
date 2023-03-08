@@ -848,6 +848,10 @@ form a:hover {
   filter: drop-shadow(0 0 0.1rem var(--text-primary));
 }
 
+.gallery-wrapper p {
+  margin: 1em 0.5em;
+}
+
 .testimonial-title {
   color: inherit;
   background: initial;
