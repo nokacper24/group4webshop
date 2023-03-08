@@ -79,12 +79,13 @@ export default function CreateLicenseForm() {
    * @param license The license to create.
    */
   const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/licenses`, {
+    fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
+      /* TODO: Send along cookie for authentication */
       body: license,
     }).then((response) => {
       const status = response.status;
