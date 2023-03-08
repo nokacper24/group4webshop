@@ -1115,7 +1115,7 @@ form a:hover {
 .accordion-body {
   border: 1px solid red;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 
 .accordion-row {
