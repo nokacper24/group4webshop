@@ -1,13 +1,12 @@
 use actix_multipart::Multipart;
 use actix_web::{post, put, web, HttpResponse, Responder};
-use serde_json::json;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub mod descriptions_protected;
 
 use crate::{
-    data_access::user,
+    data_access::{error_handling::PostgresDBError, user},
     routes::private::products_protected::descriptions_protected::description_utils::{
         self, ImageExtractorError, ImageParsingError,
     },
@@ -86,23 +85,26 @@ pub async fn create_product(
         };
     let image = match description_utils::parse_img(image_buffer) {
         Ok(image) => image,
-        Err(e) => return match e {
-            ImageParsingError::DecodeError(e) => {
-                HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
-            }
-            ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
-                "No format found. Supported formats: {:?}",
-                descriptions_protected::ALLOWED_FORMATS
-            )),
-            ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
-                .json(format!(
-                    "Unsupported format, found {:?}. Supported formats: {:?}",
-                    e, descriptions_protected::ALLOWED_FORMATS
+        Err(e) => {
+            return match e {
+                ImageParsingError::DecodeError(e) => {
+                    HttpResponse::UnsupportedMediaType().json(format!("Decode error: {}", e))
+                }
+                ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
+                    "No format found. Supported formats: {:?}",
+                    descriptions_protected::ALLOWED_FORMATS
                 )),
-            ImageParsingError::IoError(e) => {
-                HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
+                ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
+                    .json(format!(
+                        "Unsupported format, found {:?}. Supported formats: {:?}",
+                        e,
+                        descriptions_protected::ALLOWED_FORMATS
+                    )),
+                ImageParsingError::IoError(e) => {
+                    HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
+                }
             }
-        },
+        }
     };
 
     let file_name =
@@ -136,7 +138,15 @@ pub async fn create_product(
 
     match product::create_product(&pool, &product).await {
         Ok(product) => HttpResponse::Created().json(product),
-        Err(_) => HttpResponse::InternalServerError().json("Internal Server Error"),
+        Err(e) => match e {
+            sqlx::Error::Database(e) => match PostgresDBError::from_str(e) {
+                PostgresDBError::UniqueViolation => {
+                    HttpResponse::Conflict().json("Product with this name already exists")
+                }
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            },
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
     }
 }
 
