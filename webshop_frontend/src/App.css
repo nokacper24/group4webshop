@@ -1123,6 +1123,7 @@ form a:hover {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+  border-bottom: 1px solid black;
 }
 
 .accordion-row > :first-child {
