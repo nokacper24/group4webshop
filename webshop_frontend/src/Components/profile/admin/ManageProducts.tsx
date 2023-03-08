@@ -64,7 +64,7 @@ export default function ManageProducts() {
         rows={productsList.rows}
         button={productsList.button}
         outsideButtons={productsList.outsideButtons}
-      ></SelectTable>
+      />
     </section>
   );
 }

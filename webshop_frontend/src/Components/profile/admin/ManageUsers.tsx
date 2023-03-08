@@ -359,7 +359,7 @@ export default function ManageUsers() {
           rows={itHeadsList.rows}
           button={itHeadsList.button}
           outsideButtons={itHeadsList.outsideButtons}
-        ></SelectTable>
+        />
       </section>
       <section className="container left-aligned">
         <h2>Default users</h2>
@@ -368,7 +368,7 @@ export default function ManageUsers() {
           rows={defaultUsersList.rows}
           button={defaultUsersList.button}
           outsideButtons={defaultUsersList.outsideButtons}
-        ></SelectTable>
+        />
       </section>
       <section className="container left-aligned">
         <button className="default-button small-button" onClick={handleSave}>

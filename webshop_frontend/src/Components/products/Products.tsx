@@ -35,7 +35,7 @@ export default function Products() {
   }, []);
 
   return (
-    <div>
+    <>
       <section className="container">
         <h1>Our solutions</h1>
         <ul className="product-list grid-container">
@@ -44,6 +44,6 @@ export default function Products() {
           ))}
         </ul>
       </section>
-    </div>
+    </>
   );
 }
