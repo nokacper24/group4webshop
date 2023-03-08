@@ -34,12 +34,11 @@
 }
 
 /* || SITEWIDE STYLES */
-
 /* SCROLL BAR */
-
 ::-webkit-scrollbar {
   background: transparent;
   width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
 }
 
 ::-webkit-scrollbar-track {
@@ -64,6 +63,7 @@
 
 body {
   margin: 0;
+  color: var(--text-primary);
   background-color: rgba(71, 51, 114, 0.10);
   font-family: var(--ff-primary);
   line-height: 2;
@@ -99,7 +99,6 @@ h2 {
 h1,
 h2,
 h3 {
-  color: var(--text-primary);
   background: -webkit-linear-gradient(var(--text-gradient));
   background-clip: text;
   -webkit-background-clip: text;
@@ -747,7 +746,6 @@ form a:hover {
 .card-description {
   line-height: 1em;
   margin-top: 0;
-  color: var(--text-primary);
 }
 
 @media only screen and (max-width: 1100px) {
@@ -842,7 +840,12 @@ form a:hover {
   text-align: center;
   align-items: center;
   color: var(--text-secondary);
-  background: linear-gradient(var(--bg-gradient-secondary));
+  background-color: var(--bg-primary);
+  background-image: linear-gradient(var(--bg-gradient-secondary));
+}
+
+.gallery-wrapper :is(h2, p) {
+  filter: drop-shadow(0 0 0.1rem var(--text-primary));
 }
 
 .testimonial-title {
@@ -1015,7 +1018,8 @@ form a:hover {
   text-decoration: none;
 }
 
-/* || MANAGE LICENSE PAGE */
+/* || MANAGE/ADMIN PAGES */
+/* Select Table */
 .table-container {
   max-height: 20em;
   max-width: 80vw;
@@ -1071,10 +1075,6 @@ form a:hover {
   width: 7em;
   vertical-align: middle;
   text-align: center;
-}
-
-.select-table th:last-child {
-  width: 10em;
 }
 
 .checkbox-column label {
