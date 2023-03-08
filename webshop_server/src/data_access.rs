@@ -5,6 +5,7 @@ pub mod company;
 pub mod error_handling;
 pub mod license;
 pub mod product;
+pub mod testimonial;
 pub mod user;
 
 /// Creates a connection pool to the database
