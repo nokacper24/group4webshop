@@ -4,8 +4,8 @@ import AccordionTable from "./Accordion/AccordionTable";
 export default function ManagePage() {
   return (
     <>
-      <h2>Manage product</h2>
       <section className="container">
+        <h2>Manage product</h2>
         <form>
           <label htmlFor="product-name">Product name:</label>
           <input type="text" id="product-name" name="product-name" />
