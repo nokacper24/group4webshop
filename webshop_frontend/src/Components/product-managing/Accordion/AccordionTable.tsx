@@ -34,7 +34,7 @@ export default function AccordionTable() {
 
   return (
     <div className="accordion-table">
-      <AccordionHeader rows={rows}></AccordionHeader>
+      <AccordionHeader rows={rowList}></AccordionHeader>
     </div>
   );
 }
