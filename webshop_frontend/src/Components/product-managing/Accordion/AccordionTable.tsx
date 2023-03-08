@@ -3,17 +3,16 @@ import { AccordionHeader } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 
 export default function AccordionTable() {
-    const [rowList, setRows] = useState<AccordionRowProps[]>([]);
-
   const editAccordion = (id: number) => {
-    console.log("edit");
+    console.log("edit: " + id);
   };
 
   const deleteAccordion = (id: number) => {
-    console.log("delete");
+    console.log("delete: " + id);
+    setRows((rows) => rows.filter((row) => row.id !== id));
   };
 
-  let rows: AccordionRowProps[] = [
+  const rows: AccordionRowProps[] = [
     {
       title: "Test",
       id: 1,
@@ -28,9 +27,7 @@ export default function AccordionTable() {
     },
   ];
 
-  useEffect(() => {
-    setRows(rows);
-  }, []);
+  const [rowList, setRows] = useState<AccordionRowProps[]>(rows);
 
   return (
     <div className="accordion-table">
