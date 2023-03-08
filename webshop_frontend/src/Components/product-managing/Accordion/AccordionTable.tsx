@@ -3,7 +3,7 @@ import { AccordionHeader } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 
 export default function AccordionTable() {
-    const [rowList, setRows] = useState<AccordionRowProps[]>();
+    const [rowList, setRows] = useState<AccordionRowProps[]>([]);
 
   const editAccordion = (id: number) => {
     console.log("edit");
