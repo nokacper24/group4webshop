@@ -1113,7 +1113,6 @@ form a:hover {
 }
 
 .accordion-body {
-  border: 1px solid red;
   display: flex;
   flex-direction: column;
 }
@@ -1123,6 +1122,9 @@ form a:hover {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+}
+
+.accordion-body > :not(:last-child) {
   border-bottom: 1px solid black;
 }
 
