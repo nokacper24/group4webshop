@@ -26,11 +26,11 @@ VALUES ('cookie1', '2026-12-31', 2),
        ('admin_cookie', '4000-06-30', 1);
 
 INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image, available)
-VALUES ('time_management_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises', 'time_management.jpg', true),
-       ('3d_modelling_software', '3D Modelling', 29.99, 'A fast and easy-to-learn software for 3D modelling, with extensive tools for perfecting details', '3d_modelling.jpg', true),
-       ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises', 'tax_accounting.jpg', true),
-       ('online_scheduling_software', 'Online Scheduling Software', 200, 'Our software is designed to help you effectively manage and streamline the scheduling process. It helps you automate the scheduling process, allowing you to save time and reduce errors', 'online_scheduling.jpg', true),
-       ('bpa_solutions', 'BPA Solutions', 500, 'Automation of processes. It has an intuitive user interface, and automates workflows', 'bpa.jpg', true);
+VALUES ('time_management_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises.', 'time_management.jpg', true),
+       ('3d_modelling_software', '3D Modelling', 29.99, 'A fast and easy-to-learn software for 3D modelling, with extensive tools for perfecting details.', '3d_modelling.jpg', true),
+       ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises.', 'tax_accounting.jpg', true),
+       ('online_scheduling_software', 'Online Scheduling Software', 200, 'Our software is designed to help you effectively manage and streamline the scheduling process. It helps you automate the scheduling process, allowing you to save time and reduce errors.', 'online_scheduling.jpg', true),
+       ('bpa_solutions', 'BPA Solutions', 500, 'Automation of processes. It has an intuitive user interface, and automates workflows.', 'bpa.jpg', true);
 
 INSERT INTO license (valid, start_date, end_date, amount, company_id, product_id)
 VALUES (false, '2022-01-01', '2022-12-31', 100, 2, 'time_management_software'),
@@ -54,7 +54,7 @@ VALUES ('time_management_software', 1),
 INSERT INTO testimonial (author, text, author_pic, product_id)
 VALUES ('Jane Doe', 'I am extremely impressed with the time management software provided by the company. It has greatly improved the efficiency of my team.', 'jane.jpg', 'time_management_software'),
        ('John Smith', 'The tax software is a lifesaver. The software makes tax season a breeze and saves me so much time.', 'john.jpg', 'tax_and_accounting_software'),
-       ('Stephanie Smith', 'This has enabled us to streamline our operations and save time. The product is easy to use and the customer service is top-nothch', 'stephanie_smith.jpg', 'time_management_software');
+       ('Stephanie Smith', 'This has enabled us to streamline our operations and save time. The product is easy to use and the customer service is top-notch.', 'stephanie_smith.jpg', 'time_management_software');
 
 INSERT INTO product_image (image_path, alt_text)
 VALUES ('time_management_software.jpg', 'Time Management Software Interface'),
