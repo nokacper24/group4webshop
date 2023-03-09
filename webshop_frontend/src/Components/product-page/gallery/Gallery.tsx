@@ -34,6 +34,10 @@ export default function Gallery(props: GalleryProps) {
   // If there is only one slide, hide the buttons, otherwise the buttons are initialized.
   useEffect(() => {
     if (props.slides.length > 1) {
+      if (prevButton.current && nextButton.current) {
+        prevButton.current.style.display = "flex";
+        nextButton.current.style.display = "flex";
+      }
       changeSlide(0);
     } else {
       if (prevButton.current && nextButton.current) {
@@ -41,7 +45,7 @@ export default function Gallery(props: GalleryProps) {
         nextButton.current.style.display = "none";
       }
     }
-  }, []);
+  }, [props]);
 
   const [prevSlide, setPrevSlide] = useState<string>("");
   const [nextSlide, setNextSlide] = useState<string>("");
