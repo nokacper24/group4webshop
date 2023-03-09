@@ -70,6 +70,20 @@ export default function AccordionTable() {
 
   const [rowList, setRows] = useState<AccordionRowProps[]>(rows);
 
+  const addRow = (title: string) => {
+    console.log("add");
+    const newId = Math.max(...rowList.map((row) => row.id)) + 1;
+    setRows((rows) => [
+      ...rows,
+      {
+        title: title,
+        id: newId,
+        editFunction: editRow,
+        removeFunction: deleteRow,
+      },
+    ]);
+  };
+
   return (
     <div className="accordion-table">
       <AccordionHeader rows={rowList}></AccordionHeader>
