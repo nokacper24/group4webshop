@@ -1171,13 +1171,14 @@ form a:hover {
   background-color: rgb(222, 222, 222);
 }
 
-.accordion-body > :not(:last-child) {
+.accordion-body > div {
   border-bottom: 1px solid black;
 }
 
 .accordion-row > :first-child {
   margin-right: auto;
   margin-left: 1em;
+  margin-block: 0;
 }
 
 .accordion-remove-button {
