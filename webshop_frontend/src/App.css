@@ -1119,7 +1119,9 @@ form a:hover {
   height: 3em;
 }
 
-.accordion-up-down-button {
+.accordion-header > p {
+  margin-block: 0;
+}
   position: absolute;
   height: 1em;
   width: 2em;
