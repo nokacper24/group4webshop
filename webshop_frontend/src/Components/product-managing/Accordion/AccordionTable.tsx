@@ -18,11 +18,29 @@ export default function AccordionTable() {
 
   const editRow = (id: number) => {
     console.log("edit: " + id);
+    addChange(id, ChangeType.EDIT);
   };
 
   const deleteRow = (id: number) => {
     console.log("delete: " + id);
     setRows((rows) => rows.filter((row) => row.id !== id));
+    addChange(id, ChangeType.DELETE);
+  };
+
+  const moveRows = (id1: number, id2: number) => {
+    console.log("move: " + id1 + " to " + id2);
+
+    setRows((rows) => {
+      const index1 = rows.findIndex((row) => row.id === id1);
+      const index2 = rows.findIndex((row) => row.id === id2);
+      const temp = rows[index1];
+      rows[index1] = rows[index2];
+      rows[index2] = temp;
+      return rows;
+    });
+
+    addChange(id1, ChangeType.MOVE);
+    addChange(id2, ChangeType.MOVE);
   };
 
   const addChange = (id: number, change: ChangeType) => {
