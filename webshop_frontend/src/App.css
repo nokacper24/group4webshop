@@ -1117,6 +1117,9 @@ form a:hover {
   width: 100%;
   position: relative;
   height: 3em;
+
+  border: none;
+  background: rgb(207, 207, 207);
 }
 
 .accordion-header > p {
