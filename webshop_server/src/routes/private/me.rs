@@ -26,7 +26,7 @@ impl From<crate::data_access::user::User> for MeUser {
     }
 }
 
-
+#[get("/me")]
 pub async fn me(pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -> impl Responder {
 
     let user = get_user_from_token(req, &pool).await;
