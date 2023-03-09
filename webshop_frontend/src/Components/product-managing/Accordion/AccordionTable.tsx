@@ -86,7 +86,11 @@ export default function AccordionTable() {
 
   return (
     <div className="accordion-table">
-      <AccordionHeader title={"Hello"} rows={rowList}></AccordionHeader>
+      <AccordionHeader
+        title={"Hello"}
+        addRow={addRow}
+        rows={rowList}
+      ></AccordionHeader>
     </div>
   );
 }
