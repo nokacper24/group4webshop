@@ -115,8 +115,8 @@ pub async fn get_product_by_id(
 /// Create a new product.
 pub async fn create_product(
     pool: &Pool<Postgres>,
-    product: &Product,
-) -> Result<(), sqlx::Error> {
+    product: Product,
+) -> Result<Product, sqlx::Error> {
     query!(
         r#"INSERT INTO product
         (product_id, display_name, price_per_user, short_description, main_image, available)
@@ -130,7 +130,7 @@ pub async fn create_product(
     )
     .execute(pool)
     .await?;
-    Ok(())
+    Ok(product)
 }
 
 /// Update a product.

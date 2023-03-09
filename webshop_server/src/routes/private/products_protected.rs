@@ -141,7 +141,7 @@ pub async fn create_product(
         false,
     );
 
-    match product::create_product(&pool, &new_product).await {
+    match product::create_product(&pool, new_product).await {
         Ok(product) => HttpResponse::Created().json(product),
         Err(e) => {
             if let Err(io_e) = description_utils::remove_image(&file_name) {
