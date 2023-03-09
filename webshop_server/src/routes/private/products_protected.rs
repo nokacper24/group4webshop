@@ -107,12 +107,6 @@ pub async fn create_product(
         }
     };
 
-    let file_name =
-        match description_utils::save_image(image, descriptions_protected::IMAGE_DIR, &file_name) {
-            Ok(file_name) => file_name,
-            Err(_) => return HttpResponse::InternalServerError().finish(),
-        };
-
     let prod_name = match text_fields.get("product_name") {
         Some(prod_name) => prod_name,
         None => return HttpResponse::InternalServerError().finish(),
@@ -128,17 +122,33 @@ pub async fn create_product(
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
     };
-    let product = PartialProduct::new(
+
+    let product_id = product::generate_id(&prod_name);
+
+    let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
+    let file_name =
+    match description_utils::save_image(image, &path, &file_name) {
+        Ok(file_name) => file_name,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+
+    let new_product = Product::new(
+        product_id,
         prod_name.to_string(),
         price_per_unit,
         short_description.to_string(),
-        file_name,
+        file_name.to_string(),
         false,
     );
 
-    match product::create_product(&pool, &product).await {
+    match product::create_product(&pool, &new_product).await {
         Ok(product) => HttpResponse::Created().json(product),
-        Err(e) => match e {
+        Err(e) => {
+            if let Err(io_e) = description_utils::remove_image(&file_name) {
+                log::error!("Couldnt remove image from file system: {}", io_e);
+                return HttpResponse::InternalServerError().json("Internal Server Error")
+            };
+            match e {
             sqlx::Error::Database(e) => match PostgresDBError::from_str(e) {
                 PostgresDBError::UniqueViolation => {
                     HttpResponse::Conflict().json("Product with this name already exists")
@@ -146,7 +156,7 @@ pub async fn create_product(
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        }},
     }
 }
 

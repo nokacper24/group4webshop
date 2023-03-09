@@ -15,6 +15,25 @@ pub struct Product {
     main_image: String,
     available: bool,
 }
+impl Product {
+    pub fn new(
+        product_id: String,
+        display_name: String,
+        price_per_user: f32,
+        short_description: String,
+        main_image: String,
+        available: bool,
+    ) -> Self {
+        Self {
+            product_id,
+            display_name,
+            price_per_user,
+            short_description,
+            main_image,
+            available,
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialProduct {
@@ -58,6 +77,13 @@ impl PartialProduct {
     }
 }
 
+pub fn generate_id(display_name: &str) -> String {
+    display_name
+        .to_lowercase()
+        .replace('.', "")
+        .replace(' ', "_").to_string()
+}
+
 /// Returns all available products.
 pub async fn get_products(pool: &Pool<Postgres>) -> Result<Vec<Product>, sqlx::Error> {
     let products = query_as!(
@@ -89,13 +115,13 @@ pub async fn get_product_by_id(
 /// Create a new product.
 pub async fn create_product(
     pool: &Pool<Postgres>,
-    product: &PartialProduct,
+    product: &Product,
 ) -> Result<(), sqlx::Error> {
     query!(
         r#"INSERT INTO product
         (product_id, display_name, price_per_user, short_description, main_image, available)
         VALUES ($1, $2, $3, $4, $5, $6)"#,
-        product.generate_id(),
+        product.product_id,
         product.display_name,
         product.price_per_user,
         product.short_description,
