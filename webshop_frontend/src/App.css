@@ -1144,6 +1144,12 @@ form a:hover {
   fill: #6f6f6f;
 }
 
+.remove-button {
+  right: calc(var(--header-icon-width) + var(--header-button-distance));
+}
+
+.add-button {
+  right: calc(2 * calc(var(--header-icon-width) + var(--header-button-distance)));
 }
 
 .accordion-body {
