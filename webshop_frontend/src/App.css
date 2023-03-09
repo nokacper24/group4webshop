@@ -1100,7 +1100,9 @@ form a:hover {
   
 }
 
-.accordion {
+.accordion-header-container {
+  position: relative;
+}
   width: 100%;
   position: relative;
 }
