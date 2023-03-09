@@ -1,5 +1,7 @@
+use std::fs;
+
 use actix_multipart::Multipart;
-use actix_web::{post, put, web, HttpResponse, Responder};
+use actix_web::{delete, post, put, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -11,13 +13,14 @@ use crate::{
         self, ImageExtractorError, ImageParsingError,
     },
     {
-        data_access::product::{self, PartialProduct, Product},
+        data_access::product::{self, Product},
         middlewares::auth,
     },
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_product);
+    cfg.service(delete_product);
     cfg.service(update_product);
     cfg.service(web::scope("/products").configure(descriptions_protected::configure));
 }
@@ -126,8 +129,7 @@ pub async fn create_product(
     let product_id = product::generate_id(&prod_name);
 
     let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
-    let file_name =
-    match description_utils::save_image(image, &path, &file_name) {
+    let file_name = match description_utils::save_image(image, &path, &file_name) {
         Ok(file_name) => file_name,
         Err(_) => return HttpResponse::InternalServerError().finish(),
     };
@@ -146,17 +148,18 @@ pub async fn create_product(
         Err(e) => {
             if let Err(io_e) = description_utils::remove_image(&file_name) {
                 log::error!("Couldnt remove image from file system: {}", io_e);
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+                return HttpResponse::InternalServerError().json("Internal Server Error");
             };
             match e {
-            sqlx::Error::Database(e) => match PostgresDBError::from_str(e) {
-                PostgresDBError::UniqueViolation => {
-                    HttpResponse::Conflict().json("Product with this name already exists")
-                }
+                sqlx::Error::Database(e) => match PostgresDBError::from_str(e) {
+                    PostgresDBError::UniqueViolation => {
+                        HttpResponse::Conflict().json("Product with this name already exists")
+                    }
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                },
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-            },
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        }},
+            }
+        }
     }
 }
 
@@ -178,6 +181,70 @@ pub async fn update_product(
         Ok(product) => HttpResponse::Created().json(product),
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+#[delete("/products/{product_id}")]
+pub async fn delete_product(
+    pool: web::Data<Pool<Postgres>>,
+    product_id: web::Path<String>,
+    req_token: Option<web::ReqData<auth::Token>>,
+) -> impl Responder {
+    match auth::check_role(req_token, &pool).await {
+        Ok(role) => {
+            if role != user::Role::Admin {
+                return HttpResponse::Forbidden().json("Forbidden");
+            }
+        }
+        Err(e) => match e {
+            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
+            auth::AuthError::SqlxError(_) => {
+                return HttpResponse::InternalServerError().json("Internal Server Error")
+            }
+        },
+    };
+
+    let product_id = product_id.into_inner();
+
+    match product::product_exists(&pool, &product_id).await {
+        Ok(exists) => {
+            if !exists {
+                return HttpResponse::NotFound().json("Product not found");
+            }
+        }
+        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+    }
+
+    let images = match product::description::get_all_image_paths(&pool, &product_id).await {
+        Ok(images) => images,
+        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+    };
+
+    for image in images {
+        if let Err(e) = description_utils::remove_image(&image) {
+            log::error!("Couldnt remove image from file system: {}", e);
+        };
+    }
+
+    match product::delete_product(&pool, &product_id).await {
+        Ok(img_path) => {
+            if let Err(e) = description_utils::remove_image(&img_path) {
+                log::error!("Couldnt remove main image from file system: {}", e);
+            };
+            if let Err(e) = fs::remove_dir(format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id)) {
+                log::error!("Couldnt remove image folder from file system: {}", e);
+            };
+            HttpResponse::NoContent().finish()
+        },
+        Err(e) => match e {
+            sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
+                PostgresDBError::ForeignKeyViolation => {
+                    HttpResponse::Conflict().json("Product is licensed to some user or company")
+                }
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
