@@ -73,6 +73,8 @@ export default function AccordionTable() {
   const addRow = (title: string) => {
     if (rowList.length < 2) {
       console.log("add");
+      const newId =
+        rowList.length != 0 ? Math.max(...rowList.map((row) => row.id)) + 1 : 0;
       setRows((rows) => [
         ...rows,
         {
