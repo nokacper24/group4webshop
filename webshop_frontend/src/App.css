@@ -1165,6 +1165,10 @@ form a:hover {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+
+  min-height: 2.75rem; /* TODO: Check if this fits or not */
+
+  background-color: rgb(222, 222, 222);
 }
 
 .accordion-body > :not(:last-child) {
