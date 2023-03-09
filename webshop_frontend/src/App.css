@@ -1102,6 +1102,9 @@ form a:hover {
 
 .accordion-header-container {
   position: relative;
+  --accordion-header-font-size: 1.5rem;
+  --header-icon-width: 2.25rem;
+  --header-button-distance: 1rem;
 }
   width: 100%;
   position: relative;
