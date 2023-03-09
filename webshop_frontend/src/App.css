@@ -1139,6 +1139,11 @@ form a:hover {
   border: none;
   background: transparent;
 }
+
+.header-icon:hover{
+  fill: #6f6f6f;
+}
+
 }
 
 .accordion-body {
