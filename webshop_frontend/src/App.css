@@ -1122,6 +1122,11 @@ form a:hover {
 .accordion-header > p {
   margin-block: 0;
 }
+
+.accordion-header > :first-child {
+  margin-right: auto;
+}
+
   position: absolute;
   height: 1em;
   width: 2em;
