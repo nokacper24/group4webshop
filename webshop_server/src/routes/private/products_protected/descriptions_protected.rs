@@ -21,7 +21,8 @@ use sqlx::{Pool, Postgres};
 pub mod description_utils;
 
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
-pub const ALLOWED_FORMATS: [ImageFormat; 3] = [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
+pub const ALLOWED_FORMATS: [ImageFormat; 3] =
+    [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 pub const IMAGE_DIR: &str = "resources/images";
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -183,6 +184,14 @@ async fn add_text_description(
             }
         },
     };
+    match product::product_exists(&pool, product_id.as_str()).await {
+        Ok(exists) => {
+            if !exists {
+                return HttpResponse::NotFound().json("Product not found");
+            }
+        }
+        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+    }
 
     let created_component = product::description::create_text_component(
         &pool,
@@ -230,13 +239,13 @@ async fn upload_image(
                 return HttpResponse::NotFound().json("Product not found");
             }
         }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
-        }
+        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
     };
 
     let (image_buffer, file_name, mut text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(payload, vec!("alt_text")).await {
+        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
+            .await
+        {
             Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
             Err(e) => {
                 return match e {
@@ -297,7 +306,7 @@ async fn upload_image(
         }
     };
 
-    let alt_text = match text_fields.remove("alt_text"){
+    let alt_text = match text_fields.remove("alt_text") {
         Some(alt_text) => alt_text,
         None => {
             return HttpResponse::InternalServerError().json("Internal Server Error");
