@@ -71,17 +71,18 @@ export default function AccordionTable() {
   const [rowList, setRows] = useState<AccordionRowProps[]>(rows);
 
   const addRow = (title: string) => {
-    console.log("add");
-    const newId = Math.max(...rowList.map((row) => row.id)) + 1;
-    setRows((rows) => [
-      ...rows,
-      {
-        title: title,
-        id: newId,
-        editFunction: editRow,
-        removeFunction: deleteRow,
-      },
-    ]);
+    if (rowList.length < 2) {
+      console.log("add");
+      setRows((rows) => [
+        ...rows,
+        {
+          title: title,
+          id: newId,
+          editFunction: editRow,
+          removeFunction: deleteRow,
+        },
+      ]);
+    }
   };
 
   return (
