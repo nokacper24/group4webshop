@@ -4,7 +4,7 @@ import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 
 export default function AccordionTable() {
-  const [changes, setChanges] = useState<Map<String, string[]>>(new Map());
+  const [changes, setChanges] = useState<Map<string, number[]>>(new Map());
 
   useEffect(() => {
     // Sets up the map so that it can register changes
@@ -16,16 +16,16 @@ export default function AccordionTable() {
     });
   });
 
-  const editAccordion = (id: number) => {
+  const editRow = (id: number) => {
     console.log("edit: " + id);
   };
 
-  const deleteAccordion = (id: number) => {
+  const deleteRow = (id: number) => {
     console.log("delete: " + id);
     setRows((rows) => rows.filter((row) => row.id !== id));
   };
 
-  const addChange = (id: string, change: ChangeType) => {
+  const addChange = (id: number, change: ChangeType) => {
     if (!changes.get(change)?.includes(id)) {
         changes.get(change)?.push(id);
       }
@@ -35,14 +35,14 @@ export default function AccordionTable() {
     {
       title: "Test",
       id: 1,
-      editFunction: editAccordion,
-      removeFunction: deleteAccordion,
+      editFunction: editRow,
+      removeFunction: deleteRow,
     },
     {
       title: "Test2",
       id: 2,
-      editFunction: editAccordion,
-      removeFunction: deleteAccordion,
+      editFunction: editRow,
+      removeFunction: deleteRow,
     },
   ];
 
