@@ -27,8 +27,12 @@ export default function AccordionTable() {
 
   const addChange = (id: number, change: ChangeType) => {
     if (!changes.get(change)?.includes(id)) {
-        changes.get(change)?.push(id);
-      }
+      changes.get(change)?.push(id);
+    }
+    if (change === ChangeType.DELETE) {
+      changes.get(ChangeType.EDIT)?.filter((changeId) => changeId !== id);
+      changes.get(ChangeType.MOVE)?.filter((changeId) => changeId !== id);
+    }
   };
 
   const rows: AccordionRowProps[] = [
