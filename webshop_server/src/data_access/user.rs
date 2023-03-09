@@ -334,6 +334,56 @@ pub async fn create_invite(
     }
 }
 
+pub enum UserCreationError {
+    Database(sqlx::Error),
+    Hashing(argon2::Error),
+    Hashing2(argon2::password_hash::Error),
+}
+
+pub async fn create_user(
+    email: &str,
+    pass: &str,
+    company_id: i32,
+    role: Role,
+    pool: &Pool<Postgres>,
+) -> Result<User, UserCreationError> {
+    let pass_hash = match hash(pass) {
+        Ok(hash) => hash,
+        Err(e) => return Err(UserCreationError::Hashing2(e)),
+    };
+
+    let insert = query!(
+        r#"INSERT INTO app_user (email, pass_hash, company_id, role)
+        VALUES ($1, $2, $3, $4)"#,
+        email,
+        pass_hash,
+        company_id,
+        role as _
+    )
+    .execute(pool)
+    .await;
+
+    match insert {
+        Ok(_) => {
+            let user = query_as!(
+                User,
+                r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+                FROM app_user
+                WHERE email = $1"#,
+                email
+            )
+            .fetch_one(pool)
+            .await;
+            match user {
+                Ok(user) => Ok(user),
+                Err(e) => Err(UserCreationError::Database(e)),
+            }
+
+        }
+        Err(e) => Err(UserCreationError::Database(e)),
+    }
+}
+
 /// Get all users that are IT responsible for a company
 pub async fn get_users_by_role(
     pool: &Pool<Postgres>,
