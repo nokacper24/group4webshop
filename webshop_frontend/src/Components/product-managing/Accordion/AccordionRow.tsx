@@ -17,6 +17,7 @@ export function AccordionRow(props: AccordionRowProps) {
         onClick={() => props.editFunction(props.id)}
       >
         <svg
+          className="accordion-button-icon"
           version="1.2"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 200 200"
@@ -47,7 +48,11 @@ export function AccordionRow(props: AccordionRowProps) {
         className="accordion-remove-button"
         onClick={() => props.removeFunction(props.id)}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <svg
+          className="accordion-button-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
           <title>Remove</title>
           <path
             fill="none"
