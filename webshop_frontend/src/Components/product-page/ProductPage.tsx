@@ -197,7 +197,7 @@ export default function ProductPage() {
         testimonialId: testimonial.testimonial_id,
         author: testimonial.author,
         text: testimonial.text,
-        author_pic: "https://picsum.photos/100",
+        author_pic: "https://picsum.photos/80",
       };
     });
     return testimonials;
