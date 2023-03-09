@@ -32,6 +32,17 @@ pub enum Role {
     Default,
 }
 
+impl Role {
+    pub fn to_string(&self) -> String {
+        match self {
+            Role::Admin => "Admin".to_string(),
+            Role::CompanyItHead => "CompanyItHead".to_string(),
+            Role::CompanyIt => "CompanyIt".to_string(),
+            Role::Default => "Default".to_string(),
+        }
+    }
+}
+
 pub struct RoleStruct {
     role: Role,
 }
