@@ -51,7 +51,7 @@ export default function Gallery(props: GalleryProps) {
    * Updates the index of the current slide and the previous and next slide and
    * changes the href of the buttons to the correct slide.
    *
-   * @param amount
+   * @param amount the amount of slides to change
    */
   const changeSlide = (amount: number) => {
     let currentIndex = index + amount;
