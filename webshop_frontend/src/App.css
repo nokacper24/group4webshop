@@ -1132,10 +1132,13 @@ form a:hover {
   display: block;
 }
 
+.overlay-button {
   position: absolute;
-  height: 1em;
-  width: 2em;
-  transform: translate(-125%, 66%);
+  top: 0;
+  transform: translateY(25%);
+  border: none;
+  background: transparent;
+}
 }
 
 .accordion-body {
