@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { LicenseProps } from "../MyAccount";
+import { LicenseProps } from "./LicenseList";
 
 type LicenseRowProps = {
   license: LicenseProps;
@@ -44,7 +44,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   return (
     <React.Fragment>
       <tr className="row-header">
-        <td>{license.productId}</td>
+        <td>{license.productName}</td>
         <td>{0}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import SelectTable from "./SelectTable";
-import { UserProps, LicenseProps } from "../MyAccount";
+import { UserProps } from "../MyAccount";
+import { LicenseProps } from "./LicenseList";
 
 export type SelectTableRowProps = {
   id: string;
