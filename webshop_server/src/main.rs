@@ -10,9 +10,7 @@ use log::info;
 
 mod data_access;
 mod middlewares;
-mod openapi_doc;
 mod routes;
-mod serving_images;
 
 use routes::private::private;
 use routes::public::public;
@@ -22,6 +20,7 @@ use sqlx::{Pool, Postgres};
 use crate::data_access::create_pool;
 use crate::data_access::user::Role;
 use crate::middlewares::auth::{check_role, validator, Token};
+use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -83,15 +82,14 @@ async fn main() -> std::io::Result<()> {
 }
 
 async fn not_found() -> impl Responder {
-    HttpResponse::NotFound().body(
-        r#"<html>
-            <head>
-                <title>404 Not Found</title>
-            </head>
-            <body>
-                <h1>404 Not Found</h1>
-                <p>The resource could not be found.</p>
-            </body>
-        </html>"#,
+    HttpResponse::NotFound().body(r#"<html>
+    <head>
+        <title>404 Not Found</title>
+    </head>
+    <body>
+        <h1>404 Not Found</h1>
+        <p>The resource could not be found.</p>
+    </body>
+</html>"#,
     )
 }
