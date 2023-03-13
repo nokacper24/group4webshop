@@ -25,10 +25,10 @@ export default function PurchaseLicense() {
 
   const { productId } = useParams();
   const [product, setProduct] = useState<ProductProps>({
-    product_id: "PLACEHOLDER",
-    display_name: "PLACEHOLDER",
+    product_id: "",
+    display_name: "",
     price_per_user: 0,
-    short_description: "PLACEHOLDER",
+    short_description: "",
   });
   const [totalPrice, setTotalPrice] = useState<number>(0);
 

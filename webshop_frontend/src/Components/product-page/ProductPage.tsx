@@ -175,14 +175,14 @@ export default function ProductPage() {
   };
 
   const [testimonials, setTestimonials] = useState<GalleryProps>({
-    galleryName: "PLACEHOLDER",
+    galleryName: "",
     slides: [
       {
-        slideId: "PLACEHOLDER",
-        mainContent: "PLACEHOLDER",
+        slideId: "",
+        mainContent: "",
         reviewerProfile: {
           picturePath: "",
-          name: "PLACEHOLDER",
+          name: "",
         },
         slideType: SlideType.PARAGRAPH,
       },
