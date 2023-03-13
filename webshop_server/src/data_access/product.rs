@@ -15,6 +15,25 @@ pub struct Product {
     main_image: String,
     available: bool,
 }
+impl Product {
+    pub fn new(
+        product_id: String,
+        display_name: String,
+        price_per_user: f32,
+        short_description: String,
+        main_image: String,
+        available: bool,
+    ) -> Self {
+        Self {
+            product_id,
+            display_name,
+            price_per_user,
+            short_description,
+            main_image,
+            available,
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialProduct {
@@ -25,6 +44,21 @@ pub struct PartialProduct {
     available: bool,
 }
 impl PartialProduct {
+    pub fn new(
+        display_name: String,
+        price_per_user: f32,
+        short_description: String,
+        main_image: String,
+        available: bool,
+    ) -> Self {
+        Self {
+            display_name,
+            price_per_user,
+            short_description,
+            main_image,
+            available,
+        }
+    }
     fn generate_id(&self) -> String {
         self.display_name
             .to_lowercase()
@@ -41,6 +75,13 @@ impl PartialProduct {
             available: self.available,
         }
     }
+}
+
+pub fn generate_id(display_name: &str) -> String {
+    display_name
+        .to_lowercase()
+        .replace('.', "")
+        .replace(' ', "_").to_string()
 }
 
 /// Returns all available products.
@@ -74,13 +115,13 @@ pub async fn get_product_by_id(
 /// Create a new product.
 pub async fn create_product(
     pool: &Pool<Postgres>,
-    product: &PartialProduct,
-) -> Result<(), sqlx::Error> {
+    product: Product,
+) -> Result<Product, sqlx::Error> {
     query!(
         r#"INSERT INTO product
         (product_id, display_name, price_per_user, short_description, main_image, available)
         VALUES ($1, $2, $3, $4, $5, $6)"#,
-        product.generate_id(),
+        product.product_id,
         product.display_name,
         product.price_per_user,
         product.short_description,
@@ -89,7 +130,22 @@ pub async fn create_product(
     )
     .execute(pool)
     .await?;
-    Ok(())
+    Ok(product)
+}
+
+/// Delete a product.
+/// Returns path to the main image of the product, so it can be deleted.
+pub async fn delete_product(pool: &Pool<Postgres>, product_id: &str) -> Result<String, sqlx::Error> {
+    let row = query!(
+        r#"DELETE FROM product
+        WHERE product_id = $1
+        RETURNING product.main_image;"#,
+        product_id
+    )
+    .fetch_one(pool)
+    .await?;
+    
+    Ok(row.main_image)
 }
 
 /// Update a product.

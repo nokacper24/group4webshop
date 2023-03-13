@@ -10,7 +10,6 @@ CREATE TABLE company (
 
 CREATE TABLE register_company_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL,
     company_id INT NOT NULL,
@@ -28,7 +27,6 @@ CREATE TABLE app_user (
 
 CREATE TABLE register_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL
 );
@@ -120,9 +118,10 @@ CREATE TABLE description_component (
     component_id SERIAL PRIMARY KEY,
     priority INT NOT NULL,
     product_id TEXT NOT NULL,
+    full_width BOOLEAN NOT NULL,
     image_id INT,
     text_id INT,
-    FOREIGN KEY (product_id) REFERENCES product(product_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE,
     FOREIGN KEY (image_id) REFERENCES product_image(image_id),
     FOREIGN KEY (text_id) REFERENCES product_text(text_id),
     UNIQUE (product_id, priority) DEFERRABLE INITIALLY DEFERRED, -- Ensure unique priority for components of a product
@@ -164,4 +163,7 @@ CREATE TRIGGER delete_description_component_trigger
 AFTER DELETE ON description_component
 FOR EACH ROW EXECUTE FUNCTION delete_description_component();
 
+CREATE USER backend_user WITH PASSWORD 'password';
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO backend_user;
 COMMIT;

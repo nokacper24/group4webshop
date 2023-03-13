@@ -18,3 +18,4 @@ DROP TABLE app_user;
 DROP TABLE register_company_user;
 DROP TABLE company;
 DROP TYPE role_enum;
+DROP USER IF EXISTS backend_user;
