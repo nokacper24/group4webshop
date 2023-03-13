@@ -26,6 +26,7 @@ export default function ManageLicenseAccess() {
     amount: 0,
     companyId: 0,
     productId: "0",
+    productName: "",
   });
   const [users, setUsers] = useState<UserProps[]>([]);
 
@@ -210,6 +211,7 @@ export default function ManageLicenseAccess() {
       amount: data.amount,
       companyId: data.company_id,
       productId: data.product_id,
+      productName: "",
     };
     return license;
   };
