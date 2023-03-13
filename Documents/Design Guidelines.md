@@ -15,7 +15,6 @@ Our website is for selling software to enterprises, so the theme should be serio
 ## Hierarchy and layout
 
 - Most important message: What the company is/does
-- 12-column grid
 - Header and footer will always be on the page, and then the main content is changed based on what the user decides to look at
 
 ## Images
@@ -39,9 +38,9 @@ Our website is for selling software to enterprises, so the theme should be serio
 
 ## Border rounding
 
-- Buttons and input fields should have slightly rounded corners
-- Images that are not hero/banner should have slighly rounded corners (less than buttons)
+- Buttons should have slightly rounded corners
 
 ## Shadows
 
-- A very subtle shadow on navbar and all forms (login)
+- The product cards should have a dropshadow, which increases on hover
+- Text that needs better contrast with the background, should have a dropshadow
