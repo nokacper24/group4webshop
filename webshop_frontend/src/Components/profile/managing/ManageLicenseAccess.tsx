@@ -222,7 +222,7 @@ export default function ManageLicenseAccess() {
    * @param companyId The ID of the company
    * @returns A list of all company users
    */
-  const fetchCompanyUsers = async (companyId: number | undefined) => {
+  const fetchCompanyUsers = async (companyId: number) => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
     const users = data.map((user: any) => {
