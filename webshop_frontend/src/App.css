@@ -210,7 +210,7 @@ nav {
 
 #skip-navigation {
   position: absolute;
-  left: 1rem;
+  left: 10rem;
   top: -1000px;
   padding: 0.5em;
   color: var(--text-secondary);
@@ -318,6 +318,10 @@ nav {
 
 .nav-link.active {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.active:is(:hover, :focus) {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Navbar -- Mobile */
@@ -1028,6 +1032,10 @@ form a:hover {
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
+}
+
+.button-container {
+  margin-bottom: 1em;
 }
 
 .table-container+.button-container {
