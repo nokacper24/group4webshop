@@ -377,8 +377,7 @@ export default function ManageLicenseAccess() {
       <section className="container left-aligned">
         <h1>Manage license access</h1>
         <p>
-          {/* TODO: Fetch product name of license */}
-          Product: {license.productId}
+          Product: {license.productName}
           <br></br>
           Active users: {usersWithAccess.length - changedUsersWithAccess.size}
           <br></br>
