@@ -9,7 +9,6 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import CreateCompanyAccount from "./Components/profile/CreateCompanyAccount";
 
 /**
  * Represents the website content.
@@ -25,13 +24,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="products" element={<Products />} />
+          <Route path="products/:productId" element={<ProductPage />} />
+          <Route
+            path="products/:productId/purchase-license"
+            element={<PurchaseLicense />}
+          />
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
           <Route path="profile/*" element={<Profile />} />
-          <Route path="product-page" element={<ProductPage />} />
-          {/* TODO: Fix path of Purchase License */}
-          <Route path="purchase-license" element={<PurchaseLicense />} />
-          <Route path="create-account/*" element={<CreateCompanyAccount />} />
         </Routes>
       </main>
 

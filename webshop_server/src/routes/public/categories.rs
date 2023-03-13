@@ -9,7 +9,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 }
 
 /// Get all categories.
-#[get("categories")]
+#[get("/categories")]
 pub async fn categories(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let categories = get_categories(&pool).await;
 
@@ -27,7 +27,7 @@ pub async fn categories(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 }
 
 /// Get a specific category by ID.
-#[get("categories/{category_id}")]
+#[get("/categories/{category_id}")]
 async fn category_by_id(
     pool: web::Data<Pool<Postgres>>,
     category_id: web::Path<i32>,

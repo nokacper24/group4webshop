@@ -1,56 +1,49 @@
+import { useEffect, useState } from "react";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+// check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "";
+}
 export type State = {
   products: ProductCardProps[];
 };
 
 export default function Products() {
-  const website_data = [
-    {
-      name: "Product1",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      sourceImage: "https://unsplash.it/300/200",
-    },
-    {
-      name: "Product2",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit laboriosam ea ipsam, non hic obcaecati repellat dignissimos deleniti explicabo nemo, aliquam, doloremque ipsa! Reiciendis, quidem ea asperiores impedit vero quisquam!",
-      sourceImage: "https://unsplash.it/300/200",
-    },
-    {
-      name: "Product3",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      sourceImage: "https://unsplash.it/300/200",
-    },
-    {
-      name: "Product4",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus dignissimos placeat dicta. Deserunt, velit, rerum distinctio iusto, officiis nulla omnis culpa obcaecati illo quaerat eius asperiores? Voluptates sunt nemo magnam.",
-      sourceImage: "https://unsplash.it/300/200",
-    },
-  ];
-  let state: State = {
-    products: [],
+  const [products, setProducts] = useState<ProductCardProps[]>([]);
+
+  const fetchProducts = async () => {
+    const response = await fetch(`${baseUrl}/api/products`);
+    const data = await response.json();
+    const products = data.map((product: any) => {
+      return {
+        props: {
+          product_id: product.product_id,
+          name: product.display_name,
+          description: product.short_description,
+          sourceImage: product.main_image,
+        },
+      };
+    });
+
+    setProducts(products);
   };
-  website_data.forEach((projectObject) => {
-    let newProduct: ProductCardProps = {
-      props: projectObject,
-    };
-    state.products.push(newProduct);
-  });
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
-    <div>
+    <>
       <section className="container">
         <h1>Our solutions</h1>
         <ul className="product-list grid-container">
-          {state.products.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.props.name} props={product.props} />
           ))}
         </ul>
       </section>
-    </div>
+    </>
   );
 }
