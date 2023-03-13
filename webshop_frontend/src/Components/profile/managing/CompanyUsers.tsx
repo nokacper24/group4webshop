@@ -18,10 +18,41 @@ export default function CompanyUsers() {
   const { companyId } = useParams();
 
   const [users, setUsers] = useState<SelectTableRowProps[]>([]);
-  const [removedUsers] = useState<Set<string>>(new Set());
+  const [newRemovedUsers] = useState<Set<string>>(new Set());
 
   const editUser = () => {
     console.log("Editing user...");
+  };
+
+  /**
+   * Add user as pending to be removed.
+   *
+   * @param user The user to remove.
+   */
+  const updateNewRemovedUsers = (user: any) => {
+    newRemovedUsers.add(user.id);
+  };
+
+  /**
+   *  Remove selected users from list of users.
+   *
+   * @param indices The indices of the users in the list.
+   */
+  const removeUsers = (indices: number[]) => {
+    let sortedIndices = indices.sort((a, b) => a - b);
+
+    for (let i = sortedIndices.length - 1; i >= 0; i--) {
+      let index = sortedIndices[i];
+      let user = usersList.rows[index];
+      usersList.rows = [
+        ...usersList.rows.slice(0, index),
+        ...usersList.rows.slice(index + 1),
+      ];
+
+      updateNewRemovedUsers(user);
+    }
+
+    setUsers(usersList.rows);
   };
 
   const usersList = {
@@ -30,7 +61,23 @@ export default function CompanyUsers() {
     },
     rows: users,
     button: { text: "Edit", action: editUser },
-    outsideButtons: [{ text: "Remove", action: editUser }],
+    outsideButtons: [{ text: "Remove selected", action: removeUsers }],
+  };
+
+  /**
+   * Send a GET request to get a product.
+   *
+   * @param productId The ID of the product.
+   * @returns The product object.
+   */
+  const fetchProduct = async (productId: string) => {
+    const response = await fetch(`${baseUrl}/api/products/${productId}`);
+    const data = await response.json();
+    const product = {
+      name: data.display_name,
+    };
+
+    return product;
   };
 
   /**
@@ -73,6 +120,10 @@ export default function CompanyUsers() {
           button={usersList.button}
           outsideButtons={usersList.outsideButtons}
         />
+        <button className="default-button small-button">Save</button>
+      </section>
+      <section className="container left-aligned">
+        <h1>Add users</h1>
       </section>
     </>
   );
