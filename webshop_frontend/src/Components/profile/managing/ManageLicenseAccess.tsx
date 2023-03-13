@@ -196,6 +196,22 @@ export default function ManageLicenseAccess() {
   const isInitialMount = useRef(true);
 
   /**
+   * Send a GET request to get a product.
+   *
+   * @param productId The ID of the product.
+   * @returns The product object.
+   */
+  const fetchProduct = async (productId: string) => {
+    const response = await fetch(`${baseUrl}/api/products/${productId}`);
+    const data = await response.json();
+    const product = {
+      name: data.display_name,
+    };
+
+    return product;
+  };
+
+  /**
    * Send a GET request to get the license information.
    *
    * @returns The license object
@@ -335,6 +351,9 @@ export default function ManageLicenseAccess() {
     fetchLicense()
       .then((license) => {
         setLicense(license);
+        fetchProduct(license.productId).then((product) => {
+          license.productName = product.name;
+        });
         fetchCompanyUsers(license.companyId).then((users) => setUsers(users));
       })
       .catch((e) => console.error("Failed to get license or users"));
