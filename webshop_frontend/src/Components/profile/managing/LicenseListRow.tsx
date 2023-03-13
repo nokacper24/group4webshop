@@ -14,7 +14,6 @@ type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
-  const { userId } = useParams();
   const [collapsed, setCollapsed] = useState(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
