@@ -3,7 +3,7 @@ use sqlx::{Postgres, Pool, query_as};
 
 #[derive(Deserialize, Serialize)]
 pub struct Company {
-    company_id: i32,
+    pub company_id: i32,
     company_name: String,
     company_address: String,
 }

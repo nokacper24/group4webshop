@@ -10,7 +10,6 @@ CREATE TABLE company (
 
 CREATE TABLE register_company_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL,
     company_id INT NOT NULL,
@@ -28,7 +27,6 @@ CREATE TABLE app_user (
 
 CREATE TABLE register_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL
 );
