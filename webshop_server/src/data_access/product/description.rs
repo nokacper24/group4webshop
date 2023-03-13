@@ -140,6 +140,29 @@ pub async fn get_product_description_components(
     Result::Ok(description_components)
 }
 
+pub async fn get_all_image_paths(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<Vec<String>, sqlx::Error> {
+    let rows = query!(
+        r#"SELECT image_path
+        FROM description_component
+        FULL JOIN product_image ON description_component.image_id = product_image.image_id
+        WHERE description_component.product_id = $1
+        AND image_path IS NOT null;
+        "#,
+        product_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let mut paths: Vec<String> = Vec::new();
+    for row in rows {
+        paths.push(row.image_path);
+    }
+    Result::Ok(paths)
+}
+
 /// Returns a description component by id.
 #[deprecated]
 pub async fn get_description_component_by_id(

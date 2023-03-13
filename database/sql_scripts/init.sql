@@ -122,7 +122,7 @@ CREATE TABLE description_component (
     product_id TEXT NOT NULL,
     image_id INT,
     text_id INT,
-    FOREIGN KEY (product_id) REFERENCES product(product_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE,
     FOREIGN KEY (image_id) REFERENCES product_image(image_id),
     FOREIGN KEY (text_id) REFERENCES product_text(text_id),
     UNIQUE (product_id, priority) DEFERRABLE INITIALLY DEFERRED, -- Ensure unique priority for components of a product
@@ -164,4 +164,6 @@ CREATE TRIGGER delete_description_component_trigger
 AFTER DELETE ON description_component
 FOR EACH ROW EXECUTE FUNCTION delete_description_component();
 
+CREATE USER backend_user WITH PASSWORD 'password';
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
 COMMIT;
