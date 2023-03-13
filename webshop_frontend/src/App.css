@@ -614,7 +614,7 @@ form a:hover {
   height: 100vh;
   max-width: 100%;
   background: var(--text-primary);
-  background-image: url(./assets/hero.jpg);
+  background-image: url(assets/hero.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 50% 100%;
@@ -776,6 +776,7 @@ form a:hover {
   background-image: url(https://unsplash.it/1200/500);
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
 }
 
 .banner-inner {
