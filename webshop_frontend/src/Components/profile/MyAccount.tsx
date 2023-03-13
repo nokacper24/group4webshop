@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import CompanyUsers from "./managing/CompanyUsers";
 import LicenseList from "./managing/LicenseList";
 
 export type UserProps = {
@@ -49,6 +50,16 @@ export default function MyAccount() {
 
   const companyLicenses = (
     <>
+      <h2>Company users</h2>
+      <div className="button-container">
+        <Link
+          to={`../company-users/${user.companyId}`}
+          className="default-button small-button"
+        >
+          Manage users
+        </Link>
+      </div>
+
       <h2>Licenses</h2>
       <LicenseList companyId={user.companyId} />
     </>

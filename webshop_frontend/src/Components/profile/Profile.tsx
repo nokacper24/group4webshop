@@ -6,6 +6,7 @@ import CreateCompanyAccount from "./register/CreateCompanyAccount";
 import AdminCompanyLicenses from "./admin/AdminCompanyLicenses";
 import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
+import CompanyUsers from "./managing/CompanyUsers";
 
 /**
  * The user Profile page.
@@ -21,10 +22,15 @@ export default function Profile() {
         <Route path="/" element={<SignIn />} />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
         <Route path="/:userId" element={<MyAccount />} />
+
+        {/* License manager */}
         <Route
           path="/manage-license/:licenseId"
           element={<ManageLicenseAccess />}
         />
+        <Route path="/company-users/:companyId" element={<CompanyUsers />} />
+
+        {/* Admin */}
         <Route
           path="/admin-company-licenses"
           element={<AdminCompanyLicenses />}
