@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use chrono::{DateTime, Duration, Utc};
 use rand::rngs::OsRng;
@@ -193,7 +195,6 @@ fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> 
 /// A struct to represent a user that is registering themselves and a company.
 pub struct RegisterUser {
     pub id: i32,
-    pub key: String,
     pub email: String,
     pub exp_date: DateTime<Utc>,
 }
@@ -213,9 +214,8 @@ pub async fn create_partial_user(
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(
-        r#"INSERT INTO register_user (key, email, exp_date)
-        VALUES ($1, $2, $3)"#,
-        key,
+        r#"INSERT INTO register_user (email, exp_date)
+        VALUES ($1, $2)"#,
         email,
         exp_date
     )
@@ -226,7 +226,7 @@ pub async fn create_partial_user(
         Ok(_) => {
             let user = query_as!(
                 RegisterUser,
-                r#"SELECT id, key, email, exp_date FROM register_user WHERE email = $1"#,
+                r#"SELECT id, email, exp_date FROM register_user WHERE email = $1"#,
                 email
             )
             .fetch_one(pool)
@@ -237,10 +237,23 @@ pub async fn create_partial_user(
     }
 }
 
+pub async fn get_partial_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<RegisterUser, sqlx::Error> {
+    let user = query_as!(
+        RegisterUser,
+        r#"SELECT id, email, exp_date FROM register_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(user)
+}
+
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
     pub id: i32,
-    pub key: String,
     pub email: String,
     pub company_id: i32,
     pub exp_date: DateTime<Utc>,
@@ -259,13 +272,11 @@ pub async fn create_partial_company_user(
     company_id: i32,
     pool: &Pool<Postgres>,
 ) -> Result<RegisterCompanyUser, sqlx::Error> {
-    let key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(
-        r#"INSERT INTO register_company_user (key, email, company_id, exp_date)
-        VALUES ($1, $2, $3, $4)"#,
-        key,
+        r#"INSERT INTO register_company_user (email, company_id, exp_date)
+        VALUES ($1, $2, $3)"#,
         email,
         company_id,
         exp_date
@@ -277,7 +288,7 @@ pub async fn create_partial_company_user(
         Ok(_) => {
             let user = query_as!(
                 RegisterCompanyUser,
-                r#"SELECT id, key, email, company_id, exp_date FROM register_company_user WHERE email = $1"#,
+                r#"SELECT id, email, company_id, exp_date FROM register_company_user WHERE email = $1"#,
                 email
             )
             .fetch_one(pool)
@@ -286,6 +297,20 @@ pub async fn create_partial_company_user(
         }
         Err(e) => Err(e),
     }
+}
+
+pub async fn get_partial_company_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<RegisterCompanyUser, sqlx::Error> {
+    let user = query_as!(
+        RegisterCompanyUser,
+        r#"SELECT id, email, company_id, exp_date FROM register_company_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(user)
 }
 
 /// A struct representing an invite to a new user and a company.
@@ -331,6 +356,86 @@ pub async fn create_invite(
             Ok(invite)
         }
         Err(e) => Err(e),
+    }
+}
+
+pub async fn get_invite(
+    id: &str,
+    pool: &Pool<Postgres>,
+) -> Result<Invite, sqlx::Error> {
+    let invite = query_as!(
+        Invite,
+        r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(invite)
+}
+
+pub async fn delete_invite(
+    id: &str,
+    pool: &Pool<Postgres>,
+) -> Result<(), sqlx::Error> {
+    let result = query!(
+            r#"DELETE FROM invite_user WHERE id = $1"#,
+            id
+        ).execute(pool).await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
+
+
+pub enum UserCreationError {
+    Database(sqlx::Error),
+    Hashing(argon2::Error),
+    Hashing2(argon2::password_hash::Error),
+}
+
+pub async fn create_user(
+    email: &str,
+    pass: &str,
+    company_id: i32,
+    role: Role,
+    pool: &Pool<Postgres>,
+) -> Result<User, UserCreationError> {
+    let pass_hash = match hash(pass) {
+        Ok(hash) => hash,
+        Err(e) => return Err(UserCreationError::Hashing2(e)),
+    };
+
+    let insert = query!(
+        r#"INSERT INTO app_user (email, pass_hash, company_id, role)
+        VALUES ($1, $2, $3, $4)"#,
+        email,
+        pass_hash,
+        company_id,
+        role as _
+    )
+    .execute(pool)
+    .await;
+
+    match insert {
+        Ok(_) => {
+            let user = query_as!(
+                User,
+                r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+                FROM app_user
+                WHERE email = $1"#,
+                email
+            )
+            .fetch_one(pool)
+            .await;
+            match user {
+                Ok(user) => Ok(user),
+                Err(e) => Err(UserCreationError::Database(e)),
+            }
+
+        }
+        Err(e) => Err(UserCreationError::Database(e)),
     }
 }
 
