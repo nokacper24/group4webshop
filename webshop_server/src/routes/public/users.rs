@@ -1,7 +1,9 @@
 use crate::{
     data_access::{
         auth, error_handling,
-        user::{self, create_invite, create_partial_user, LicenseUser, Role, User, UserRole},
+        user::{
+            self, create_invite, create_partial_user, LicenseUser, Role, User, UserID, UserRole,
+        },
     },
     middlewares::auth::{check_role, Token},
 };
@@ -24,6 +26,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(remove_license_users);
     cfg.service(get_users_by_role);
     cfg.service(update_user_roles);
+    cfg.service(delete_users);
 }
 
 #[derive(OpenApi)]
@@ -36,7 +39,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         add_license_users,
         remove_license_users,
         get_users_by_role,
-        update_user_roles
+        update_user_roles,
+        delete_users
     ),
     components(
         schemas(User)
@@ -348,6 +352,45 @@ async fn update_user_roles(
 ) -> impl Responder {
     let other_users = &other_users.users;
     match user::update_user_roles(&pool, &other_users).await {
+        Ok(_) => HttpResponse::Ok().json(other_users),
+        Err(e) => match e {
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+struct UserIDs {
+    users: Vec<UserID>,
+}
+
+/// Delete users
+/// The JSON for `user_ids` can be like this:
+/// ```
+/// {
+///     "users": [
+///         {
+///             "user_id": 3
+///         }
+///     ]
+/// }
+/// ```
+#[utoipa::path (
+    context_path = "/api",
+    delete,
+    responses(
+        (status = 200, description = "Users have been deleted.", body = Vec<i32>),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    )
+  ]
+#[delete("/users")]
+async fn delete_users(
+    pool: web::Data<Pool<Postgres>>,
+    other_users: web::Json<UserIDs>,
+) -> impl Responder {
+    let other_users = &other_users.users;
+    match user::delete_users(&pool, &other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(e) => match e {
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
