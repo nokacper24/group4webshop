@@ -492,8 +492,7 @@ pub async fn delete_users(pool: &Pool<Postgres>, users: &Vec<UserID>) -> Result<
         transaction
             .execute(query!(
                 r#"DELETE FROM app_user
-                    WHERE user_id = $1
-                    CASCADE"#,
+                   WHERE user_id = $1"#,
                 user.user_id,
             ))
             .await?;
