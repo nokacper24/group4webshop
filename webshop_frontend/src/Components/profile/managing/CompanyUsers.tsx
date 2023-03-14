@@ -65,22 +65,6 @@ export default function CompanyUsers() {
   };
 
   /**
-   * Send a GET request to get a product.
-   *
-   * @param productId The ID of the product.
-   * @returns The product object.
-   */
-  const fetchProduct = async (productId: string) => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product = {
-      name: data.display_name,
-    };
-
-    return product;
-  };
-
-  /**
    * Send a GET request to get the company users.
    *
    * @returns A list of all company users
@@ -95,6 +79,44 @@ export default function CompanyUsers() {
       };
     });
     return users;
+  };
+
+  const sendDeleteRequest = async () => {
+    fetch(`${baseUrl}/api/users`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        users: Array.from(newRemovedUsers, (item) => {
+          return {
+            user_id: item,
+          };
+        }),
+      }),
+    })
+      .then((response) => {
+        const status = response.status;
+        if (status == 200) {
+          location.reload();
+        } else {
+          alert("Something went wrong when saving users");
+        }
+      })
+      .catch(() => alert("Failed to save users"));
+  };
+
+  const handleSave = () => {
+    if (newRemovedUsers.size > 0) {
+      if (
+        confirm(
+          "Are you sure you want to remove the users? This action cannot be reversed."
+        )
+      ) {
+        console.log("Sending DELETE request...");
+      }
+    }
   };
 
   useEffect(() => {
