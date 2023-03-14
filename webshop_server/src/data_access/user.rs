@@ -5,7 +5,7 @@ use chrono::{DateTime, Duration, Utc};
 use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, query_as, {Pool, Postgres},
+    query, query_as, Executor, {Pool, Postgres},
 };
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -127,16 +127,19 @@ pub async fn add_license_users(
     pool: &Pool<Postgres>,
     users: &Vec<LicenseUser>,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"INSERT INTO user_license(license_id, user_id)
-            VALUES ($1, $2)"#,
-            user.license_id,
-            user.user_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"INSERT INTO user_license(license_id, user_id)
+                VALUES ($1, $2)"#,
+                user.license_id,
+                user.user_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }
 
@@ -145,16 +148,19 @@ pub async fn remove_license_users(
     pool: &Pool<Postgres>,
     users: &Vec<LicenseUser>,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"DELETE FROM user_license
-            WHERE license_id = $1 AND user_id = $2"#,
-            user.license_id,
-            user.user_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"DELETE FROM user_license
+                WHERE license_id = $1 AND user_id = $2"#,
+                user.license_id,
+                user.user_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }
 
@@ -359,10 +365,7 @@ pub async fn create_invite(
     }
 }
 
-pub async fn get_invite(
-    id: &str,
-    pool: &Pool<Postgres>,
-) -> Result<Invite, sqlx::Error> {
+pub async fn get_invite(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
     let invite = query_as!(
         Invite,
         r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
@@ -373,21 +376,15 @@ pub async fn get_invite(
     Ok(invite)
 }
 
-pub async fn delete_invite(
-    id: &str,
-    pool: &Pool<Postgres>,
-) -> Result<(), sqlx::Error> {
-    let result = query!(
-            r#"DELETE FROM invite_user WHERE id = $1"#,
-            id
-        ).execute(pool).await;
+pub async fn delete_invite(id: &str, pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM invite_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
     match result {
         Ok(_) => Ok(()),
         Err(e) => Err(e),
     }
 }
-
-
 
 pub enum UserCreationError {
     Database(sqlx::Error),
@@ -433,7 +430,6 @@ pub async fn create_user(
                 Ok(user) => Ok(user),
                 Err(e) => Err(UserCreationError::Database(e)),
             }
-
         }
         Err(e) => Err(UserCreationError::Database(e)),
     }
@@ -467,16 +463,42 @@ pub async fn update_user_roles(
     pool: &Pool<Postgres>,
     users: &Vec<UserRole>,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"UPDATE app_user
-            SET role = $1
-            WHERE user_id = $2"#,
-            user.role as _,
-            user.user_id
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"UPDATE app_user
+                SET role = $1
+                WHERE user_id = $2"#,
+                user.role as _,
+                user.user_id
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserID {
+    user_id: i32,
+}
+
+/// Delete users
+pub async fn delete_users(pool: &Pool<Postgres>, users: &Vec<UserID>) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    for user in users.iter() {
+        transaction
+            .execute(query!(
+                r#"DELETE FROM app_user
+                    WHERE user_id = $1
+                    CASCADE"#,
+                user.user_id,
+            ))
+            .await?;
+    }
+    transaction.commit().await?;
+
     Ok(())
 }
