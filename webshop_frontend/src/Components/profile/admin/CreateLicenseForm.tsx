@@ -217,7 +217,7 @@ export default function CreateLicenseForm() {
       ></input>
 
       <button type="submit" className="m-t-1 default-button">
-        Save
+        Save changes
       </button>
     </form>
   );

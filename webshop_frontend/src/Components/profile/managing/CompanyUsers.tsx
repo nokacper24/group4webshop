@@ -120,7 +120,9 @@ export default function CompanyUsers() {
           button={usersList.button}
           outsideButtons={usersList.outsideButtons}
         />
-        <button className="default-button small-button">Save</button>
+        <button className="default-button small-button" onClick={handleSave}>
+          Save changes
+        </button>
       </section>
       <section className="container left-aligned">
         <h1>Add users</h1>
