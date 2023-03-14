@@ -1,5 +1,6 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::{Pool, Postgres};
 
 use crate::data_access::{
@@ -27,9 +28,11 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
     let db_user = get_user_by_username(&pool, &user.email).await;
     match db_user {
         Ok(v) => {
-            //check if password is correct
+            //check if password is correct TODO: use hash verify function
             if v.pass_hash != user.password {
-                return HttpResponse::Unauthorized().json("Wrong password");
+                return HttpResponse::Unauthorized().json(
+                    json!({"success": false, "message": "Incorrect username or password"}),
+                );
             }
 
             let cookie_string = create_cookie(&pool, &v.user_id).await;
@@ -38,11 +41,17 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
                     // set cookie
                     let cookie = actix_web::cookie::Cookie::build("Bearer", v)
                         .path("/")
-                        .domain("localhost")
-                        .secure(false)
+                        .domain("localhost:5173")
+                        .domain("127.0.0.1:8089")
+                        .domain("localhost:8089")
+                        .domain("127.0.0.1:5173")
+                        .secure(true)
                         .http_only(true)
+                        .expires(None)
                         .finish();
-                    return HttpResponse::Ok().cookie(cookie).json("Logged in");
+                    return HttpResponse::Ok().cookie(cookie).json(json!(
+                        {"success": true, "message": "Login successful"}
+                    ));
                 }
                 Err(_e) => {
                     return HttpResponse::InternalServerError().json("Internal Server Error");
