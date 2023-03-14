@@ -252,7 +252,7 @@ export default function ManageUsers() {
             alert("Something went wrong when saving new IT heads");
           }
         })
-        .catch(() => console.error("Failed to update user roles"));
+        .catch(() => alert("Failed to save users"));
     }
   };
 
@@ -284,7 +284,7 @@ export default function ManageUsers() {
             alert("Something went wrong when saving new default users");
           }
         })
-        .catch(() => console.error("Failed to update user roles"));
+        .catch(() => alert("Failed to save users"));
     }
   };
 
