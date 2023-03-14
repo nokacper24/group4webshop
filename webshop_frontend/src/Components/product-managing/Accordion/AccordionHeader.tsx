@@ -1,9 +1,10 @@
 import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 
 export type AccordionHeaderProps = {
+  index: number;
   title: string;
   rows: AccordionRowProps[];
-  addRow: (title: string) => void;
+  addRow: (title: string, header: number) => void;
 };
 
 export function AccordionHeader(props: AccordionHeaderProps) {
