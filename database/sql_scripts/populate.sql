@@ -1,7 +1,7 @@
 BEGIN;
 
 INSERT INTO company (company_name, company_address)
-VALUES ('Proflex', 'sandbergvegen 98 6009 Ålesund'),
+VALUES ('Proflex', 'Sandbergvegen 98 6009 Ålesund'),
         ('Enterprise Solutions Inc.', 'Cupertino, California'),
         ('Business Solutions LLC', 'Redmond, Washington');
 
