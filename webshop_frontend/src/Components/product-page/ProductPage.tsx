@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import DescriptionRow, { ProductPageRow } from "./DescriptionRow";
+import DescriptionsContianer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import { GalleryProps } from "./gallery/Gallery";
 import { SlideType } from "./gallery/SlideTypes";
@@ -76,7 +77,7 @@ export default function ProductPage() {
   const [descriptionRow, setDescriptionRow] = useState<ProductPageRow[]>([]);
 
   // array of descriptions
-  const [descriptions, setDescriptions] = useState<NewDescription[]>([]);
+  const [newdescriptions, setDescriptions] = useState<NewDescription[]>([]);
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
@@ -203,7 +204,7 @@ export default function ProductPage() {
 
   useEffect(() => {
     fetchProduct();
-    fetchDescriptions();
+    fetchDescriptionComponents();
     fetchTestimonials();
   }, []);
 
@@ -223,12 +224,7 @@ export default function ProductPage() {
           </section>
           <hr></hr>
           <section className="product-description container">
-            {descriptionRow.map((productPageRow) => (
-              <DescriptionRow
-                key={assignUniqueKey("row")}
-                props={productPageRow.props}
-              />
-            ))}
+            {DescriptionsContianer(newdescriptions)}
           </section>
           {testimonials.length > 0 && (
             <section className="gallery-wrapper">
