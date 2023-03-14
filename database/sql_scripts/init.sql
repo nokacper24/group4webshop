@@ -118,7 +118,7 @@ CREATE TABLE description_component (
     component_id SERIAL PRIMARY KEY,
     priority INT NOT NULL,
     product_id TEXT NOT NULL,
-    full_width BOOLEAN NOT NULL,
+    full_width BOOLEAN NOT NULL DEFAULT FALSE,
     image_id INT,
     text_id INT,
     FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE,
