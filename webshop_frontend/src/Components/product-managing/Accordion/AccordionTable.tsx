@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AccordionHeader } from "./AccordionHeader";
+import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 
@@ -70,11 +70,11 @@ export default function AccordionTable() {
 
   const [rowList, setRows] = useState<AccordionRowProps[]>(rows);
 
-  const addRow = (title: string) => {
+  const addRow = (title: string, header: number) => {
     if (rowList.length < 2) {
       console.log("add");
       const newId =
-        rowList.length != 0 ? Math.max(...rowList.map((row) => row.id)) + 1 : 0;
+        rowList.length != 0 ? Math.max(...rowList.map((row) => row.id)) + 1 : 0; //TODO: This is a naive way of generating ids. There could be an open id, but this will only find the highest.
       setRows((rows) => [
         ...rows,
         {
@@ -87,9 +87,25 @@ export default function AccordionTable() {
     }
   };
 
+  const [headerList, setHeaders] = useState<AccordionHeaderProps[]>([]);
+
+  const addHeader = (title: string) => {
+    const index = headerList.length;
+    setHeaders((headers) => [
+      ...headers,
+      {
+        title: title,
+        index: index,
+        addRow: addRow,
+        rows: rowList,
+      },
+    ]);
+  };
+
   return (
     <div className="accordion-table">
       <AccordionHeader
+      index={0}
         title={"Hello"}
         addRow={addRow}
         rows={rowList}
