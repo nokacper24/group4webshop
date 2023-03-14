@@ -13,23 +13,14 @@ export type State = {
 };
 
 export interface Product {
-  product_id: string;
-  display_name: string;
-  price_per_user: number;
-  short_description: string;
-  main_image: string;
-  available: boolean;
+  product_id: string
+  display_name: string
+  price_per_user: number
+  short_description: string
+  main_image: string
+  available: boolean
 }
 
-export interface Text {
-  text_title: string;
-  paragraph: string;
-}
-
-export interface Image {
-  image_path: string;
-  alt_text: string;
-}
 
 export interface Description {
   component_id: number;
@@ -39,12 +30,33 @@ export interface Description {
   image: Image;
   isTextNotImage: boolean;
 }
+export interface NewDescription {
+  component_id: number
+  priority: number
+  full_width: boolean
+  product_id: string
+  text?: Text
+  image?: Image
+}
 
-interface Testimonial {
-  testimonialId: number;
-  author: string;
-  text: string;
-  author_pic: string;
+export interface Text {
+  text_id: number
+  text_title: string
+  paragraph: string
+}
+
+export interface Image {
+  image_id: number
+  image_path: string
+  alt_text: string
+}
+
+export interface Testimonial {
+  testimonial_id: number
+  author: string
+  text: string
+  author_pic: string
+  product_id: string
 }
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -63,22 +75,34 @@ export default function ProductPage() {
   // array of rows
   const [descriptionRow, setDescriptionRow] = useState<ProductPageRow[]>([]);
 
+  // array of descriptions
+  const [descriptions, setDescriptions] = useState<NewDescription[]>([]);
+
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+
   //get product id from url
   const { productId } = useParams();
 
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product = {
-      product_id: data.product_id,
-      display_name: data.display_name,
-      price_per_user: data.price_per_user,
-      short_description: data.short_description,
-      main_image: data.main_image,
-      available: data.available,
-    };
-    setProduct(product);
+    const data: Product = await response.json();
+    setProduct(data);
   };
+
+  const fetchDescriptionComponents = async () => {
+    const response = await fetch(
+      `${baseUrl}/api/products/${productId}/descriptions`
+    );
+    const data: NewDescription[] = await response.json();
+    setDescriptions(data);
+  };
+
+  const fetchTestimonials = async () => {
+    const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
+    const data: Testimonial[] = await response.json();
+    setTestimonials(data);
+  };
+  
 
   const fetchDescriptions = async () => {
     const response = await fetch(
@@ -174,54 +198,13 @@ export default function ProductPage() {
     setDescriptionRow(rows);
   };
 
-  const [testimonials, setTestimonials] = useState<GalleryProps>({
-    galleryName: "PLACEHOLDER",
-    slides: [
-      {
-        slideId: "PLACEHOLDER",
-        mainContent: "PLACEHOLDER",
-        reviewerProfile: {
-          picturePath: "",
-          name: "PLACEHOLDER",
-        },
-        slideType: SlideType.PARAGRAPH,
-      },
-    ],
-  });
 
-  const fetchTestimonials = async () => {
-    const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
-    const data = await response.json();
-    const testimonials: Testimonial[] = data.map((testimonial: any) => {
-      return {
-        testimonialId: testimonial.testimonial_id,
-        author: testimonial.author,
-        text: testimonial.text,
-        author_pic: "https://picsum.photos/80",
-      };
-    });
-    return testimonials;
-  };
+
 
   useEffect(() => {
     fetchProduct();
     fetchDescriptions();
-    fetchTestimonials().then((testimonials) => {
-      setTestimonials({
-        galleryName: "Testimonials",
-        slides: testimonials.map((testimonial) => {
-          return {
-            slideId: testimonial.author,
-            mainContent: testimonial.text,
-            reviewerProfile: {
-              picturePath: testimonial.author_pic,
-              name: testimonial.author,
-            },
-            slideType: SlideType.PARAGRAPH,
-          };
-        }),
-      });
-    });
+    fetchTestimonials();
   }, []);
 
   return (
@@ -247,13 +230,13 @@ export default function ProductPage() {
               />
             ))}
           </section>
-          {testimonials.slides.length > 0 && (
+          {testimonials.length > 0 && (
             <section className="gallery-wrapper">
               <div className="container">
                 <h2 className="testimonial-title">Testimonials</h2>
                 <Gallery
-                  slides={testimonials.slides}
-                  galleryName={testimonials.galleryName}
+                  testimonials={testimonials}
+                  galleryName={"Testimonials"}
                 />
               </div>
             </section>

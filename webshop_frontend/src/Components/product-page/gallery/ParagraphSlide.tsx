@@ -18,13 +18,14 @@ export type ParagraphSlideProps = {
  * @returns the slide HTML element
  */
 export const ParagraphSlide = (props: ParagraphSlideProps) => {
+  let alt_text = props.reviewerProfile.name + "'s profile picture";
   return (
     <div className="slide" id={props.id}>
       <p>{props.paragraph}</p>
       <div className="reviewer-profile">
         <img
           src={props.reviewerProfile.picturePath}
-          alt={props.reviewerProfile.name}
+          alt={props.reviewerProfile.name + "'s face"}
           height="80"
           width="80"
           className="reviewer-picture"
