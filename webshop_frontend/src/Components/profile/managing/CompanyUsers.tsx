@@ -72,11 +72,16 @@ export default function CompanyUsers() {
   const fetchCompanyUsers = async () => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        userId: user.user_id,
-        email: user.email,
-      };
+
+    const users: UserProps[] = [];
+
+    data.map((user: any) => {
+      if (user.role != "Admin" && user.role != "CompanyItHead") {
+        users.push({
+          userId: user.user_id,
+          email: user.email,
+        });
+      }
     });
     return users;
   };
@@ -114,7 +119,7 @@ export default function CompanyUsers() {
           "Are you sure you want to remove the users? This action cannot be reversed."
         )
       ) {
-        console.log("Sending DELETE request...");
+        sendDeleteRequest();
       }
     }
   };
@@ -122,7 +127,7 @@ export default function CompanyUsers() {
   useEffect(() => {
     fetchCompanyUsers().then((users) => {
       setUsers(
-        users.map((user) => {
+        users.map((user: UserProps) => {
           return {
             id: user.userId,
             columns: [{ text: user.email }],
@@ -136,6 +141,11 @@ export default function CompanyUsers() {
     <>
       <section className="container left-aligned">
         <h1>Manage users</h1>
+        <p>
+          Remove or edit default users. You cannot remove users that have the
+          role 'Company IT head' or 'Company IT'. In order to remove 'Company
+          IT' users, you first have to remove the role from them.
+        </p>
         <SelectTable
           header={usersList.header}
           rows={usersList.rows}
