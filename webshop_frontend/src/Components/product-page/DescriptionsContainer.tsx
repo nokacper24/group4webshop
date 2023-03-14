@@ -1,5 +1,10 @@
 import { NewDescription } from "./ProductPage";
 
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
+// check if we are in production mode
+if (import.meta.env.PROD) {
+    baseUrl = "/";
+}
 
 export default function DescriptionsContianer(descriptions: NewDescription[]) {
     let prev_item: undefined | NewDescription = undefined as undefined | NewDescription;
@@ -61,6 +66,52 @@ interface DescriptionRowProps {
 
 function DescriptionRow(props: DescriptionRowProps) {
     return (
-        <p>Description Row with number of items: {props.descriptions.length}</p>
+        <section className="description-row">
+            {props.descriptions.map((item) => {
+                if (item.image !== null) {
+                    return (
+                        <ImageDescription
+                            key={item.component_id}
+                            description={item}
+                        />
+                    );
+                } else if (item.text !== null) {
+                    return (
+                        <TextDescription
+                            key={item.component_id}
+                            description={item}
+                        />
+                    );
+                }
+            })}
+        </section>
+    )
+}
+
+interface ImageDescriptionProps {
+    description: NewDescription
+}
+
+function ImageDescription(props: ImageDescriptionProps) {
+    return (
+        <div className="description-component image-description">
+        <img
+            src={baseUrl + props.description.image?.image_path}
+            alt={props.description.image?.alt_text}
+        />
+        </div>
+    )
+}
+
+interface TextDescriptionProps {
+    description: NewDescription
+}
+
+function TextDescription(props: TextDescriptionProps) {
+    return (
+        <div className="description-component text-description">
+            <h2>{props.description.text?.text_title}</h2>
+            <p>{props.description.text?.paragraph}</p>
+        </div>
     )
 }
