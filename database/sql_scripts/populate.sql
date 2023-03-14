@@ -5,20 +5,12 @@ VALUES ('Proflex', 'sandbergvegen 98 6009 Ålesund'),
         ('Enterprise Solutions Inc.', 'Cupertino, California'),
         ('Business Solutions LLC', 'Redmond, Washington');
 
-INSERT INTO register_company_user (key, email, exp_date, company_id)
-VALUES ('abc123', 'es_hr@enterprisesolutions.com', '2021-06-01', 2),
-       ('def456', 'bs_hr@businesssolutions.com', '2022-01-01', 3);
-
 INSERT INTO app_user (email, pass_hash, company_id, role)
 VALUES ('admin_proflex@gmail.com', 'mmmsecurepass', 1, 'admin'),
         ('es_it_head@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('it_manager@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('it_manager_2@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('bs_it_head@businesssolutions.com', 'pass', 3, 'company_it_head');
-
-INSERT INTO register_user (key, email, exp_date)
-VALUES ('ghi789', 'jane_enterprise@gmail.com', '2021-12-01'),
-       ('jkl101', 'john_business@gmail.com', '2022-03-01');
 
 INSERT INTO cookies (cookie, exp, user_id)
 VALUES ('cookie1', '2026-12-31', 2),

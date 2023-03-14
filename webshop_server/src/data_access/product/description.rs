@@ -9,6 +9,7 @@ use sqlx::{
 pub struct DescriptionComponent {
     component_id: i32,
     priority: i32,
+    full_width: bool,
     product_id: String,
     text: Option<TextComponent>,
     image: Option<ImageComponent>,
@@ -78,7 +79,7 @@ pub async fn get_product_description_components(
     product_id: &str,
 ) -> Result<Vec<DescriptionComponent>, sqlx::Error> {
     let rows = query!(
-        r#"SELECT component_id, priority, product_id,
+        r#"SELECT component_id, priority, full_width, product_id,
         description_component.text_id AS "text_id?",
         text_title AS "text_title?", paragraph AS "paragraph?",
         description_component.image_id, image_path AS "image_path?",
@@ -104,6 +105,7 @@ pub async fn get_product_description_components(
                 description_components.push(DescriptionComponent {
                     component_id: row.component_id,
                     priority: row.priority,
+                    full_width: row.full_width,
                     product_id: row.product_id,
                     text: Some(TextComponent {
                         text_id,
@@ -121,6 +123,7 @@ pub async fn get_product_description_components(
                 description_components.push(DescriptionComponent {
                     component_id: row.component_id,
                     priority: row.priority,
+                    full_width: row.full_width,
                     product_id: row.product_id,
                     text: None,
                     image: Some(ImageComponent {
@@ -170,7 +173,7 @@ pub async fn get_description_component_by_id(
     component_id: i32,
 ) -> Result<DescriptionComponent, sqlx::Error> {
     let row = query!(
-        r#"SELECT component_id, priority, product_id,
+        r#"SELECT component_id, priority, full_width, product_id,
         description_component.text_id AS "text_id?",
         text_title AS "text_title?", paragraph AS "paragraph?",
         description_component.image_id, image_path AS "image_path?",
@@ -192,6 +195,7 @@ pub async fn get_description_component_by_id(
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
+                full_width: row.full_width,
                 product_id: row.product_id,
                 text: Some(TextComponent {
                     text_id,
@@ -209,6 +213,7 @@ pub async fn get_description_component_by_id(
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
+                full_width: row.full_width,
                 product_id: row.product_id,
                 text: None,
                 image: Some(ImageComponent {
@@ -237,7 +242,7 @@ pub async fn get_description_component_checked(
     component_id: i32,
 ) -> Result<DescriptionComponent, sqlx::Error> {
     let row = query!(
-        r#"SELECT component_id, priority, product_id,
+        r#"SELECT component_id, priority, full_width, product_id,
     description_component.text_id AS "text_id?",
     text_title AS "text_title?", paragraph AS "paragraph?",
     description_component.image_id, image_path AS "image_path?",
@@ -262,6 +267,7 @@ pub async fn get_description_component_checked(
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
+                full_width: row.full_width,
                 product_id: row.product_id,
                 text: Some(TextComponent {
                     text_id,
@@ -279,6 +285,7 @@ pub async fn get_description_component_checked(
             return Result::Ok(DescriptionComponent {
                 component_id: row.component_id,
                 priority: row.priority,
+                full_width: row.full_width,
                 product_id: row.product_id,
                 text: None,
                 image: Some(ImageComponent {
@@ -338,6 +345,7 @@ pub async fn create_component(
         Ok(DescriptionComponent {
             component_id: result_row.component_id,
             priority: result_row.priority,
+            full_width: result_row.full_width,
             product_id: result_row.product_id,
             text: Some(text_comp),
             image: None,
@@ -361,6 +369,7 @@ pub async fn create_component(
         Ok(DescriptionComponent {
             component_id: returned_row.component_id,
             priority: returned_row.priority,
+            full_width: returned_row.full_width,
             product_id: returned_row.product_id,
             text: None,
             image: Some(image_comp),
@@ -397,6 +406,7 @@ pub async fn create_text_component(
     Ok(DescriptionComponent {
         component_id: result_row.component_id,
         priority: result_row.priority,
+        full_width: result_row.full_width,
         product_id: result_row.product_id,
         text: Some(text_comp),
         image: None,
@@ -426,6 +436,7 @@ pub async fn create_image_component(
     Ok(DescriptionComponent {
         component_id: returned_row.component_id,
         priority: returned_row.priority,
+        full_width: returned_row.full_width,
         product_id: returned_row.product_id,
         text: None,
         image: Some(image_comp),
