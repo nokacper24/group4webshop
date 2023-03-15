@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Description, Product } from "../../Interfaces";
 import DescriptionRow, { ProductPageRow } from "./DescriptionRow";
 import Gallery from "./gallery/Gallery";
 import { GalleryProps } from "./gallery/Gallery";
@@ -8,40 +9,8 @@ import PurchaseLicenseButton from "./PurchaseLicenseButton";
 
 let counter = 0;
 
-export type State = {
-  rows: ProductPageRow[];
-};
-
-export interface Product {
-  product_id: string;
-  display_name: string;
-  price_per_user: number;
-  short_description: string;
-  main_image: string;
-  available: boolean;
-}
-
-export interface Text {
-  text_title: string;
-  paragraph: string;
-}
-
-export interface Image {
-  image_path: string;
-  alt_text: string;
-}
-
-export interface Description {
-  component_id: number;
-  priority: number;
-  product_id: string;
-  text: Text;
-  image: Image;
-  isTextNotImage: boolean;
-}
-
 interface Testimonial {
-  testimonialId: number;
+  testimonial_id: number;
   author: string;
   text: string;
   author_pic: string;
@@ -69,14 +38,7 @@ export default function ProductPage() {
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
     const data = await response.json();
-    const product = {
-      product_id: data.product_id,
-      display_name: data.display_name,
-      price_per_user: data.price_per_user,
-      short_description: data.short_description,
-      main_image: data.main_image,
-      available: data.available,
-    };
+    const product: Product = data;
     setProduct(product);
   };
 
@@ -85,7 +47,7 @@ export default function ProductPage() {
       `${baseUrl}/api/products/${productId}/descriptions`
     );
     const data = await response.json();
-    const descriptions = data.map((description: any) => {
+    const descriptions: Description[] = data.map((description: Description) => {
       // check if text or image, by seeing if either text or image is null
 
       if (description.text == null) {
@@ -192,15 +154,7 @@ export default function ProductPage() {
   const fetchTestimonials = async () => {
     const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
     const data = await response.json();
-    const testimonials: Testimonial[] = data.map((testimonial: any) => {
-      return {
-        testimonialId: testimonial.testimonial_id,
-        author: testimonial.author,
-        text: testimonial.text,
-        author_pic: "https://picsum.photos/80",
-      };
-    });
-    return testimonials;
+    return data.map((testimonial: Testimonial) => testimonial);
   };
 
   useEffect(() => {
@@ -209,7 +163,7 @@ export default function ProductPage() {
     fetchTestimonials().then((testimonials) => {
       setTestimonials({
         galleryName: "Testimonials",
-        slides: testimonials.map((testimonial) => {
+        slides: testimonials.map((testimonial: any) => {
           return {
             slideId: testimonial.author,
             mainContent: testimonial.text,

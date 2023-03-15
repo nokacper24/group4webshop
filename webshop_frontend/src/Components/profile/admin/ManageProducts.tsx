@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
+import { Product } from "../../../Interfaces";
 import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
 import SelectTable from "../managing/SelectTable";
-
-type ProductProps = {
-  id: string;
-  name: string;
-  description: string;
-};
 
 export default function ManageProducts() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -33,23 +28,19 @@ export default function ManageProducts() {
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
-    const products: ProductProps[] = data.map((product: any) => {
-      return {
-        id: product.product_id,
-        name: product.display_name,
-        description: product.short_description,
-      };
-    });
-    return products;
+    return data.map((product: Product) => product);
   };
 
   useEffect(() => {
     fetchProducts().then((products) => {
       setProducts(
-        products.map((product) => {
+        products.map((product: Product) => {
           return {
-            id: product.id,
-            columns: [{ text: product.name }, { text: product.description }],
+            id: product.product_id,
+            columns: [
+              { text: product.display_name },
+              { text: product.short_description },
+            ],
           };
         })
       );

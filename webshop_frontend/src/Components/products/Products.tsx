@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Product } from "../../Interfaces";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -16,16 +17,7 @@ export default function Products() {
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
-    const products = data.map((product: any) => {
-      return {
-        props: {
-          product_id: product.product_id,
-          name: product.display_name,
-          description: product.short_description,
-          sourceImage: product.main_image,
-        },
-      };
-    });
+    const products = data.map((product: Product) => product);
 
     setProducts(products);
   };

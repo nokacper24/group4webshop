@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { LicenseProps } from "./LicenseList";
+import { License } from "../../../Interfaces";
 
 type LicenseRowProps = {
-  license: LicenseProps;
+  license: License;
 };
 
 /**
@@ -23,7 +23,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     <button className="default-button small-button">Cancel renewal</button>
   );
   const manageButton = (
-    <Link to={`../manage-license/${license.licenseId}`}>
+    <Link to={`../manage-license/${license.license_id}`}>
       <button className="default-button small-button">Manage access</button>
     </Link>
   );
@@ -43,7 +43,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   return (
     <React.Fragment>
       <tr className="row-header">
-        <td>{license.productName}</td>
+        <td>{license.product_name}</td>
         <td>{0}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>
@@ -69,8 +69,8 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
-            Active period: {license.startDate.toLocaleDateString()} to{" "}
-            {license.endDate.toLocaleDateString()}
+            Active period: {license.start_date.toLocaleDateString()} to{" "}
+            {license.end_date.toLocaleDateString()}
             {buttons}
           </p>
         </td>

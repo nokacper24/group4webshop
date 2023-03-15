@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
-
-interface ProductProps {
-  product_id: string;
-  display_name: string;
-  price_per_user: number;
-  short_description: string;
-}
 
 /**
  * Represents a Purchase License page.
@@ -24,11 +18,13 @@ export default function PurchaseLicense() {
   }
 
   const { productId } = useParams();
-  const [product, setProduct] = useState<ProductProps>({
+  const [product, setProduct] = useState<Product>({
     product_id: "",
     display_name: "",
     price_per_user: 0,
     short_description: "",
+    main_image: "",
+    available: false,
   });
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -38,12 +34,7 @@ export default function PurchaseLicense() {
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
     const data = await response.json();
-    const product = {
-      product_id: data.product_id,
-      display_name: data.display_name,
-      price_per_user: data.price_per_user,
-      short_description: data.short_description,
-    };
+    const product: Product = data;
     setProduct(product);
   };
 

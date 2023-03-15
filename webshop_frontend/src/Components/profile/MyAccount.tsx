@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import CompanyUsers from "./managing/CompanyUsers";
+import { User } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
-
-export type UserProps = {
-  userId: string;
-  email: string;
-  companyId: string;
-  role: string;
-};
 
 /**
  * Represents the My Account page.
@@ -24,22 +17,18 @@ export default function MyAccount() {
   }
 
   const { userId } = useParams();
-  const [user, setUser] = useState<UserProps>({
-    userId: "",
+  const [user, setUser] = useState<User>({
+    user_id: "",
     email: "",
-    companyId: "",
-    role: "Default",
+    pass_hash: "",
+    company_id: -1,
+    role: "",
   });
 
   const fetchUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/${userId}`);
     const data = await response.json();
-    const user = {
-      userId: data.user_id,
-      email: data.email,
-      companyId: data.company_id,
-      role: data.role,
-    };
+    const user: User = data;
     setUser(user);
     return user;
   };
@@ -53,7 +42,7 @@ export default function MyAccount() {
       <h2>Company users</h2>
       <div className="button-container">
         <Link
-          to={`../company-users/${user.companyId}`}
+          to={`../company-users/${user.company_id}`}
           className="default-button small-button"
         >
           Manage users
@@ -61,7 +50,7 @@ export default function MyAccount() {
       </div>
 
       <h2>Licenses</h2>
-      <LicenseList companyId={user.companyId} />
+      <LicenseList companyId={user.company_id} />
     </>
   );
 

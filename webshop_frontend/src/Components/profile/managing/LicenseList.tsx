@@ -1,23 +1,9 @@
 import { useEffect, useState } from "react";
+import { License, Product } from "../../../Interfaces";
 import LicenseListRow from "./LicenseListRow";
 
-export type LicenseProps = {
-  licenseId: number;
-  valid: boolean;
-  startDate: Date;
-  endDate: Date;
-  amount: number;
-  companyId: number;
-  productId: string;
-  productName: string;
-};
-
 type LicenseListProps = {
-  companyId: string;
-};
-
-type Product = {
-  name: string;
+  companyId: number;
 };
 
 /**
@@ -32,47 +18,35 @@ export default function LicenseList(props: LicenseListProps) {
     baseUrl = "";
   }
 
-  const [licenses, setLicenses] = useState<LicenseProps[]>([]);
+  const [licenses, setLicenses] = useState<License[]>([]);
 
-  const fetchLicenses = async (companyId: string) => {
+  const fetchLicenses = async (companyId: number) => {
     const response = await fetch(
       `${baseUrl}/api/companies/${companyId}/licenses`
     );
     const data = await response.json();
-    const licenses: LicenseProps[] = data.map((license: any) => {
-      return {
-        licenseId: license.license_id,
-        valid: license.valid,
-        startDate: new Date(license.start_date),
-        endDate: new Date(license.end_date),
-        amount: license.amount,
-        productId: license.product_id,
-      };
-    });
-
+    const licenses: License[] = data.map((license: License) => license);
     return licenses;
   };
 
   const fetchProduct = async (productId: string) => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
     const data = await response.json();
-    const product: Product = {
-      name: data.display_name,
-    };
+    const product: Product = data;
 
     return product;
   };
 
   useEffect(() => {
     fetchLicenses(props.companyId).then((licenses) => {
-      licenses.map((license: LicenseProps) => {
-        fetchProduct(license.productId).then((product: Product) => {
+      licenses.map((license: License) => {
+        fetchProduct(license.product_id).then((product: Product) => {
           setLicenses((list) => {
             let newList = list.slice();
 
             newList.push({
               ...license,
-              productName: product.name,
+              product_name: product.display_name,
             });
 
             return newList;

@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
+import { User } from "../../../Interfaces";
 import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
 import SelectTable from "../managing/SelectTable";
-
-type UserProps = {
-  id: number;
-  email: string;
-  companyId: number;
-};
 
 /**
  * A Manage Users page.
@@ -178,14 +173,7 @@ export default function ManageUsers() {
   const fetchCompanyItHead = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyItHead`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
@@ -196,14 +184,7 @@ export default function ManageUsers() {
   const fetchCompanyIt = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyIt`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
@@ -214,20 +195,13 @@ export default function ManageUsers() {
   const fetchDefaultUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/Default`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
    * Send a PATCH request to give some users the 'Company IT Head' role.
    */
-  const patchAddItHeadsRequest = () => {
+  const sendPatchAddItHeadsRequest = () => {
     if (newItHeads.size > 0) {
       fetch(`${baseUrl}/api/user_roles`, {
         method: "PATCH",
@@ -292,19 +266,19 @@ export default function ManageUsers() {
    * Save the changes made to the user lists.
    */
   const handleSave = () => {
-    patchAddItHeadsRequest();
+    sendPatchAddItHeadsRequest();
     patchAddDefaultUsersRequest();
   };
 
   useEffect(() => {
     fetchCompanyItHead().then((users) => {
       setItHeads(
-        users.map((user) => {
+        users.map((user: User) => {
           return {
-            id: user.id.toString(),
+            id: user.user_id.toString(),
             columns: [
               { text: user.email },
-              { text: user.companyId.toString() },
+              { text: user.company_id.toString() },
             ],
           };
         })
@@ -315,22 +289,22 @@ export default function ManageUsers() {
       fetchDefaultUser().then((defaultUser) => {
         let users: SelectTableRowProps[] = [];
 
-        companyIt.map((user) => {
+        companyIt.map((user: User) => {
           users.push({
-            id: user.id.toString(),
+            id: user.user_id.toString(),
             columns: [
               { text: user.email },
-              { text: user.companyId.toString() },
+              { text: user.company_id.toString() },
             ],
           });
         });
 
-        defaultUser.map((user) => {
+        defaultUser.map((user: User) => {
           users.push({
-            id: user.id.toString(),
+            id: user.user_id.toString(),
             columns: [
               { text: user.email },
-              { text: user.companyId.toString() },
+              { text: user.company_id.toString() },
             ],
           });
         });

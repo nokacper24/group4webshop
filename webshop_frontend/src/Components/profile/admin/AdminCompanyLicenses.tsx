@@ -2,15 +2,7 @@ import { useEffect, useState } from "react";
 import SelectTable from "../managing/SelectTable";
 import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
 import CreateLicenseForm from "./CreateLicenseForm";
-
-type LicenseProps = {
-  licenseId: number;
-  companyId: number;
-  companyName: string;
-  productId: string;
-  productName: string;
-  valid: boolean;
-};
+import { License } from "../../../Interfaces";
 
 /**
  * An admin page for managing companies' licenses.
@@ -37,17 +29,7 @@ export default function AdminCompanyLicenses() {
   const fetchLicenses = async () => {
     const response = await fetch(`${baseUrl}/api/licenses_vital`);
     const data = await response.json();
-    const licenses: LicenseProps[] = data.map((license: any) => {
-      return {
-        licenseId: license.license_id,
-        companyId: license.company_id,
-        companyName: license.company_name,
-        productId: license.product_id,
-        productName: license.display_name,
-        valid: license.valid,
-      };
-    });
-    return licenses;
+    return data.map((license: License) => license);
   };
 
   /**
@@ -148,7 +130,7 @@ export default function AdminCompanyLicenses() {
     fetchLicenses()
       .then((licenses) => {
         let validLicenses: SelectTableRowProps[] = [];
-        licenses.map((license) => {
+        licenses.map((license: any) => {
           if (license.valid) {
             validLicenses.push({
               id: license.licenseId.toString(),

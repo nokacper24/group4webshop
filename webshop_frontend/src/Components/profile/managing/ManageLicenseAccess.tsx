@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { License, Product, User } from "../../../Interfaces";
 import SelectTable from "./SelectTable";
-import { UserProps } from "../MyAccount";
-import { LicenseProps } from "./LicenseList";
 
 export type SelectTableRowProps = {
   id: string;
@@ -18,17 +17,17 @@ export type SelectTableRowProps = {
  */
 export default function ManageLicenseAccess() {
   const { licenseId } = useParams();
-  const [license, setLicense] = useState<LicenseProps>({
-    licenseId: 0,
+  const [license, setLicense] = useState<License>({
+    license_id: 0,
     valid: false,
-    startDate: new Date("1970-01-01"),
-    endDate: new Date("1970-01-01"),
+    start_date: new Date("1970-01-01"),
+    end_date: new Date("1970-01-01"),
     amount: 0,
-    companyId: 0,
-    productId: "0",
-    productName: "",
+    company_id: 0,
+    product_id: "0",
+    product_name: "",
   });
-  const [users, setUsers] = useState<UserProps[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
   const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
@@ -204,10 +203,7 @@ export default function ManageLicenseAccess() {
   const fetchProduct = async (productId: string) => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
     const data = await response.json();
-    const product = {
-      name: data.display_name,
-    };
-
+    const product: Product = data;
     return product;
   };
 
@@ -219,16 +215,7 @@ export default function ManageLicenseAccess() {
   const fetchLicense = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
     const data = await response.json();
-    const license: LicenseProps = {
-      licenseId: data.license_id,
-      valid: data.valid,
-      startDate: new Date(data.start_date),
-      endDate: new Date(data.end_date),
-      amount: data.amount,
-      companyId: data.company_id,
-      productId: data.product_id,
-      productName: "",
-    };
+    const license: License = data;
     return license;
   };
 
@@ -241,13 +228,7 @@ export default function ManageLicenseAccess() {
   const fetchCompanyUsers = async (companyId: number) => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
-    const users = data.map((user: any) => {
-      return {
-        userId: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
+    const users: User[] = data.map((user: User) => user);
     return users;
   };
 
@@ -259,13 +240,7 @@ export default function ManageLicenseAccess() {
   const fetchUsersWithAccess = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        userId: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
+    const users: User[] = data.map((user: User) => user);
     return users;
   };
 
@@ -351,10 +326,10 @@ export default function ManageLicenseAccess() {
     fetchLicense()
       .then((license) => {
         setLicense(license);
-        fetchProduct(license.productId).then((product) => {
-          license.productName = product.name;
+        fetchProduct(license.product_id).then((product) => {
+          license.product_name = product.display_name;
         });
-        fetchCompanyUsers(license.companyId).then((users) => setUsers(users));
+        fetchCompanyUsers(license.company_id).then((users) => setUsers(users));
       })
       .catch((e) => console.error("Failed to get license or users"));
   }, []);
@@ -366,22 +341,22 @@ export default function ManageLicenseAccess() {
       // Sort users between those with and without license access
       fetchUsersWithAccess()
         .then((x) => {
-          let withoutAccess: UserProps[] = [];
-          let withAccess: UserProps[] = [];
+          let withoutAccess: User[] = [];
+          let withAccess: User[] = [];
 
           withoutAccess = users.filter(
-            (arr1) => !x.find((arr2) => arr2.userId === arr1.userId)
+            (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
           );
           withAccess = x;
 
           setUsersWithoutAccess(
             withoutAccess.map((user) => {
-              return { id: user.userId, columns: [{ text: user.email }] };
+              return { id: user.user_id, columns: [{ text: user.email }] };
             })
           );
           setUsersWithAccess(
             withAccess.map((user) => {
-              return { id: user.userId, columns: [{ text: user.email }] };
+              return { id: user.user_id, columns: [{ text: user.email }] };
             })
           );
         })
@@ -396,15 +371,15 @@ export default function ManageLicenseAccess() {
       <section className="container left-aligned">
         <h1>Manage license access</h1>
         <p>
-          Product: {license.productName}
+          Product: {license.product_name}
           <br></br>
           Active users: {usersWithAccess.length - changedUsersWithAccess.size}
           <br></br>
           Total allowed: {license.amount}
           <br></br>
-          Start date: {license.startDate.toDateString()}
+          Start date: {license.start_date.toDateString()}
           <br></br>
-          End date: {license.endDate.toDateString()}
+          End date: {license.end_date.toDateString()}
           <br></br>
           Status: {license.valid ? "Valid" : "Invalid"}
           <br></br>
