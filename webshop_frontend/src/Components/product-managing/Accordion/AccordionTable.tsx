@@ -28,11 +28,11 @@ export default function AccordionTable() {
       return rows;
     });
 
-    addChange(id1, ChangeType.MOVE);
-    addChange(id2, ChangeType.MOVE);
+    registerChange(id1, ChangeType.MOVE);
+    registerChange(id2, ChangeType.MOVE);
   };
 
-  const addChange = (id: number, change: ChangeType) => {
+  const registerChange = (id: number, change: ChangeType) => {
     if (!changes.get(change)?.includes(id)) {
       changes.get(change)?.push(id);
     }
