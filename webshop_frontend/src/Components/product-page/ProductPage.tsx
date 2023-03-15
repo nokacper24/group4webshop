@@ -87,7 +87,7 @@ export default function ProductPage() {
   }, []);
 
   return (
-    <div className="product-page-content">
+    <>
       {product && (
         <>
           <section className="banner">
@@ -127,6 +127,6 @@ export default function ProductPage() {
           <h1>Product not found</h1>
         </div>
       )}
-    </div>
+    </>
   );
 }
