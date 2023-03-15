@@ -73,12 +73,12 @@ export default function AccordionTable() {
   const [headerList, setHeaders] = useState<AccordionHeaderProps[]>([]);
 
   const addHeader = (title: string) => {
-    const index = headerList.length;
+    const id = headerList.length;
     setHeaders((headers) => [
       ...headers,
       {
         title: title,
-        index: index,
+        id: id,
         addRow: addRow,
         rows: rowList,
       },
