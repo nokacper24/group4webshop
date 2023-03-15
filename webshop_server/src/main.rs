@@ -2,14 +2,16 @@ use std::fs::File;
 use std::io::BufReader;
 
 use actix_cors::Cors;
+use actix_web::dev::Service;
 use actix_web::{
     get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpResponse, HttpServer,
     Responder,
 
 };
-use actix_web_httpauth::middleware::HttpAuthentication;
+
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
+use futures::TryFutureExt;
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -64,15 +66,12 @@ async fn main() -> std::io::Result<()> {
             ])
             .max_age(3600);
 
-        let bearer_middleware = HttpAuthentication::bearer(validator);
 
 
 
         // public enpoints at `/api`, private endpoints at `/api/priv`
         let api_endpoints = web::scope("/api").configure(public).service(
-            web::scope("/priv")
-                .wrap(bearer_middleware)
-                .configure(private),
+            web::scope("/priv").configure(private),
         );
 
         App::new()
