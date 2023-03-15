@@ -18,7 +18,6 @@ export type ParagraphSlideProps = {
  * @returns the slide HTML element
  */
 export const ParagraphSlide = (props: ParagraphSlideProps) => {
-  let alt_text = props.reviewerProfile.name + "'s profile picture";
   return (
     <div className="slide" id={props.id}>
       <p>{props.paragraph}</p>

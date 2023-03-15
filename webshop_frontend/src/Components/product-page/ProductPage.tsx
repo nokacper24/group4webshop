@@ -14,14 +14,13 @@ export type State = {
 };
 
 export interface Product {
-  product_id: string
-  display_name: string
-  price_per_user: number
-  short_description: string
-  main_image: string
-  available: boolean
+  product_id: string;
+  display_name: string;
+  price_per_user: number;
+  short_description: string;
+  main_image: string;
+  available: boolean;
 }
-
 
 export interface Description {
   component_id: number;
@@ -32,32 +31,32 @@ export interface Description {
   isTextNotImage: boolean;
 }
 export interface NewDescription {
-  component_id: number
-  priority: number
-  full_width: boolean
-  product_id: string
-  text?: Text
-  image?: Image
+  component_id: number;
+  priority: number;
+  full_width: boolean;
+  product_id: string;
+  text?: Text;
+  image?: Image;
 }
 
 export interface Text {
-  text_id: number
-  text_title: string
-  paragraph: string
+  text_id: number;
+  text_title: string;
+  paragraph: string;
 }
 
 export interface Image {
-  image_id: number
-  image_path: string
-  alt_text: string
+  image_id: number;
+  image_path: string;
+  alt_text: string;
 }
 
 export interface Testimonial {
-  testimonial_id: number
-  author: string
-  text: string
-  author_pic: string
-  product_id: string
+  testimonial_id: number;
+  author: string;
+  text: string;
+  author_pic: string;
+  product_id: string;
 }
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -103,7 +102,6 @@ export default function ProductPage() {
     const data: Testimonial[] = await response.json();
     setTestimonials(data);
   };
-  
 
   const fetchDescriptions = async () => {
     const response = await fetch(
@@ -199,9 +197,6 @@ export default function ProductPage() {
     setDescriptionRow(rows);
   };
 
-
-
-
   useEffect(() => {
     fetchProduct();
     fetchDescriptionComponents();
@@ -209,7 +204,7 @@ export default function ProductPage() {
   }, []);
 
   return (
-    <>
+    <div className="product-page-content">
       {product && (
         <>
           <section className="banner">
@@ -249,7 +244,7 @@ export default function ProductPage() {
           <h1>Product not found</h1>
         </div>
       )}
-    </>
+    </div>
   );
 }
 /**
