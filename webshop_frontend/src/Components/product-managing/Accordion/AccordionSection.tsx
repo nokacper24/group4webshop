@@ -55,6 +55,22 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.registerChange(id, ChangeType.EDIT);
   };
 
+  const moveRows = (id1: number, id2: number) => {
+    console.log("move: " + id1 + " to " + id2);
+
+    setRows((rows) => {
+      const index1 = rows.findIndex((row) => row.id === id1);
+      const index2 = rows.findIndex((row) => row.id === id2);
+      const temp = rows[index1];
+      rows[index1] = rows[index2];
+      rows[index2] = temp;
+      return rows;
+    });
+
+    props.registerChange(id1, ChangeType.MOVE);
+
+  };
+
   return (
     <>
       <AccordionHeader></AccordionHeader>
