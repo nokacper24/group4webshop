@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
+import { AccordionSection } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 
 export default function AccordionTable() {
@@ -42,23 +43,6 @@ export default function AccordionTable() {
     }
   };
 
-  const rows: AccordionRowProps[] = [
-    {
-      title: "Test",
-      id: 1,
-      editFunction: editRow,
-      removeFunction: deleteRow,
-    },
-    {
-      title: "Test2",
-      id: 2,
-      editFunction: editRow,
-      removeFunction: deleteRow,
-    },
-  ];
-
-  const [rowList, setRows] = useState<AccordionRowProps[]>(rows);
-
   const [headerList, setHeaders] = useState<AccordionHeaderProps[]>([]);
 
   const addHeader = (title: string) => {
@@ -74,14 +58,25 @@ export default function AccordionTable() {
     ]);
   };
 
+  const [sections, setSections] = useState<[]>();
+
+  const rows = [
+    {
+      title: "Test",
+      id: 1,
+    },
+    {
+      title: "Test2",
+      id: 2,
+    },
+  ];
+
   return (
     <div className="accordion-table">
-      <AccordionHeader
-      index={0}
-        title={"Hello"}
-        addRow={addRow}
-        rows={rowList}
-      ></AccordionHeader>
+      <AccordionSection
+        rows={rows}
+        registerChange={registerChange}
+      ></AccordionSection>
     </div>
   );
 }
