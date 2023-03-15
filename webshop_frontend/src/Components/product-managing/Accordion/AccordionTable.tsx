@@ -16,11 +16,6 @@ export default function AccordionTable() {
     });
   });
 
-  const editRow = (id: number) => {
-    console.log("edit: " + id);
-    addChange(id, ChangeType.EDIT);
-  };
-
   const moveRows = (id1: number, id2: number) => {
     console.log("move: " + id1 + " to " + id2);
 

@@ -22,4 +22,9 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.registerChange(id, ChangeType.DELETE);
   };
 
+  const editRow = (id: number) => {
+    console.log("edit: " + id);
+    props.registerChange(id, ChangeType.EDIT);
+  };
+
 }
