@@ -641,16 +641,17 @@ form a:hover {
 
 .hero-title {
   color: var(--text-secondary);
-  font-size: 3em;
+  font-size: 6rem;
   font-weight: 400;
   font-family: var(--ff-title);
+  line-height: 3rem;
 
   -webkit-text-fill-color: initial;
 }
 
 .hero-text {
-  font-size: 1.3rem;
-  margin: 0 0 2em 0;
+  font-size: 2rem;
+  margin-block: 3rem;
 }
 
 .hero-button {
@@ -659,7 +660,7 @@ form a:hover {
   background-color: var(--bg-secondary);
   border: 2px solid var(--text-secondary);
   border-radius: 0.5em;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 700;
   font-variant: small-caps;
   text-decoration: none;
