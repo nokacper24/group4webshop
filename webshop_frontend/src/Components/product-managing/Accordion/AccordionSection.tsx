@@ -1,3 +1,11 @@
+export type AccordionSectionProps = {
+  rows: {
+    title: string;
+    id: number;
+  }[];
+  registerChange: (id: number, change: ChangeType) => void;
+};
+
 export function AccordionSection(props: AccordionSectionProps) {
   const addRow = (title: string, header: number) => {
     if (rowList.length < 2) {
