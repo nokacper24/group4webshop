@@ -21,12 +21,6 @@ export default function AccordionTable() {
     addChange(id, ChangeType.EDIT);
   };
 
-  const deleteRow = (id: number) => {
-    console.log("delete: " + id);
-    setRows((rows) => rows.filter((row) => row.id !== id));
-    addChange(id, ChangeType.DELETE);
-  };
-
   const moveRows = (id1: number, id2: number) => {
     console.log("move: " + id1 + " to " + id2);
 

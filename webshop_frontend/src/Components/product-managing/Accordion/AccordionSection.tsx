@@ -15,4 +15,11 @@ export function AccordionSection(props: AccordionSectionProps) {
       ]);
     }
   };
+
+  const deleteRow = (id: number) => {
+    console.log("delete: " + id);
+    setRows((rows) => rows.filter((row) => row.id !== id));
+    props.registerChange(id, ChangeType.DELETE);
+  };
+
 }
