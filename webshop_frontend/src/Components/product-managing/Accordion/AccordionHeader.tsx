@@ -1,7 +1,7 @@
 import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 
 export type AccordionHeaderProps = {
-  index: number;
+  id: number;
   title: string;
   rows: AccordionRowProps[];
   addRow: (title: string, header: number) => void;
