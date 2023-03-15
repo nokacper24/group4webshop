@@ -34,16 +34,31 @@ pub async fn validator(
     let pool = req
         .app_data::<web::Data<Pool<Postgres>>>()
         .expect("No pool found");
-    let cookie = credentials.token();
-    let valid = check_auth(cookie, &pool).await;
-    if valid {
-        req.extensions_mut().insert(Token {
-            token: cookie.to_string(),
-        });
-        Ok(req)
-    } else {
-        Ok(req)
+
+println!("{:?}", req.headers());
+// print all cookies
+    let cookies = req.cookies();
+    for cookie in cookies {
+        println!("cookie: {:?}", cookie);
     }
+    let cookie = req.cookie("Bearer");
+    let cookie = match cookie {
+        Some(cookie) => {
+            println!("cookie: {:?}", cookie);
+            let cookie = cookie.value();
+            let valid = check_auth(cookie, &pool).await;
+            if valid {
+                req.extensions_mut().insert(Token {
+                    token: cookie.to_string(),
+                });
+                return Ok(req);
+            } else {
+                Ok(req)
+            }
+        }
+        None => return Ok(req),
+    };
+    cookie
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -96,7 +111,7 @@ pub async fn get_user_from_token(
 /// # Example
 /// ```
 /// use webshop_server::middlewares::auth;
-/// 
+///
 /// #[get("/")]
 /// async fn index(req_token: Option<ReqData<auth::Token>>, pool: &Pool<Postgres>) -> Result<HttpResponse, String> {
 ///   let role = auth::check_role(req_token, pool).await;

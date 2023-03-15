@@ -23,6 +23,7 @@ if (import.meta.env.PROD) {
             email: email.current?.value,
             password: password.current?.value,
         }),
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
             "credentials": "include",

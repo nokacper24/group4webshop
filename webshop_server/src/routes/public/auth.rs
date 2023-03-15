@@ -41,12 +41,8 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
                     // set cookie
                     let cookie = actix_web::cookie::Cookie::build("Bearer", v)
                         .path("/")
-                        .domain("localhost:5173")
-                        .domain("127.0.0.1:8089")
-                        .domain("localhost:8089")
-                        .domain("127.0.0.1:5173")
                         .secure(true)
-                        .http_only(true)
+                        .http_only(false)
                         .expires(None)
                         .finish();
                     return HttpResponse::Ok().cookie(cookie).json(json!(

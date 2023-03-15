@@ -6,6 +6,15 @@ import CreateCompanyAccount from "./register/CreateCompanyAccount";
 import AdminCompanyLicenses from "./admin/AdminCompanyLicenses";
 import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
+import { useEffect, useState } from "react";
+
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT+ "/";
+// check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "../";
+}
+
+
 
 /**
  * The user Profile page.
@@ -15,10 +24,39 @@ import ManageUsers from "./admin/ManageUsers";
  * @returns The Profile page component.
  */
 export default function Profile() {
+
+      // check sign in status
+  const checkSignInStatus = async () => {
+    let result = await fetch(baseUrl + "api/priv/logged_in", {
+        method: "GET",
+        credentials: "include",
+        
+    })
+    if (result.status === 200) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+const [signedIn, setSignedIn] = useState<boolean>(false);
+
+useEffect(() => {
+    checkSignInStatus().then((result) => {
+        setSignedIn(result);
+    });
+}, [signedIn]);
+
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<SignIn />} />
+        {signedIn ? (
+            <Route path="/" element={<MyAccount />} />
+        ) : (
+            <Route path="/" element={<SignIn />} />
+        )}
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
         <Route path="/:userId" element={<MyAccount />} />
         <Route

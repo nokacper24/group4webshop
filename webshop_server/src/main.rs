@@ -1,12 +1,18 @@
+use std::fs::File;
+use std::io::BufReader;
+
 use actix_cors::Cors;
 use actix_web::{
     get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpResponse, HttpServer,
     Responder,
+
 };
 use actix_web_httpauth::middleware::HttpAuthentication;
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
 use log::info;
+use rustls::{self, Certificate, PrivateKey, ServerConfig};
+use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod data_access;
 mod middlewares;
@@ -45,11 +51,22 @@ async fn main() -> std::io::Result<()> {
             .await
             .expect("Can not connect to database"),
     );
+    let tls_config = load_rustls_config();
 
     HttpServer::new(move || {
-        let cors = Cors::permissive();
+        let cors = Cors::default()
+            .allowed_origin("https://127.0.0.1:8089")
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+            .allowed_headers(vec![
+                http::header::AUTHORIZATION,
+                http::header::ACCEPT,
+                http::header::CONTENT_TYPE,
+            ])
+            .max_age(3600);
 
         let bearer_middleware = HttpAuthentication::bearer(validator);
+
+
 
         // public enpoints at `/api`, private endpoints at `/api/priv`
         let api_endpoints = web::scope("/api").configure(public).service(
@@ -70,14 +87,15 @@ async fn main() -> std::io::Result<()> {
             .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
             .default_service(web::route().to(not_found))
     })
-    .bind(address)
+    .bind_rustls(address, tls_config)
     .expect("Can not bind to port 8080")
     .run()
     .await
 }
 
 async fn not_found() -> impl Responder {
-    HttpResponse::NotFound().body(r#"<html>
+    HttpResponse::NotFound().body(
+        r#"<html>
     <head>
         <title>404 Not Found</title>
     </head>
@@ -87,4 +105,34 @@ async fn not_found() -> impl Responder {
     </body>
 </html>"#,
     )
+}
+fn load_rustls_config() -> rustls::ServerConfig {
+    // init server config builder with safe defaults
+    let config = ServerConfig::builder()
+        .with_safe_defaults()
+        .with_no_client_auth();
+
+    // load TLS key/cert files
+    let cert_file = &mut BufReader::new(File::open("certificate.pem").unwrap());
+    let key_file = &mut BufReader::new(File::open("privatekey.pem").unwrap());
+
+    // convert files to key/cert objects
+    let cert_chain = certs(cert_file)
+        .unwrap()
+        .into_iter()
+        .map(Certificate)
+        .collect();
+    let mut keys: Vec<PrivateKey> = pkcs8_private_keys(key_file)
+        .unwrap()
+        .into_iter()
+        .map(PrivateKey)
+        .collect();
+
+    // exit if no keys could be parsed
+    if keys.is_empty() {
+        eprintln!("Could not locate PKCS 8 private keys.");
+        std::process::exit(1);
+    }
+
+    config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
 }
