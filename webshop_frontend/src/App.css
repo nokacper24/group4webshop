@@ -823,6 +823,7 @@ form a:hover {
   flex-direction: column;
   justify-content: center;
   gap: 1em;
+  margin-top: 2rem;
 }
 
 .description-row {
@@ -838,18 +839,22 @@ form a:hover {
 .description-component {
   min-width: 45vw;
   max-width: 39vw;
+  border-radius: 0.5rem;
 }
 .text-description {
   text-align: center;
+  
 }
 .image-description {
-  border: 2px solid red;
+  
+  overflow: hidden;
+  height: 25vw;
+  /* filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 0.5)); */
 
 }
 .image-description img {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   object-fit: cover;
 }
 
@@ -857,13 +862,13 @@ form a:hover {
   text-align: center;
 }
 
-.row-text {
+/* .row-text {
   max-width: 50vw;
   line-height: 1.5em;
   margin-inline: auto;
-}
+} */
 
-@media (max-width: 800px) {
+/* @media (max-width: 800px) {
   .product-description-row {
     flex-direction: column;
   }
@@ -871,7 +876,7 @@ form a:hover {
   .row-text {
     max-width: 80vw;
   }
-}
+} */
 
 /* Gallery */
 .gallery-wrapper {
