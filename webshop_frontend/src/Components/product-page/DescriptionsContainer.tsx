@@ -1,4 +1,4 @@
-import { NewDescription } from "./ProductPage";
+import { Description } from "./ProductPage";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
 // check if we are in production mode
@@ -6,10 +6,10 @@ if (import.meta.env.PROD) {
   baseUrl = "/";
 }
 
-export default function DescriptionsContianer(descriptions: NewDescription[]) {
-  let prev_item: undefined | NewDescription = undefined as
+export default function DescriptionsContianer(descriptions: Description[]) {
+  let prev_item: undefined | Description = undefined as
     | undefined
-    | NewDescription;
+    | Description;
   return (
     <>
       {descriptions.map((item) => {
@@ -50,7 +50,7 @@ export default function DescriptionsContianer(descriptions: NewDescription[]) {
 }
 
 interface DescriptionRowProps {
-  descriptions: NewDescription[];
+  descriptions: Description[];
 }
 
 function DescriptionRow(props: DescriptionRowProps) {
@@ -70,7 +70,7 @@ function DescriptionRow(props: DescriptionRowProps) {
 }
 
 interface ImageDescriptionProps {
-  description: NewDescription;
+  description: Description;
 }
 
 function ImageDescription(props: ImageDescriptionProps) {
@@ -92,7 +92,7 @@ function ImageDescription(props: ImageDescriptionProps) {
 }
 
 interface TextDescriptionProps {
-  description: NewDescription;
+  description: Description;
 }
 
 function TextDescription(props: TextDescriptionProps) {
