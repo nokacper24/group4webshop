@@ -218,7 +218,7 @@ export default function ProductPage() {
             </div>
           </section>
           <hr></hr>
-          <section className="product-description-container">
+          <section className="product-description-container container">
             {DescriptionsContianer(newdescriptions)}
           </section>
           {testimonials.length > 0 && (

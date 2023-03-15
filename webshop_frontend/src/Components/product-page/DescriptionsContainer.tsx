@@ -76,7 +76,7 @@ interface ImageDescriptionProps {
 function ImageDescription(props: ImageDescriptionProps) {
   let classes: string;
   if (props.description.full_width) {
-    classes = "description-component image-description full-width-desc";
+    classes = "image-description full-width-desc";
   } else {
     classes = "description-component image-description";
   }
@@ -98,7 +98,7 @@ interface TextDescriptionProps {
 function TextDescription(props: TextDescriptionProps) {
   let classes: string;
   if (props.description.full_width) {
-    classes = "description-component text-description full-width-desc";
+    classes = "text-description full-width-desc";
   } else {
     classes = "description-component text-description";
   }
