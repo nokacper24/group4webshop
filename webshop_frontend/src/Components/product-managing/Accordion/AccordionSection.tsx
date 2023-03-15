@@ -35,4 +35,10 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.registerChange(id, ChangeType.EDIT);
   };
 
+  return (
+    <>
+      <AccordionHeader></AccordionHeader>
+      <AccordionBody></AccordionBody>
+    </>
+  );
 }
