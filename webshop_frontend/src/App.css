@@ -507,9 +507,8 @@ nav {
 
 hr {
   margin: 0;
-  height: 0.2rem;
+  height: 0.5rem;
   width: 100%;
-  max-width: var(--max-width);
   background-color: var(--bg-secondary);
 }
 
@@ -619,15 +618,14 @@ form a:hover {
 }
 
 .hero {
-  height: min(100vh, 30rem);
+  height: min(100vh, 40em);
   width: 100%;
-  max-width: var(--max-width);
   margin-top: calc(0px - var(--header-height));
   background: var(--text-primary);
   background-image: url(assets/hero.jpg);
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 100%;
+  background-position: 50% 70%;
   overflow: hidden;
 }
 
@@ -651,7 +649,7 @@ form a:hover {
 
 .hero-title {
   color: var(--text-secondary);
-  font-size: 6rem;
+  font-size: 5rem;
   font-weight: 400;
   font-family: var(--ff-title);
   line-height: 3rem;
@@ -670,7 +668,7 @@ form a:hover {
   background-color: var(--bg-secondary);
   border: 2px solid var(--text-secondary);
   border-radius: 0.5em;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   font-variant: small-caps;
   text-decoration: none;
@@ -789,12 +787,19 @@ form a:hover {
 
 .banner {
   width: 100%;
-  max-width: var(--max-width);
-  height: 30em;
+  height: 30rem;
   background-image: url(https://unsplash.it/1200/500);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+}
+
+.banner-title {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-family: var(--ff-title);
+
+  -webkit-text-fill-color: initial;
 }
 
 .banner-inner {
@@ -994,7 +999,7 @@ form a:hover {
 .about-us-banner {
   position: relative;
   height: 90vh;
-  max-width: 100%;
+  width: 100%;
   margin-top: calc(0px - var(--header-height));
   color: var(--text-secondary);
   background: var(--text-primary);
