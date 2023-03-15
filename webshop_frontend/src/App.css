@@ -829,7 +829,7 @@ form a:hover {
 .description-row {
   display: flex;
   flex-direction: row;
-  gap: 1em;
+  gap: 2em;
   justify-content: space-evenly;
   align-items: flex-start;
   flex-wrap: wrap;
@@ -841,6 +841,11 @@ form a:hover {
   max-width: 39vw;
   border-radius: 0.5rem;
 }
+.full-width-desc {
+  max-width: 75%;
+}
+
+
 .text-description {
   text-align: center;
   
