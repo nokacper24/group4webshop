@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Description, Product } from "../../Interfaces";
-import DescriptionsContianer from "./DescriptionsContainer";
+import DescriptionsContainer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import PurchaseLicenseButton from "./PurchaseLicenseButton";
 
@@ -27,17 +27,14 @@ if (import.meta.env.PROD) {
  * @returns the product page component
  */
 export default function ProductPage() {
-  const [product, setProduct] = useState<Product>();
+  const { productId } = useParams();
 
+  const [product, setProduct] = useState<Product>();
   const [descriptions, setDescriptions] = useState<Description[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const { productId } = useParams();
 
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product: Product = data;
-    setProduct(product);
     const data: Product = await response.json();
     setProduct(data);
   };
@@ -49,21 +46,6 @@ export default function ProductPage() {
     const data: Description[] = await response.json();
     setDescriptions(data);
   };
-
-  const [testimonials, setTestimonials] = useState<GalleryProps>({
-    galleryName: "",
-    slides: [
-      {
-        slideId: "",
-        mainContent: "",
-        reviewerProfile: {
-          picturePath: "",
-          name: "",
-        },
-        slideType: SlideType.PARAGRAPH,
-      },
-    ],
-  });
 
   const fetchTestimonials = async () => {
     const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
@@ -93,7 +75,7 @@ export default function ProductPage() {
           </section>
           <hr></hr>
           <section className="product-description-container container">
-            {DescriptionsContianer(descriptions)}
+            {DescriptionsContainer(descriptions)}
           </section>
           {testimonials.length > 0 && (
             <section className="gallery-wrapper">

@@ -1,5 +1,3 @@
-import { ProductPageRow } from "./Components/product-page/DescriptionRow";
-
 export interface License {
   license_id: number;
   valid: boolean;
@@ -23,10 +21,6 @@ export interface Company {
   company_id: number;
   company_name: string;
   company_address: string;
-}
-
-export interface State {
-  rows: ProductPageRow[];
 }
 
 export interface Product {
@@ -55,4 +49,5 @@ export interface Description {
   text: Text;
   image: Image;
   isTextNotImage: boolean;
+  full_width: boolean;
 }
