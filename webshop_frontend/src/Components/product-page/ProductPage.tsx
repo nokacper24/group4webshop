@@ -66,9 +66,7 @@ export default function ProductPage() {
           <section className="banner">
             <div className="banner-inner">
               <div className="banner-highlight">
-                <h1 className="banner-title banner-element hero-title">
-                  {product.display_name}
-                </h1>
+                <h1 className="banner-title">{product.display_name}</h1>
                 <PurchaseLicenseButton />
               </div>
             </div>
