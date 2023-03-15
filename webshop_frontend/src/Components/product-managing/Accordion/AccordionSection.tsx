@@ -1,3 +1,9 @@
+import { useEffect, useState } from "react";
+import { AccordionBody } from "./AccordionBody";
+import { AccordionHeader } from "./AccordionHeader";
+import { AccordionRowProps } from "./AccordionRow";
+import { ChangeType } from "./ChangeTypes";
+
 export type AccordionSectionProps = {
   rows: {
     title: string;
@@ -7,6 +13,20 @@ export type AccordionSectionProps = {
 };
 
 export function AccordionSection(props: AccordionSectionProps) {
+  const [rowList, setRows] = useState<AccordionRowProps[]>([]);
+  useEffect(() => {
+    setRows(
+      props.rows.map((row) => {
+        return {
+          title: row.title,
+          id: row.id,
+          editFunction: editRow,
+          removeFunction: deleteRow,
+        };
+      })
+    );
+  });
+
   const addRow = (title: string, header: number) => {
     if (rowList.length < 2) {
       console.log("add");
