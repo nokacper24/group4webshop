@@ -49,10 +49,7 @@ async fn main() -> std::io::Result<()> {
     );
     let tls_config = load_rustls_config();
 
-
-
     let server = HttpServer::new(move || {
-
         let allowed_origins = std::env::var("ALLOWED_ORIGINS")
         .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
         .split(",")
@@ -70,26 +67,23 @@ async fn main() -> std::io::Result<()> {
                 allowed_origins.iter().any(|allowed| allowed == origin)
             });
 
-        // public enpoints at `/api`, private endpoints at `/api/priv`
         let api_endpoints = web::scope("/api")
             .configure(public)
             .service(web::scope("/priv").configure(private));
-
+        let image_service = web::scope("/resources/images").configure(serving_images::config);
+        let static_files = ResourceFiles::new("/", generate()).resolve_not_found_to_root();
         App::new()
-            // register sqlx pool
             .app_data(pool.clone())
-            // configure cors
             .wrap(cors)
             .wrap(Logger::default())
             .service(api_endpoints)
             .configure(openapi_doc::configure_opanapi)
-            .service(web::scope("/resources/images").configure(serving_images::config))
-            .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
+            .service(image_service)
+            .service(static_files)
             .default_service(web::route().to(not_found))
     });
 
-    match server
-    .bind_rustls(address.clone(), tls_config) {
+    match server.bind_rustls(address.clone(), tls_config) {
         Ok(server) => server.run().await,
         Err(e) => {
             eprintln!("Could not bind to address: {}", address);
