@@ -49,16 +49,26 @@ async fn main() -> std::io::Result<()> {
     );
     let tls_config = load_rustls_config();
 
+
+
     let server = HttpServer::new(move || {
+
+        let allowed_origins = std::env::var("ALLOWED_ORIGINS")
+        .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
+        .split(",")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
         let cors = Cors::default()
-            .allowed_origin("https://127.0.0.1:8089")
             .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allowed_headers(vec![
                 http::header::AUTHORIZATION,
                 http::header::ACCEPT,
                 http::header::CONTENT_TYPE,
             ])
-            .max_age(3600);
+            .max_age(3600)
+            .allowed_origin_fn(move |origin, _req_head| {
+                allowed_origins.iter().any(|allowed| allowed == origin)
+            });
 
         // public enpoints at `/api`, private endpoints at `/api/priv`
         let api_endpoints = web::scope("/api")
