@@ -21,12 +21,8 @@ mod routes;
 
 use routes::private::private;
 use routes::public::public;
-use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
-use crate::data_access::user::Role;
-use crate::middlewares::auth::{check_role, validator, Token};
 use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
