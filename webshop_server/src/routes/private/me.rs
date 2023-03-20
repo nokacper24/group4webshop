@@ -1,7 +1,7 @@
-use actix_web::{web::{self, ReqData}, Responder, HttpResponse, get};
+use actix_web::{web::{self, ReqData}, Responder, HttpResponse, get, dev::ServiceRequest, HttpRequest};
 use sqlx::{Postgres, Pool};
 
-use crate::middlewares::auth::{get_user_from_token, Token};
+use crate::middlewares::auth::{Token, validator};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 
@@ -27,14 +27,13 @@ impl From<crate::data_access::user::User> for MeUser {
 }
 
 #[get("/me")]
-pub async fn me(pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -> impl Responder {
+pub async fn me(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
 
-    let user = get_user_from_token(req, &pool).await;
+    let user = validator(req).await;
     match user {
         Ok(user) => HttpResponse::Ok().json(MeUser::from(user)),
         Err(e) => match e {
-            crate::middlewares::auth::AuthError::SqlxError(_) => HttpResponse::InternalServerError().finish(),
-            crate::middlewares::auth::AuthError::BadToken => HttpResponse::Unauthorized().finish(), }
-            
+            _ => HttpResponse::InternalServerError().finish()
         }
     }
+}

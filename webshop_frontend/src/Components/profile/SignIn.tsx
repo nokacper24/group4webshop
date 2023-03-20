@@ -7,19 +7,43 @@ import { Link } from "react-router-dom";
  * @returns A Sign In component.
  */
 export default function SignIn() {
+    let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT+ "/";
+// check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "../";
+}
+
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
 
-  const verifySignInInfo = () => {
-    // Placeholder solution. TODO: Implement real solution.
-    if (email.current) {
-      localStorage.setItem("authenticated", email.current.value);
+  const verifySignInInfo = async () => {
+    let result = await fetch(baseUrl + "api/login", {
+        method: "POST",
+        body: JSON.stringify({
+            email: email.current?.value,
+            password: password.current?.value,
+        }),
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "credentials": "include",
+        },
+    })
+
+    if (result.status === 200) {
+        console.log("User logged in");
+        
+    }
+    else {
+        console.log("User not logged in");
+        password.current!.value = "";
     }
   };
 
   return (
     <section className="center-container">
-      <form className="container form-container">
+
+      <form className="container form-container" onSubmit={(e) => e.preventDefault()}>
         <h1>Sign in</h1>
         <p>
           Not a customer yet?

@@ -1,12 +1,13 @@
-use actix_web::{post, Responder, web::{self, ReqData}, HttpResponse, cookie::time::Duration};
+use actix_web::{post, Responder, web::{self, ReqData}, HttpResponse, cookie::time::Duration, get, HttpRequest};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{data_access::{user::get_user_by_username, auth::{create_cookie, delete_cookie}}, middlewares::auth::Token};
+use crate::{data_access::{user::get_user_by_username, auth::{create_cookie, delete_cookie}}, middlewares::auth::{Token, check_auth, validator}};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 
     cfg.service(logout);
+    cfg.service(logged_in);
 
 }
 
@@ -34,3 +35,11 @@ async fn logout( pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -
     }
 }
             
+#[get("/logged_in")]
+async fn logged_in(req: HttpRequest) -> impl Responder {
+   let valid = validator(req).await;
+    match valid {
+         Ok(_) => HttpResponse::Ok().finish(),
+         Err(_) => HttpResponse::Unauthorized().finish()
+    }        
+}
