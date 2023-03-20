@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/': {
+      '^/(api|resources)/': {
         target: 'https://localhost:8083',
         changeOrigin: true,
         secure: false
