@@ -6,7 +6,6 @@ use actix_web::dev::Service;
 use actix_web::{
     get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpResponse, HttpServer,
     Responder,
-
 };
 
 use actix_web_static_files::ResourceFiles;
@@ -37,13 +36,12 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info,sqlx=off");
     env_logger::init();
 
-    // check if .env file exists and load it
     dotenv().ok();
-    let host = std::env::var("HOST").expect("HOST environment variable not set");
-    let port = std::env::var("PORT").expect("PORT environment variable not set");
+    let host = std::env::var("HOST").unwrap_or("localhost".to_string());
+    let port = std::env::var("PORT").unwrap_or("8080".to_string());
     let address = format!("{}:{}", host, port);
 
-    info!("Starting server at http://{}", address);
+    info!("Starting server at https://{}", address);
 
     //create new pool
     let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
@@ -51,7 +49,7 @@ async fn main() -> std::io::Result<()> {
     let pool = web::Data::new(
         create_pool(dburl.as_str())
             .await
-            .expect("Can not connect to database"),
+            .expect("Cannot connect to database"),
     );
     let tls_config = load_rustls_config();
 
@@ -66,13 +64,10 @@ async fn main() -> std::io::Result<()> {
             ])
             .max_age(3600);
 
-
-
-
         // public enpoints at `/api`, private endpoints at `/api/priv`
-        let api_endpoints = web::scope("/api").configure(public).service(
-            web::scope("/priv").configure(private),
-        );
+        let api_endpoints = web::scope("/api")
+            .configure(public)
+            .service(web::scope("/priv").configure(private));
 
         App::new()
             // register sqlx pool
