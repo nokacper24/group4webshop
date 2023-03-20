@@ -1,7 +1,7 @@
 use static_files::resource_dir;
 use std::process::Command;
 
-const FRONTEND_DIR: &str = "../webshop_frontend";
+const FRONTEND_DIR: &str = "../webshop_frontend/src";
 const REACT_OUT_DIR: &str = "../webshop_frontend/dist";
 const DUMMY_OUT_DIR: &str = "./target/debug/build/webshop_server-dummy-hmtl";
 
@@ -15,6 +15,7 @@ fn main() -> std::io::Result<()> {
 
     // If BUILD_REACT=true, or if build in release mode, build the react app
     if build_react.eq_ignore_ascii_case("true") || !cfg!(debug_assertions) {
+        println!("\x1b[31m BUILDING REACT APP \x1b[0m");
         let (program, c_option) = match cfg!(target_os = "windows") {
             true => ("cmd", "/C"), // windows
             false => ("sh", "-c"), // unix
@@ -27,6 +28,7 @@ fn main() -> std::io::Result<()> {
         assert!(status.success());
         resource_dir(REACT_OUT_DIR).build()
     } else {
+        println!("\x1b[31m BUILDING DUMMY FILE \x1b[0m");
         std::fs::create_dir_all(DUMMY_OUT_DIR).expect("Failed to create dummy dir");
         std::fs::write(DUMMY_OUT_DIR.to_string() + "/index.html", dummy_hmtl())
             .expect("Failed to create dummy file");
