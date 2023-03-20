@@ -83,6 +83,7 @@ pub struct Token {
 ///    Err(e) => Err(e),
 ///     }
 /// }
+#[deprecated="Use validator instead"]
 pub async fn check_role(
     req_token: Option<ReqData<Token>>,
     pool: &Pool<Postgres>,
