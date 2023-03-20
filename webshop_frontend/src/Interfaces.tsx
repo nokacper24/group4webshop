@@ -48,6 +48,14 @@ export interface Description {
   product_id: string;
   text: Text;
   image: Image;
-  isTextNotImage: boolean;
+  is_text_not_image: boolean;
   full_width: boolean;
+}
+
+export interface Testimonial {
+  testimonial_id: number;
+  author: string;
+  text: string;
+  author_pic: string;
+  product_id: string;
 }

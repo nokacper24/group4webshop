@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Description, Product } from "../../Interfaces";
+import { Description, Product, Testimonial } from "../../Interfaces";
 import DescriptionsContainer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import PurchaseLicenseButton from "./PurchaseLicenseButton";
 
 let counter = 0;
-
-interface Testimonial {
-  testimonial_id: number;
-  author: string;
-  text: string;
-  author_pic: string;
-  product_id: string;
-}
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // check if we are in production mode
