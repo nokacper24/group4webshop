@@ -69,8 +69,8 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
-            Active period: {license.start_date.toLocaleDateString()} to{" "}
-            {license.end_date.toLocaleDateString()}
+            Active period: {new Date(license.start_date).toLocaleDateString()}{" "}
+            to {new Date(license.end_date).toLocaleDateString()}
             {buttons}
           </p>
         </td>
