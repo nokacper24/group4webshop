@@ -54,6 +54,10 @@ interface DescriptionRowProps {
 }
 
 function DescriptionRow(props: DescriptionRowProps) {
+  if (props.descriptions.length === 1) {
+    // if exactly one item in row, must be full width
+    props.descriptions[0].full_width = true;
+  }
   return (
     <section className="description-row">
       {props.descriptions.map((item) => {
