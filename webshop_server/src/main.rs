@@ -53,7 +53,7 @@ async fn main() -> std::io::Result<()> {
     );
     let tls_config = load_rustls_config();
 
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("https://127.0.0.1:8089")
             .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
@@ -80,11 +80,16 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("/resources/images").configure(serving_images::config))
             .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
             .default_service(web::route().to(not_found))
-    })
-    .bind_rustls(address, tls_config)
-    .expect("Can not bind to port 8080")
-    .run()
-    .await
+    });
+
+    match server
+    .bind_rustls(address.clone(), tls_config) {
+        Ok(server) => server.run().await,
+        Err(e) => {
+            eprintln!("Could not bind to address: {}", address);
+            panic!("Error: {}", e);
+        }
+    }
 }
 
 async fn not_found() -> impl Responder {
