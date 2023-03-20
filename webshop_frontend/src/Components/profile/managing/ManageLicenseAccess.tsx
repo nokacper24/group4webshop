@@ -274,7 +274,7 @@ export default function ManageLicenseAccess() {
             alert("Something went wrong when saving users");
           }
         })
-        .catch(() => console.error("Failed to save license access for users"));
+        .catch(() => alert("Failed to save license access for users"));
     }
   };
 
@@ -306,7 +306,7 @@ export default function ManageLicenseAccess() {
             alert("Something went wrong when saving users");
           }
         })
-        .catch(() => console.error("Failed to save license access for users"));
+        .catch(() => alert("Failed to save license access for users"));
     }
   };
 
@@ -331,7 +331,7 @@ export default function ManageLicenseAccess() {
         });
         fetchCompanyUsers(license.company_id).then((users) => setUsers(users));
       })
-      .catch((e) => console.error("Failed to get license or users"));
+      .catch((e) => alert("Failed to get license or users"));
   }, []);
 
   useEffect(() => {
@@ -360,9 +360,7 @@ export default function ManageLicenseAccess() {
             })
           );
         })
-        .catch(() =>
-          console.error("Failed to fetch users with license access")
-        );
+        .catch(() => alert("Failed to fetch users with license access"));
     }
   }, [users]);
 

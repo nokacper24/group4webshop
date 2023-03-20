@@ -43,13 +43,13 @@ export default function CreateLicenseForm() {
       .then((companies) => {
         setCompanies(companies);
       })
-      .catch(() => console.error("Failed to load companies"));
+      .catch(() => alert("Failed to load companies"));
 
     fetchProducts()
       .then((products) => {
         setProducts(products);
       })
-      .catch(() => console.error("Failed to load products"));
+      .catch(() => alert("Failed to load products"));
   }, []);
 
   /**
@@ -118,13 +118,6 @@ export default function CreateLicenseForm() {
       className="form-container container"
       onSubmit={(event) => handleSubmit(event)}
     >
-      {/* Prevent implicit submission of the form */}
-      <button
-        type="submit"
-        disabled
-        style={{ display: "none" }}
-        aria-hidden="true"
-      ></button>
       <h2>Create license</h2>
 
       <label htmlFor="companies">Company</label>

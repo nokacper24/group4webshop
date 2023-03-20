@@ -145,7 +145,7 @@ export default function AdminCompanyLicenses() {
 
         setLicenses(validLicenses);
       })
-      .catch(() => console.error("Failed to load licenses"));
+      .catch(() => alert("Failed to load licenses"));
   }, []);
 
   return (
