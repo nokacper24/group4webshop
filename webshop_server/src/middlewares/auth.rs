@@ -1,12 +1,9 @@
 use crate::data_access::{
-    self,
-    auth,
+    self, auth,
     user::{Role, User},
 };
 
-use actix_web::{
-    web::ReqData, HttpRequest, Result,
-};
+use actix_web::{web::ReqData, HttpRequest, Result};
 
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
@@ -29,7 +26,7 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
     match req.cookie(COOKIE_KEY_SECRET) {
         Some(cookie) => {
             let cookie = cookie.value();
-            let valid = match auth::is_valid_cookie(pool, cookie).await{
+            let valid = match auth::is_valid_cookie(pool, cookie).await {
                 Ok(valid) => valid,
                 Err(e) => return Err(AuthError::SqlxError(e)),
             };
@@ -55,6 +52,30 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
     }
 }
 
+/// Extracts the secret cookie from the request and returns it.
+/// If there is no cookie or the cookie is invalid, returns `AuthError::Unauthorized`.
+pub async fn extract_valid_cookie(
+    req: HttpRequest,
+    pool: &Pool<Postgres>,
+) -> Result<String, AuthError> {
+    match req.cookie(COOKIE_KEY_SECRET) {
+        Some(cookie) => {
+            let cookie = cookie.value();
+            let valid = match auth::is_valid_cookie(pool, cookie).await {
+                Ok(valid) => valid,
+                Err(e) => return Err(AuthError::SqlxError(e)),
+            };
+            if valid {
+                return Ok(cookie.to_string());
+            } else {
+                return Err(AuthError::Unauthorized);
+            }
+        }
+        None => {
+            return Err(AuthError::Unauthorized);
+        }
+    }
+}
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[deprecated]
 pub struct Token {
