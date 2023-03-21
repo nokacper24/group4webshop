@@ -13,6 +13,8 @@ use actix_web::{
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
+pub const COOKIE_KEY_SECRET: &str = "Secret";
+
 pub async fn check_auth(cookie: &str, pool: &Pool<Postgres>) -> bool {
     match auth::is_valid_cookie(pool, cookie).await {
         Ok(valid) => valid,
@@ -24,17 +26,11 @@ pub async fn get_cookie(cookie: &str, pool: &Pool<Postgres>) -> Result<auth::Coo
     auth::get_cookie(pool, cookie).await
 }
 
-/// Middleware to check if the token is valid and if the user is logged in
-
-pub async fn validator(req: HttpRequest) -> Result<User, Error> {
-    let pool = req
-        .app_data::<web::Data<Pool<Postgres>>>()
-        .expect("No pool found");
-
-    // get the token from the request e.g. cookie: Bearer=token
-    match req.cookie("Bearer") {
+/// Returns the user associated with the the "Secret" cookie in the request.
+pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<User, AuthError> {
+    match req.cookie(COOKIE_KEY_SECRET) {
         None => {
-            return Err(actix_web::error::ErrorUnauthorized("No token found"));
+            return Err(AuthError::NoSecret);
         }
         Some(cookie) => {
             let cookie = cookie.value();
@@ -49,14 +45,14 @@ pub async fn validator(req: HttpRequest) -> Result<User, Error> {
                                 data_access::user::get_user_by_id(&pool, cookie.user_id).await;
                             return match user {
                                 Ok(user) => Ok(user),
-                                Err(e) => Err(actix_web::error::ErrorUnauthorized(e.to_string())),
+                                Err(e) => Err(AuthError::SqlxError(e)),
                             };
                         }
-                        Err(e) => Err(actix_web::error::ErrorUnauthorized(e.to_string())),
+                        Err(e) => Err(AuthError::SqlxError(e)),
                     };
                 }
                 false => {
-                    return Err(actix_web::error::ErrorUnauthorized("Invalid token"));
+                    return Err(AuthError::InvalidCookie);
                 }
             }
         }
@@ -112,5 +108,7 @@ pub async fn check_role(
 /// SqlxError: An error occured while querying the database - probably 500 Internal Server Error
 pub enum AuthError {
     SqlxError(sqlx::Error),
+    NoSecret,
     BadToken,
+    InvalidCookie,
 }
