@@ -58,6 +58,7 @@ async fn main() -> std::io::Result<()> {
                 http::header::CONTENT_TYPE,
             ])
             .max_age(3600)
+            .supports_credentials()
             .allowed_origin_fn(move |origin, _req_head| {
                 allowed_origins.iter().any(|allowed| allowed == origin)
             });
