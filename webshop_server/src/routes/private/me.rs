@@ -2,7 +2,7 @@ use actix_web::{web, Responder, HttpResponse, get, HttpRequest};
 use log::error;
 use sqlx::{Postgres, Pool};
 
-use crate::middlewares::auth::{validate_user, AuthenticatorError};
+use crate::middlewares::auth::{validate_user, AuthError};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 
@@ -34,8 +34,8 @@ pub async fn me(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Respo
     match user {
         Ok(user) => HttpResponse::Ok().json(MeUser::from(user)),
         Err(e) => match e {
-            AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-            AuthenticatorError::SqlxError(e) => {
+            AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            AuthError::SqlxError(e) => {
                 error!("{}", e);
                 HttpResponse::InternalServerError().finish()
             },

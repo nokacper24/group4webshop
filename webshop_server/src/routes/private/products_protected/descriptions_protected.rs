@@ -48,8 +48,8 @@ async fn delete_description_component(
         }
         Err(e) => {
             return match e {
-                auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-                auth::AuthenticatorError::SqlxError(e) => {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
                     error!("{}", e);
                     HttpResponse::InternalServerError().finish()
                 }
@@ -97,8 +97,8 @@ async fn update_priority(
         }
         Err(e) => {
             return match e {
-                auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-                auth::AuthenticatorError::SqlxError(e) => {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
                     error!("{}", e);
                     HttpResponse::InternalServerError().finish()
                 }
@@ -147,8 +147,8 @@ async fn description_swap_priorities(
         }
         Err(e) => {
             return match e {
-                auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-                auth::AuthenticatorError::SqlxError(e) => {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
                     error!("{}", e);
                     HttpResponse::InternalServerError().finish()
                 }
@@ -189,8 +189,8 @@ async fn add_text_description(
         }
         Err(e) => {
             return match e {
-                auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-                auth::AuthenticatorError::SqlxError(e) => {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
                     error!("{}", e);
                     HttpResponse::InternalServerError().finish()
                 }
@@ -241,8 +241,8 @@ async fn upload_image(
         }
         Err(e) => {
             return match e {
-                auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-                auth::AuthenticatorError::SqlxError(e) => {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
                     error!("{}", e);
                     HttpResponse::InternalServerError().finish()
                 }

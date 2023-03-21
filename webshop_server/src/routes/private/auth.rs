@@ -10,7 +10,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::{
     data_access::auth::delete_cookie,
-    middlewares::auth::{validate_user, AuthenticatorError, Token, COOKIE_KEY_SECRET},
+    middlewares::auth::{validate_user, AuthError, Token, COOKIE_KEY_SECRET},
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -47,8 +47,8 @@ async fn logged_in(req: HttpRequest, pool: web::Data<Pool<Postgres>>) -> impl Re
     match valid {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => match e {
-            AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-            AuthenticatorError::SqlxError(e) => {
+            AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            AuthError::SqlxError(e) => {
                 error!("{}", e);
                 HttpResponse::InternalServerError().finish()
             }

@@ -61,8 +61,8 @@ pub async fn create_product(
             return HttpResponse::Forbidden().finish();
         },
         Err(e) => return match e {
-            auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-            auth::AuthenticatorError::SqlxError(e) => {
+            auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            auth::AuthError::SqlxError(e) => {
                 error!("{}", e);
                 HttpResponse::InternalServerError().finish()
             }
@@ -197,8 +197,8 @@ pub async fn delete_product(
             return HttpResponse::Forbidden().finish();
         },
         Err(e) => return match e {
-            auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
-            auth::AuthenticatorError::SqlxError(e) => {
+            auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            auth::AuthError::SqlxError(e) => {
                 error!("{}", e);
                 HttpResponse::InternalServerError().finish()
             }

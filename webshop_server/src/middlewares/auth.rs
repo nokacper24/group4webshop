@@ -25,13 +25,13 @@ pub async fn get_cookie(cookie: &str, pool: &Pool<Postgres>) -> Result<auth::Coo
 }
 
 /// Returns the user associated with the the "Secret" cookie in the request.
-pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<User, AuthenticatorError> {
+pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<User, AuthError> {
     match req.cookie(COOKIE_KEY_SECRET) {
         Some(cookie) => {
             let cookie = cookie.value();
             let valid = match auth::is_valid_cookie(pool, cookie).await{
                 Ok(valid) => valid,
-                Err(e) => return Err(AuthenticatorError::SqlxError(e)),
+                Err(e) => return Err(AuthError::SqlxError(e)),
             };
             if valid {
                 let cookie = get_cookie(cookie, &pool).await;
@@ -40,17 +40,17 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
                         let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
                         return match user {
                             Ok(user) => Ok(user),
-                            Err(e) => Err(AuthenticatorError::SqlxError(e)),
+                            Err(e) => Err(AuthError::SqlxError(e)),
                         };
                     }
-                    Err(e) => Err(AuthenticatorError::SqlxError(e)),
+                    Err(e) => Err(AuthError::SqlxError(e)),
                 };
             } else {
-                return Err(AuthenticatorError::Unauthorized);
+                return Err(AuthError::Unauthorized);
             }
         }
         None => {
-            return Err(AuthenticatorError::Unauthorized);
+            return Err(AuthError::Unauthorized);
         }
     }
 }
@@ -79,7 +79,7 @@ pub struct Token {
 pub async fn check_role(
     req_token: Option<ReqData<Token>>,
     pool: &Pool<Postgres>,
-) -> Result<Role, AuthError> {
+) -> Result<Role, AuthErrorOld> {
     match req_token {
         Some(token) => {
             let token = token.into_inner();
@@ -90,27 +90,27 @@ pub async fn check_role(
                     let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
                     match user {
                         Ok(role) => Ok(role.role),
-                        Err(e) => Err(AuthError::SqlxError(e)),
+                        Err(e) => Err(AuthErrorOld::SqlxError(e)),
                     }
                 }
-                Err(_) => Err(AuthError::BadToken),
+                Err(_) => Err(AuthErrorOld::BadToken),
             }
         }
-        _ => Err(AuthError::BadToken),
+        _ => Err(AuthErrorOld::BadToken),
     }
 }
 /// Error type for auth
 /// BadToken: The token was not found or is invalid - do 401 Unauthorized
 /// SqlxError: An error occured while querying the database - probably 500 Internal Server Error
 #[deprecated]
-pub enum AuthError {
+pub enum AuthErrorOld {
     SqlxError(sqlx::Error),
     NoSecret,
     BadToken,
     InvalidCookie,
 }
 
-pub enum AuthenticatorError {
+pub enum AuthError {
     SqlxError(sqlx::Error),
     Unauthorized,
 }
