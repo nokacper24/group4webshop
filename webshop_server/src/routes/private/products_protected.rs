@@ -15,7 +15,7 @@ use crate::{
     },
     {
         data_access::product::{self, Product},
-        middlewares::auth,
+        utils::auth,
     },
 };
 

@@ -5,7 +5,7 @@ use sqlx::{Pool, Postgres};
 
 use crate::{
     data_access::auth::delete_cookie,
-    middlewares::auth::{self, AuthError, COOKIE_KEY_SECRET},
+    utils::auth::{self, AuthError, COOKIE_KEY_SECRET},
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {

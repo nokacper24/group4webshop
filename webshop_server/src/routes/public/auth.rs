@@ -7,7 +7,7 @@ use crate::{data_access::{
     self,
     auth::create_cookie,
     user::{create_invite, get_user_by_username},
-}, middlewares::auth::COOKIE_KEY_SECRET};
+}, utils::auth::COOKIE_KEY_SECRET};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(login);

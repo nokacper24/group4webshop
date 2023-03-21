@@ -2,7 +2,7 @@ use actix_web::{web, Responder, HttpResponse, get, HttpRequest};
 use log::error;
 use sqlx::{Postgres, Pool};
 
-use crate::middlewares::auth::{validate_user, AuthError};
+use crate::utils::auth::{validate_user, AuthError};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 

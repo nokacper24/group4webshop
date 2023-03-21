@@ -4,7 +4,7 @@ use crate::{
         product::{self, description::DescriptionCompError},
         user,
     },
-    middlewares::auth,
+    utils::auth,
     routes::private::products_protected::descriptions_protected::description_utils::{
         ImageExtractorError, ImageParsingError,
     },

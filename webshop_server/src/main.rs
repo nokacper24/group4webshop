@@ -11,7 +11,7 @@ use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod data_access;
-mod middlewares;
+mod utils;
 mod routes;
 
 use routes::private::private;
