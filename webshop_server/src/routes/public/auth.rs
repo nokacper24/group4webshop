@@ -49,13 +49,24 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
                         {"success": true, "message": "Login successful"}
                     ));
                 }
-                Err(_e) => {
+                Err(e) => {
+                    log::error!("Error creating cookie: {}", e);
                     return HttpResponse::InternalServerError().json("Internal Server Error");
                 }
             }
         }
-        Err(_e) => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+        Err(e) => {
+            match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::Unauthorized().json(
+                        json!({"success": false, "message": "Incorrect username or password"}),
+                    );
+                }
+                _ => {
+                    log::error!("Error getting user: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            }
         }
     }
 }
