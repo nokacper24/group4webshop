@@ -1,7 +1,7 @@
 use actix_web::{web::{self, ReqData}, Responder, HttpResponse, get, dev::ServiceRequest, HttpRequest};
 use sqlx::{Postgres, Pool};
 
-use crate::middlewares::auth::{Token, validator};
+use crate::middlewares::auth::{Token, validate_user};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 
@@ -29,7 +29,7 @@ impl From<crate::data_access::user::User> for MeUser {
 #[get("/me")]
 pub async fn me(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
 
-    let user = validator(req).await;
+    let user = validate_user(req).await;
     match user {
         Ok(user) => HttpResponse::Ok().json(MeUser::from(user)),
         Err(e) => match e {

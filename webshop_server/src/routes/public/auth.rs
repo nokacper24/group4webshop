@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Pool, Postgres};
 
-use crate::data_access::{
+use crate::{data_access::{
     self,
     auth::create_cookie,
     user::{create_invite, get_user_by_username},
-};
+}, middlewares::auth::COOKIE_KEY_SECRET};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(login);
@@ -39,7 +39,7 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
             match cookie_string {
                 Ok(v) => {
                     // set cookie
-                    let cookie = actix_web::cookie::Cookie::build("Bearer", v)
+                    let cookie = actix_web::cookie::Cookie::build(COOKIE_KEY_SECRET, v)
                         .path("/")
                         .secure(true)
                         .http_only(true)

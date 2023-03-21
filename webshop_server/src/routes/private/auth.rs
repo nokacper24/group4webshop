@@ -2,7 +2,7 @@ use actix_web::{post, Responder, web::{self, ReqData}, HttpResponse, cookie::tim
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-use crate::{data_access::{user::get_user_by_username, auth::{create_cookie, delete_cookie}}, middlewares::auth::{Token, check_auth, validator}};
+use crate::{data_access::{user::get_user_by_username, auth::{create_cookie, delete_cookie}}, middlewares::auth::{Token, check_auth, validate_user, COOKIE_KEY_SECRET}};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
 
@@ -25,7 +25,7 @@ async fn logout( pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -
     match cookie {
         Ok(_) => {
             HttpResponse::Ok().cookie(
-                actix_web::cookie::Cookie::build("Bearer", "")
+                actix_web::cookie::Cookie::build(COOKIE_KEY_SECRET, "")
                     .path("/")
                     .max_age(Duration::seconds(0))
                     .finish()
@@ -36,10 +36,13 @@ async fn logout( pool: web::Data<Pool<Postgres>>, req: Option<ReqData<Token>>) -
 }
             
 #[get("/logged_in")]
-async fn logged_in(req: HttpRequest) -> impl Responder {
-   let valid = validator(req).await;
+async fn logged_in(req: HttpRequest, pool: web::Data<Pool<Postgres>>) -> impl Responder {
+   let valid = validate_user(req, &pool).await;
     match valid {
          Ok(_) => HttpResponse::Ok().finish(),
-         Err(_) => HttpResponse::Unauthorized().finish()
+         Err(e) => match e {
+            InvalidCookie => HttpResponse::Unauthorized().finish(),
+            _ => HttpResponse::InternalServerError().finish()
+         }
     }        
 }
