@@ -2,16 +2,10 @@ use std::fs::File;
 use std::io::BufReader;
 
 use actix_cors::Cors;
-use actix_web::dev::Service;
-use actix_web::{
-    get, http, http::Error, middleware::Logger, web, web::ReqData, App, HttpResponse, HttpServer,
-    Responder,
-
-};
+use actix_web::{http, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
-use futures::TryFutureExt;
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -22,12 +16,8 @@ mod routes;
 
 use routes::private::private;
 use routes::public::public;
-use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 
 use crate::data_access::create_pool;
-use crate::data_access::user::Role;
-use crate::middlewares::auth::{check_role, validator, Token};
 use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
@@ -37,13 +27,12 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info,sqlx=off");
     env_logger::init();
 
-    // check if .env file exists and load it
     dotenv().ok();
-    let host = std::env::var("HOST").expect("HOST environment variable not set");
-    let port = std::env::var("PORT").expect("PORT environment variable not set");
+    let host = std::env::var("HOST").unwrap_or("localhost".to_string());
+    let port = std::env::var("PORT").unwrap_or("8080".to_string());
     let address = format!("{}:{}", host, port);
 
-    info!("Starting server at http://{}", address);
+    info!("Starting server at https://{}", address);
 
     //create new pool
     let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
@@ -51,45 +40,51 @@ async fn main() -> std::io::Result<()> {
     let pool = web::Data::new(
         create_pool(dburl.as_str())
             .await
-            .expect("Can not connect to database"),
+            .expect("Cannot connect to database"),
     );
     let tls_config = load_rustls_config();
 
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
+        let allowed_origins = std::env::var("ALLOWED_ORIGINS")
+        .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
+        .split(",")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
         let cors = Cors::default()
-            .allowed_origin("https://127.0.0.1:8089")
-            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allowed_headers(vec![
                 http::header::AUTHORIZATION,
                 http::header::ACCEPT,
                 http::header::CONTENT_TYPE,
             ])
-            .max_age(3600);
+            .max_age(3600)
+            .allowed_origin_fn(move |origin, _req_head| {
+                allowed_origins.iter().any(|allowed| allowed == origin)
+            });
 
-
-
-
-        // public enpoints at `/api`, private endpoints at `/api/priv`
-        let api_endpoints = web::scope("/api").configure(public).service(
-            web::scope("/priv").configure(private),
-        );
-
+        let api_endpoints = web::scope("/api")
+            .configure(public)
+            .service(web::scope("/priv").configure(private));
+        let image_service = web::scope("/resources/images").configure(serving_images::config);
+        let static_files = ResourceFiles::new("/", generate()).resolve_not_found_to_root();
         App::new()
-            // register sqlx pool
             .app_data(pool.clone())
-            // configure cors
             .wrap(cors)
             .wrap(Logger::default())
             .service(api_endpoints)
             .configure(openapi_doc::configure_opanapi)
-            .service(web::scope("/resources/images").configure(serving_images::config))
-            .service(ResourceFiles::new("/", generate()).resolve_not_found_to_root())
+            .service(image_service)
+            .service(static_files)
             .default_service(web::route().to(not_found))
-    })
-    .bind_rustls(address, tls_config)
-    .expect("Can not bind to port 8080")
-    .run()
-    .await
+    });
+
+    match server.bind_rustls(address.clone(), tls_config) {
+        Ok(server) => server.run().await,
+        Err(e) => {
+            eprintln!("Could not bind to address: {}", address);
+            panic!("Error: {}", e);
+        }
+    }
 }
 
 async fn not_found() -> impl Responder {
@@ -105,6 +100,7 @@ async fn not_found() -> impl Responder {
 </html>"#,
     )
 }
+
 fn load_rustls_config() -> rustls::ServerConfig {
     // init server config builder with safe defaults
     let config = ServerConfig::builder()
