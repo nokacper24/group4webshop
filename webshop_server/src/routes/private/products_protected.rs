@@ -1,7 +1,8 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, post, put, web, HttpResponse, Responder};
+use actix_web::{delete, post, put, web, HttpResponse, Responder, HttpRequest};
+use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -53,22 +54,21 @@ pub struct ProtectedProductsApiDoc;
 pub async fn create_product(
     payload: Multipart,
     pool: web::Data<Pool<Postgres>>,
-    req_token: Option<web::ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
-            }
-        }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => if user.role != user::Role::Admin {
+            return HttpResponse::Forbidden().finish();
+        },
+        Err(e) => return match e {
+            auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            auth::AuthenticatorError::SqlxError(e) => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
             }
         },
     };
-
+    
     let (image_buffer, file_name, text_fields) =
         match description_utils::extract_image_and_texts_from_multipart(
             payload,
@@ -190,18 +190,17 @@ pub async fn update_product(
 pub async fn delete_product(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    req_token: Option<web::ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
-            }
-        }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => if user.role != user::Role::Admin {
+            return HttpResponse::Forbidden().finish();
+        },
+        Err(e) => return match e {
+            auth::AuthenticatorError::Unauthorized => HttpResponse::Unauthorized().finish(),
+            auth::AuthenticatorError::SqlxError(e) => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
             }
         },
     };
