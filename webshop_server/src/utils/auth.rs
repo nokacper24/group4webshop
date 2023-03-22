@@ -8,32 +8,31 @@ pub const COOKIE_KEY_SECRET: &str = "Secret";
 
 /// Returns the user associated with the the "Secret" cookie in the request.
 pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<User, AuthError> {
-    match req.cookie(COOKIE_KEY_SECRET) {
-        Some(cookie) => {
-            let cookie = cookie.value();
-            let valid = match auth::is_valid_cookie(pool, cookie).await {
-                Ok(valid) => valid,
-                Err(e) => return Err(AuthError::SqlxError(e)),
-            };
-            if valid {
-                let cookie = auth::get_cookie(&pool, cookie).await;
-                return match cookie {
-                    Ok(cookie) => {
-                        let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
-                        return match user {
-                            Ok(user) => Ok(user),
-                            Err(e) => Err(AuthError::SqlxError(e)),
-                        };
-                    }
+    let cookie = match req.cookie(COOKIE_KEY_SECRET) {
+        Some(cookie) => cookie,
+        None => return Err(AuthError::Unauthorized),
+    };
+
+    let cookie_str = cookie.value();
+    let valid = match auth::is_valid_cookie(pool, cookie_str).await {
+        Ok(valid) => valid,
+        Err(e) => return Err(AuthError::SqlxError(e)),
+    };
+    
+    if valid {
+        let cookie = auth::get_cookie(&pool, cookie_str).await;
+        return match cookie {
+            Ok(cookie) => {
+                let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
+                return match user {
+                    Ok(user) => Ok(user),
                     Err(e) => Err(AuthError::SqlxError(e)),
                 };
-            } else {
-                return Err(AuthError::Unauthorized);
             }
-        }
-        None => {
-            return Err(AuthError::Unauthorized);
-        }
+            Err(e) => Err(AuthError::SqlxError(e)),
+        };
+    } else {
+        return Err(AuthError::Unauthorized);
     }
 }
 
