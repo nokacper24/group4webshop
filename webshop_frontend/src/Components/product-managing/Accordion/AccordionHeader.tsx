@@ -1,10 +1,9 @@
 import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 
 export type AccordionHeaderProps = {
-  id: number;
   title: string;
   rows: AccordionRowProps[];
-  addRow: (title: string, header: number) => void;
+  addRow: (title: string) => void;
 };
 
 export function AccordionHeader(props: AccordionHeaderProps) {
@@ -51,19 +50,7 @@ export function AccordionHeader(props: AccordionHeaderProps) {
         </button>
       </div>
 
-      <div className="accordion-body">
-        {props.rows?.map((row) => {
-          return (
-            <AccordionRow
-              key={"ACR" + row.id}
-              id={row.id}
-              title={row.title}
-              editFunction={row.editFunction}
-              removeFunction={row.removeFunction}
-            ></AccordionRow>
-          );
-        })}
-      </div>
+
     </>
   );
 }
