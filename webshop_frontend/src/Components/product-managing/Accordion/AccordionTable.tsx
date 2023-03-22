@@ -56,6 +56,22 @@ export default function AccordionTable() {
 
   const [sectionList, setSectionList] =
     useState<AccordionSectionProps[]>(sections);
+
+  const newSection = (title: string) => {
+    const id = sectionList.length;
+    setSectionList((sections) => [
+      ...sections,
+      {
+        header: {
+          title: title,
+          rows: [],
+        },
+        sectionID: id,
+        registerContentChange: registerContentChange,
+      },
+    ]);
+  };
+
   return (
     <div className="accordion-table">
       <AccordionSection
