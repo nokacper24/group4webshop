@@ -5,11 +5,16 @@ import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 
 export type AccordionSectionProps = {
-  rows: {
+  header: {
     title: string;
-    id: number;
-  }[];
-  registerChange: (id: number, change: ChangeType) => void;
+    rows: {
+      title: string;
+      id: number;
+    }[];
+  };
+
+  sectionID: number;
+  registerContentChange: (id: number, change: ChangeType) => void;
 };
 
 export function AccordionSection(props: AccordionSectionProps) {
