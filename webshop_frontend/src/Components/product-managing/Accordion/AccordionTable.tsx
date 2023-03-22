@@ -74,10 +74,16 @@ export default function AccordionTable() {
 
   return (
     <div className="accordion-table">
-      <AccordionSection
-        rows={rows}
-        registerChange={registerChange}
-      ></AccordionSection>
+      <button onClick={() => newSection("Testy")}>New section</button>
+      {sectionList.map((section) => {
+        return (
+          <AccordionSection
+            header={section.header}
+            sectionID={section.sectionID}
+            registerContentChange={section.registerContentChange}
+          ></AccordionSection>
+        );
+      })}
     </div>
   );
 }
