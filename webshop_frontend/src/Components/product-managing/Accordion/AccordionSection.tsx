@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AccordionBody } from "./AccordionBody";
-import { AccordionHeader } from "./AccordionHeader";
+import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 
@@ -18,37 +18,6 @@ export type AccordionSectionProps = {
 };
 
 export function AccordionSection(props: AccordionSectionProps) {
-  const [rowList, setRows] = useState<AccordionRowProps[]>([]);
-  useEffect(() => {
-    setRows(
-      props.rows.map((row) => {
-        return {
-          title: row.title,
-          id: row.id,
-          editFunction: editRow,
-          removeFunction: deleteRow,
-        };
-      })
-    );
-  });
-
-  const addRow = (title: string, header: number) => {
-    if (rowList.length < 2) {
-      console.log("add");
-      const newId =
-        rowList.length != 0 ? Math.max(...rowList.map((row) => row.id)) + 1 : 0; //TODO: This is a naive way of generating ids. There could be an open id, but this will only find the highest.
-      setRows((rows) => [
-        ...rows,
-        {
-          title: title,
-          id: newId,
-          editFunction: editRow,
-          removeFunction: deleteRow,
-        },
-      ]);
-    }
-  };
-
   const deleteRow = (id: number) => {
     content.rows = content.rows.filter((row) => row.id !== id);
     setContent({ ...content });
@@ -60,13 +29,44 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.registerChange(id, ChangeType.EDIT);
   };
 
-
+  const addRow = (title: string) => {
+    if (content.rows.length < 2) {
+      content.rows.push({
+        title: title,
+        id: createID(),
+        editFunction: editRow,
+        removeFunction: deleteRow,
+      });
+      setContent({ ...content });
+    }
   };
+
+  var latestID = 100;
+  const createID = (): number => {
+    return latestID++;
+  };
+
+  const [content, setContent] = useState<AccordionHeaderProps>({
+    title: props.header.title,
+    rows: props.header.rows.map((row) => {
+      return {
+        title: row.title,
+        id: row.id,
+        editFunction: editRow,
+        removeFunction: deleteRow,
+      };
+    }),
+    addRow: addRow,
+  });
 
   return (
     <>
-      <AccordionHeader></AccordionHeader>
-      <AccordionBody></AccordionBody>
+      <AccordionHeader
+        title={content.title}
+        rows={content.rows}
+        addRow={content.addRow}
+      ></AccordionHeader>
+      <AccordionBody rows={content.rows}></AccordionBody>
     </>
   );
 }
