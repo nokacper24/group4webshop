@@ -1,17 +1,24 @@
 import { useState } from "react";
-import { AccordionRowProps } from "./AccordionRow";
+import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 
-export function AccordionBody() {
-  const [rowList, setRows] = useState<AccordionRowProps[]>([]);
 export type AccordionBodyProps = {
   rows: AccordionRowProps[];
 };
 
+export function AccordionBody(props: AccordionBodyProps) {
   return (
-    <>
-      {rowList.map((row) => {
-        return <AccordionRowProps></AccordionRowProps>;
+    <div className="accordion-body">
+      {props.rows.map((row) => {
+        return (
+          <AccordionRow
+            key={"row" + row.id}
+            title={row.title}
+            id={row.id}
+            editFunction={row.editFunction}
+            removeFunction={row.removeFunction}
+          ></AccordionRow>
+        );
       })}
-    </>
+    </div>
   );
 }
