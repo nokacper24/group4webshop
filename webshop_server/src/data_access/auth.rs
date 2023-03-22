@@ -21,7 +21,8 @@ pub struct UserInvite {
     pub exp_date: DateTime<Utc>,
 }
 
-/// Returns Auth Cookies by cookie, and checks if it is valid.
+/// Returns true if the cookie is valid, false if it is not.
+/// Errors if the database query fails.
 pub async fn is_valid_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<bool, sqlx::Error> {
     let cookie = match query_as!(
         Cookie,
