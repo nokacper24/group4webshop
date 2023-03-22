@@ -44,7 +44,6 @@ export default function AccordionTable() {
     ]);
   };
 
-  const [sections, setSections] = useState<[]>();
 
   const rows = [
     {
@@ -57,6 +56,8 @@ export default function AccordionTable() {
     },
   ];
 
+  const [sectionList, setSectionList] =
+    useState<AccordionSectionProps[]>(sections);
   return (
     <div className="accordion-table">
       <AccordionSection
