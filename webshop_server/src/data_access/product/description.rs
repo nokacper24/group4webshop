@@ -307,29 +307,40 @@ pub async fn get_description_component_checked(
 }
 
 
-/// Cecks if given comp_ids belong to the product.
+/// Cecks if component ids all belong to the product.
+/// Returns true if all components belong to the specified product.
+/// False is at least one component does not belong to the specified product.
+/// 
+/// # Arguments
+/// * `pool` - Database connection pool
+/// * `product_id` - Product id
+/// * `comp_ids` - Array of component ids
+/// 
+/// # Errors
+/// * `sqlx::Error::RowNotFound` - No components for specified product
+/// * `sqlx::Error` - Any other database error
 pub async fn verify_component_ids(
     pool: &Pool<Postgres>,
     product_id: &str,
     comp_ids: &[i32],
 ) -> Result<bool, sqlx::Error> {
     let result = query!(
-        r#"SELECT COUNT(*) = $3 AS all_components_belong_to_product
-        FROM description_component
-        WHERE product_id = $1
-        AND component_id = ANY($2);"#,
+        // <@ operator checks is array is contained by another array; https://www.postgresql.org/docs/9.1/functions-array.html
+        r#"SELECT $2 <@ (
+            SELECT array_agg(component_id)
+            FROM description_component
+            WHERE product_id = $1
+        ) as is_contained;"#,
         product_id,
-        comp_ids,
-        comp_ids.len() as i32
+        comp_ids
     ).fetch_one(pool).await?;
-    match result.all_components_belong_to_product {
-        Some(t) => Ok(t),
-        _ => Ok(false),
-    }
-
     
-
-    //unimplemented!("verify_component_ids")
+    if let Some(is_contained) = result.is_contained {
+        return Ok(is_contained);
+    } else {
+        // Query returned null -> no components for specified product
+        return Err(sqlx::Error::RowNotFound);
+    }
 }
 
 /// Creates a new description component, and returns newly created component.
