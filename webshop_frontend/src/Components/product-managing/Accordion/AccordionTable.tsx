@@ -22,15 +22,15 @@ export default function AccordionTable() {
     });
   });
 
-
-
-  const registerChange = (id: number, change: ChangeType) => {
-    if (!changes.get(change)?.includes(id)) {
-      changes.get(change)?.push(id);
+  const registerContentChange = (id: number, change: ChangeType) => {
+    if (!contentChanges.get(change)?.includes(id)) {
+      contentChanges.get(change)?.push(id);
     }
-    if (change === ChangeType.DELETE) {
-      changes.get(ChangeType.EDIT)?.filter((changeId) => changeId !== id);
-      changes.get(ChangeType.MOVE)?.filter((changeId) => changeId !== id);
+    if (change === ChangeType.Delete) {
+      contentChanges
+        .get(ChangeType.Edit)
+        ?.filter((changeId) => changeId !== id);
+      priorityChanges.delete(id);
     }
   };
 
