@@ -226,7 +226,7 @@ async fn verify(
                                             &v.email,
                                             &data.password,
                                             c.company_id,
-                                            data_access::user::Role::Default,
+                                            data_access::user::Role::CompanyItHead,
                                             &pool,
                                         )
                                         .await;
