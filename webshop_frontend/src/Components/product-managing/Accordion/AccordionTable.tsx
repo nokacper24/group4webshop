@@ -5,7 +5,12 @@ import { AccordionSection } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 
 export default function AccordionTable() {
-  const [changes, setChanges] = useState<Map<string, number[]>>(new Map());
+  const [priorityChanges, setPriorityChanges] = useState<Map<number, number>>(
+    new Map()
+  ); //ID as key, priority as value
+  const [contentChanges, setContentChanges] = useState<
+    Map<ChangeType, number[]>
+  >(new Map()); //The type of change as key, list of IDs that has had that change as value
 
   useEffect(() => {
     // Sets up the map so that it can register changes
