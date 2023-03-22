@@ -314,19 +314,22 @@ pub async fn verify_component_ids(
     comp_ids: &[i32],
 ) -> Result<bool, sqlx::Error> {
     let result = query!(
-        r#"SELECT EXISTS (
-        SELECT 1 FROM description_component
+        r#"SELECT COUNT(*) = $3 AS all_components_belong_to_product
+        FROM description_component
         WHERE product_id = $1
-        AND component_id = ANY($2)
-        );"#,
+        AND component_id = ANY($2);"#,
         product_id,
-        comp_ids
+        comp_ids,
+        comp_ids.len() as i32
     ).fetch_one(pool).await?;
-    //result.exists
-    
+    match result.all_components_belong_to_product {
+        Some(t) => Ok(t),
+        _ => Ok(false),
+    }
+
     
 
-    unimplemented!("verify_component_ids")
+    //unimplemented!("verify_component_ids")
 }
 
 /// Creates a new description component, and returns newly created component.
