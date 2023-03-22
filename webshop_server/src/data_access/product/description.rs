@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, Executor, {Pool, Postgres},
+    query, Executor, {Pool, Postgres}, query_as,
 };
 
 /// Description component. Contains either text or image.
@@ -304,6 +304,29 @@ pub async fn get_description_component_checked(
     Err(sqlx::Error::Decode(
         "Could not decode description component, corrupt data".into(),
     ))
+}
+
+
+/// Cecks if given comp_ids belong to the product.
+pub async fn verify_component_ids(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    comp_ids: &[i32],
+) -> Result<bool, sqlx::Error> {
+    let result = query!(
+        r#"SELECT EXISTS (
+        SELECT 1 FROM description_component
+        WHERE product_id = $1
+        AND component_id = ANY($2)
+        );"#,
+        product_id,
+        comp_ids
+    ).fetch_one(pool).await?;
+    result.exists
+    
+    
+
+    unimplemented!("verify_component_ids")
 }
 
 /// Creates a new description component, and returns newly created component.

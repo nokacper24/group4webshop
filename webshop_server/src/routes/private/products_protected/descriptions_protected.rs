@@ -132,6 +132,38 @@ async fn update_priority(
     }
 }
 
+#[patch("/{product_id}/descriptions/{component_id}/priorities")]
+async fn update_priorities(
+    pool: web::Data<Pool<Postgres>>,
+    product_id: web::Path<String>,
+    ids_and_priotities: web::Json<Vec<(i32,i32)>>,
+    req: HttpRequest,
+) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let ids = ids_and_priotities.iter().map(|(id, _)| *id).collect::<Vec<i32>>();
+    let qresult = product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await;
+
+
+
+    return HttpResponse::NotImplemented().finish();
+}
+
 #[patch("/{product_id}/descriptions/priorityswap")]
 async fn description_swap_priorities(
     pool: web::Data<Pool<Postgres>>,
