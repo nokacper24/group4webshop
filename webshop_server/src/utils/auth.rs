@@ -1,24 +1,10 @@
-use crate::data_access::{
-    self, auth,
-    user::User,
-};
+use crate::data_access::{self, auth, user::User};
 
 use actix_web::{HttpRequest, Result};
 
 use sqlx::{Pool, Postgres};
 
 pub const COOKIE_KEY_SECRET: &str = "Secret";
-
-pub async fn check_auth(cookie: &str, pool: &Pool<Postgres>) -> bool {
-    match auth::is_valid_cookie(pool, cookie).await {
-        Ok(valid) => valid,
-        Err(_) => false,
-    }
-}
-
-pub async fn get_cookie(cookie: &str, pool: &Pool<Postgres>) -> Result<auth::Cookie, sqlx::Error> {
-    auth::get_cookie(pool, cookie).await
-}
 
 /// Returns the user associated with the the "Secret" cookie in the request.
 pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<User, AuthError> {
@@ -30,7 +16,7 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
                 Err(e) => return Err(AuthError::SqlxError(e)),
             };
             if valid {
-                let cookie = get_cookie(cookie, &pool).await;
+                let cookie = auth::get_cookie(&pool, cookie).await;
                 return match cookie {
                     Ok(cookie) => {
                         let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
