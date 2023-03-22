@@ -14,9 +14,9 @@ export default function AccordionTable() {
 
   useEffect(() => {
     // Sets up the map so that it can register changes
-    setChanges((changes) => {
+    setContentChanges((changes) => {
       for (let type in ChangeType) {
-        changes.set(type, []);
+        changes.set(ChangeType[type as keyof typeof ChangeType], []);
       }
       return changes;
     });
