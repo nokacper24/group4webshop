@@ -1,6 +1,9 @@
-use crate::data_access::{
-    error_handling,
-    user::{self, LicenseUser, Role, User, UserRole},
+use crate::{
+    data_access::{
+        error_handling,
+        user::{self, LicenseUser, Role, User, UserRole},
+    },
+    utils::auth,
 };
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -170,48 +173,36 @@ async fn generate_invite(
     invite: web::Json<Invite>,
     req: HttpRequest,
 ) -> impl Responder {
-    log::error!("route '/generate_invite' is not implemented yet!");
-    return HttpResponse::NotImplemented().json("Not implemented yet");
+    let user = match auth::validate_user(req.clone(), &pool).await {
+        Ok(user) => user,
+        Err(e) => match e {
+            auth::AuthError::Unauthorized => {
+                return HttpResponse::Unauthorized().json("Must be logged in to invite new users");
+            }
+            auth::AuthError::SqlxError(e) => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
+    };
 
-    // let role = check_role(req, &pool).await;
-    // match role {
-    //     Ok(role) => match role {
-    //         user::Role::Admin => { // TODO use NotImplemented instead of Ok
-    //             return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
-    //         }
-    //         user::Role::CompanyItHead => {
-    //             return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
-    //         }
-    //         user::Role::CompanyIt => {
-    //             return HttpResponse::Ok().json("Can't generate a new user for proflex yet!");
-    //         }
-    //         user::Role::Default => { // TODO this should be FORBIDDEN, not unauthorized
-    //             return HttpResponse::Unauthorized().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
-    //         }
-    //     },
-    //     Err(_) => {
-    //         // since the user is not logged in, we can't check the role, so it must be a new user
-    //         // so we can generate a new user and a company for them
-    //         let partial_user = create_partial_user(&invite.email, &pool.clone()).await;
-    //         match partial_user {
-    //             Ok(partial_user) => {
-    //                 let invite = create_invite(Some(partial_user.id), None, &pool).await;
-    //                 match invite {
-    //                     Ok(invite) => {
-    //                         return HttpResponse::Ok().json(invite);
-    //                     }
-    //                     Err(_) => {
-    //                         return HttpResponse::InternalServerError()
-    //                             .json("Internal Server Error");
-    //                     }
-    //                 }
-    //             }
-    //             Err(_) => {
-    //                 return HttpResponse::InternalServerError().json("Internal Server Error");
-    //             }
-    //         }
-    //     }
-    // }
+    match user.role {
+        user::Role::Admin => {
+            return HttpResponse::NotImplemented()
+                .json("Can't generate a new user for proflex yet!");
+        }
+        user::Role::CompanyItHead => {
+            return HttpResponse::NotImplemented()
+                .json("Can't generate a new user for proflex yet!");
+        }
+        user::Role::CompanyIt => {
+            return HttpResponse::NotImplemented()
+                .json("Can't generate a new user for proflex yet!");
+        }
+        user::Role::Default => {
+            return HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
