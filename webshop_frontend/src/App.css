@@ -1092,14 +1092,6 @@ form a:hover {
 
 /* || MANAGE PRODUCTS */
 
-.accordion-wrapper {
-
-}
-
-.accordion-table {
-  
-}
-
 .accordion-header-container {
   position: relative;
   --accordion-header-font-size: 1.5rem;
@@ -1158,6 +1150,7 @@ form a:hover {
 .accordion-body {
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid black;
 }
 
 .accordion-row {
@@ -1171,7 +1164,7 @@ form a:hover {
   background-color: rgb(222, 222, 222);
 }
 
-.accordion-body > div {
+.accordion-body > :not(:last-child) {
   border-bottom: 1px solid black;
 }
 
