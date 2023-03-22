@@ -307,7 +307,7 @@ pub async fn get_description_component_checked(
 }
 
 
-/// Cecks if component ids all belong to the product.
+/// Checks if component ids all belong to the product.
 /// Returns true if all components belong to the specified product.
 /// False is at least one component does not belong to the specified product.
 /// 
