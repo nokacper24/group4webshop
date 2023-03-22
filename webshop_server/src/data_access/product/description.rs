@@ -322,7 +322,7 @@ pub async fn verify_component_ids(
         product_id,
         comp_ids
     ).fetch_one(pool).await?;
-    result.exists
+    //result.exists
     
     
 
