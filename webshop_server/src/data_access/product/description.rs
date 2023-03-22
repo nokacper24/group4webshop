@@ -343,6 +343,39 @@ pub async fn verify_component_ids(
     }
 }
 
+/// Updates priorities of multiple components.
+/// 
+/// # Arguments
+/// * `pool` - Database connection pool
+/// * `product_id` - Product id of the product the components belong to
+/// * `comps_and_priorities` - Array of tuples of component id and priority
+///     * \[(component_id, priority), ...]
+/// 
+/// # Errors
+/// * `sqlx::Error` - Any database error
+/// * `sqlx::Error::Database` - I recommend using [PostgresDBError](crate::data_access::error_handling::PostgresDBError) to extract the underlying database error
+///     * Check for `PostgresDBError::UniqueViolation`, if the error is caused by a unique constraint violation.
+pub async fn update_priorities_bulk(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    comps_and_priorities: &[(i32,i32)],
+) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    for (comp_id, priority) in comps_and_priorities {
+        query!(
+            r#"UPDATE description_component
+            SET priority = $1
+            WHERE component_id = $2
+            AND product_id = $3;"#,
+            priority,
+            comp_id,
+            product_id
+        ).execute(&mut transaction).await?;
+    }
+    transaction.commit().await?;
+    Ok(())
+}
+
 /// Creates a new description component, and returns newly created component.
 ///
 /// # Arguments
