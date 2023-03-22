@@ -26,7 +26,7 @@ export function AccordionSection(props: AccordionSectionProps) {
 
   const editRow = (id: number) => {
     console.log("edit: " + id);
-    props.registerChange(id, ChangeType.EDIT);
+    props.registerContentChange(id, ChangeType.Edit);
   };
 
   const addRow = (title: string) => {
