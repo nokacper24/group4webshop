@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
-import { AccordionSection } from "./AccordionSection";
+import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 
 export default function AccordionTable() {
@@ -34,16 +34,23 @@ export default function AccordionTable() {
     }
   };
 
-
-
-  const rows = [
+  const sections = [
     {
-      title: "Test",
-      id: 1,
-    },
-    {
-      title: "Test2",
-      id: 2,
+      header: {
+        title: "Test",
+        rows: [
+          {
+            title: "Test",
+            id: 1,
+          },
+          {
+            title: "Test2",
+            id: 2,
+          },
+        ],
+      },
+      sectionID: 0,
+      registerContentChange: registerContentChange,
     },
   ];
 
