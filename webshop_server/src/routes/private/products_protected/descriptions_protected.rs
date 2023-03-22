@@ -4,17 +4,13 @@ use crate::{
         product::{self, description::DescriptionCompError},
         user,
     },
-    utils::auth,
     routes::private::products_protected::descriptions_protected::description_utils::{
         ImageExtractorError, ImageParsingError,
     },
+    utils::auth,
 };
 use actix_multipart::Multipart;
-use actix_web::{
-    delete, patch, post,
-    web::{self, ReqData},
-    HttpRequest, HttpResponse, Responder,
-};
+use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, Responder};
 use image::ImageFormat;
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
@@ -32,6 +28,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(add_text_description);
     cfg.service(update_priority);
     cfg.service(upload_image);
+    cfg.service(update_priorities);
 }
 
 #[delete("/{product_id}/descriptions/{component_id}")]
@@ -132,11 +129,11 @@ async fn update_priority(
     }
 }
 
-#[patch("/{product_id}/descriptions/{component_id}/priorities")]
+#[patch("/{product_id}/descriptions/all/priorities")]
 async fn update_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    ids_and_priotities: web::Json<Vec<(i32,i32)>>,
+    ids_and_priotities: web::Json<Vec<(i32, i32)>>,
     req: HttpRequest,
 ) -> impl Responder {
     match auth::validate_user(req, &pool).await {
@@ -156,12 +153,50 @@ async fn update_priorities(
         }
     };
 
-    let ids = ids_and_priotities.iter().map(|(id, _)| *id).collect::<Vec<i32>>();
-    let qresult = product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await;
+    let ids = ids_and_priotities
+        .iter()
+        .map(|(id, _)| *id)
+        .collect::<Vec<i32>>();
+    let valid =
+        match product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await {
+            Ok(valid) => valid,
+            Err(e) => match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::NotFound().json("No descriptions found for such product")
+                }
+                _ => {
+                    error!("{}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            },
+        };
 
+    if !valid {
+        return HttpResponse::Conflict().json("Not all components belong to this product");
+    }
 
+    let query_result =
+        product::description::update_priorities_bulk(&pool, product_id.as_str(), &ids_and_priotities)
+            .await;
 
-    return HttpResponse::NotImplemented().finish();
+    match query_result {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(e) => match e {
+            sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::Conflict().json("Conflict: Priority already in use")
+                }
+                e => {
+                    error!("PostgresDBError while updating priorities: {:?}", e);
+                    HttpResponse::InternalServerError().json("Internal Server Error")
+                }
+            },
+            e => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().json("Internal Server Error")
+            }
+        },
+    }
 }
 
 #[patch("/{product_id}/descriptions/priorityswap")]
