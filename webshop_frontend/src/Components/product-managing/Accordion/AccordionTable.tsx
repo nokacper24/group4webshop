@@ -34,20 +34,6 @@ export default function AccordionTable() {
     }
   };
 
-  const [headerList, setHeaders] = useState<AccordionHeaderProps[]>([]);
-
-  const addHeader = (title: string) => {
-    const id = headerList.length;
-    setHeaders((headers) => [
-      ...headers,
-      {
-        title: title,
-        id: id,
-        addRow: addRow,
-        rows: rowList,
-      },
-    ]);
-  };
 
 
   const rows = [
