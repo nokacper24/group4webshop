@@ -34,7 +34,7 @@ export default function AccordionTable() {
     }
   };
 
-  const sections = [
+  const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
     {
       header: {
         title: "Test",
@@ -51,11 +51,8 @@ export default function AccordionTable() {
       },
       sectionID: 0,
       registerContentChange: registerContentChange,
+      deleteSection: deleteSection,
     },
-  ];
-
-  const [sectionList, setSectionList] =
-    useState<AccordionSectionProps[]>(sections);
 
   const newSection = (title: string) => {
     const id = sectionList.length;
