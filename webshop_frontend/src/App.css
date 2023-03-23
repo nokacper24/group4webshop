@@ -1053,6 +1053,7 @@ form a:hover {
 
 .collapsed {
   visibility: collapse;
+  display: none;
 }
 
 .button-container {
