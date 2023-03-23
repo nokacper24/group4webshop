@@ -78,6 +78,7 @@ export default function AccordionTable() {
       {sectionList.map((section) => {
         return (
           <AccordionSection
+            key={section.sectionID}
             header={section.header}
             sectionID={section.sectionID}
             registerContentChange={section.registerContentChange}
