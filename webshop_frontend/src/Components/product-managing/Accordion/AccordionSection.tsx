@@ -15,6 +15,7 @@ export type AccordionSectionProps = {
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
+  deleteSection: (id: number) => void;
 };
 
 export function AccordionSection(props: AccordionSectionProps) {
@@ -46,6 +47,12 @@ export function AccordionSection(props: AccordionSectionProps) {
     return latestID++;
   };
 
+  const deleteSelf = () => {
+    console.log("Delete self");
+    console.log(props);
+    props.deleteSection(props.sectionID);
+  }
+
   const [content, setContent] = useState<AccordionHeaderProps>({
     title: props.header.title,
     rows: props.header.rows.map((row) => {
@@ -57,6 +64,7 @@ export function AccordionSection(props: AccordionSectionProps) {
       };
     }),
     addRow: addRow,
+    deleteSelf: deleteSelf,
   });
 
   return (
@@ -65,6 +73,7 @@ export function AccordionSection(props: AccordionSectionProps) {
         title={content.title}
         rows={content.rows}
         addRow={content.addRow}
+        deleteSelf={content.deleteSelf}
       ></AccordionHeader>
       <AccordionBody rows={content.rows}></AccordionBody>
     </>
