@@ -37,7 +37,7 @@ pub struct ProductsApiDoc;
 )]
 #[get("/products")]
 pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    let products = product::get_products(&pool).await;
+    let products = product::get_products(&pool, true).await;
 
     //error check
     if products.is_err() {

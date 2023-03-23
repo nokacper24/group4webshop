@@ -84,15 +84,35 @@ pub fn generate_id(display_name: &str) -> String {
         .replace(' ', "_").to_string()
 }
 
-/// Returns all available products.
-pub async fn get_products(pool: &Pool<Postgres>) -> Result<Vec<Product>, sqlx::Error> {
-    let products = query_as!(
-        Product,
-        r#"SELECT *
-        FROM product WHERE available = true"#
-    )
-    .fetch_all(pool)
-    .await?;
+/// Returns all products.
+/// 
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database pool
+/// * `only_available`
+///     - true - only available products are returned, should be used for the public api
+///     - false - all products are returned
+/// 
+/// # Returns
+pub async fn get_products(pool: &Pool<Postgres>, only_available: bool) -> Result<Vec<Product>, sqlx::Error> {
+    let products = if only_available {
+        query_as!(
+            Product,
+            r#"SELECT *
+            FROM product WHERE available = true"#
+        )
+        .fetch_all(pool)
+        .await?
+    } else {
+        query_as!(
+            Product,
+            r#"SELECT *
+            FROM product"#
+        )
+        .fetch_all(pool)
+        .await?
+    };
     Ok(products)
 }
 
