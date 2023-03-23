@@ -77,7 +77,6 @@ export default function PurchaseLicense() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      /* TODO: Send along cookie for authentication */
       body: license,
     }).then((response) => {
       const status = response.status;
@@ -142,7 +141,7 @@ export default function PurchaseLicense() {
             refs={{ price }}
           />
 
-          <p className="total-price">TOTAL: {totalPrice}</p>
+          <p className="total-price">TOTAL: ${totalPrice}</p>
 
           <button type="submit" className="default-button submit-button">
             Buy

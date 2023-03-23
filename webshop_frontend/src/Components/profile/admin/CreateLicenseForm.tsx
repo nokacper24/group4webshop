@@ -64,7 +64,6 @@ export default function CreateLicenseForm() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      /* TODO: Send along cookie for authentication */
       body: license,
     }).then((response) => {
       const status = response.status;
