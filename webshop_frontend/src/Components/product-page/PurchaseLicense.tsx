@@ -71,7 +71,7 @@ export default function PurchaseLicense() {
    * @param license The license to create.
    */
   const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/licenses`, {
+    fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -108,7 +108,7 @@ export default function PurchaseLicense() {
         end_date: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ),
-        amount: totalPrice / product.price_per_user,
+        amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
       });
 
