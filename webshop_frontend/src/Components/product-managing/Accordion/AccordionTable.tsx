@@ -34,6 +34,22 @@ export default function AccordionTable() {
     }
   };
 
+  const deleteSection = (id: number) => {
+    console.log("delete: " + id);
+    console.log(sectionList);
+
+    const index = sectionList.findIndex((section) => section.sectionID === id);
+    delete sectionList[index];
+    setSectionList([ ...sectionList ]);
+
+    /* const newSections = sectionList.filter(
+      (section) => section.sectionID !== id
+    ); */
+    console.log("new sections");
+    /* console.log(newSections); */
+    /* setSectionList(newSections); */
+  };
+
   const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
     {
       header: {
@@ -53,10 +69,22 @@ export default function AccordionTable() {
       registerContentChange: registerContentChange,
       deleteSection: deleteSection,
     },
+  ]);
 
   const newSection = (title: string) => {
     const id = sectionList.length;
-    setSectionList((sections) => [
+    sectionList.push({
+      header: {
+        title: title,
+        rows: [],
+      },
+      sectionID: id,
+      registerContentChange: registerContentChange,
+      deleteSection: deleteSection,
+    });
+    setSectionList([ ...sectionList ]);
+
+    /* setSectionList((sections) => [
       ...sections,
       {
         header: {
@@ -65,10 +93,14 @@ export default function AccordionTable() {
         },
         sectionID: id,
         registerContentChange: registerContentChange,
+        deleteSection: deleteSection,
       },
     ]);
+    console.log(sectionList); */
   };
 
+  console.log("latest section list");
+  console.log(sectionList);
   return (
     <div className="accordion-table">
       <button onClick={() => newSection("Testy")}>New section</button>
@@ -79,6 +111,7 @@ export default function AccordionTable() {
             header={section.header}
             sectionID={section.sectionID}
             registerContentChange={section.registerContentChange}
+            deleteSection={section.deleteSection}
           ></AccordionSection>
         );
       })}
