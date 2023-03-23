@@ -4,20 +4,17 @@ use crate::{
         product::{self, description::DescriptionCompError},
         user,
     },
-    middlewares::auth,
     routes::private::products_protected::descriptions_protected::description_utils::{
         ImageExtractorError, ImageParsingError,
     },
+    utils::auth,
 };
 use actix_multipart::Multipart;
-use actix_web::{
-    delete, patch, post,
-    web::{self, ReqData},
-    HttpResponse, Responder,
-};
+use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, Responder};
 use image::ImageFormat;
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
+
 pub mod description_utils;
 
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
@@ -31,26 +28,30 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(add_text_description);
     cfg.service(update_priority);
     cfg.service(upload_image);
+    cfg.service(update_priorities);
 }
 
 #[delete("/{product_id}/descriptions/{component_id}")]
 async fn delete_description_component(
     pool: web::Data<Pool<Postgres>>,
     path: web::Path<(String, i32)>,
-    req_token: Option<ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     let (product_id, component_id) = path.into_inner();
@@ -83,20 +84,23 @@ async fn update_priority(
     pool: web::Data<Pool<Postgres>>,
     path: web::Path<(String, i32)>,
     new_priority: web::Json<i32>,
-    req_token: Option<ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     let (product_id, component_id) = path.into_inner();
@@ -125,25 +129,98 @@ async fn update_priority(
     }
 }
 
+#[patch("/{product_id}/descriptions/all/priorities")]
+async fn update_priorities(
+    pool: web::Data<Pool<Postgres>>,
+    product_id: web::Path<String>,
+    ids_and_priotities: web::Json<Vec<(i32, i32)>>,
+    req: HttpRequest,
+) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let ids = ids_and_priotities
+        .iter()
+        .map(|(id, _)| *id)
+        .collect::<Vec<i32>>();
+    let valid =
+        match product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await {
+            Ok(valid) => valid,
+            Err(e) => match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::NotFound().json("No descriptions found for such product")
+                }
+                _ => {
+                    error!("{}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            },
+        };
+
+    if !valid {
+        return HttpResponse::Conflict().json("Not all components belong to this product");
+    }
+
+    let query_result =
+        product::description::update_priorities_bulk(&pool, product_id.as_str(), &ids_and_priotities)
+            .await;
+
+    match query_result {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(e) => match e {
+            sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::Conflict().json("Conflict: Priority already in use")
+                }
+                e => {
+                    error!("PostgresDBError while updating priorities: {:?}", e);
+                    HttpResponse::InternalServerError().json("Internal Server Error")
+                }
+            },
+            e => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().json("Internal Server Error")
+            }
+        },
+    }
+}
+
 #[patch("/{product_id}/descriptions/priorityswap")]
 async fn description_swap_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
     description_ids: web::Json<Vec<i32>>,
-    req_token: Option<ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     let descriptions = product::description::swap_priority(
@@ -169,21 +246,25 @@ async fn add_text_description(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
     description: web::Json<product::description::TextComponent>,
-    req_token: Option<ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
+
     match product::product_exists(&pool, product_id.as_str()).await {
         Ok(exists) => {
             if !exists {
@@ -217,20 +298,23 @@ async fn upload_image(
     payload: Multipart,
     product_id: web::Path<String>,
     pool: web::Data<Pool<Postgres>>,
-    req_token: Option<ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     match product::product_exists(&pool, product_id.as_str()).await {

@@ -15,4 +15,5 @@ pub fn private(cfg: &mut web::ServiceConfig) {
     cfg.configure(products_protected::configure);
     cfg.configure(licenses_protected::configure);
     cfg.configure(me::configure);
+    cfg.default_service(web::route().to(super::api_not_found));
 }

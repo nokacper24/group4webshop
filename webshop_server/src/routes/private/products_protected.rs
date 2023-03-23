@@ -1,7 +1,8 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, post, put, web, HttpResponse, Responder};
+use actix_web::{delete, post, put, web, HttpRequest, HttpResponse, Responder};
+use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -14,7 +15,7 @@ use crate::{
     },
     {
         data_access::product::{self, Product},
-        middlewares::auth,
+        utils::auth,
     },
 };
 
@@ -22,7 +23,11 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_product);
     cfg.service(delete_product);
     cfg.service(update_product);
-    cfg.service(web::scope("/products").configure(descriptions_protected::configure));
+    cfg.service(
+        web::scope("/products")
+            .configure(descriptions_protected::configure)
+            .default_service(web::route().to(crate::routes::api_not_found)),
+    );
 }
 
 #[derive(OpenApi)]
@@ -53,20 +58,23 @@ pub struct ProtectedProductsApiDoc;
 pub async fn create_product(
     payload: Multipart,
     pool: web::Data<Pool<Postgres>>,
-    req_token: Option<web::ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     let (image_buffer, file_name, text_fields) =
@@ -190,20 +198,23 @@ pub async fn update_product(
 pub async fn delete_product(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    req_token: Option<web::ReqData<auth::Token>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    match auth::check_role(req_token, &pool).await {
-        Ok(role) => {
-            if role != user::Role::Admin {
-                return HttpResponse::Forbidden().json("Forbidden");
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
-        Err(e) => match e {
-            auth::AuthError::BadToken => return HttpResponse::Unauthorized().json("Unauthorized"),
-            auth::AuthError::SqlxError(_) => {
-                return HttpResponse::InternalServerError().json("Internal Server Error")
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
             }
-        },
+        }
     };
 
     let product_id = product_id.into_inner();
@@ -233,11 +244,15 @@ pub async fn delete_product(
             if let Err(e) = description_utils::remove_image(&img_path) {
                 log::error!("Couldnt remove main image from file system: {}", e);
             };
-            if let Err(e) = fs::remove_dir(format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id)) {
+            if let Err(e) = fs::remove_dir(format!(
+                "{}/{}",
+                descriptions_protected::IMAGE_DIR,
+                product_id
+            )) {
                 log::error!("Couldnt remove image folder from file system: {}", e);
             };
             HttpResponse::NoContent().finish()
-        },
+        }
         Err(e) => match e {
             sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
                 PostgresDBError::ForeignKeyViolation => {

@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Pool, Postgres};
 
-use crate::data_access::{
+use crate::{data_access::{
     self,
     auth::create_cookie,
     user::{create_invite, get_user_by_username},
-};
+}, utils::auth::COOKIE_KEY_SECRET};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(login);
@@ -39,23 +39,34 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
             match cookie_string {
                 Ok(v) => {
                     // set cookie
-                    let cookie = actix_web::cookie::Cookie::build("Bearer", v)
+                    let cookie = actix_web::cookie::Cookie::build(COOKIE_KEY_SECRET, v)
                         .path("/")
                         .secure(true)
-                        .http_only(false)
+                        .http_only(true)
                         .expires(None)
                         .finish();
                     return HttpResponse::Ok().cookie(cookie).json(json!(
                         {"success": true, "message": "Login successful"}
                     ));
                 }
-                Err(_e) => {
+                Err(e) => {
+                    log::error!("Error creating cookie: {}", e);
                     return HttpResponse::InternalServerError().json("Internal Server Error");
                 }
             }
         }
-        Err(_e) => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+        Err(e) => {
+            match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::Unauthorized().json(
+                        json!({"success": false, "message": "Incorrect username or password"}),
+                    );
+                }
+                _ => {
+                    log::error!("Error getting user: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            }
         }
     }
 }
@@ -215,7 +226,7 @@ async fn verify(
                                             &v.email,
                                             &data.password,
                                             c.company_id,
-                                            data_access::user::Role::Default,
+                                            data_access::user::Role::CompanyItHead,
                                             &pool,
                                         )
                                         .await;

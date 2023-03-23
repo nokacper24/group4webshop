@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use actix_cors::Cors;
-use actix_web::{http, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{http, middleware::Logger, web, App, HttpServer};
 
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
@@ -11,7 +11,7 @@ use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod data_access;
-mod middlewares;
+mod utils;
 mod routes;
 
 use routes::private::private;
@@ -58,13 +58,14 @@ async fn main() -> std::io::Result<()> {
                 http::header::CONTENT_TYPE,
             ])
             .max_age(3600)
+            .supports_credentials()
             .allowed_origin_fn(move |origin, _req_head| {
                 allowed_origins.iter().any(|allowed| allowed == origin)
             });
-
         let api_endpoints = web::scope("/api")
             .configure(public)
             .service(web::scope("/priv").configure(private));
+
         let image_service = web::scope("/resources/images").configure(serving_images::config);
         let static_files = ResourceFiles::new("/", generate()).resolve_not_found_to_root();
         App::new()
@@ -75,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             .configure(openapi_doc::configure_opanapi)
             .service(image_service)
             .service(static_files)
-            .default_service(web::route().to(not_found))
+            .default_service(web::route().to(routes::not_found))
     });
 
     match server.bind_rustls(address.clone(), tls_config) {
@@ -85,20 +86,6 @@ async fn main() -> std::io::Result<()> {
             panic!("Error: {}", e);
         }
     }
-}
-
-async fn not_found() -> impl Responder {
-    HttpResponse::NotFound().body(
-        r#"<html>
-    <head>
-        <title>404 Not Found</title>
-    </head>
-    <body>
-        <h1>404 Not Found</h1>
-        <p>The resource could not be found.</p>
-    </body>
-</html>"#,
-    )
 }
 
 fn load_rustls_config() -> rustls::ServerConfig {
