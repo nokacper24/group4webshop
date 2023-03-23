@@ -1,7 +1,10 @@
 use crate::{
     data_access::{
         error_handling,
-        product::{self, description::DescriptionCompError},
+        product::{
+            self,
+            description::{DescriptionCompError, DescriptionUpdateError},
+        },
         user,
     },
     routes::private::products_protected::descriptions_protected::description_utils::{
@@ -10,7 +13,7 @@ use crate::{
     utils::auth,
 };
 use actix_multipart::Multipart;
-use actix_web::{delete, patch, post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageFormat;
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
@@ -29,6 +32,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(update_priority);
     cfg.service(upload_image);
     cfg.service(update_priorities);
+    cfg.service(update_text_description);
 }
 
 #[delete("/{product_id}/descriptions/{component_id}")]
@@ -175,9 +179,12 @@ async fn update_priorities(
         return HttpResponse::Conflict().json("Not all components belong to this product");
     }
 
-    let query_result =
-        product::description::update_priorities_bulk(&pool, product_id.as_str(), &ids_and_priotities)
-            .await;
+    let query_result = product::description::update_priorities_bulk(
+        &pool,
+        product_id.as_str(),
+        &ids_and_priotities,
+    )
+    .await;
 
     match query_result {
         Ok(_) => HttpResponse::NoContent().finish(),
@@ -412,6 +419,58 @@ async fn upload_image(
             }
             DescriptionCompError::SqlxError(e) => {
                 HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
+            }
+        },
+    }
+}
+
+#[put("/{product_id}/descriptions/text/{component_id}")]
+async fn update_text_description(
+    path_parms: web::Path<(String, i32)>,
+    description: web::Json<product::description::TextComponent>,
+    pool: web::Data<Pool<Postgres>>,
+    req: HttpRequest,
+) -> impl Responder {
+    let product_id = path_parms.0.as_str();
+    let component_id = path_parms.1;
+    
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let updated_component = product::description::update_text_component(
+        &pool,
+        product_id,
+        description.into_inner(),
+        component_id,
+    )
+    .await;
+
+    match updated_component {
+        Ok(description_component) => HttpResponse::Ok().json(description_component),
+        Err(e) => match e {
+            DescriptionUpdateError::WrongComponentType => {
+                HttpResponse::BadRequest().json(format!("Wrong component type! Component with id {} is not a text component.", component_id))
+            }
+            DescriptionUpdateError::NotFound => {
+                HttpResponse::NotFound().json("No component found with given id and product.")
+            }
+            DescriptionUpdateError::SqlxError(e) => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().json("Internal Server Error")
             }
         },
     }

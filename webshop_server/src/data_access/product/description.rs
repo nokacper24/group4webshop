@@ -471,6 +471,48 @@ async fn insert_image_component(
     Result::Ok(image_comp)
 }
 
+pub enum DescriptionUpdateError {
+    SqlxError(sqlx::Error),
+    WrongComponentType,
+    NotFound,
+}
+pub async fn update_text_component(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    text_comp: TextComponent,
+    component_id: i32,
+) -> Result<DescriptionComponent, DescriptionUpdateError> {
+    let desc_comp = match get_description_component_checked(pool, product_id, component_id).await {
+        Ok(desc_comp) => desc_comp,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return Err(DescriptionUpdateError::NotFound),
+            _ => return Err(DescriptionUpdateError::SqlxError(e)),
+        },
+    };
+    let text_id = match desc_comp.text {
+        Some(text) => text.text_id,
+        None => return Err(DescriptionUpdateError::WrongComponentType),
+    };
+
+    let result = query!(
+        r#"UPDATE product_text
+        SET text_title = $1, paragraph = $2
+        WHERE text_id = $3;"#,
+        text_comp.text_title,
+        text_comp.paragraph,
+        text_id
+    ).execute(pool).await;
+
+    if let Err(e) = result {
+        return Err(DescriptionUpdateError::SqlxError(e));
+    }
+    match get_description_component_checked (pool, product_id, component_id).await {
+        Ok (desc_comp) => {return Ok(desc_comp)},
+        Err (e) => return Err(DescriptionUpdateError::SqlxError(e)),
+        
+    }
+}
+
 pub async fn update_priority(
     pool: &Pool<Postgres>,
     product_id: &str,
