@@ -1,7 +1,7 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, post, put, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{delete, post, put, web, HttpRequest, HttpResponse, Responder, get};
 use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
@@ -20,6 +20,7 @@ use crate::{
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(get_all_products);
     cfg.service(create_product);
     cfg.service(delete_product);
     cfg.service(update_product);
@@ -28,6 +29,34 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .configure(descriptions_protected::configure)
             .default_service(web::route().to(crate::routes::api_not_found)),
     );
+}
+
+#[get("/products")]
+pub async fn get_all_products(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    match product::get_products(&pool, false).await {
+        Ok(products) => HttpResponse::Ok().json(products),
+        Err(e) => {
+            error!("{}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 #[derive(OpenApi)]
