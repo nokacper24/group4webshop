@@ -287,7 +287,7 @@ export default function CompanyUsers() {
             Add
           </button>
         </form>
-        <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
+        {/* <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
           <label style={{ display: "inline-block" }}>
             Choose a file
             <input
@@ -304,7 +304,7 @@ export default function CompanyUsers() {
           >
             Add
           </button>
-        </form>
+        </form> */}
       </section>
     </>
   );
