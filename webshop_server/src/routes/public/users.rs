@@ -1,7 +1,7 @@
 use crate::{
     data_access::{
         error_handling,
-        user::{self, LicenseUser, Role, User, UserRole},
+        user::{self, LicenseUser, Role, User, UserID, UserRole},
     },
     utils::auth,
 };
@@ -189,15 +189,7 @@ async fn generate_invite(
     };
 
     match user.role {
-        user::Role::Admin => {
-            return HttpResponse::NotImplemented()
-                .json("Can't generate a new user for proflex yet!");
-        }
-        user::Role::CompanyItHead => {
-            return HttpResponse::NotImplemented()
-                .json("Can't generate a new user for proflex yet!");
-        }
-        user::Role::CompanyIt => {
+        user::Role::Admin | user::Role::CompanyItHead | user::Role::CompanyIt => {
             return HttpResponse::NotImplemented()
                 .json("Can't generate a new user for proflex yet!");
         }
