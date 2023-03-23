@@ -319,6 +319,33 @@ pub async fn get_partial_company_user(
     Ok(user)
 }
 
+/// Fetches a user by their email address and returns a boolean indicating if the user exists.
+/// # Arguments
+/// * `email` - The email of the user
+/// * `pool` - The database pool
+/// # Returns
+/// * `bool` - A boolean indicating if the user exists
+/// # Errors
+/// * `sqlx::Error` - An error from the database
+/// # Example
+/// ```rust
+/// let user_exists: bool = user_exists("bob@name.com", &pool).await?;
+/// ```
+pub async fn user_exixts(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
+    let user = query!(
+        r#"SELECT user_id FROM app_user WHERE email = $1"#,
+        email
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    match user {
+        Some(_) => Ok(true),
+        None => Ok(false),
+    }
+}
+
+
 /// A struct representing an invite to a new user and a company.
 /// This is used to create a new user and link them to a new or existing company.
 ///
