@@ -159,13 +159,15 @@ export default function CompanyUsers() {
     const formData = new FormData();
     formData.append("email", email);
 
-    fetch(`${baseUrl}/api/register_user`, {
+    fetch(`${baseUrl}/api/generate_invite`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: formData,
+      body: JSON.stringify({
+        email: email,
+      }),
     })
       .then((response) => {
         const status = response.status;
@@ -187,7 +189,7 @@ export default function CompanyUsers() {
     const formData = new FormData();
     formData.append("csvFile", filePath);
 
-    fetch(`${baseUrl}/api/register_users`, {
+    fetch(`${baseUrl}/api/generate_invite`, {
       method: "POST",
       headers: {
         Accept: "multipart/form-data",
