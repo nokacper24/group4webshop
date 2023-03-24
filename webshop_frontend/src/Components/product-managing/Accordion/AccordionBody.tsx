@@ -5,6 +5,12 @@ export type AccordionBodyProps = {
   rows: AccordionRowProps[];
 };
 
+/**
+ * Simple component that keeps the rows of the accordion body.
+ *
+ * @param props the props of the component, must be of AccordionBodyProps type
+ * @returns the React component for the Accordion body
+ */
 export function AccordionBody(props: AccordionBodyProps) {
   return (
     <div className="accordion-body">
