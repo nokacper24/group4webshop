@@ -7,6 +7,12 @@ export type AccordionHeaderProps = {
   deleteSelf: () => void;
 };
 
+/**
+ * The header of the accordion section.
+ *
+ * @param props the props of the component, must be of AccordionHeaderProps type
+ * @returns the React component for the Accordion header
+ */
 export function AccordionHeader(props: AccordionHeaderProps) {
   return (
     <>

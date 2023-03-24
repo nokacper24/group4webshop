@@ -8,9 +8,14 @@ export type AccordionRowProps = {
   removeFunction: (id: number) => void;
 };
 
+/**
+ * The component for a single row in the accordion body.
+ *
+ * @param props the props of the component, must be of AccordionRowProps type
+ * @returns the React component for the Accordion row
+ */
 export function AccordionRow(props: AccordionRowProps) {
   const [state, setState] = useState<Description>(); //TODO: Update this when getting input
-
 
   if (props.title.length <= 0) {
     props.title = "Title";
