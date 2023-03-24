@@ -4,6 +4,12 @@ import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 
+/**
+ * Renders a table consisting of the header and a body with rows connected to the header through
+ * this component.
+ *
+ * @returns The React component for the Accordion table
+ */
 export default function AccordionTable() {
   const [priorityChanges, setPriorityChanges] = useState<Map<number, number>>(
     new Map()
@@ -22,6 +28,12 @@ export default function AccordionTable() {
     });
   });
 
+  /**
+   * Registers changes to the content of the table. This is used to keep track of what has changed and what needs to be saved.
+   *
+   * @param id The ID of the section that has changed
+   * @param change The type of change that has been made
+   */
   const registerContentChange = (id: number, change: ChangeType) => {
     if (!contentChanges.get(change)?.includes(id)) {
       contentChanges.get(change)?.push(id);
@@ -34,20 +46,23 @@ export default function AccordionTable() {
     }
   };
 
+  /**
+   * Deletes a section, including its header and rows in the body, from the table.
+   * Makes react re-render.
+   *
+   * @param id The ID of the section that has changed
+   */
   const deleteSection = (id: number) => {
-    console.log("delete: " + id);
-    console.log(sectionList);
-
     const index = sectionList.findIndex((section) => section.sectionID === id);
-    delete sectionList[index];
+    /* delete sectionList[index];
     setSectionList([ ...sectionList ]);
+    console.log(sectionList); */
 
-    /* const newSections = sectionList.filter(
+    const newSections = sectionList.filter(
       (section) => section.sectionID !== id
-    ); */
-    console.log("new sections");
-    /* console.log(newSections); */
-    /* setSectionList(newSections); */
+    );
+    console.log(newSections);
+    setSectionList(newSections);
   };
 
   const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
@@ -71,6 +86,12 @@ export default function AccordionTable() {
     },
   ]);
 
+  /**
+   * Creates a new section in the table.
+   * Makes react re-render.
+   *
+   * @param title The title of the new section
+   */
   const newSection = (title: string) => {
     const id = sectionList.length;
     sectionList.push({
@@ -82,7 +103,8 @@ export default function AccordionTable() {
       registerContentChange: registerContentChange,
       deleteSection: deleteSection,
     });
-    setSectionList([ ...sectionList ]);
+    setSectionList([...sectionList]);
+    console.log(sectionList);
 
     /* setSectionList((sections) => [
       ...sections,
@@ -99,8 +121,6 @@ export default function AccordionTable() {
     console.log(sectionList); */
   };
 
-  console.log("latest section list");
-  console.log(sectionList);
   return (
     <div className="accordion-table">
       <button onClick={() => newSection("Testy")}>New section</button>
