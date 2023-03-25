@@ -1,8 +1,9 @@
-import { ChangeEvent } from "react";
-
 export type LicensePricesProps = {
   price: number;
-  updatePrice: (arg: ChangeEvent<HTMLSelectElement>) => void;
+  refs: {
+    price: React.RefObject<HTMLSelectElement>;
+  };
+  updatePrice: (arg: React.ChangeEvent<HTMLSelectElement>) => void;
 };
 
 /**
@@ -27,6 +28,7 @@ export default function LicensePrices(props: LicensePricesProps) {
         name="prices"
         onChange={props.updatePrice}
         defaultValue="0"
+        ref={props.refs.price}
       >
         <option key="0" value="0" disabled hidden>
           Please choose a plan

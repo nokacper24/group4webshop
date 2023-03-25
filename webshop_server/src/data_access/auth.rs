@@ -1,5 +1,6 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, Utc, NaiveDate};
 use serde::{Deserialize, Serialize};
+
 use sqlx::{
     query_as, {Pool, Postgres},
 };
@@ -13,15 +14,29 @@ pub struct Cookie {
     pub user_id: i32,
 }
 
-/// Returns Auth Cookies by cookie, and checks if it is valid.
+pub struct UserInvite {
+    pub id: i32,
+    pub key: String,
+    pub email: String,
+    pub exp_date: DateTime<Utc>,
+}
+
+/// Returns true if the cookie is valid, false if it is not.
+/// Errors if the database query fails.
 pub async fn is_valid_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<bool, sqlx::Error> {
-    let cookie = query_as!(
+    let cookie = match query_as!(
         Cookie,
         "SELECT * FROM cookies WHERE cookie = $1 LIMIT 1",
         cookie
     )
     .fetch_one(pool)
-    .await?;
+    .await{
+        Ok(cookie) => cookie,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return Ok(false),
+            _ => return Err(e),
+        }
+    };
 
     if cookie.exp < Utc::now() {
         sqlx::query!("DELETE FROM cookies WHERE cookie = $1", cookie.cookie)
@@ -74,3 +89,5 @@ pub async fn get_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<Cookie, s
     }
     Ok(cookie)
 }
+
+

@@ -38,7 +38,8 @@ export default function Header() {
 
         if (nav.current) {
           nav.current.style.height = "var(--header-height)";
-          nav.current.style.width = " var(--header-height)";
+          nav.current.style.width =
+            "calc(var(--header-height) + var(--scrollbar-width))";
         }
       },
       { once: true }
@@ -48,6 +49,17 @@ export default function Header() {
   const setNavPositionProperty = () => {
     if (nav.current) {
       nav.current.style.position = isOpen ? "absolute" : "fixed";
+    }
+  };
+
+  const handleNavClick = () => {
+    navToggle.current?.classList.remove("active");
+
+    closeMenu();
+    setIsOpen(false);
+
+    if (nav.current) {
+      nav.current.style.position = "absolute";
     }
   };
 
@@ -72,7 +84,7 @@ export default function Header() {
         </a>
 
         {/* ProFlex Logo */}
-        <NavLink className="logo-link" to="/">
+        <NavLink onClick={handleNavClick} className="logo-link" to="/">
           <svg
             className="logo"
             xmlns="http://www.w3.org/2000/svg"
@@ -106,54 +118,44 @@ export default function Header() {
             data-state="closed"
           >
             <li>
-              {/* Searchbox */}
-              <form className="nav-search" method="post">
-                <label htmlFor="search-input">Search</label>
-                <input
-                  id="search-input"
-                  name="search"
-                  type="text"
-                  placeholder="Search"
-                />
-                {/* Magnifying glass icon */}
-                <button className="icon-button" type="submit">
-                  <svg
-                    className="nav-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 512 512"
-                  >
-                    {/* Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. */}
-                    <title>Search</title>
-                    <desc>Submits the search input</desc>
-                    <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z" />
-                  </svg>
-                </button>
-              </form>
-            </li>
-
-            <li>
-              <NavLink className="nav-link" to="/">
+              <NavLink onClick={handleNavClick} className="nav-link" to="/">
                 Home
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/products">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/products"
+              >
                 Products
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/about">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/about"
+              >
                 About
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/support">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/support"
+              >
                 Support
               </NavLink>
             </li>
             {/* User profile icon */}
             <li>
-              <NavLink className="nav-link" to="/profile">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/profile"
+              >
                 <svg
                   className="nav-icon"
                   xmlns="http://www.w3.org/2000/svg"

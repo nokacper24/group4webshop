@@ -4,6 +4,8 @@ type SelectTableButtonProps = {
   action: (index: number) => void;
 };
 
+export const dangerWords = ["remove", "invalidate"];
+
 /**
  * Represents a button in a Select Table component.
  *
@@ -14,7 +16,9 @@ export default function SelectTableButton(props: SelectTableButtonProps) {
   return (
     <button
       className={`default-button small-button ${
-        props.text.toLowerCase().includes("remove") ? "bg-danger" : ""
+        dangerWords.some((el) => props.text.toLowerCase().includes(el))
+          ? "bg-danger"
+          : ""
       }`}
       onClick={() => props.action(props.rowIndex)}
     >

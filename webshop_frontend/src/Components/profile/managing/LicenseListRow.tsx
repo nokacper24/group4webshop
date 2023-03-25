@@ -1,22 +1,16 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { License } from "../../../Interfaces";
 
-export type LicenseRowProps = {
-  license: {
-    id: string;
-    name: string;
-    activeUsers: number;
-    total: number;
-    status: string;
-    details: string[];
-  };
+type LicenseRowProps = {
+  license: License;
 };
 
 /**
  * Represents a Row component in the License List component.
  * Clicking on the expand button will show more information about the license.
  *
- * @param props The license information to be shown in the row.
+ * @param license The license information to be shown in the row.
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
@@ -29,13 +23,13 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     <button className="default-button small-button">Cancel renewal</button>
   );
   const manageButton = (
-    <Link to={"manage-license/" + license.id}>
+    <Link to={`../manage-license/${license.license_id}`}>
       <button className="default-button small-button">Manage access</button>
     </Link>
   );
 
   let buttons;
-  if (license.status == "Active") {
+  if (license.valid == true) {
     buttons = (
       <span className="button-container">
         {cancelButton}
@@ -49,10 +43,10 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   return (
     <>
       <tr className="row-header">
-        <td>{license.name}</td>
-        <td>{license.activeUsers}</td>
-        <td>{license.total}</td>
-        <td>{license.status}</td>
+        <td>{license.product_name}</td>
+        <td>{0}</td>
+        <td>{license.amount}</td>
+        <td>{license.valid ? "Valid" : "Invalid"}</td>
         <td>
           <button
             className="icon-button expand-button"
@@ -75,7 +69,8 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
-            Active period: {license.details[0]}&ndash;{license.details[1]}
+            Active period: {new Date(license.start_date).toLocaleDateString()}{" "}
+            to {new Date(license.end_date).toLocaleDateString()}
             {buttons}
           </p>
         </td>

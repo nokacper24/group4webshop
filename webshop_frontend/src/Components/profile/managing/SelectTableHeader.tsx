@@ -20,6 +20,7 @@ export default function SelectTableHeader(props: SelectTableHeaderProps) {
       {props.columns.map((column) => (
         <th key={column.text}>{column.text}</th>
       ))}
+      <th></th>
     </tr>
   );
 }
