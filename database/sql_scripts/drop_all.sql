@@ -1,3 +1,7 @@
+DROP TRIGGER IF EXISTS delete_description_component_trigger ON description_component;
+DROP FUNCTION IF EXISTS delete_description_component;
+DROP TRIGGER IF EXISTS set_description_component_priority_trigger ON description_component;
+DROP FUNCTION IF EXISTS set_description_component_priority;
 DROP TABLE description_component;
 DROP TABLE product_text;
 DROP TABLE product_image;
@@ -8,8 +12,10 @@ DROP TABLE user_license;
 DROP TABLE license;
 DROP TABLE product;
 DROP TABLE cookies;
+DROP TABLE invite_user;
 DROP TABLE register_user;
 DROP TABLE app_user;
 DROP TABLE register_company_user;
 DROP TABLE company;
 DROP TYPE role_enum;
+DROP USER IF EXISTS backend_user;

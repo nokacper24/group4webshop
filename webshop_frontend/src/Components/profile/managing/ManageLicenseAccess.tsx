@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { License, Product, User } from "../../../Interfaces";
 import SelectTable from "./SelectTable";
-import { UserProps, LicenseProps } from "../MyAccount";
 
-type UserRowProps = {
+export type SelectTableRowProps = {
   id: string;
   columns: { text: string }[];
 };
@@ -17,31 +17,34 @@ type UserRowProps = {
  */
 export default function ManageLicenseAccess() {
   const { licenseId } = useParams();
-  const [license, setLicense] = useState<LicenseProps>({
-    licenseId: 0,
+  const [license, setLicense] = useState<License>({
+    license_id: 0,
     valid: false,
-    startDate: new Date("1970-01-01"),
-    endDate: new Date("1970-01-01"),
+    start_date: new Date("1970-01-01"),
+    end_date: new Date("1970-01-01"),
     amount: 0,
-    companyId: 0,
-    productId: "0",
+    company_id: 0,
+    product_id: "0",
+    product_name: "",
   });
-  const [users, setUsers] = useState<UserProps[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
   const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
 
-  const [usersWithoutAccess, setUsersWithoutAccess] = useState<UserRowProps[]>(
+  const [usersWithoutAccess, setUsersWithoutAccess] = useState<
+    SelectTableRowProps[]
+  >([]);
+  const [usersWithAccess, setUsersWithAccess] = useState<SelectTableRowProps[]>(
     []
   );
-  const [usersWithAccess, setUsersWithAccess] = useState<UserRowProps[]>([]);
 
   /**
    * Update if the user access has been changed (from original) when adding user.
    *
    * @param user The user to check if their access has changed.
    */
-  const updateChangedOnAdd = (user: UserRowProps) => {
+  const updateChangedOnAdd = (user: SelectTableRowProps) => {
     if (changedUsersWithoutAccess.has(user.id)) {
       changedUsersWithoutAccess.delete(user.id);
     } else if (!changedUsersWithAccess.has(user.id)) {
@@ -54,7 +57,7 @@ export default function ManageLicenseAccess() {
    *
    * @param user The user to check if their access has changed.
    */
-  const updateChangedOnRemove = (user: UserRowProps) => {
+  const updateChangedOnRemove = (user: SelectTableRowProps) => {
     if (changedUsersWithAccess.has(user.id)) {
       changedUsersWithAccess.delete(user.id);
     } else if (!changedUsersWithoutAccess.has(user.id)) {
@@ -163,7 +166,7 @@ export default function ManageLicenseAccess() {
 
   const withoutAccessTable = {
     header: {
-      columns: [{ text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }],
     },
     rows: usersWithoutAccess,
     button: { text: "Add", action: addUserAccess },
@@ -174,7 +177,7 @@ export default function ManageLicenseAccess() {
 
   const withAccessTable = {
     header: {
-      columns: [{ text: "Users" }, { text: "Access" }],
+      columns: [{ text: "Users" }],
     },
     rows: usersWithAccess,
     button: { text: "Remove", action: removeUserAccess },
@@ -183,8 +186,26 @@ export default function ManageLicenseAccess() {
     ],
   };
 
-  const baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
+    baseUrl = "";
+  }
+
   const isInitialMount = useRef(true);
+
+  /**
+   * Send a GET request to get a product.
+   *
+   * @param productId The ID of the product.
+   * @returns The product object.
+   */
+  const fetchProduct = async (productId: string) => {
+    const response = await fetch(`${baseUrl}/api/products/${productId}`);
+    const data = await response.json();
+    const product: Product = data;
+    return product;
+  };
 
   /**
    * Send a GET request to get the license information.
@@ -194,15 +215,7 @@ export default function ManageLicenseAccess() {
   const fetchLicense = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
     const data = await response.json();
-    const license: LicenseProps = {
-      licenseId: data.license_id,
-      valid: data.valid,
-      startDate: new Date(data.start_date),
-      endDate: new Date(data.end_date),
-      amount: data.amount,
-      companyId: data.company_id,
-      productId: data.product_id,
-    };
+    const license: License = data;
     return license;
   };
 
@@ -212,16 +225,10 @@ export default function ManageLicenseAccess() {
    * @param companyId The ID of the company
    * @returns A list of all company users
    */
-  const fetchCompanyUsers = async (companyId: number | undefined) => {
+  const fetchCompanyUsers = async (companyId: number) => {
     const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
     const data = await response.json();
-    const users = data.map((user: any) => {
-      return {
-        userId: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
+    const users: User[] = data.map((user: User) => user);
     return users;
   };
 
@@ -233,13 +240,7 @@ export default function ManageLicenseAccess() {
   const fetchUsersWithAccess = async () => {
     const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        userId: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
+    const users: User[] = data.map((user: User) => user);
     return users;
   };
 
@@ -273,7 +274,7 @@ export default function ManageLicenseAccess() {
             alert("Something went wrong when saving users");
           }
         })
-        .catch(() => console.error("Failed to save license access for users"));
+        .catch(() => alert("Failed to save license access for users"));
     }
   };
 
@@ -305,7 +306,7 @@ export default function ManageLicenseAccess() {
             alert("Something went wrong when saving users");
           }
         })
-        .catch(() => console.error("Failed to save license access for users"));
+        .catch(() => alert("Failed to save license access for users"));
     }
   };
 
@@ -325,9 +326,12 @@ export default function ManageLicenseAccess() {
     fetchLicense()
       .then((license) => {
         setLicense(license);
-        fetchCompanyUsers(license.companyId).then((users) => setUsers(users));
+        fetchProduct(license.product_id).then((product) => {
+          license.product_name = product.display_name;
+        });
+        fetchCompanyUsers(license.company_id).then((users) => setUsers(users));
       })
-      .catch((e) => console.error("Failed to get license or users"));
+      .catch((e) => alert("Failed to get license or users"));
   }, []);
 
   useEffect(() => {
@@ -337,28 +341,26 @@ export default function ManageLicenseAccess() {
       // Sort users between those with and without license access
       fetchUsersWithAccess()
         .then((x) => {
-          var withoutAccess: UserProps[] = [];
-          var withAccess: UserProps[] = [];
+          let withoutAccess: User[] = [];
+          let withAccess: User[] = [];
 
           withoutAccess = users.filter(
-            (arr1) => !x.find((arr2) => arr2.userId === arr1.userId)
+            (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
           );
           withAccess = x;
 
           setUsersWithoutAccess(
             withoutAccess.map((user) => {
-              return { id: user.userId, columns: [{ text: user.email }] };
+              return { id: user.user_id, columns: [{ text: user.email }] };
             })
           );
           setUsersWithAccess(
             withAccess.map((user) => {
-              return { id: user.userId, columns: [{ text: user.email }] };
+              return { id: user.user_id, columns: [{ text: user.email }] };
             })
           );
         })
-        .catch(() =>
-          console.error("Failed to fetch users with license access")
-        );
+        .catch(() => alert("Failed to fetch users with license access"));
     }
   }, [users]);
 
@@ -367,18 +369,17 @@ export default function ManageLicenseAccess() {
       <section className="container left-aligned">
         <h1>Manage license access</h1>
         <p>
-          {/* TODO: Fetch product name of license */}
-          Product: {license.productId}
+          Product: {license.product_name}
           <br></br>
-          Active users: {usersWithAccess.length}
+          Active users: {usersWithAccess.length - changedUsersWithAccess.size}
           <br></br>
           Total allowed: {license.amount}
           <br></br>
-          Start date: {license.startDate.toDateString()}
+          Start date: {license.start_date.toDateString()}
           <br></br>
-          End date: {license.endDate.toDateString()}
+          End date: {license.end_date.toDateString()}
           <br></br>
-          Status: {license.valid ? "Active" : "Expired"}
+          Status: {license.valid ? "Valid" : "Invalid"}
           <br></br>
         </p>
       </section>

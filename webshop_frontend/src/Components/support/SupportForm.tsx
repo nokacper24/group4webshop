@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
 
 /**
@@ -8,12 +9,23 @@ import ProductSelect from "./ProductSelect";
  * @returns A Support Form component.
  */
 export default function SupportForm() {
-  const products = [
-    { name: "Planner" },
-    { name: "Tax" },
-    { name: "Law" },
-    { name: "3D Models" },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
+    baseUrl = "";
+  }
+
+  const fetchProducts = async () => {
+    const response = await fetch(`${baseUrl}/api/products`);
+    const data = await response.json();
+    return data.map((product: Product) => product);
+  };
+
+  useEffect(() => {
+    fetchProducts().then((products) => setProducts(products));
+  }, []);
 
   return (
     <form className="container form-container">

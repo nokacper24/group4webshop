@@ -7,7 +7,6 @@ export type ParagraphSlideProps = {
   reviewerProfile: {
     picturePath: string;
     name: string;
-    title: string;
   };
 };
 
@@ -25,12 +24,13 @@ export const ParagraphSlide = (props: ParagraphSlideProps) => {
       <div className="reviewer-profile">
         <img
           src={props.reviewerProfile.picturePath}
-          alt=""
+          alt={props.reviewerProfile.name + "'s face"}
+          height="80"
+          width="80"
           className="reviewer-picture"
         />
         <div className="reviewer-details">
           <p>{props.reviewerProfile.name}</p>
-          <p>{props.reviewerProfile.title}</p>
         </div>
       </div>
     </div>

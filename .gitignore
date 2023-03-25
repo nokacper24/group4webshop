@@ -1,6 +1,9 @@
 target
 .env
 .obsidian/
+webshop_server/resources/
+webshop_server/certificate.pem
+webshop_server/privatekey.pem
 
 # Logs
 logs

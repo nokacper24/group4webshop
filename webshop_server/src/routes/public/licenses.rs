@@ -1,11 +1,12 @@
+use crate::data_access::license::{self, License};
+
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
-use crate::data_access::license::{self, License};
-
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(licenses);
+    cfg.service(licenses_vital);
     cfg.service(license_by_id);
     cfg.service(licenses_by_company);
 }
@@ -14,6 +15,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[openapi(
     paths(
         licenses,
+        licenses_vital,
         license_by_id,
         licenses_by_company
     ),
@@ -47,6 +49,32 @@ pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     // Parse to JSON
     if let Ok(licenses) = licenses {
         return HttpResponse::Ok().json(licenses);
+    }
+
+    HttpResponse::InternalServerError().json("Internal Server Error")
+}
+
+/// Get the most vital information about a license.
+#[utoipa::path(
+    context_path = "/api",
+    get,
+    responses(
+    (status = 200, description = "List of all licenses with only their vital information", body = Vec<License>),
+    (status = 500, description = "Internal Server Error"),
+)
+)]
+#[get("/licenses_vital")]
+pub async fn licenses_vital(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+    let other_licenses = license::get_licenses_vital_info(&pool).await;
+
+    // Error check
+    if other_licenses.is_err() {
+        return HttpResponse::InternalServerError().json("Internal Server Error");
+    }
+
+    // Parse to JSON
+    if let Ok(other_licenses) = other_licenses {
+        return HttpResponse::Ok().json(other_licenses);
     }
 
     HttpResponse::InternalServerError().json("Internal Server Error")
