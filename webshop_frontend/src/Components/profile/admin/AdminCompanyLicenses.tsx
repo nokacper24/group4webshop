@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SelectTable from "../managing/SelectTable";
 import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
 import CreateLicenseForm from "./CreateLicenseForm";
-import { License } from "../../../Interfaces";
+import { LicenseVital } from "../../../Interfaces";
 
 /**
  * An admin page for managing companies' licenses.
@@ -29,7 +29,7 @@ export default function AdminCompanyLicenses() {
   const fetchLicenses = async () => {
     const response = await fetch(`${baseUrl}/api/licenses_vital`);
     const data = await response.json();
-    return data.map((license: License) => license);
+    return data.map((license: LicenseVital) => license);
   };
 
   /**
@@ -37,8 +37,8 @@ export default function AdminCompanyLicenses() {
    *
    * @param license The license to invalidate.
    */
-  const updateChangedOnInvalidate = (license: any) => {
-    invalidatedLicenses.add(license.id);
+  const updateChangedOnInvalidate = (license: SelectTableRowProps) => {
+    invalidatedLicenses.add(parseInt(license.id));
   };
 
   /**
@@ -130,14 +130,14 @@ export default function AdminCompanyLicenses() {
     fetchLicenses()
       .then((licenses) => {
         let validLicenses: SelectTableRowProps[] = [];
-        licenses.map((license: any) => {
+        licenses.map((license: LicenseVital) => {
           if (license.valid) {
             validLicenses.push({
-              id: license.licenseId.toString(),
+              id: license.license_id.toString(),
               columns: [
-                { text: license.licenseId.toString() },
-                { text: license.companyName },
-                { text: license.productName },
+                { text: license.license_id.toString() },
+                { text: license.company_name },
+                { text: license.display_name },
               ],
             });
           }
