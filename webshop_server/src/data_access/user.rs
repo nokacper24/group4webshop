@@ -380,7 +380,7 @@ pub async fn get_partial_company_user(
 /// ```rust
 /// let user_exists: bool = user_exists("bob@name.com", &pool).await?;
 /// ```
-pub async fn user_exixts(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
+pub async fn user_exists(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
     let user = query!(r#"SELECT user_id FROM app_user WHERE email = $1"#, email)
         .fetch_optional(pool)
         .await?;
