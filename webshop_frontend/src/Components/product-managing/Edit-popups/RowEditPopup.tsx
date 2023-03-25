@@ -17,6 +17,21 @@ export default function RowEditPopup(props: RowEditPopupProps) {
         <form className="popup-form">
           {props.image ? (
             <>
+              <h2>Edit image</h2>
+              <label htmlFor="image">Image:</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/png, image/jpeg, image/webp"
+              />
+              <label htmlFor="alt-text">Alt-text:</label>
+              <textarea
+                name="alt-text"
+                id="alt-text"
+                cols={40}
+                rows={10}
+              ></textarea>
             </>
           ) : (
             <>
