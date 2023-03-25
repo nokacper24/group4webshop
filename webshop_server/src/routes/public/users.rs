@@ -237,10 +237,12 @@ async fn generate_invites(
             let mut other_users = Vec::<PartialRegisterCompanyUser>::new();
 
             for email in email_list.as_slice() {
-                other_users.push(PartialRegisterCompanyUser {
-                    email: email.to_string(),
-                    company_id: user.company_id,
-                });
+                if !email.is_empty() {
+                    other_users.push(PartialRegisterCompanyUser {
+                        email: email.to_string(),
+                        company_id: user.company_id,
+                    });
+                }
             }
 
             match user::create_partial_company_users(&other_users, &pool).await {
