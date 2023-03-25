@@ -1,4 +1,4 @@
-use crate::data_access::license::{self, InvalidLicense, License, PartialLicense};
+use crate::data_access::license::{self, License, LicenseValidation, PartialLicense};
 
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -47,8 +47,8 @@ async fn create_license(
 }
 
 #[derive(Serialize, Deserialize)]
-struct InvalidLicenses {
-    licenses: Vec<InvalidLicense>,
+struct LicenseValidations {
+    licenses: Vec<LicenseValidation>,
 }
 
 /// Update the validation of licenses.
@@ -64,7 +64,7 @@ struct InvalidLicenses {
 #[patch("/licenses")]
 async fn update_license_validations(
     pool: web::Data<Pool<Postgres>>,
-    other_licenses: web::Json<InvalidLicenses>,
+    other_licenses: web::Json<LicenseValidations>,
 ) -> impl Responder {
     let other_licenses = &other_licenses.licenses;
     match license::update_license_validations(&pool, &other_licenses).await {
