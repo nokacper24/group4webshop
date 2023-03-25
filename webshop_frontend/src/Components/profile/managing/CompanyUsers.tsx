@@ -185,15 +185,16 @@ export default function CompanyUsers() {
    *
    * @param filePath The file path for the CSV file of users to be created.
    */
-  const sendPostRegisterUsersRequest = async (filePath: string) => {
+  const sendPostRegisterUsersRequest = async () => {
     const formData = new FormData();
-    formData.append("csvFile", filePath);
+    if (csvEmail.current?.files) {
+      formData.append("csv", csvEmail.current.files[0]);
+    }
 
-    fetch(`${baseUrl}/api/generate_invite`, {
+    fetch(`${baseUrl}/api/generate_invites`, {
       method: "POST",
       headers: {
         Accept: "multipart/form-data",
-        "Content-Type": "multipart/form-data",
       },
       body: formData,
     })
@@ -220,7 +221,8 @@ export default function CompanyUsers() {
     event.preventDefault();
 
     if (csvEmail.current && csvEmail.current?.value != "") {
-      sendPostRegisterUsersRequest(csvEmail.current.value);
+      console.log(csvEmail.current.value);
+      sendPostRegisterUsersRequest();
     }
   };
 
@@ -289,10 +291,11 @@ export default function CompanyUsers() {
             Add
           </button>
         </form>
-        {/* <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
+        <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
           <label style={{ display: "inline-block" }}>
             Choose a file
             <input
+              name="csvFile"
               ref={csvEmail}
               style={{ marginInline: "1em", padding: "0.5em" }}
               type="file"
@@ -306,7 +309,7 @@ export default function CompanyUsers() {
           >
             Add
           </button>
-        </form> */}
+        </form>
       </section>
     </>
   );

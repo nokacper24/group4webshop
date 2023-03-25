@@ -257,12 +257,19 @@ pub async fn get_partial_user(
     Ok(user)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
     pub id: i32,
     pub email: String,
     pub company_id: i32,
     pub exp_date: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PartialRegisterCompanyUser {
+    pub email: String,
+    pub company_id: i32,
 }
 
 /// Creates a new user that is registering themselves and linking to a company.
@@ -303,6 +310,50 @@ pub async fn create_partial_company_user(
         }
         Err(e) => Err(e),
     }
+}
+
+/// Creates new users that is registering themselves and linking to a company.
+/// Returns the partial users that were created.
+/// # Arguments
+/// * `email` - The email of the user
+/// * `company_id` - The id of the company the user is registering for
+/// * `pool` - The database pool
+/// # Returns
+/// * `RegisterCompanyUser` - The partial user that was created
+pub async fn create_partial_company_users(
+    users: &Vec<PartialRegisterCompanyUser>,
+    pool: &Pool<Postgres>,
+) -> Result<Vec<RegisterCompanyUser>, sqlx::Error> {
+    let exp_date = Utc::now() + Duration::days(1);
+
+    let mut transaction = pool.begin().await?;
+    let mut email_list = Vec::<String>::new();
+
+    for user in users.iter() {
+        transaction
+            .execute(query!(
+                r#"INSERT INTO register_company_user (email, company_id, exp_date)
+                VALUES ($1, $2, $3)"#,
+                user.email,
+                user.company_id,
+                exp_date
+            ))
+            .await?;
+
+        email_list.push(user.email.clone());
+    }
+    transaction.commit().await?;
+
+    let created_users = query_as!(
+        RegisterCompanyUser,
+        r#"SELECT id, email, company_id, exp_date
+            FROM register_company_user
+            WHERE email = ANY($1)"#,
+        &email_list
+    )
+    .fetch_all(pool)
+    .await;
+    created_users
 }
 
 pub async fn get_partial_company_user(

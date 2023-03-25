@@ -1,13 +1,21 @@
 use crate::{
     data_access::{
         error_handling,
-        user::{self, LicenseUser, Role, User, UserID, UserRole},
+        user::{
+            self, LicenseUser, PartialRegisterCompanyUser, RegisterCompanyUser, Role, User, UserID,
+            UserRole,
+        },
     },
     utils::auth,
 };
+use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
+use chrono::{Duration, Utc};
+use futures::{FutureExt, StreamExt};
+use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
+use std::str;
 use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -16,6 +24,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users_by_company);
     cfg.service(users_by_license);
     cfg.service(generate_invite);
+    cfg.service(generate_invites);
     cfg.service(add_license_users);
     cfg.service(remove_license_users);
     cfg.service(get_users_by_role);
@@ -197,6 +206,92 @@ async fn generate_invite(
             return HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
         }
     }
+}
+
+#[post("/generate_invites")]
+async fn generate_invites(
+    pool: web::Data<Pool<Postgres>>,
+    payload: Multipart,
+    req: HttpRequest,
+) -> impl Responder {
+    let user = match auth::validate_user(req, &pool).await {
+        Ok(user) => user,
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(_) => HttpResponse::InternalServerError().finish(),
+            }
+        }
+    };
+    if (user.role != user::Role::Admin)
+        && (user.role != user::Role::CompanyItHead)
+        && (user.role != user::Role::CompanyIt)
+    {
+        return HttpResponse::Forbidden().finish();
+    }
+
+    match extract_text_from_multipart(payload).await {
+        Ok(text) => {
+            let email_list = csv_string_to_list(text);
+            let mut other_users = Vec::<PartialRegisterCompanyUser>::new();
+
+            for email in email_list.as_slice() {
+                other_users.push(PartialRegisterCompanyUser {
+                    email: email.to_string(),
+                    company_id: user.company_id,
+                });
+            }
+
+            match user::create_partial_company_users(&other_users, &pool).await {
+                Ok(created_users) => return HttpResponse::Ok().json(created_users),
+                Err(_) => return HttpResponse::InternalServerError().finish(),
+            }
+        }
+        Err(e) => return HttpResponse::UnprocessableEntity().json(e.to_string()),
+    }
+}
+
+async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, MultipartError> {
+    let mut buffer = Vec::new();
+
+    while let Some(item) = payload.next().await {
+        let mut field = match item {
+            Ok(field) => field,
+            Err(e) => return Err(e),
+        };
+
+        let name = match field.content_disposition().get_name() {
+            Some(name) => name,
+            None => return Err(MultipartError::NoContentDisposition),
+        };
+
+        if name == "csv" {
+            while let Some(chunk) = field.next().await {
+                let data = match chunk {
+                    Ok(data) => data,
+                    Err(e) => return Err(e),
+                };
+
+                buffer.extend_from_slice(&data);
+            }
+        } else {
+            return Err(MultipartError::Incomplete);
+        }
+    }
+
+    match String::from_utf8(buffer) {
+        Ok(text) => return Ok(text),
+        Err(e) => return Err(MultipartError::Parse(e.into())),
+    }
+}
+
+fn csv_string_to_list(text: String) -> Vec<String> {
+    let list: Vec<&str> = text.split(",").collect();
+    let mut string_list = Vec::<String>::new();
+    for word in list {
+        string_list.push(word.trim().to_string());
+    }
+    return string_list;
 }
 
 #[derive(Serialize, Deserialize)]
