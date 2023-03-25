@@ -1,9 +1,11 @@
 import { AccordionHeader } from "./Accordion/AccordionHeader";
 import AccordionTable from "./Accordion/AccordionTable";
+import RowEditPopup from "./Edit-popups/RowEditPopup";
 
 export default function ManagePage() {
   return (
     <>
+    <RowEditPopup></RowEditPopup>
       <section className="container">
         <h2>Manage product</h2>
         <form>
