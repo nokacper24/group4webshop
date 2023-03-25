@@ -53,6 +53,10 @@ export default function RowEditPopup(props: RowEditPopupProps) {
             </>
           )}
 
+          <div>
+            <button className="hero-button popup-button">Save</button>
+            <button className="hero-button popup-button">Cancel</button>
+          </div>
         </form>
       </div>
     </div>
