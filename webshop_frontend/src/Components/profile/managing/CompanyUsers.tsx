@@ -202,6 +202,7 @@ export default function CompanyUsers() {
         const status = response.status;
         if (status == 200) {
           resetCsvEmailInput();
+          alert("Users succesfully created");
         } else {
           alert("Something went wrong when adding users");
         }
@@ -279,7 +280,7 @@ export default function CompanyUsers() {
               style={{ marginInline: "1em", padding: "0.5em" }}
               type="email"
               name="email"
-              placeholder="john@doe.com"
+              placeholder="john.doe@company.com"
             ></input>
           </label>
 
@@ -295,7 +296,6 @@ export default function CompanyUsers() {
           <label style={{ display: "inline-block" }}>
             Choose a file
             <input
-              name="csvFile"
               ref={csvEmail}
               style={{ marginInline: "1em", padding: "0.5em" }}
               type="file"
