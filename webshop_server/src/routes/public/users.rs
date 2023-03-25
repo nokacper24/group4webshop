@@ -208,6 +208,7 @@ async fn generate_invite(
     }
 }
 
+/// Generate invites for a CSV list of users.
 #[post("/generate_invites")]
 async fn generate_invites(
     pool: web::Data<Pool<Postgres>>,
@@ -251,6 +252,7 @@ async fn generate_invites(
     }
 }
 
+/// Extract the text from a `Multipart`.
 async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, MultipartError> {
     let mut buffer = Vec::new();
 
@@ -285,6 +287,18 @@ async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, M
     }
 }
 
+/// Parses a `String` that is separated by commas into a `Vec` of `String` and each `String` is trimmed.
+/// # Arguments
+/// * `text` - The text to be split
+/// # Returns
+/// * `Vec<String>` - A list of Strings
+/// # Example
+/// ```rust
+/// let hello = String::from("Hello, world!");
+/// let list = csv_string_to_list(hello);
+///
+/// assert_eq!(list, vec!["Hello", "world!"])
+/// ```
 fn csv_string_to_list(text: String) -> Vec<String> {
     let list: Vec<&str> = text.split(",").collect();
     let mut string_list = Vec::<String>::new();
