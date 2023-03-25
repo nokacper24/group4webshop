@@ -35,6 +35,19 @@ export default function RowEditPopup(props: RowEditPopupProps) {
             </>
           ) : (
             <>
+              <h2>Edit paragraph</h2>
+              <label htmlFor="title">Title:</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={props.title ? props.title : ""}
+              />
+              <label htmlFor="paragraph">Paragraph:</label>
+              <textarea
+                id="paragraph"
+                value={props.content ? props.content : ""}
+                cols={40}
                 rows={10}
               />
             </>
