@@ -3,6 +3,7 @@ import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
+import { showPopup } from "../Edit-popups/RowEditPopup";
 
 /**
  * Renders a table consisting of the header and a body with rows connected to the header through
@@ -104,6 +105,7 @@ export default function AccordionTable() {
       deleteSection: deleteSection,
     });
     setSectionList([...sectionList]);
+    showPopup();
     console.log(sectionList);
 
     /* setSectionList((sections) => [
