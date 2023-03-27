@@ -1,3 +1,5 @@
+import { RefObject, useRef } from "react";
+
 /**
  * Props for the RowEditPopup component.
  * Image indicates if the content should be interpreted as an image or not.
@@ -10,9 +12,13 @@ export type RowEditPopupProps = {
   content: string | undefined;
 };
 
+
+let popupRef: RefObject<HTMLDivElement>;
 export default function RowEditPopup(props: RowEditPopupProps) {
+  popupRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="popup-grey-zone">
+    <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
         <form className="popup-form">
           {props.image ? (
@@ -41,12 +47,12 @@ export default function RowEditPopup(props: RowEditPopupProps) {
                 type="text"
                 id="title"
                 name="title"
-                value={props.title ? props.title : ""}
+                defaultValue={props.title ? props.title : ""}
               />
               <label htmlFor="paragraph">Paragraph:</label>
               <textarea
                 id="paragraph"
-                value={props.content ? props.content : ""}
+                defaultValue={props.content ? props.content : ""}
                 cols={40}
                 rows={10}
               />
