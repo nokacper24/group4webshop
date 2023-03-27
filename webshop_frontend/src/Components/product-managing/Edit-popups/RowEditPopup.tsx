@@ -62,3 +62,13 @@ export default function RowEditPopup(props: RowEditPopupProps) {
     </div>
   );
 }
+
+export function showPopup() {
+  popupRef.current?.classList.add("popup-visible");
+}
+
+function hidePopup() {
+  popupRef.current?.classList.remove("popup-visible");
+}
+
+

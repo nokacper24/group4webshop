@@ -1331,8 +1331,13 @@ input:checked + .slider:before {
   background-color: #3d3d3d7c;
   position: absolute;
   display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
+}
+
+.popup-visible {
+  display: flex;
 }
 
 .popup-box {
