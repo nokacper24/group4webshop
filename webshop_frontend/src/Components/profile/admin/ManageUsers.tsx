@@ -7,6 +7,9 @@ import SelectTable, {
 import {
   createSelectTableProps,
   createRowProps,
+  updateNewChanges,
+  moveItemBetweenTables,
+  moveItemsBetweenTables,
 } from "../managing/SelectTableFunctions";
 
 /**
@@ -23,37 +26,29 @@ export default function ManageUsers() {
   }
 
   const [itHeads, setItHeads] = useState<SelectTableRowProps[]>([]);
-  const [newItHeads] = useState<Set<number>>(new Set());
+  const [newItHeads] = useState<Set<string>>(new Set());
 
   const [defaultUsers, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
-  const [newDefaultUsers] = useState<Set<number>>(new Set());
+  const [newDefaultUsers] = useState<Set<string>>(new Set());
 
   /**
    * Update the lists of new IT heads and default users
    * when a user gets removed from the list of IT heads.
    *
-   * @param userId The ID of the user to update.
+   * @param user The user to update.
    */
-  const updateNewUsersOnRemove = (userId: number) => {
-    if (newItHeads.has(userId)) {
-      newItHeads.delete(userId);
-    } else if (!newDefaultUsers.has(userId)) {
-      newDefaultUsers.add(userId);
-    }
+  const updateNewUsersOnRemove = (user: SelectTableRowProps) => {
+    updateNewChanges(user, newItHeads, newDefaultUsers);
   };
 
   /**
    * Update the lists of new IT heads and default users
    * when a user gets added to the list of IT heads.
    *
-   * @param userId The ID of the user to update.
+   * @param user The user to update.
    */
-  const updateNewUsersOnAdd = (userId: number) => {
-    if (newDefaultUsers.has(userId)) {
-      newDefaultUsers.delete(userId);
-    } else if (!newItHeads.has(userId)) {
-      newItHeads.add(userId);
-    }
+  const updateNewUsersOnAdd = (user: SelectTableRowProps) => {
+    updateNewChanges(user, newDefaultUsers, newItHeads);
   };
 
   /**
@@ -62,46 +57,32 @@ export default function ManageUsers() {
    * @param index The index of the user in the list of IT  heads.
    */
   const removeItHead = (index: number) => {
-    /* Get user who's being moved from "IT heads" to "default users" */
-    let user = itHeadsTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      itHeadsTable,
+      defaultUsersTable,
+      setItHeads,
+      setDefaultUsers
+    );
 
-    /* Remove user from the "It heads" list */
-    let newItHeadsArray = [
-      ...itHeadsTable.rows.slice(0, index),
-      ...itHeadsTable.rows.slice(index + 1),
-    ];
-    setItHeads(newItHeadsArray);
-
-    /* Add user to the "default users" list */
-    defaultUsersTable.rows.push(user);
-    setDefaultUsers(defaultUsersTable.rows);
-
-    updateNewUsersOnRemove(parseInt(user.id));
+    updateNewUsersOnRemove(user);
   };
 
   /**
    * Remove all the selected users from the list of IT heads.
    *
-   * @param index The indices of the users in the list of IT  heads.
+   * @param indices The indices of the users in the list of IT  heads.
    */
   const removeSelectedItHeads = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = itHeadsTable.rows[index];
-
-      itHeadsTable.rows = [
-        ...itHeadsTable.rows.slice(0, index),
-        ...itHeadsTable.rows.slice(index + 1),
-      ];
-      defaultUsersTable.rows.push(user);
-
-      updateNewUsersOnRemove(parseInt(user.id));
-    }
-
-    setItHeads(itHeadsTable.rows);
-    setDefaultUsers(defaultUsersTable.rows);
+    moveItemsBetweenTables(
+      indices,
+      itHeadsTable,
+      defaultUsersTable,
+      setItHeads,
+      setDefaultUsers,
+      newItHeads,
+      newDefaultUsers
+    );
   };
 
   const itHeadsTable: SelectTableProps = createSelectTableProps(
@@ -118,45 +99,32 @@ export default function ManageUsers() {
    * @param index The index of the user in the list of IT  heads.
    */
   const addItHead = (index: number) => {
-    /* Get user who's being moved from "default users" to "IT heads" */
-    let user = defaultUsersTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      defaultUsersTable,
+      itHeadsTable,
+      setDefaultUsers,
+      setItHeads
+    );
 
-    /* Remove user from the "default users" list */
-    let newDefaultUsersArray = [
-      ...defaultUsersTable.rows.slice(0, index),
-      ...defaultUsersTable.rows.slice(index + 1),
-    ];
-    setDefaultUsers(newDefaultUsersArray);
-
-    /* Add user to the "IT heads" list */
-    itHeadsTable.rows.push(user);
-    setItHeads(itHeadsTable.rows);
-
-    updateNewUsersOnAdd(parseInt(user.id));
+    updateNewUsersOnAdd(user);
   };
 
   /**
    * Add all the selected users to the list of IT heads.
    *
-   * @param index The indices of the users in the list of IT  heads.
+   * @param indices The indices of the users in the list of IT  heads.
    */
   const addSelectedItHeads = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = defaultUsersTable.rows[index];
-
-      defaultUsersTable.rows = [
-        ...defaultUsersTable.rows.slice(0, index),
-        ...defaultUsersTable.rows.slice(index + 1),
-      ];
-      itHeadsTable.rows.push(user);
-
-      updateNewUsersOnAdd(parseInt(user.id));
-    }
-    setDefaultUsers(defaultUsersTable.rows);
-    setItHeads(itHeadsTable.rows);
+    moveItemsBetweenTables(
+      indices,
+      defaultUsersTable,
+      itHeadsTable,
+      setDefaultUsers,
+      setItHeads,
+      newDefaultUsers,
+      newItHeads
+    );
   };
 
   const defaultUsersTable: SelectTableProps = createSelectTableProps(

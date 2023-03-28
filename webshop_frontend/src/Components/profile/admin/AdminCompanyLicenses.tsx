@@ -8,6 +8,9 @@ import { LicenseVital } from "../../../Interfaces";
 import {
   createSelectTableProps,
   createRowProps,
+  moveItemBetweenTables,
+  moveItemsBetweenTables,
+  updateNewChanges,
 } from "../managing/SelectTableFunctions";
 
 /**
@@ -28,10 +31,8 @@ export default function AdminCompanyLicenses() {
     []
   );
 
-  const [newValidatedLiceneses, setNewValidatedLicenses] = useState<
-    Set<number>
-  >(new Set());
-  const [newInvalidatedLicenses] = useState<Set<number>>(new Set());
+  const [newValidatedLicenses] = useState<Set<string>>(new Set());
+  const [newInvalidatedLicenses] = useState<Set<string>>(new Set());
 
   /**
    * Get all licenses.
@@ -45,37 +46,20 @@ export default function AdminCompanyLicenses() {
   };
 
   /**
-   * Add license as pending to be invalidated.
-   *
-   * @param license The license to invalidate.
-   */
-  const updateChangedOnInvalidate = (license: SelectTableRowProps) => {
-    newInvalidatedLicenses.add(parseInt(license.id));
-  };
-
-  /**
-   * Add license as pending to be validated.
-   *
-   * @param license The license to validate.
-   */
-  const updateChangedOnValidate = (license: SelectTableRowProps) => {
-    newValidatedLiceneses.add(parseInt(license.id));
-  };
-
-  /**
    * Remove a license from list of valid licenses.
    *
    * @param index The index of the license in the list.
    */
   const invalidateLicense = (index: number) => {
-    let license = validLicensesTable.rows[index];
+    let license = moveItemBetweenTables(
+      index,
+      validLicensesTable,
+      invalidLicensesTable,
+      setValidLicenses,
+      setInvalidLicenses
+    );
 
-    setValidLicenses([
-      ...validLicensesTable.rows.slice(0, index),
-      ...validLicensesTable.rows.slice(index + 1),
-    ]);
-
-    updateChangedOnInvalidate(license);
+    updateNewChanges(license, newValidatedLicenses, newInvalidatedLicenses);
   };
 
   /**
@@ -84,14 +68,15 @@ export default function AdminCompanyLicenses() {
    * @param index The index of the license in the list.
    */
   const validateLicense = (index: number) => {
-    let license = invalidLicensesTable.rows[index];
+    let license = moveItemBetweenTables(
+      index,
+      invalidLicensesTable,
+      validLicensesTable,
+      setInvalidLicenses,
+      setValidLicenses
+    );
 
-    setInvalidLicenses([
-      ...invalidLicensesTable.rows.slice(0, index),
-      ...invalidLicensesTable.rows.slice(index + 1),
-    ]);
-
-    updateChangedOnValidate(license);
+    updateNewChanges(license, newInvalidatedLicenses, newValidatedLicenses);
   };
 
   /**
@@ -100,37 +85,27 @@ export default function AdminCompanyLicenses() {
    * @param indices The indices of the licenses in the list.
    */
   const invalidateSelectedLicenses = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = validLicensesTable.rows[index];
-      validLicensesTable.rows = [
-        ...validLicensesTable.rows.slice(0, index),
-        ...validLicensesTable.rows.slice(index + 1),
-      ];
-
-      updateChangedOnInvalidate(user);
-    }
-
-    setValidLicenses(validLicensesTable.rows);
+    moveItemsBetweenTables(
+      indices,
+      validLicensesTable,
+      invalidLicensesTable,
+      setValidLicenses,
+      setInvalidLicenses,
+      newValidatedLicenses,
+      newInvalidatedLicenses
+    );
   };
 
   const validateSelectedLicenses = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = invalidLicensesTable.rows[index];
-      invalidLicensesTable.rows = [
-        ...invalidLicensesTable.rows.slice(0, index),
-        ...invalidLicensesTable.rows.slice(index + 1),
-      ];
-
-      updateChangedOnValidate(user);
-    }
-
-    setInvalidLicenses(invalidLicensesTable.rows);
+    moveItemsBetweenTables(
+      indices,
+      invalidLicensesTable,
+      validLicensesTable,
+      setInvalidLicenses,
+      setValidLicenses,
+      newInvalidatedLicenses,
+      newValidatedLicenses
+    );
   };
 
   const validLicensesTable: SelectTableProps = createSelectTableProps(
@@ -161,7 +136,7 @@ export default function AdminCompanyLicenses() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          licenses: Array.from(newInvalidatedLicenses, (item: number) => {
+          licenses: Array.from(newInvalidatedLicenses, (item: string) => {
             return {
               license_id: parseInt(item.toString()),
               valid: false,

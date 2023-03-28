@@ -10,6 +10,7 @@ import {
   createRowProps,
   updateNewChanges,
   moveItemBetweenTables,
+  moveItemsBetweenTables,
 } from "./SelectTableFunctions";
 
 /**
@@ -85,23 +86,16 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addSelectedUsersAccess = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = withoutAccessTable.rows[index];
-      withoutAccessTable.rows = [
-        ...withoutAccessTable.rows.slice(0, index),
-        ...withoutAccessTable.rows.slice(index + 1),
-      ];
-
-      withAccessTable.rows.push(user);
-
-      updateNewChanges(user, newUsersWithoutAccess, newUsersWithAccess);
-    }
-    setUsersWithoutAccess(withoutAccessTable.rows);
-    setUsersWithAccess(withAccessTable.rows);
+  const addSelectedUsersAccess = (indices: number[]) => {
+    moveItemsBetweenTables(
+      indices,
+      withoutAccessTable,
+      withAccessTable,
+      setUsersWithoutAccess,
+      setUsersWithAccess,
+      newUsersWithoutAccess,
+      newUsersWithAccess
+    );
   };
 
   /**
@@ -110,24 +104,16 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeSelectedUsersAccess = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = withAccessTable.rows[index];
-      withAccessTable.rows = [
-        ...withAccessTable.rows.slice(0, index),
-        ...withAccessTable.rows.slice(index + 1),
-      ];
-
-      withoutAccessTable.rows.push(user);
-
-      updateNewChanges(user, newUsersWithAccess, newUsersWithoutAccess);
-    }
-
-    setUsersWithAccess(withAccessTable.rows);
-    setUsersWithoutAccess(withoutAccessTable.rows);
+  const removeSelectedUsersAccess = (indices: number[]) => {
+    moveItemsBetweenTables(
+      indices,
+      withAccessTable,
+      withoutAccessTable,
+      setUsersWithAccess,
+      setUsersWithoutAccess,
+      newUsersWithAccess,
+      newUsersWithoutAccess
+    );
   };
 
   const withoutAccessTable: SelectTableProps = createSelectTableProps(
