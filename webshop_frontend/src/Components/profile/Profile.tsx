@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
@@ -8,6 +8,7 @@ import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
 import CompanyUsers from "./managing/CompanyUsers";
 import { useEffect, useState } from "react";
+import { User } from "../../Interfaces";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
 // check if we are in production mode
@@ -23,13 +24,19 @@ if (import.meta.env.PROD) {
  * @returns The Profile page component.
  */
 export default function Profile() {
+  const [user, setUser] = useState<User>();
+
   // check sign in status
   const checkSignInStatus = async () => {
     let result = await fetch(baseUrl + "api/priv/logged_in", {
       method: "GET",
       credentials: "include",
     });
+
     if (result.status === 200) {
+      const data: User = await result.json();
+      setUser(data);
+
       return true;
     } else {
       return false;
@@ -47,11 +54,10 @@ export default function Profile() {
   return (
     <>
       <Routes>
-        {signedIn ? (
-          <Route path="/" element={<MyAccount />} />
-        ) : (
-          <Route path="/" element={<SignIn />} />
-        )}
+        <Route
+          path="/"
+          element={signedIn ? <Navigate to={`${user?.user_id}`} /> : <SignIn />}
+        />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
         <Route path="/:userId" element={<MyAccount />} />
 

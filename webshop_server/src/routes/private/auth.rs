@@ -49,7 +49,7 @@ async fn logout(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Respo
 async fn logged_in(req: HttpRequest, pool: web::Data<Pool<Postgres>>) -> impl Responder {
     let valid = auth::validate_user(req, &pool).await;
     match valid {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(user) => HttpResponse::Ok().json(user),
         Err(e) => match e {
             AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
             AuthError::SqlxError(e) => {
