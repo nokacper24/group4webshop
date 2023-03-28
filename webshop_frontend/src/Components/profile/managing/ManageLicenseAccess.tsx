@@ -28,8 +28,8 @@ export default function ManageLicenseAccess() {
   });
   const [users, setUsers] = useState<User[]>([]);
 
-  const [newUsersWithoutAccess] = useState<Map<string, string>>(new Map());
-  const [newUsersWithAccess] = useState<Map<string, string>>(new Map());
+  const [newUsersWithoutAccess] = useState<Set<string>>(new Set());
+  const [newUsersWithAccess] = useState<Set<string>>(new Set());
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState<
     SelectTableRowProps[]
@@ -47,7 +47,7 @@ export default function ManageLicenseAccess() {
     if (newUsersWithoutAccess.has(user.id)) {
       newUsersWithoutAccess.delete(user.id);
     } else if (!newUsersWithAccess.has(user.id)) {
-      newUsersWithAccess.set(user.id, user.columns[0].text);
+      newUsersWithAccess.add(user.id);
     }
   };
 
@@ -60,7 +60,7 @@ export default function ManageLicenseAccess() {
     if (newUsersWithAccess.has(user.id)) {
       newUsersWithAccess.delete(user.id);
     } else if (!newUsersWithoutAccess.has(user.id)) {
-      newUsersWithoutAccess.set(user.id, user.columns[0].text);
+      newUsersWithoutAccess.add(user.id);
     }
   };
 
@@ -249,9 +249,9 @@ export default function ManageLicenseAccess() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(newUsersWithAccess, (item) => {
+          users: Array.from(newUsersWithAccess, (id) => {
             return {
-              user_id: item[0],
+              user_id: id,
               license_id: licenseId ? parseInt(licenseId) : NaN,
             };
           }),
@@ -260,6 +260,7 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 201) {
+            alert("Users successfully saved");
             location.reload();
           } else if (status == 409) {
             alert("Failed to save changes, because users already have access");
@@ -283,9 +284,9 @@ export default function ManageLicenseAccess() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(newUsersWithoutAccess, (item) => {
+          users: Array.from(newUsersWithoutAccess, (id) => {
             return {
-              user_id: item[0],
+              user_id: id,
               license_id: licenseId ? parseInt(licenseId) : NaN,
             };
           }),
@@ -294,6 +295,7 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
+            alert("Users successfully saved");
             location.reload();
           } else {
             alert("Something went wrong when saving users");
