@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { License, Product, User } from "../../../Interfaces";
-import SelectTable, { SelectTableRowProps } from "./SelectTable";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "./SelectTable";
+import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
 
 /**
  * A Manage License Access page.
@@ -24,8 +28,8 @@ export default function ManageLicenseAccess() {
   });
   const [users, setUsers] = useState<User[]>([]);
 
-  const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
-  const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
+  const [newUsersWithoutAccess] = useState<Map<string, string>>(new Map());
+  const [newUsersWithAccess] = useState<Map<string, string>>(new Map());
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState<
     SelectTableRowProps[]
@@ -40,10 +44,10 @@ export default function ManageLicenseAccess() {
    * @param user The user to check if their access has changed.
    */
   const updateChangedOnAdd = (user: SelectTableRowProps) => {
-    if (changedUsersWithoutAccess.has(user.id)) {
-      changedUsersWithoutAccess.delete(user.id);
-    } else if (!changedUsersWithAccess.has(user.id)) {
-      changedUsersWithAccess.set(user.id, user.columns[0].text);
+    if (newUsersWithoutAccess.has(user.id)) {
+      newUsersWithoutAccess.delete(user.id);
+    } else if (!newUsersWithAccess.has(user.id)) {
+      newUsersWithAccess.set(user.id, user.columns[0].text);
     }
   };
 
@@ -53,10 +57,10 @@ export default function ManageLicenseAccess() {
    * @param user The user to check if their access has changed.
    */
   const updateChangedOnRemove = (user: SelectTableRowProps) => {
-    if (changedUsersWithAccess.has(user.id)) {
-      changedUsersWithAccess.delete(user.id);
-    } else if (!changedUsersWithoutAccess.has(user.id)) {
-      changedUsersWithoutAccess.set(user.id, user.columns[0].text);
+    if (newUsersWithAccess.has(user.id)) {
+      newUsersWithAccess.delete(user.id);
+    } else if (!newUsersWithoutAccess.has(user.id)) {
+      newUsersWithoutAccess.set(user.id, user.columns[0].text);
     }
   };
 
@@ -159,27 +163,21 @@ export default function ManageLicenseAccess() {
     setUsersWithoutAccess(withoutAccessTable.rows);
   };
 
-  const withoutAccessTable = {
-    header: {
-      columns: [{ text: "Users" }],
-    },
-    rows: usersWithoutAccess,
-    button: { text: "Add", action: addUserAccess },
-    outsideButtons: [
-      { text: "Add all selected", action: addSelectedUsersAccess },
-    ],
-  };
+  const withoutAccessTable: SelectTableProps = createSelectTableProps(
+    ["Users"],
+    usersWithoutAccess,
+    "Add",
+    addUserAccess,
+    new Map([["Add selected", addSelectedUsersAccess]])
+  );
 
-  const withAccessTable = {
-    header: {
-      columns: [{ text: "Users" }],
-    },
-    rows: usersWithAccess,
-    button: { text: "Remove", action: removeUserAccess },
-    outsideButtons: [
-      { text: "Remove all selected", action: removeSelectedUsersAccess },
-    ],
-  };
+  const withAccessTable: SelectTableProps = createSelectTableProps(
+    ["Users"],
+    usersWithAccess,
+    "Remove",
+    removeUserAccess,
+    new Map([["Remove selected", removeSelectedUsersAccess]])
+  );
 
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   // Check if we are in production mode
@@ -243,7 +241,7 @@ export default function ManageLicenseAccess() {
    * Send a POST request to add users' access to the license.
    */
   const sendAddUsersRequest = () => {
-    if (changedUsersWithAccess.size > 0) {
+    if (newUsersWithAccess.size > 0) {
       fetch(`${baseUrl}/api/license_users`, {
         method: "POST",
         headers: {
@@ -251,7 +249,7 @@ export default function ManageLicenseAccess() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(changedUsersWithAccess, (item) => {
+          users: Array.from(newUsersWithAccess, (item) => {
             return {
               user_id: item[0],
               license_id: licenseId ? parseInt(licenseId) : NaN,
@@ -277,7 +275,7 @@ export default function ManageLicenseAccess() {
    * Send a DELETE request to remove users' access to the license.
    */
   const sendRemoveUsersRequest = () => {
-    if (changedUsersWithoutAccess.size > 0) {
+    if (newUsersWithoutAccess.size > 0) {
       fetch(`${baseUrl}/api/license_users`, {
         method: "DELETE",
         headers: {
@@ -285,7 +283,7 @@ export default function ManageLicenseAccess() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(changedUsersWithoutAccess, (item) => {
+          users: Array.from(newUsersWithoutAccess, (item) => {
             return {
               user_id: item[0],
               license_id: licenseId ? parseInt(licenseId) : NaN,
@@ -346,12 +344,12 @@ export default function ManageLicenseAccess() {
 
           setUsersWithoutAccess(
             withoutAccess.map((user) => {
-              return { id: user.user_id, columns: [{ text: user.email }] };
+              return createRowProps(user.user_id, [user.email]);
             })
           );
           setUsersWithAccess(
             withAccess.map((user) => {
-              return { id: user.user_id, columns: [{ text: user.email }] };
+              return createRowProps(user.user_id, [user.email]);
             })
           );
         })
@@ -366,13 +364,13 @@ export default function ManageLicenseAccess() {
         <p>
           Product: {license.product_name}
           <br></br>
-          Active users: {usersWithAccess.length - changedUsersWithAccess.size}
+          Active users: {usersWithAccess.length - newUsersWithAccess.size}
           <br></br>
           Total allowed: {license.amount}
           <br></br>
-          Start date: {license.start_date.toDateString()}
+          Start date: {new Date(license.start_date).toDateString()}
           <br></br>
-          End date: {license.end_date.toDateString()}
+          End date: {new Date(license.end_date).toDateString()}
           <br></br>
           Status: {license.valid ? "Valid" : "Invalid"}
           <br></br>

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "../managing/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
 import { LicenseVital } from "../../../Interfaces";
 import {
   createSelectTableProps,
-  createTableRowProps,
+  createRowProps,
 } from "../managing/SelectTableFunctions";
 
 /**
@@ -130,26 +133,20 @@ export default function AdminCompanyLicenses() {
     setInvalidLicenses(invalidLicensesTable.rows);
   };
 
-  let validLicensesOutsideButtons: Map<string, (indices: number[]) => void> =
-    new Map([["Invalidate licenses", invalidateSelectedLicenses]]);
-
-  const validLicensesTable = createSelectTableProps(
+  const validLicensesTable: SelectTableProps = createSelectTableProps(
     ["ID", "Company", "Product"],
     validLicenses,
     "Invalidate",
     invalidateLicense,
-    validLicensesOutsideButtons
+    new Map([["Invalidate licenses", invalidateSelectedLicenses]])
   );
 
-  let invalidLicensesOutsideButtons: Map<string, (indices: number[]) => void> =
-    new Map([["Validate licenses", validateSelectedLicenses]]);
-
-  const invalidLicensesTable = createSelectTableProps(
+  const invalidLicensesTable: SelectTableProps = createSelectTableProps(
     ["ID", "Company", "Product"],
     invalidLicenses,
     "Validate",
     validateLicense,
-    invalidLicensesOutsideButtons
+    new Map([["Validate licenses", validateSelectedLicenses]])
   );
 
   /**
@@ -195,7 +192,7 @@ export default function AdminCompanyLicenses() {
         let invalidLicenses: SelectTableRowProps[] = [];
 
         licenses.map((license: LicenseVital) => {
-          let newLicense = createTableRowProps(license.license_id.toString(), [
+          let newLicense = createRowProps(license.license_id.toString(), [
             license.license_id.toString(),
             license.company_name,
             license.display_name,

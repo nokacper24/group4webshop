@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import SelectTable, { SelectTableRowProps } from "./SelectTable";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "./SelectTable";
 import { User } from "../../../Interfaces";
+import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
 
 /**
  * A page for managing company users.
@@ -47,26 +51,25 @@ export default function CompanyUsers() {
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
       let index = sortedIndices[i];
-      let user = usersList.rows[index];
-      usersList.rows = [
-        ...usersList.rows.slice(0, index),
-        ...usersList.rows.slice(index + 1),
+      let user = usersTable.rows[index];
+      usersTable.rows = [
+        ...usersTable.rows.slice(0, index),
+        ...usersTable.rows.slice(index + 1),
       ];
 
       updateNewRemovedUsers(user.id);
     }
 
-    setUsers(usersList.rows);
+    setUsers(usersTable.rows);
   };
 
-  const usersList = {
-    header: {
-      columns: [{ text: "User" }],
-    },
-    rows: users,
-    button: { text: "Edit", action: editUser },
-    outsideButtons: [{ text: "Remove selected", action: removeUsers }],
-  };
+  const usersTable: SelectTableProps = createSelectTableProps(
+    ["User"],
+    users,
+    "Edit",
+    editUser,
+    new Map([["Remove selected", removeUsers]])
+  );
 
   /**
    * Send a GET request to get the company users.
@@ -230,10 +233,7 @@ export default function CompanyUsers() {
     fetchCompanyUsers().then((users) => {
       setUsers(
         users.map((user: User) => {
-          return {
-            id: user.user_id,
-            columns: [{ text: user.email }],
-          };
+          return createRowProps(user.user_id, [user.email]);
         })
       );
     });
@@ -254,10 +254,10 @@ export default function CompanyUsers() {
           address, but will have to go through all the initial steps again.
         </p>
         <SelectTable
-          header={usersList.header}
-          rows={usersList.rows}
-          button={usersList.button}
-          outsideButtons={usersList.outsideButtons}
+          header={usersTable.header}
+          rows={usersTable.rows}
+          button={usersTable.button}
+          outsideButtons={usersTable.outsideButtons}
         />
         <button className="default-button small-button" onClick={handleSave}>
           Save changes

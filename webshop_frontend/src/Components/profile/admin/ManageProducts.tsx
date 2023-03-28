@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../../Interfaces";
-import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "../managing/SelectTable";
+import {
+  createSelectTableProps,
+  createRowProps,
+} from "../managing/SelectTableFunctions";
 
 export default function ManageProducts() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -12,17 +19,16 @@ export default function ManageProducts() {
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
   const editProduct = (index: number) => {
-    console.log("Editing: ", index);
+    console.log("Editing: ", index); // TODO: Reroute to product page
   };
 
-  const productsList = {
-    header: {
-      columns: [{ text: "Product" }, { text: "Description" }],
-    },
-    rows: products,
-    button: { text: "Edit", action: editProduct },
-    outsideButtons: [],
-  };
+  const productsTable: SelectTableProps = createSelectTableProps(
+    ["Product", "Description"],
+    products,
+    "Edit",
+    editProduct,
+    new Map([])
+  );
 
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
@@ -31,16 +37,13 @@ export default function ManageProducts() {
   };
 
   useEffect(() => {
-    fetchProducts().then((products) => {
+    fetchProducts().then((products: Product[]) => {
       setProducts(
         products.map((product: Product) => {
-          return {
-            id: product.product_id,
-            columns: [
-              { text: product.display_name },
-              { text: product.short_description },
-            ],
-          };
+          return createRowProps(product.product_id, [
+            product.display_name,
+            product.short_description,
+          ]);
         })
       );
     });
@@ -50,10 +53,10 @@ export default function ManageProducts() {
     <section className="container left-aligned">
       <h1>Manage products</h1>
       <SelectTable
-        header={productsList.header}
-        rows={productsList.rows}
-        button={productsList.button}
-        outsideButtons={productsList.outsideButtons}
+        header={productsTable.header}
+        rows={productsTable.rows}
+        button={productsTable.button}
+        outsideButtons={productsTable.outsideButtons}
       />
     </section>
   );
