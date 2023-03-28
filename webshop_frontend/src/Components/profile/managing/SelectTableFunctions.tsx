@@ -88,14 +88,38 @@ export function moveItemBetweenTables(
   let item: SelectTableRowProps = fromTable.rows[index];
 
   /* Remove item from the "From list" */
-  let newFromTempArray = fromTable.rows.filter((element) => element !== item);
-  setFromListFunction(newFromTempArray);
+  fromTable.rows = fromTable.rows.filter((element) => element !== item);
+  setFromListFunction(fromTable.rows);
 
   /* Add item to the "To list" */
   toTable.rows.push(item);
   setToListFunction(toTable.rows);
 
   return item;
+}
+
+export function moveItemsBetweenTables(
+  indices: number[],
+  fromTable: SelectTableProps,
+  toTable: SelectTableProps,
+  setFromListFunction: any,
+  setToListFunction: any,
+  newFromList: Set<string>,
+  newToList: Set<string>
+) {
+  let sortedIndices = indices.sort((a, b) => a - b);
+
+  for (let i = sortedIndices.length - 1; i >= 0; i--) {
+    let index = sortedIndices[i];
+    let item: SelectTableRowProps = fromTable.rows[index];
+
+    fromTable.rows = fromTable.rows.filter((element) => element !== item);
+    toTable.rows.push(item);
+
+    updateNewChanges(item, newFromList, newToList);
+  }
+  setFromListFunction(fromTable.rows);
+  setToListFunction(toTable.rows);
 }
 
 /**
