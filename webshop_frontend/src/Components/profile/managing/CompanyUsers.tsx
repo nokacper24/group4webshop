@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "./SelectTable";
+import SelectTable, { SelectTableRowProps } from "./SelectTable";
 import { User } from "../../../Interfaces";
 
 /**

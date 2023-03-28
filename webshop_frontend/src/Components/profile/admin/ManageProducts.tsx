@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../../Interfaces";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "../managing/SelectTable";
+import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
 
 export default function ManageProducts() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import SelectTable from "../managing/SelectTable";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
+import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
 import { License } from "../../../Interfaces";
 

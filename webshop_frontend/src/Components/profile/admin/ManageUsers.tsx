@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "../../../Interfaces";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "../managing/SelectTable";
+import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
 
 /**
  * A Manage Users page.

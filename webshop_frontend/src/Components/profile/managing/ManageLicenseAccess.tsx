@@ -1,12 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { License, Product, User } from "../../../Interfaces";
-import SelectTable from "./SelectTable";
-
-export type SelectTableRowProps = {
-  id: string;
-  columns: { text: string }[];
-};
+import SelectTable, { SelectTableRowProps } from "./SelectTable";
 
 /**
  * A Manage License Access page.
