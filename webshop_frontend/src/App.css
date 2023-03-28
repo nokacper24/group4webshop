@@ -124,6 +124,7 @@ button {
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
+  text-decoration: none;
   transition: background var(--transition-speed);
 }
 
@@ -1059,10 +1060,6 @@ form a:hover {
 .button-container {
   display: flex;
   gap: 1em;
-}
-
-.button-container>a {
-  text-decoration: none;
 }
 
 /* || MANAGE/ADMIN PAGES */
