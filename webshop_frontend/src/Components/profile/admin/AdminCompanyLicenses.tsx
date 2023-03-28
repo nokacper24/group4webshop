@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import SelectTable, { SelectTableRowProps } from "../managing/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
-import { License } from "../../../Interfaces";
+import { LicenseVital } from "../../../Interfaces";
+import {
+  createSelectTableProps,
+  createTableRowProps,
+} from "../managing/SelectTableFunctions";
 
 /**
  * An admin page for managing companies' licenses.
@@ -16,9 +20,15 @@ export default function AdminCompanyLicenses() {
     baseUrl = "";
   }
 
-  const [licenses, setLicenses] = useState<SelectTableRowProps[]>([]);
+  const [validLicenses, setValidLicenses] = useState<SelectTableRowProps[]>([]);
+  const [invalidLicenses, setInvalidLicenses] = useState<SelectTableRowProps[]>(
+    []
+  );
 
-  const [invalidatedLicenses] = useState<Set<number>>(new Set());
+  const [newValidatedLiceneses, setNewValidatedLicenses] = useState<
+    Set<number>
+  >(new Set());
+  const [newInvalidatedLicenses] = useState<Set<number>>(new Set());
 
   /**
    * Get all licenses.
@@ -28,7 +38,7 @@ export default function AdminCompanyLicenses() {
   const fetchLicenses = async () => {
     const response = await fetch(`${baseUrl}/api/licenses_vital`);
     const data = await response.json();
-    return data.map((license: License) => license);
+    return data.map((license: LicenseVital) => license);
   };
 
   /**
@@ -36,8 +46,17 @@ export default function AdminCompanyLicenses() {
    *
    * @param license The license to invalidate.
    */
-  const updateChangedOnInvalidate = (license: any) => {
-    invalidatedLicenses.add(license.id);
+  const updateChangedOnInvalidate = (license: SelectTableRowProps) => {
+    newInvalidatedLicenses.add(parseInt(license.id));
+  };
+
+  /**
+   * Add license as pending to be validated.
+   *
+   * @param license The license to validate.
+   */
+  const updateChangedOnValidate = (license: SelectTableRowProps) => {
+    newValidatedLiceneses.add(parseInt(license.id));
   };
 
   /**
@@ -46,14 +65,30 @@ export default function AdminCompanyLicenses() {
    * @param index The index of the license in the list.
    */
   const invalidateLicense = (index: number) => {
-    let license = licensesList.rows[index];
+    let license = validLicensesTable.rows[index];
 
-    setLicenses([
-      ...licensesList.rows.slice(0, index),
-      ...licensesList.rows.slice(index + 1),
+    setValidLicenses([
+      ...validLicensesTable.rows.slice(0, index),
+      ...validLicensesTable.rows.slice(index + 1),
     ]);
 
     updateChangedOnInvalidate(license);
+  };
+
+  /**
+   * Remove a license from list of invalid licenses.
+   *
+   * @param index The index of the license in the list.
+   */
+  const validateLicense = (index: number) => {
+    let license = invalidLicensesTable.rows[index];
+
+    setInvalidLicenses([
+      ...invalidLicensesTable.rows.slice(0, index),
+      ...invalidLicensesTable.rows.slice(index + 1),
+    ]);
+
+    updateChangedOnValidate(license);
   };
 
   /**
@@ -66,34 +101,62 @@ export default function AdminCompanyLicenses() {
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
       let index = sortedIndices[i];
-      let user = licensesList.rows[index];
-      licensesList.rows = [
-        ...licensesList.rows.slice(0, index),
-        ...licensesList.rows.slice(index + 1),
+      let user = validLicensesTable.rows[index];
+      validLicensesTable.rows = [
+        ...validLicensesTable.rows.slice(0, index),
+        ...validLicensesTable.rows.slice(index + 1),
       ];
 
       updateChangedOnInvalidate(user);
     }
 
-    setLicenses(licensesList.rows);
+    setValidLicenses(validLicensesTable.rows);
   };
 
-  const licensesList = {
-    header: {
-      columns: [{ text: "ID" }, { text: "Company" }, { text: "Product" }],
-    },
-    rows: licenses,
-    button: { text: "Invalidate", action: invalidateLicense },
-    outsideButtons: [
-      { text: "Invalidate licenses", action: invalidateSelectedLicenses },
-    ],
+  const validateSelectedLicenses = (indices: number[]) => {
+    let sortedIndices = indices.sort((a, b) => a - b);
+
+    for (let i = sortedIndices.length - 1; i >= 0; i--) {
+      let index = sortedIndices[i];
+      let user = invalidLicensesTable.rows[index];
+      invalidLicensesTable.rows = [
+        ...invalidLicensesTable.rows.slice(0, index),
+        ...invalidLicensesTable.rows.slice(index + 1),
+      ];
+
+      updateChangedOnValidate(user);
+    }
+
+    setInvalidLicenses(invalidLicensesTable.rows);
   };
+
+  let validLicensesOutsideButtons: Map<string, (indices: number[]) => void> =
+    new Map([["Invalidate licenses", invalidateSelectedLicenses]]);
+
+  const validLicensesTable = createSelectTableProps(
+    ["ID", "Company", "Product"],
+    validLicenses,
+    "Invalidate",
+    invalidateLicense,
+    validLicensesOutsideButtons
+  );
+
+  let invalidLicensesOutsideButtons: Map<string, (indices: number[]) => void> =
+    new Map([["Validate licenses", validateSelectedLicenses]]);
+
+  const invalidLicensesTable = createSelectTableProps(
+    ["ID", "Company", "Product"],
+    invalidLicenses,
+    "Validate",
+    validateLicense,
+    invalidLicensesOutsideButtons
+  );
 
   /**
    * Send a PATCH request to set licenses validation to false.
    */
   const patchInvalidated = () => {
-    if (invalidatedLicenses.size > 0) {
+    if (newInvalidatedLicenses.size > 0) {
       fetch(`${baseUrl}/api/licenses`, {
         method: "PATCH",
         headers: {
@@ -101,7 +164,7 @@ export default function AdminCompanyLicenses() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          licenses: Array.from(invalidatedLicenses, (item: number) => {
+          licenses: Array.from(newInvalidatedLicenses, (item: number) => {
             return {
               license_id: parseInt(item.toString()),
               valid: false,
@@ -127,22 +190,26 @@ export default function AdminCompanyLicenses() {
 
   useEffect(() => {
     fetchLicenses()
-      .then((licenses) => {
+      .then((licenses: LicenseVital[]) => {
         let validLicenses: SelectTableRowProps[] = [];
-        licenses.map((license: any) => {
+        let invalidLicenses: SelectTableRowProps[] = [];
+
+        licenses.map((license: LicenseVital) => {
+          let newLicense = createTableRowProps(license.license_id.toString(), [
+            license.license_id.toString(),
+            license.company_name,
+            license.display_name,
+          ]);
+
           if (license.valid) {
-            validLicenses.push({
-              id: license.licenseId.toString(),
-              columns: [
-                { text: license.licenseId.toString() },
-                { text: license.companyName },
-                { text: license.productName },
-              ],
-            });
+            validLicenses.push(newLicense);
+          } else {
+            invalidLicenses.push(newLicense);
           }
         });
 
-        setLicenses(validLicenses);
+        setValidLicenses(validLicenses);
+        setInvalidLicenses(invalidLicenses);
       })
       .catch(() => alert("Failed to load licenses"));
   }, []);
@@ -150,12 +217,21 @@ export default function AdminCompanyLicenses() {
   return (
     <>
       <section className="container left-aligned">
-        <h1>Manage company licenses</h1>
+        <h1>Valid licenses</h1>
         <SelectTable
-          header={licensesList.header}
-          rows={licensesList.rows}
-          button={licensesList.button}
-          outsideButtons={licensesList.outsideButtons}
+          header={validLicensesTable.header}
+          rows={validLicensesTable.rows}
+          button={validLicensesTable.button}
+          outsideButtons={validLicensesTable.outsideButtons}
+        />
+      </section>
+      <section className="container left-aligned">
+        <h1>Invalid licenses</h1>
+        <SelectTable
+          header={invalidLicensesTable.header}
+          rows={invalidLicensesTable.rows}
+          button={invalidLicensesTable.button}
+          outsideButtons={invalidLicensesTable.outsideButtons}
         />
       </section>
       <section className="container left-aligned button-container">
@@ -164,7 +240,7 @@ export default function AdminCompanyLicenses() {
         </button>
       </section>
       <section className="center-container">
-        <CreateLicenseForm></CreateLicenseForm>
+        <CreateLicenseForm />
       </section>
     </>
   );
