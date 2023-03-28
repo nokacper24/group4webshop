@@ -17,13 +17,7 @@ export default function MyAccount() {
   }
 
   const { userId } = useParams();
-  const [user, setUser] = useState<User>({
-    user_id: "",
-    email: "",
-    pass_hash: "",
-    company_id: -1,
-    role: "",
-  });
+  const [user, setUser] = useState<User>();
 
   const fetchUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/${userId}`);
@@ -42,7 +36,7 @@ export default function MyAccount() {
       <h2>Company users</h2>
       <div className="button-container">
         <Link
-          to={`../company-users/${user.company_id}`}
+          to={`../company-users/${user?.company_id}`}
           className="default-button small-button"
         >
           Manage users
@@ -50,7 +44,7 @@ export default function MyAccount() {
       </div>
 
       <h2>Licenses</h2>
-      <LicenseList companyId={user.company_id} />
+      <LicenseList companyId={user ? user.company_id : -1} />
     </>
   );
 
@@ -91,7 +85,9 @@ export default function MyAccount() {
           <p>
             E-mail: {user?.email} <br></br>
           </p>
-          <button className="default-button small-button">Edit profile</button>
+          <Link className="default-button small-button" to="edit">
+            Edit profile
+          </Link>
         </div>
       </section>
       <section className="container left-aligned">{userRoleSection}</section>
