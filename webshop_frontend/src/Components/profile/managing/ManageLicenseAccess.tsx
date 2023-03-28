@@ -5,7 +5,12 @@ import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
 } from "./SelectTable";
-import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
+import {
+  createSelectTableProps,
+  createRowProps,
+  updateNewChanges,
+  moveItemBetweenTables,
+} from "./SelectTableFunctions";
 
 /**
  * A Manage License Access page.
@@ -39,53 +44,21 @@ export default function ManageLicenseAccess() {
   );
 
   /**
-   * Update if the user access has been changed (from original) when adding user.
-   *
-   * @param user The user to check if their access has changed.
-   */
-  const updateChangedOnAdd = (user: SelectTableRowProps) => {
-    if (newUsersWithoutAccess.has(user.id)) {
-      newUsersWithoutAccess.delete(user.id);
-    } else if (!newUsersWithAccess.has(user.id)) {
-      newUsersWithAccess.add(user.id);
-    }
-  };
-
-  /**
-   * Update if the user access has been changed (from original) when removing user.
-   *
-   * @param user The user to check if their access has changed.
-   */
-  const updateChangedOnRemove = (user: SelectTableRowProps) => {
-    if (newUsersWithAccess.has(user.id)) {
-      newUsersWithAccess.delete(user.id);
-    } else if (!newUsersWithoutAccess.has(user.id)) {
-      newUsersWithoutAccess.add(user.id);
-    }
-  };
-
-  /**
    * Add a user to the list of users with license access.
    *
    * @param index The index of the user in the list of users without
    *        access to be added to the list of users with access.
    */
   const addUserAccess = (index: number) => {
-    /* Get the user to be moved from "without access" to "with access" */
-    let user = withoutAccessTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      withoutAccessTable,
+      withAccessTable,
+      setUsersWithoutAccess,
+      setUsersWithAccess
+    );
 
-    /* Remove user from the "without access" list */
-    let newWithoutAccessArray = [
-      ...withoutAccessTable.rows.slice(0, index),
-      ...withoutAccessTable.rows.slice(index + 1),
-    ];
-    setUsersWithoutAccess(newWithoutAccessArray);
-
-    /* Add user to the "with access" list */
-    withAccessTable.rows.push(user);
-    setUsersWithAccess(withAccessTable.rows);
-
-    updateChangedOnAdd(user);
+    updateNewChanges(user, newUsersWithoutAccess, newUsersWithAccess);
   };
 
   /**
@@ -95,21 +68,15 @@ export default function ManageLicenseAccess() {
    *        access to be added to the list of users without access.
    */
   const removeUserAccess = (index: number) => {
-    /* Get the user to be moved from "with access" to "without access" */
-    let user = withAccessTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      withAccessTable,
+      withoutAccessTable,
+      setUsersWithAccess,
+      setUsersWithoutAccess
+    );
 
-    /* Remove user from the "with access" list */
-    let newWithAccessArray = [
-      ...withAccessTable.rows.slice(0, index),
-      ...withAccessTable.rows.slice(index + 1),
-    ];
-    setUsersWithAccess(newWithAccessArray);
-
-    /* Add user to the "without access" list */
-    withoutAccessTable.rows.push(user);
-    setUsersWithoutAccess(withoutAccessTable.rows);
-
-    updateChangedOnRemove(user);
+    updateNewChanges(user, newUsersWithAccess, newUsersWithoutAccess);
   };
 
   /**
@@ -131,7 +98,7 @@ export default function ManageLicenseAccess() {
 
       withAccessTable.rows.push(user);
 
-      updateChangedOnAdd(user);
+      updateNewChanges(user, newUsersWithoutAccess, newUsersWithAccess);
     }
     setUsersWithoutAccess(withoutAccessTable.rows);
     setUsersWithAccess(withAccessTable.rows);
@@ -156,7 +123,7 @@ export default function ManageLicenseAccess() {
 
       withoutAccessTable.rows.push(user);
 
-      updateChangedOnRemove(user);
+      updateNewChanges(user, newUsersWithAccess, newUsersWithoutAccess);
     }
 
     setUsersWithAccess(withAccessTable.rows);
@@ -260,15 +227,15 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 201) {
-            alert("Users successfully saved");
+            alert("User access successfully added");
             location.reload();
           } else if (status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
-            alert("Something went wrong when saving users");
+            alert("Something went wrong when adding users");
           }
         })
-        .catch(() => alert("Failed to save license access for users"));
+        .catch(() => alert("Failed to add license access for users"));
     }
   };
 
@@ -295,13 +262,13 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            alert("Users successfully saved");
+            alert("User access successfully removed");
             location.reload();
           } else {
-            alert("Something went wrong when saving users");
+            alert("Something went wrong when removing users");
           }
         })
-        .catch(() => alert("Failed to save license access for users"));
+        .catch(() => alert("Failed to remove license access for users"));
     }
   };
 

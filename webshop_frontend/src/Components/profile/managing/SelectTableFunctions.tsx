@@ -66,3 +66,54 @@ export function createRowProps(
     }),
   };
 }
+
+/**
+ * Move an item from one Select Table to another.
+ *
+ * @param index The index of the item in the rows.
+ * @param fromTable The table the item is moved from.
+ * @param toTable The table the item is moved to.
+ * @param setFromListFunction The set function that sets the 'from list'.
+ * @param setToListFunction The set function that sets the 'to list'.
+ * @returns The item that was moved.
+ */
+export function moveItemBetweenTables(
+  index: number,
+  fromTable: SelectTableProps,
+  toTable: SelectTableProps,
+  setFromListFunction: any,
+  setToListFunction: any
+) {
+  /* Get the item to be moved from the "From list" to the "To list" */
+  let item: SelectTableRowProps = fromTable.rows[index];
+
+  /* Remove item from the "From list" */
+  let newFromTempArray = fromTable.rows.filter((element) => element !== item);
+  setFromListFunction(newFromTempArray);
+
+  /* Add item to the "To list" */
+  toTable.rows.push(item);
+  setToListFunction(toTable.rows);
+
+  return item;
+}
+
+/**
+ * Update the lists keeping track of changes, when an item is moved from one table to another.
+ * Does not store every change made, only if it differs from the original data.
+ *
+ * @param item The item that has been moved.
+ * @param newFromList The list the item is moved from.
+ * @param newToList The list the item is moved to.
+ */
+export function updateNewChanges(
+  item: SelectTableRowProps,
+  newFromList: Set<string>,
+  newToList: Set<string>
+) {
+  if (newFromList.has(item.id)) {
+    newFromList.delete(item.id);
+  } else if (!newToList.has(item.id)) {
+    newToList.add(item.id);
+  }
+}
