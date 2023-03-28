@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Product } from "../../Interfaces";
+import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
 
 /**
@@ -70,14 +70,14 @@ export default function PurchaseLicense() {
    *
    * @param license The license to create.
    */
-  const postLicense = async (license: any) => {
+  const postLicense = async (license: License) => {
     fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: license,
+      body: JSON.stringify(license),
     }).then((response) => {
       const status = response.status;
       if (status == 201) {
@@ -101,16 +101,18 @@ export default function PurchaseLicense() {
     event.preventDefault();
 
     if (validateForm()) {
-      let license = JSON.stringify({
+      let license: License = {
+        license_id: NaN,
         company_id: 1 /* TODO: Get real company */,
-        product_id: productId,
+        product_id: product.product_id,
+        product_name: product.display_name,
         start_date: new Date(),
         end_date: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ),
         amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
-      });
+      };
 
       postLicense(license);
     }
