@@ -32,7 +32,6 @@ export default function ManageLicenseAccess() {
     product_id: "0",
     product_name: "",
   });
-  const [users, setUsers] = useState<User[]>([]);
 
   const [newUsersWithoutAccess] = useState<Set<string>>(new Set());
   const [newUsersWithAccess] = useState<Set<string>>(new Set());
@@ -270,47 +269,43 @@ export default function ManageLicenseAccess() {
   };
 
   useEffect(() => {
-    // Get license and users
+    // Get license
     fetchLicense()
       .then((license) => {
         setLicense(license);
+        // Get the product the license is for
         fetchProduct(license.product_id).then((product) => {
           license.product_name = product.display_name;
         });
-        fetchCompanyUsers(license.company_id).then((users) => setUsers(users));
+        // Get all company users
+        fetchCompanyUsers(license.company_id).then((users) => {
+          // Sort users between those with and without license access
+          fetchUsersWithAccess()
+            .then((x) => {
+              let withoutAccess: User[] = [];
+              let withAccess: User[] = [];
+
+              withoutAccess = users.filter(
+                (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
+              );
+              withAccess = x;
+
+              setUsersWithoutAccess(
+                withoutAccess.map((user) => {
+                  return createRowProps(user.user_id, [user.email]);
+                })
+              );
+              setUsersWithAccess(
+                withAccess.map((user) => {
+                  return createRowProps(user.user_id, [user.email]);
+                })
+              );
+            })
+            .catch(() => alert("Failed to fetch users with license access"));
+        });
       })
       .catch((e) => alert("Failed to get license or users"));
   }, []);
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      // Sort users between those with and without license access
-      fetchUsersWithAccess()
-        .then((x) => {
-          let withoutAccess: User[] = [];
-          let withAccess: User[] = [];
-
-          withoutAccess = users.filter(
-            (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
-          );
-          withAccess = x;
-
-          setUsersWithoutAccess(
-            withoutAccess.map((user) => {
-              return createRowProps(user.user_id, [user.email]);
-            })
-          );
-          setUsersWithAccess(
-            withAccess.map((user) => {
-              return createRowProps(user.user_id, [user.email]);
-            })
-          );
-        })
-        .catch(() => alert("Failed to fetch users with license access"));
-    }
-  }, [users]);
 
   return (
     <>
