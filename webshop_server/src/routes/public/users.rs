@@ -347,7 +347,7 @@ async fn add_license_users(
         Err(e) => match e {
             sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
                 error_handling::PostgresDBError::UniqueViolation => {
-                    HttpResponse::BadRequest().json("Record already exists")
+                    HttpResponse::Conflict().json("Record already exists")
                 }
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },

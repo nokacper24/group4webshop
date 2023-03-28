@@ -261,7 +261,7 @@ export default function ManageLicenseAccess() {
           const status = response.status;
           if (status == 201) {
             location.reload();
-          } else if (status == 400) {
+          } else if (status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
             alert("Something went wrong when saving users");
