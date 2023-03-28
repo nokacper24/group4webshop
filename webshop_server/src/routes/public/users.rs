@@ -1,7 +1,9 @@
+use std::f32::consts::E;
+
 use crate::{
     data_access::{
         error_handling,
-        user::{self, LicenseUser, Role, User, UserID, UserRole},
+        user::{self, LicenseUser, Role, User, UserID, UserRole}, company,
     },
     utils::auth,
 };
@@ -167,6 +169,7 @@ async fn users_by_license(
 #[derive(Deserialize, Serialize)]
 struct Invite {
     email: String,
+    company_id: Option<i32>,
 }
 
 #[post("/generate_invite")]
@@ -175,6 +178,17 @@ async fn generate_invite(
     invite: web::Json<Invite>,
     req: HttpRequest,
 ) -> impl Responder {
+    let company = match invite.company_id {
+        Some(company_id) => match company::get_company_by_id(&pool, &company_id).await {
+            Ok(company) => Ok(company),
+            Err(e) => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
+        None => Err("No company ID provided"),
+    };
+
     let user = match auth::validate_user(req.clone(), &pool).await {
         Ok(user) => user,
         Err(e) => match e {
@@ -189,13 +203,94 @@ async fn generate_invite(
     };
 
     match user.role {
-        user::Role::Admin | user::Role::CompanyItHead | user::Role::CompanyIt => {
-            return HttpResponse::NotImplemented()
-                .json("Can't generate a new user for proflex yet!");
+
+        user::Role::Admin => {
+            match company {
+                Ok(company) => {
+                    let partial = user::create_partial_company_user(&invite.email, company.company_id, &pool).await;
+                    match partial {
+                        Ok(partial) => {
+                            let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
+                            match invite {
+                                Ok(invite) => {
+                                    return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                }
+                                Err(e) => {
+                                    log::error!("Error: {}", e);
+                                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("Error: {}", e);
+                            return HttpResponse::InternalServerError().json("Internal Server Error");
+                        }
+                    }
+
+                }
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    return HttpResponse::InternalServerError().json("No company ID provided");
+                }
+            }
+        }
+
+        user::Role::CompanyItHead | user::Role::CompanyIt => {
+            match company {
+                Ok(company) => {
+                    if company.company_id == user.company_id {
+                        let partial = user::create_partial_company_user(&invite.email, company.company_id, &pool).await;
+                        match partial {
+                            Ok(partial) => {
+                                let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
+                                match invite {
+                                    Ok(invite) => {
+                                        return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                    }
+                                    Err(e) => {
+                                        log::error!("Error: {}", e);
+                                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Error: {}", e);
+                                return HttpResponse::InternalServerError().json("Internal Server Error");
+                            }
+                        }
+                    } else {
+                        return HttpResponse::Forbidden().json("You don't have permission to invite users to this company");
+                    }
+                }
+                Err(e) => {
+                    //if no id is provided, then the user is trying to invite a user to their company
+                    let comp_id = user.company_id;
+                    let partial = user::create_partial_company_user(&invite.email, comp_id, &pool).await;
+                    match partial {
+                        Ok(partial) => {
+                            let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
+                            match invite {
+                                Ok(invite) => {
+                                    return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                }
+                                Err(e) => {
+                                    log::error!("Error: {}", e);
+                                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("Error: {}", e);
+                            return HttpResponse::InternalServerError().json("Internal Server Error");
+                        }
+                    }
+                }
+            }
         }
         user::Role::Default => {
             return HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
         }
+
     }
 }
 
