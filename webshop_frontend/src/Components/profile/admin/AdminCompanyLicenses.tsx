@@ -129,7 +129,7 @@ export default function AdminCompanyLicenses() {
    */
   const patchInvalidated = () => {
     if (newInvalidatedLicenses.size > 0) {
-      fetch(`${baseUrl}/api/licenses`, {
+      fetch(`${baseUrl}/api/priv/licenses`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -156,8 +156,41 @@ export default function AdminCompanyLicenses() {
     }
   };
 
+  /**
+   * Send a PATCH request to set licenses validation to true.
+   */
+  const patchValidated = () => {
+    if (newValidatedLicenses.size > 0) {
+      fetch(`${baseUrl}/api/priv/licenses`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          licenses: Array.from(newInvalidatedLicenses, (item: string) => {
+            return {
+              license_id: parseInt(item.toString()),
+              valid: true,
+            };
+          }),
+        }),
+      })
+        .then((response) => {
+          const status = response.status;
+          if (status == 200) {
+            location.reload();
+          } else {
+            alert("Something went wrong when saving licenses");
+          }
+        })
+        .catch(() => alert("Failed to save license validation status"));
+    }
+  };
+
   const handleSave = () => {
     patchInvalidated();
+    patchValidated();
   };
 
   useEffect(() => {
