@@ -9,6 +9,7 @@ import ManageUsers from "./admin/ManageUsers";
 import CompanyUsers from "./managing/CompanyUsers";
 import { useEffect, useState } from "react";
 import { User } from "../../Interfaces";
+import EditProfile from "./EditProfile";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
 // check if we are in production mode
@@ -59,7 +60,8 @@ export default function Profile() {
           element={signedIn ? <Navigate to={`${user?.user_id}`} /> : <SignIn />}
         />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
-        <Route path="/:userId" element={<MyAccount />} />
+        <Route path="/:userId/*" element={<MyAccount />} />
+        <Route path="/:userId/edit" element={<EditProfile />} />
 
         {/* License manager */}
         <Route
