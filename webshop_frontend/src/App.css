@@ -538,6 +538,13 @@ form>h1 {
   font-size: 2rem;
 }
 
+form input {
+  margin-inline: 0.5em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  font-size: 1rem;
+}
+
 .form-container {
   width: min(80vw, 700px);
   margin-block: 1em;
@@ -556,13 +563,9 @@ form>h1 {
   text-align: left;
 }
 
-.form-container>label {
-  margin-top: 1em;
-}
-
 .form-container>input {
+  margin: initial;
   font-size: 1.1rem;
-  padding: 0.5em;
 }
 
 .form-container>textarea {
