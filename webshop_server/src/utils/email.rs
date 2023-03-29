@@ -5,11 +5,7 @@ pub struct Email {
 }
 
 impl Email {
-    pub fn new(
-        recipient_email: String,
-        subject: String,
-        body: String,
-    ) -> Self {
+    pub fn new(recipient_email: String, subject: String, body: String) -> Self {
         Self {
             recipient_email,
             subject,
@@ -25,7 +21,7 @@ pub enum MailError {
     InvalidBody,
 
     SendError,
-    NotImplemented
+    NotImplemented,
 }
 
 impl std::fmt::Display for MailError {
@@ -40,9 +36,11 @@ impl std::fmt::Display for MailError {
     }
 }
 
-pub async fn send_email(
-    email: Email,
-) -> Result<(), MailError> {
-    log::info!("Sending email to {}\n with content {}", email.recipient_email, email.body);
+pub async fn send_email(email: Email) -> Result<(), MailError> {
+    log::info!(
+        "Sending email to {}\n with content {}",
+        email.recipient_email,
+        email.body
+    );
     return Err(MailError::NotImplemented);
 }
