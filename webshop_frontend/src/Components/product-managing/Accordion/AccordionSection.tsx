@@ -10,11 +10,11 @@ import { ChangeType } from "./ChangeTypes";
 export type AccordionSectionProps = {
   header: {
     title: string;
-    rows: {
-      title: string;
-      id: number;
-    }[];
   };
+  rows: {
+    title: string;
+    id: number;
+  }[];
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;

@@ -70,17 +70,17 @@ export default function AccordionTable() {
     {
       header: {
         title: "Test",
-        rows: [
-          {
-            title: "Test",
-            id: 1,
-          },
-          {
-            title: "Test2",
-            id: 2,
-          },
-        ],
       },
+      rows: [
+        {
+          title: "Test",
+          id: 1,
+        },
+        {
+          title: "Test2",
+          id: 2,
+        },
+      ],
       sectionID: 0,
       registerContentChange: registerContentChange,
       deleteSection: deleteSection,
