@@ -1,10 +1,10 @@
-use std::f32::consts::E;
+
 
 use crate::{
     data_access::{
         company, error_handling,
         user::{
-            self, LicenseUser, PartialRegisterCompanyUser, RegisterCompanyUser, Role, User, UserID,
+            self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID,
             UserRole,
         },
     },
@@ -12,9 +12,9 @@ use crate::{
 };
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
-use chrono::{Duration, Utc};
-use futures::{FutureExt, StreamExt};
-use log::error;
+
+use futures::StreamExt;
+
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::str;

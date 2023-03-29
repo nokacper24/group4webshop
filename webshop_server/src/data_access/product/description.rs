@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, Executor, {Pool, Postgres}, query_as,
+    query, Executor, {Pool, Postgres},
 };
 
 /// Description component. Contains either text or image.

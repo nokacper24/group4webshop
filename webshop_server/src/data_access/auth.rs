@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, Utc, NaiveDate};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 
 use sqlx::{

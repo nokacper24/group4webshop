@@ -1,10 +1,10 @@
-use actix_web::{get, post, put, web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub mod descriptions;
 
-use crate::data_access::product::{self, PartialProduct, Product};
+use crate::data_access::product::{self, Product};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(all_products);
