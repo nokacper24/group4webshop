@@ -276,7 +276,6 @@ export default function CompanyUsers() {
             E-mail
             <input
               ref={singleEmail}
-              style={{ marginInline: "1em", padding: "0.5em" }}
               type="email"
               name="email"
               placeholder="john.doe@company.com"
@@ -294,12 +293,7 @@ export default function CompanyUsers() {
         <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
           <label style={{ display: "inline-block" }}>
             Choose a file
-            <input
-              ref={csvEmail}
-              style={{ marginInline: "1em", padding: "0.5em" }}
-              type="file"
-              accept=".csv"
-            ></input>
+            <input ref={csvEmail} type="file" accept=".csv"></input>
           </label>
           <button
             style={{ display: "inline-block" }}
