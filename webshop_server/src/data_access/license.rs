@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, query_as, {Pool, Postgres},
+    query, query_as, Executor, {Pool, Postgres},
 };
 use utoipa::ToSchema;
 
