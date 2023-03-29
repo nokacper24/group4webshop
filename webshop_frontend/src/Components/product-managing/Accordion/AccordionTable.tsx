@@ -98,8 +98,8 @@ export default function AccordionTable() {
     sectionList.push({
       header: {
         title: title,
-        rows: [],
       },
+      rows: [],
       sectionID: id,
       registerContentChange: registerContentChange,
       deleteSection: deleteSection,
@@ -131,9 +131,10 @@ export default function AccordionTable() {
           <AccordionSection
             key={section.sectionID}
             header={section.header}
+            rows={section.rows}
             sectionID={section.sectionID}
-            registerContentChange={section.registerContentChange}
-            deleteSection={section.deleteSection}
+            registerContentChange={registerContentChange}
+            deleteSection={deleteSection}
           ></AccordionSection>
         );
       })}
