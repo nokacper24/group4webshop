@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Description } from "../../product-page/ProductPage";
+/* import { Description } from "../../product-page/ProductPage"; */
 
 export type AccordionRowProps = {
   title: string;
@@ -15,7 +15,7 @@ export type AccordionRowProps = {
  * @returns the React component for the Accordion row
  */
 export function AccordionRow(props: AccordionRowProps) {
-  const [state, setState] = useState<Description>(); //TODO: Update this when getting input
+  const [state, setState] = useState<String>(); //TODO: Update this when getting input
 
   if (props.title.length <= 0) {
     props.title = "Title";
