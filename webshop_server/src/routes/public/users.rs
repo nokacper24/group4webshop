@@ -5,7 +5,7 @@ use crate::{
         error_handling,
         user::{self, LicenseUser, Role, User, UserID, UserRole}, company,
     },
-    utils::auth,
+    utils::{auth, self},
 };
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -213,7 +213,17 @@ async fn generate_invite(
                             let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
                             match invite {
                                 Ok(invite) => {
-                                    return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                    let email = utils::email::Email::new(partial.email, "Invite to Proflex".to_string(), invite.id);
+                                    let res = utils::email::send_email(email).await;
+                                    match res {
+                                        Ok(_) => {
+                                            return HttpResponse::Ok().json("Invite sent");
+                                        }
+                                        Err(e) => {
+                                            log::error!("Error: {}", e);
+                                            return HttpResponse::InternalServerError().json("Internal Server Error");
+                                        }
+                                    }
                                 }
                                 Err(e) => {
                                     log::error!("Error: {}", e);
@@ -245,7 +255,17 @@ async fn generate_invite(
                                 let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
                                 match invite {
                                     Ok(invite) => {
-                                        return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                        let email = utils::email::Email::new(partial.email, "Invite to Proflex".to_string(), invite.id);
+                                    let res = utils::email::send_email(email).await;
+                                    match res {
+                                        Ok(_) => {
+                                            return HttpResponse::Ok().json("Invite sent");
+                                        }
+                                        Err(e) => {
+                                            log::error!("Error: {}", e);
+                                            return HttpResponse::InternalServerError().json("Internal Server Error");
+                                        }
+                                    }
                                     }
                                     Err(e) => {
                                         log::error!("Error: {}", e);
@@ -262,7 +282,7 @@ async fn generate_invite(
                         return HttpResponse::Forbidden().json("You don't have permission to invite users to this company");
                     }
                 }
-                Err(e) => {
+                Err(_e) => {
                     //if no id is provided, then the user is trying to invite a user to their company
                     let comp_id = user.company_id;
                     let partial = user::create_partial_company_user(&invite.email, comp_id, &pool).await;
@@ -271,7 +291,17 @@ async fn generate_invite(
                             let invite = user::create_invite(None, Some(partial.company_id), &pool).await;
                             match invite {
                                 Ok(invite) => {
-                                    return  HttpResponse::NotImplemented().json("Not implemented yet");
+                                    let email = utils::email::Email::new(partial.email, "Invite to Proflex".to_string(), invite.id);
+                                    let res = utils::email::send_email(email).await;
+                                    match res {
+                                        Ok(_) => {
+                                            return HttpResponse::Ok().json("Invite sent");
+                                        }
+                                        Err(e) => {
+                                            log::error!("Error: {}", e);
+                                            return HttpResponse::InternalServerError().json("Internal Server Error");
+                                        }
+                                    }
                                 }
                                 Err(e) => {
                                     log::error!("Error: {}", e);
