@@ -128,16 +128,19 @@ pub async fn update_license_validations(
     pool: &Pool<Postgres>,
     licenses: &Vec<InvalidLicense>,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for license in licenses.iter() {
-        query!(
-            r#"UPDATE license
-            SET valid = $1
-            WHERE license_id = $2"#,
-            license.valid,
-            license.license_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"UPDATE license
+                SET valid = $1
+                WHERE license_id = $2"#,
+                license.valid,
+                license.license_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }
