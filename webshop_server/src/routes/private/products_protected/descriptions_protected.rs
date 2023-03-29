@@ -175,9 +175,12 @@ async fn update_priorities(
         return HttpResponse::Conflict().json("Not all components belong to this product");
     }
 
-    let query_result =
-        product::description::update_priorities_bulk(&pool, product_id.as_str(), &ids_and_priotities)
-            .await;
+    let query_result = product::description::update_priorities_bulk(
+        &pool,
+        product_id.as_str(),
+        &ids_and_priotities,
+    )
+    .await;
 
     match query_result {
         Ok(_) => HttpResponse::NoContent().finish(),

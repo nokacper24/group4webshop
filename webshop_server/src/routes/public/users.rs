@@ -1,12 +1,7 @@
-
-
 use crate::{
     data_access::{
         company, error_handling,
-        user::{
-            self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID,
-            UserRole,
-        },
+        user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
     utils::{self, auth},
 };
@@ -466,22 +461,17 @@ fn csv_string_to_list(text: String) -> Vec<String> {
 #[post("/register")]
 async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
     match user::user_exixts(&invite.email, &pool).await {
-        Ok(true) => {
-            HttpResponse::BadRequest().json("User already exists")
-        }
+        Ok(true) => HttpResponse::BadRequest().json("User already exists"),
         Ok(false) => {
             let partial_user = user::create_partial_user(&invite.email, &pool).await;
             match partial_user {
                 Ok(partial_user) => {
                     let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
                     match invite_obj {
-                        Ok(invite_obj) => {
-                            HttpResponse::Created().json(invite_obj)
-                        }
+                        Ok(invite_obj) => HttpResponse::Created().json(invite_obj),
                         Err(e) => {
                             log::error!("Error: {}", e);
-                            HttpResponse::InternalServerError()
-                                .json("Internal Server Error")
+                            HttpResponse::InternalServerError().json("Internal Server Error")
                         }
                     }
                 }

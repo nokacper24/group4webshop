@@ -17,9 +17,13 @@ async fn companies(pool: web::Data<Pool<Postgres>>) -> impl Responder {
         Ok(companies) => HttpResponse::Ok().json(companies),
         Err(e) => match e {
             sqlx::Error::Database(e) => match error_handling::PostgresDBError::from_str(e) {
-                error_handling::PostgresDBError::NoDataFound => HttpResponse::NotFound().json("No companies found"),
+                error_handling::PostgresDBError::NoDataFound => {
+                    HttpResponse::NotFound().json("No companies found")
+                }
                 // if the data already exists, return a Conflict
-                error_handling::PostgresDBError::UniqueViolation => HttpResponse::Conflict().json("Company already exists"),
+                error_handling::PostgresDBError::UniqueViolation => {
+                    HttpResponse::Conflict().json("Company already exists")
+                }
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),

@@ -18,7 +18,7 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
         Ok(valid) => valid,
         Err(e) => return Err(AuthError::SqlxError(e)),
     };
-    
+
     if valid {
         let cookie = auth::get_cookie(pool, cookie_str).await;
         return match cookie {
@@ -55,9 +55,7 @@ pub async fn extract_valid_cookie(
                 Err(AuthError::Unauthorized)
             }
         }
-        None => {
-            Err(AuthError::Unauthorized)
-        }
+        None => Err(AuthError::Unauthorized),
     }
 }
 

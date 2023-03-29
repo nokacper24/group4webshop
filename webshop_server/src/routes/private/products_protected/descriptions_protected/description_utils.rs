@@ -66,7 +66,7 @@ pub async fn extract_image_and_texts_from_multipart(
     if fields_found.len() != text_fields.len() {
         return Err(ImageExtractorError::MissingData);
     }
-    
+
     for field in fields_found.values() {
         if field.trim().is_empty() {
             return Err(ImageExtractorError::MissingData);

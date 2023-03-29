@@ -30,12 +30,13 @@ pub async fn is_valid_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<bool
         cookie
     )
     .fetch_one(pool)
-    .await{
+    .await
+    {
         Ok(cookie) => cookie,
         Err(e) => match e {
             sqlx::Error::RowNotFound => return Ok(false),
             _ => return Err(e),
-        }
+        },
     };
 
     if cookie.exp < Utc::now() {
@@ -89,5 +90,3 @@ pub async fn get_cookie(pool: &Pool<Postgres>, cookie: &str) -> Result<Cookie, s
     }
     Ok(cookie)
 }
-
-

@@ -3,11 +3,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Pool, Postgres};
 
-use crate::{data_access::{
-    self,
-    auth::create_cookie,
-    user::{create_invite, get_user_by_username},
-}, utils::auth::COOKIE_KEY_SECRET};
+use crate::{
+    data_access::{
+        self,
+        auth::create_cookie,
+        user::{create_invite, get_user_by_username},
+    },
+    utils::auth::COOKIE_KEY_SECRET,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(login);
@@ -30,9 +33,8 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
         Ok(v) => {
             //check if password is correct TODO: use hash verify function
             if v.pass_hash != user.password {
-                return HttpResponse::Unauthorized().json(
-                    json!({"success": false, "message": "Incorrect username or password"}),
-                );
+                return HttpResponse::Unauthorized()
+                    .json(json!({"success": false, "message": "Incorrect username or password"}));
             }
 
             let cookie_string = create_cookie(&pool, &v.user_id).await;
@@ -55,19 +57,14 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
                 }
             }
         }
-        Err(e) => {
-            match e {
-                sqlx::Error::RowNotFound => {
-                    HttpResponse::Unauthorized().json(
-                        json!({"success": false, "message": "Incorrect username or password"}),
-                    )
-                }
-                _ => {
-                    log::error!("Error getting user: {}", e);
-                    HttpResponse::InternalServerError().json("Internal Server Error")
-                }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::Unauthorized()
+                .json(json!({"success": false, "message": "Incorrect username or password"})),
+            _ => {
+                log::error!("Error getting user: {}", e);
+                HttpResponse::InternalServerError().json("Internal Server Error")
             }
-        }
+        },
     }
 }
 
@@ -81,9 +78,7 @@ async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -
     // check if user exists
     let db_user = get_user_by_username(&pool, &email.email).await;
     match db_user {
-        Ok(_v) => {
-            HttpResponse::BadRequest().json("User already exists")
-        }
+        Ok(_v) => HttpResponse::BadRequest().json("User already exists"),
         Err(_e) => {
             // create partial user
             let partial_user = data_access::user::create_partial_user(&email.email, &pool).await;
@@ -99,14 +94,11 @@ async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -
                             HttpResponse::Ok().json("Invite created, check your email")
                         }
                         Err(_e) => {
-                            HttpResponse::InternalServerError()
-                                .json("Internal Server Error")
+                            HttpResponse::InternalServerError().json("Internal Server Error")
                         }
                     }
                 }
-                Err(_e) => {
-                    HttpResponse::InternalServerError().json("Internal Server Error")
-                }
+                Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
             }
         }
     }
@@ -128,9 +120,7 @@ async fn valid_verify(
     let invite = data_access::user::get_invite(&invite_id, &pool).await;
     match invite {
         Ok(v) => HttpResponse::Ok().json(v),
-        Err(_e) => {
-            HttpResponse::InternalServerError().json("Internal Server Error")
-        }
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -211,8 +201,7 @@ async fn verify(
             match (&data.company_name, &data.company_address) {
                 (Some(name), Some(address)) => {
                     // create company
-                    let company =
-                        data_access::company::create_company(&pool, name, address).await;
+                    let company = data_access::company::create_company(&pool, name, address).await;
                     match company {
                         Ok(c) => {
                             // create user with company from partial user
@@ -253,26 +242,16 @@ async fn verify(
                                 .json("Internal Server Error")
                         }
                     }
-                },
+                }
                 (None, None) => {
-                    return HttpResponse::BadRequest()
-                        .json("Company name and address are required")
+                    return HttpResponse::BadRequest().json("Company name and address are required")
                 }
-                (None, _) => {
-                    return HttpResponse::BadRequest().json("Company name is required")
-                }
-                (_, None) => {
-                    return HttpResponse::BadRequest().json("Company address is required")
-                }
-
-
+                (None, _) => return HttpResponse::BadRequest().json("Company name is required"),
+                (_, None) => return HttpResponse::BadRequest().json("Company address is required"),
             }
             HttpResponse::InternalServerError().json("Internal Server Error")
         }
 
-        Err(_e) => {
-            HttpResponse::InternalServerError().json("Internal Server Error")
-        }
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
-
