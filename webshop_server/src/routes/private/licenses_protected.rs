@@ -67,10 +67,8 @@ async fn update_license_validations(
     other_licenses: web::Json<InvalidLicenses>,
 ) -> impl Responder {
     let other_licenses = &other_licenses.licenses;
-    match license::update_license_validations(&pool, &other_licenses).await {
+    match license::update_license_validations(&pool, other_licenses).await {
         Ok(_) => HttpResponse::Ok().json(other_licenses),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }

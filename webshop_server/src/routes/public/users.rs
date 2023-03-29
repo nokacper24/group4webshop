@@ -231,31 +231,31 @@ async fn generate_invite(
                                 let res = utils::email::send_email(email).await;
                                 match res {
                                     Ok(_) => {
-                                        return HttpResponse::Ok().json("Invite sent");
+                                        HttpResponse::Ok().json("Invite sent")
                                     }
                                     Err(e) => {
                                         log::error!("Error: {}", e);
-                                        return HttpResponse::InternalServerError()
-                                            .json("Internal Server Error");
+                                        HttpResponse::InternalServerError()
+                                            .json("Internal Server Error")
                                     }
                                 }
                             }
                             Err(e) => {
                                 log::error!("Error: {}", e);
-                                return HttpResponse::InternalServerError()
-                                    .json("Internal Server Error");
+                                HttpResponse::InternalServerError()
+                                    .json("Internal Server Error")
                             }
                         }
                     }
                     Err(e) => {
                         log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                        HttpResponse::InternalServerError().json("Internal Server Error")
                     }
                 }
             }
             Err(e) => {
                 log::error!("Error: {}", e);
-                return HttpResponse::InternalServerError().json("No company ID provided");
+                HttpResponse::InternalServerError().json("No company ID provided")
             }
         },
 
@@ -284,31 +284,31 @@ async fn generate_invite(
                                         let res = utils::email::send_email(email).await;
                                         match res {
                                             Ok(_) => {
-                                                return HttpResponse::Ok().json("Invite sent");
+                                                HttpResponse::Ok().json("Invite sent")
                                             }
                                             Err(e) => {
                                                 log::error!("Error: {}", e);
-                                                return HttpResponse::InternalServerError()
-                                                    .json("Internal Server Error");
+                                                HttpResponse::InternalServerError()
+                                                    .json("Internal Server Error")
                                             }
                                         }
                                     }
                                     Err(e) => {
                                         log::error!("Error: {}", e);
-                                        return HttpResponse::InternalServerError()
-                                            .json("Internal Server Error");
+                                        HttpResponse::InternalServerError()
+                                            .json("Internal Server Error")
                                     }
                                 }
                             }
                             Err(e) => {
                                 log::error!("Error: {}", e);
-                                return HttpResponse::InternalServerError()
-                                    .json("Internal Server Error");
+                                HttpResponse::InternalServerError()
+                                    .json("Internal Server Error")
                             }
                         }
                     } else {
-                        return HttpResponse::Forbidden()
-                            .json("You don't have permission to invite users to this company");
+                        HttpResponse::Forbidden()
+                            .json("You don't have permission to invite users to this company")
                     }
                 }
                 Err(_e) => {
@@ -330,33 +330,33 @@ async fn generate_invite(
                                     let res = utils::email::send_email(email).await;
                                     match res {
                                         Ok(_) => {
-                                            return HttpResponse::Ok().json("Invite sent");
+                                            HttpResponse::Ok().json("Invite sent")
                                         }
                                         Err(e) => {
                                             log::error!("Error: {}", e);
-                                            return HttpResponse::InternalServerError()
-                                                .json("Internal Server Error");
+                                            HttpResponse::InternalServerError()
+                                                .json("Internal Server Error")
                                         }
                                     }
                                 }
                                 Err(e) => {
                                     log::error!("Error: {}", e);
-                                    return HttpResponse::InternalServerError()
-                                        .json("Internal Server Error");
+                                    HttpResponse::InternalServerError()
+                                        .json("Internal Server Error")
                                 }
                             }
                         }
                         Err(e) => {
                             log::error!("Error: {}", e);
-                            return HttpResponse::InternalServerError()
-                                .json("Internal Server Error");
+                            HttpResponse::InternalServerError()
+                                .json("Internal Server Error")
                         }
                     }
                 }
             }
         }
         user::Role::Default => {
-            return HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
+            HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.")
         }
     }
 }
@@ -399,11 +399,11 @@ async fn generate_invites(
             }
 
             match user::create_partial_company_users(&other_users, &pool).await {
-                Ok(created_users) => return HttpResponse::Ok().json(created_users),
-                Err(_) => return HttpResponse::InternalServerError().finish(),
+                Ok(created_users) => HttpResponse::Ok().json(created_users),
+                Err(_) => HttpResponse::InternalServerError().finish(),
             }
         }
-        Err(e) => return HttpResponse::UnprocessableEntity().json(e.to_string()),
+        Err(e) => HttpResponse::UnprocessableEntity().json(e.to_string()),
     }
 }
 
@@ -437,8 +437,8 @@ async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, M
     }
 
     match String::from_utf8(buffer) {
-        Ok(text) => return Ok(text),
-        Err(e) => return Err(MultipartError::Parse(e.into())),
+        Ok(text) => Ok(text),
+        Err(e) => Err(MultipartError::Parse(e.into())),
     }
 }
 
@@ -455,19 +455,19 @@ async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, M
 /// assert_eq!(list, vec!["Hello", "world!"])
 /// ```
 fn csv_string_to_list(text: String) -> Vec<String> {
-    let list: Vec<&str> = text.split(",").collect();
+    let list: Vec<&str> = text.split(',').collect();
     let mut string_list = Vec::<String>::new();
     for word in list {
         string_list.push(word.trim().to_string());
     }
-    return string_list;
+    string_list
 }
 
 #[post("/register")]
 async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
     match user::user_exixts(&invite.email, &pool).await {
         Ok(true) => {
-            return HttpResponse::BadRequest().json("User already exists");
+            HttpResponse::BadRequest().json("User already exists")
         }
         Ok(false) => {
             let partial_user = user::create_partial_user(&invite.email, &pool).await;
@@ -476,24 +476,24 @@ async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) ->
                     let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
                     match invite_obj {
                         Ok(invite_obj) => {
-                            return HttpResponse::Created().json(invite_obj);
+                            HttpResponse::Created().json(invite_obj)
                         }
                         Err(e) => {
                             log::error!("Error: {}", e);
-                            return HttpResponse::InternalServerError()
-                                .json("Internal Server Error");
+                            HttpResponse::InternalServerError()
+                                .json("Internal Server Error")
                         }
                     }
                 }
                 Err(e) => {
                     log::error!("Error: {}", e);
-                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                    HttpResponse::InternalServerError().json("Internal Server Error")
                 }
             }
         }
         Err(e) => {
             log::error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            HttpResponse::InternalServerError().json("Internal Server Error")
         }
     }
 }
@@ -529,7 +529,7 @@ async fn add_license_users(
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::add_license_users(&pool, &other_users).await {
+    match user::add_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Created().json(other_users),
 
         Err(e) => match e {
@@ -569,11 +569,9 @@ async fn remove_license_users(
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::remove_license_users(&pool, &other_users).await {
+    match user::remove_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -626,11 +624,9 @@ async fn update_user_roles(
     other_users: web::Json<UserRoles>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::update_user_roles(&pool, &other_users).await {
+    match user::update_user_roles(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -665,10 +661,8 @@ async fn delete_users(
     other_users: web::Json<UserIDs>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::delete_users(&pool, &other_users).await {
+    match user::delete_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }

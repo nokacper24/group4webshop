@@ -42,5 +42,5 @@ pub async fn send_email(email: Email) -> Result<(), MailError> {
         email.recipient_email,
         email.body
     );
-    return Err(MailError::NotImplemented);
+    Err(MailError::NotImplemented)
 }

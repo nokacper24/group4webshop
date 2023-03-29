@@ -20,10 +20,10 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
     };
     
     if valid {
-        let cookie = auth::get_cookie(&pool, cookie_str).await;
+        let cookie = auth::get_cookie(pool, cookie_str).await;
         return match cookie {
             Ok(cookie) => {
-                let user = data_access::user::get_user_by_id(&pool, cookie.user_id).await;
+                let user = data_access::user::get_user_by_id(pool, cookie.user_id).await;
                 return match user {
                     Ok(user) => Ok(user),
                     Err(e) => Err(AuthError::SqlxError(e)),
@@ -32,7 +32,7 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
             Err(e) => Err(AuthError::SqlxError(e)),
         };
     } else {
-        return Err(AuthError::Unauthorized);
+        Err(AuthError::Unauthorized)
     }
 }
 
@@ -50,13 +50,13 @@ pub async fn extract_valid_cookie(
                 Err(e) => return Err(AuthError::SqlxError(e)),
             };
             if valid {
-                return Ok(cookie.to_string());
+                Ok(cookie.to_string())
             } else {
-                return Err(AuthError::Unauthorized);
+                Err(AuthError::Unauthorized)
             }
         }
         None => {
-            return Err(AuthError::Unauthorized);
+            Err(AuthError::Unauthorized)
         }
     }
 }

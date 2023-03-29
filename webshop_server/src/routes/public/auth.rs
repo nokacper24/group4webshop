@@ -51,20 +51,20 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
                 }
                 Err(e) => {
                     log::error!("Error creating cookie: {}", e);
-                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                    HttpResponse::InternalServerError().json("Internal Server Error")
                 }
             }
         }
         Err(e) => {
             match e {
                 sqlx::Error::RowNotFound => {
-                    return HttpResponse::Unauthorized().json(
+                    HttpResponse::Unauthorized().json(
                         json!({"success": false, "message": "Incorrect username or password"}),
-                    );
+                    )
                 }
                 _ => {
                     log::error!("Error getting user: {}", e);
-                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                    HttpResponse::InternalServerError().json("Internal Server Error")
                 }
             }
         }
@@ -82,7 +82,7 @@ async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -
     let db_user = get_user_by_username(&pool, &email.email).await;
     match db_user {
         Ok(_v) => {
-            return HttpResponse::BadRequest().json("User already exists");
+            HttpResponse::BadRequest().json("User already exists")
         }
         Err(_e) => {
             // create partial user
@@ -96,16 +96,16 @@ async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -
                             //print invite temporarely TODO: send email
                             println!("Invite: {}", v.id);
 
-                            return HttpResponse::Ok().json("Invite created, check your email");
+                            HttpResponse::Ok().json("Invite created, check your email")
                         }
                         Err(_e) => {
-                            return HttpResponse::InternalServerError()
-                                .json("Internal Server Error");
+                            HttpResponse::InternalServerError()
+                                .json("Internal Server Error")
                         }
                     }
                 }
                 Err(_e) => {
-                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                    HttpResponse::InternalServerError().json("Internal Server Error")
                 }
             }
         }
@@ -129,7 +129,7 @@ async fn valid_verify(
     match invite {
         Ok(v) => HttpResponse::Ok().json(v),
         Err(_e) => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            HttpResponse::InternalServerError().json("Internal Server Error")
         }
     }
 }
@@ -212,7 +212,7 @@ async fn verify(
                 (Some(name), Some(address)) => {
                     // create company
                     let company =
-                        data_access::company::create_company(&pool, &name, &address).await;
+                        data_access::company::create_company(&pool, name, address).await;
                     match company {
                         Ok(c) => {
                             // create user with company from partial user
@@ -267,11 +267,11 @@ async fn verify(
 
 
             }
-            return HttpResponse::InternalServerError().json("Internal Server Error")
+            HttpResponse::InternalServerError().json("Internal Server Error")
         }
 
         Err(_e) => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            HttpResponse::InternalServerError().json("Internal Server Error")
         }
     }
 }

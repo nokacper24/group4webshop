@@ -216,7 +216,7 @@ pub async fn create_partial_user(
     email: &str,
     pool: &Pool<Postgres>,
 ) -> Result<RegisterUser, sqlx::Error> {
-    let key = Uuid::new_v4().to_string();
+    let _key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(

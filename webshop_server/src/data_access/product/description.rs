@@ -336,10 +336,10 @@ pub async fn verify_component_ids(
     ).fetch_one(pool).await?;
     
     if let Some(is_contained) = result.is_contained {
-        return Ok(is_contained);
+        Ok(is_contained)
     } else {
         // Query returned null -> no components for specified product
-        return Err(sqlx::Error::RowNotFound);
+        Err(sqlx::Error::RowNotFound)
     }
 }
 

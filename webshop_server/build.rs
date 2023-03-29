@@ -23,7 +23,7 @@ fn main() -> std::io::Result<()> {
             false => ("sh", "-c"), // unix
         };
         let status = Command::new(program)
-            .args(&[c_option, "npm run build"])
+            .args([c_option, "npm run build"])
             .current_dir(FRONTEND_DIR)
             .status()
             .expect("Failed to run npm");

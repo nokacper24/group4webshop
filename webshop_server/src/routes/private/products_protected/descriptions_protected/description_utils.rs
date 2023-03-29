@@ -179,7 +179,7 @@ pub fn save_image(
 ) -> Result<String, std::io::Error> {
     std::fs::create_dir_all(dir)?;
 
-    let file_name = sanitize_filename::sanitize(file_name).replace(" ", "-");
+    let file_name = sanitize_filename::sanitize(file_name).replace(' ', "-");
 
     let mut path = format!("{}/{}", dir, file_name);
     let mut i = 1;

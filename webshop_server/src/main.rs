@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let allowed_origins = std::env::var("ALLOWED_ORIGINS")
         .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
-        .split(",")
+        .split(',')
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
         let cors = Cors::default()

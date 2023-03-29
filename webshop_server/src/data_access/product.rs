@@ -81,7 +81,7 @@ pub fn generate_id(display_name: &str) -> String {
     display_name
         .to_lowercase()
         .replace('.', "")
-        .replace(' ', "_").to_string()
+        .replace(' ', "_")
 }
 
 /// Returns all available products.
