@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AccordionBody } from "./AccordionBody";
+import { AccordionBody, addNewRow } from "./AccordionBody";
 import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
@@ -40,12 +40,11 @@ export function AccordionSection(props: AccordionSectionProps) {
   return (
     <>
       <AccordionHeader
-        title={content.title}
-        rows={content.rows}
-        addRow={content.addRow}
-        deleteSelf={content.deleteSelf}
+        title={props.header.title}
+        addRow={addNewRow}
+        deleteSelf={deleteSelf}
       ></AccordionHeader>
-      <AccordionBody rows={content.rows}></AccordionBody>
+      <AccordionBody rows={props.rows} registerContentChange={props.registerContentChange}></AccordionBody>
     </>
   );
 }
