@@ -282,16 +282,15 @@ pub async fn get_description_component_checked(
     ))
 }
 
-
 /// Checks if component ids all belong to the product.
 /// Returns true if all components belong to the specified product.
 /// False is at least one component does not belong to the specified product.
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `product_id` - Product id
 /// * `comp_ids` - Array of component ids
-/// 
+///
 /// # Errors
 /// * `sqlx::Error::RowNotFound` - No components for specified product
 /// * `sqlx::Error` - Any other database error
@@ -309,24 +308,26 @@ pub async fn verify_component_ids(
         ) as is_contained;"#,
         product_id,
         comp_ids
-    ).fetch_one(pool).await?;
-    
+    )
+    .fetch_one(pool)
+    .await?;
+
     if let Some(is_contained) = result.is_contained {
-        return Ok(is_contained);
+        Ok(is_contained)
     } else {
         // Query returned null -> no components for specified product
-        return Err(sqlx::Error::RowNotFound);
+        Err(sqlx::Error::RowNotFound)
     }
 }
 
 /// Updates priorities of multiple components.
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `product_id` - Product id of the product the components belong to
 /// * `comps_and_priorities` - Array of tuples of component id and priority
 ///     * \[(component_id, priority), ...]
-/// 
+///
 /// # Errors
 /// * `sqlx::Error` - Any database error
 /// * `sqlx::Error::Database` - I recommend using [PostgresDBError](crate::data_access::error_handling::PostgresDBError) to extract the underlying database error
@@ -334,7 +335,7 @@ pub async fn verify_component_ids(
 pub async fn update_priorities_bulk(
     pool: &Pool<Postgres>,
     product_id: &str,
-    comps_and_priorities: &[(i32,i32)],
+    comps_and_priorities: &[(i32, i32)],
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for (comp_id, priority) in comps_and_priorities {
@@ -346,7 +347,9 @@ pub async fn update_priorities_bulk(
             priority,
             comp_id,
             product_id
-        ).execute(&mut transaction).await?;
+        )
+        .execute(&mut transaction)
+        .await?;
     }
     transaction.commit().await?;
     Ok(())

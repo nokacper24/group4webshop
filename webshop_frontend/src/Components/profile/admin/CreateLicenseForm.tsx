@@ -1,14 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-
-type CompanyProps = {
-  companyId: number;
-  companyName: string;
-};
-
-type ProductProps = {
-  productId: string;
-  productName: string;
-};
+import { Company, License, Product } from "../../../Interfaces";
 
 /**
  * A form for creating a license.
@@ -22,8 +13,8 @@ export default function CreateLicenseForm() {
     baseUrl = "";
   }
 
-  const [companies, setCompanies] = useState<CompanyProps[]>([]);
-  const [products, setProducts] = useState<ProductProps[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   /**
    * Get all companies.
@@ -33,13 +24,7 @@ export default function CreateLicenseForm() {
   const fetchCompanies = async () => {
     const response = await fetch(`${baseUrl}/api/companies`);
     const data = await response.json();
-    const companies: CompanyProps[] = data.map((company: any) => {
-      return {
-        companyId: company.company_id,
-        companyName: company.company_name,
-      };
-    });
-    return companies;
+    return data.map((company: Company) => company);
   };
 
   /**
@@ -50,13 +35,7 @@ export default function CreateLicenseForm() {
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
-    const products: ProductProps[] = data.map((product: any) => {
-      return {
-        productId: product.product_id,
-        productName: product.display_name,
-      };
-    });
-    return products;
+    return data.map((product: Product) => product);
   };
 
   useEffect(() => {
@@ -64,13 +43,13 @@ export default function CreateLicenseForm() {
       .then((companies) => {
         setCompanies(companies);
       })
-      .catch(() => console.error("Failed to load companies"));
+      .catch(() => alert("Failed to load companies"));
 
     fetchProducts()
       .then((products) => {
         setProducts(products);
       })
-      .catch(() => console.error("Failed to load products"));
+      .catch(() => alert("Failed to load products"));
   }, []);
 
   /**
@@ -85,7 +64,6 @@ export default function CreateLicenseForm() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      /* TODO: Send along cookie for authentication */
       body: license,
     }).then((response) => {
       const status = response.status;
@@ -139,13 +117,6 @@ export default function CreateLicenseForm() {
       className="form-container container"
       onSubmit={(event) => handleSubmit(event)}
     >
-      {/* Prevent implicit submission of the form */}
-      <button
-        type="submit"
-        disabled
-        style={{ display: "none" }}
-        aria-hidden="true"
-      ></button>
       <h2>Create license</h2>
 
       <label htmlFor="companies">Company</label>
@@ -161,8 +132,8 @@ export default function CreateLicenseForm() {
         </option>
         {companies.map((company) => {
           return (
-            <option key={company.companyId} value={company.companyId}>
-              {company.companyName}
+            <option key={company.company_id} value={company.company_id}>
+              {company.company_name}
             </option>
           );
         })}
@@ -181,8 +152,8 @@ export default function CreateLicenseForm() {
         </option>
         {products.map((product) => {
           return (
-            <option key={product.productId} value={product.productId}>
-              {product.productName}
+            <option key={product.product_id} value={product.product_id}>
+              {product.display_name}
             </option>
           );
         })}
@@ -217,7 +188,7 @@ export default function CreateLicenseForm() {
       ></input>
 
       <button type="submit" className="m-t-1 default-button">
-        Save
+        Save changes
       </button>
     </form>
   );

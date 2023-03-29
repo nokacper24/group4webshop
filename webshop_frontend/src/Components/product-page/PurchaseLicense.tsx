@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
-
-interface ProductProps {
-  product_id: string;
-  display_name: string;
-  price_per_user: number;
-  short_description: string;
-}
 
 /**
  * Represents a Purchase License page.
@@ -24,11 +18,13 @@ export default function PurchaseLicense() {
   }
 
   const { productId } = useParams();
-  const [product, setProduct] = useState<ProductProps>({
-    product_id: "PLACEHOLDER",
-    display_name: "PLACEHOLDER",
+  const [product, setProduct] = useState<Product>({
+    product_id: "",
+    display_name: "",
     price_per_user: 0,
-    short_description: "PLACEHOLDER",
+    short_description: "",
+    main_image: "",
+    available: false,
   });
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -38,12 +34,7 @@ export default function PurchaseLicense() {
   const fetchProduct = async () => {
     const response = await fetch(`${baseUrl}/api/products/${productId}`);
     const data = await response.json();
-    const product = {
-      product_id: data.product_id,
-      display_name: data.display_name,
-      price_per_user: data.price_per_user,
-      short_description: data.short_description,
-    };
+    const product: Product = data;
     setProduct(product);
   };
 
@@ -79,15 +70,14 @@ export default function PurchaseLicense() {
    *
    * @param license The license to create.
    */
-  const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/licenses`, {
+  const postLicense = async (license: License) => {
+    fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      /* TODO: Send along cookie for authentication */
-      body: license,
+      body: JSON.stringify(license),
     }).then((response) => {
       const status = response.status;
       if (status == 201) {
@@ -111,16 +101,18 @@ export default function PurchaseLicense() {
     event.preventDefault();
 
     if (validateForm()) {
-      let license = JSON.stringify({
+      let license: License = {
+        license_id: NaN,
         company_id: 1 /* TODO: Get real company */,
-        product_id: productId,
+        product_id: product.product_id,
+        product_name: product.display_name,
         start_date: new Date(),
         end_date: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ),
-        amount: totalPrice / product.price_per_user,
+        amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
-      });
+      };
 
       postLicense(license);
     }
@@ -151,7 +143,7 @@ export default function PurchaseLicense() {
             refs={{ price }}
           />
 
-          <p className="total-price">TOTAL: {totalPrice}</p>
+          <p className="total-price">TOTAL: ${totalPrice}</p>
 
           <button type="submit" className="default-button submit-button">
             Buy

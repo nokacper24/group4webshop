@@ -8,7 +8,7 @@ import SelectTableButton from "./SelectTableButton";
  * selectAll: information about the  status of the "select all" checkbox.
  * button: the action button to be put in the last column of the row.
  */
-export type SelectTableRowProps = {
+export type RowProps = {
   rowIndex: number;
   columns: {
     text: string;
@@ -27,7 +27,7 @@ export type SelectTableRowProps = {
  * @param props The columns in the row.
  * @returns The table row component.
  */
-export default function SelectTableRow(props: SelectTableRowProps) {
+export default function SelectTableRow(props: RowProps) {
   const [selected, setSelected] = useState(false);
 
   useEffect(() => {

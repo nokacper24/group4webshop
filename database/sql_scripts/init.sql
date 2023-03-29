@@ -47,7 +47,7 @@ CREATE TABLE cookies (
     cookie TEXT NOT NULL,
     exp timestamptz NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE product (
@@ -76,7 +76,7 @@ CREATE TABLE user_license (
     user_id INT NOT NULL,
     PRIMARY KEY (license_id, user_id),
     FOREIGN KEY (license_id) REFERENCES license(license_id),
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE category (

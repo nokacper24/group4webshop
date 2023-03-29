@@ -1,23 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { User } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
-
-export type UserProps = {
-  userId: string;
-  email: string;
-  companyId: string;
-  role: string;
-};
-
-export type LicenseProps = {
-  licenseId: number;
-  valid: boolean;
-  startDate: Date;
-  endDate: Date;
-  amount: number;
-  companyId?: number;
-  productId: string;
-};
 
 /**
  * Represents the My Account page.
@@ -33,54 +17,40 @@ export default function MyAccount() {
   }
 
   const { userId } = useParams();
-  const [user, setUser] = useState<UserProps>();
-  const [licenses, setLicenses] = useState<LicenseProps[]>([]);
+  const [user, setUser] = useState<User>({
+    user_id: "",
+    email: "",
+    pass_hash: "",
+    company_id: -1,
+    role: "",
+  });
 
   const fetchUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/${userId}`);
     const data = await response.json();
-    const user = {
-      userId: data.user_id,
-      email: data.email,
-      companyId: data.company_id,
-      role: data.role,
-    };
+    const user: User = data;
     setUser(user);
     return user;
   };
 
-  const fetchLicenses = async (companyId: string) => {
-    const response = await fetch(
-      `${baseUrl}/api/companies/${companyId}/licenses`
-    );
-    const data = await response.json();
-    const licenses: LicenseProps[] = data.map((license: any) => {
-      return {
-        licenseId: license.license_id,
-        valid: license.valid,
-        startDate: new Date(license.start_date),
-        endDate: new Date(license.end_date),
-        amount: license.amount,
-        productId: license.product_id,
-      };
-    });
-    setLicenses(licenses);
-  };
-
   useEffect(() => {
-    fetchUser()
-      .then((user) => fetchLicenses(user.companyId))
-      .catch(() =>
-        console.log(
-          "An error occurred while trying to get the user or licenses."
-        )
-      );
+    fetchUser();
   }, []);
 
   const companyLicenses = (
     <>
+      <h2>Company users</h2>
+      <div className="button-container">
+        <Link
+          to={`../company-users/${user.company_id}`}
+          className="default-button small-button"
+        >
+          Manage users
+        </Link>
+      </div>
+
       <h2>Licenses</h2>
-      <LicenseList licenses={licenses} />
+      <LicenseList companyId={user.company_id} />
     </>
   );
 
@@ -120,11 +90,8 @@ export default function MyAccount() {
         <div className="user-details">
           <p>
             E-mail: {user?.email} <br></br>
-            Company: {user?.companyId}
-            <br></br>
-            <a href="">Reset password</a>
           </p>
-          <button className="default-button small-button">Edit</button>
+          <button className="default-button small-button">Edit profile</button>
         </div>
       </section>
       <section className="container left-aligned">{userRoleSection}</section>

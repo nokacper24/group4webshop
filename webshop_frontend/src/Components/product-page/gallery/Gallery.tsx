@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Testimonial } from "../ProductPage";
+import { Testimonial } from "../../../Interfaces";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
@@ -75,7 +75,7 @@ export default function Gallery(props: GalleryProps) {
   const reviewerProfile = {
     picturePath: props.testimonials[index].author_pic,
     name: props.testimonials[index].author,
-  }
+  };
 
   return (
     <div className="gallery">

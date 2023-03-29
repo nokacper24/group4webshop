@@ -9,6 +9,7 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
+import PageNotFound from "./Components/PageNotFound";
 
 /**
  * Represents the website content.
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
           <Route path="profile/*" element={<Profile />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </main>
 

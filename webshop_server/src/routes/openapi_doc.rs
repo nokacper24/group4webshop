@@ -25,7 +25,7 @@ pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
         ),
         (
             Url::new("Testimonials", "/api-doc/openapi_testimonials.json"),
-            build_licenses_doc(info.clone()),
+            build_licenses_doc(info),
         ),
     ]));
 }

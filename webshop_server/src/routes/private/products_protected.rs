@@ -163,7 +163,7 @@ pub async fn create_product(
         None => return HttpResponse::InternalServerError().finish(),
     };
 
-    let product_id = product::generate_id(&prod_name);
+    let product_id = product::generate_id(prod_name);
 
     let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
     let file_name = match description_utils::save_image(image, &path, &file_name) {

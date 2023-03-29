@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "../managing/SelectTable";
-
-type UserProps = {
-  id: number;
-  email: string;
-  companyId: number;
-};
+import { User } from "../../../Interfaces";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "../managing/SelectTable";
+import {
+  createSelectTableProps,
+  createRowProps,
+  updateNewChanges,
+  moveItemBetweenTables,
+  moveItemsBetweenTables,
+} from "../managing/SelectTableFunctions";
 
 /**
  * A Manage Users page.
@@ -22,37 +26,29 @@ export default function ManageUsers() {
   }
 
   const [itHeads, setItHeads] = useState<SelectTableRowProps[]>([]);
-  const [newItHeads] = useState<Set<number>>(new Set());
+  const [newItHeads] = useState<Set<string>>(new Set());
 
-  const [defaultUser, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
-  const [newDefaultUsers] = useState<Set<number>>(new Set());
+  const [defaultUsers, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
+  const [newDefaultUsers] = useState<Set<string>>(new Set());
 
   /**
    * Update the lists of new IT heads and default users
    * when a user gets removed from the list of IT heads.
    *
-   * @param userId The ID of the user to update.
+   * @param user The user to update.
    */
-  const updateNewUsersOnRemove = (userId: number) => {
-    if (newItHeads.has(userId)) {
-      newItHeads.delete(userId);
-    } else if (!newDefaultUsers.has(userId)) {
-      newDefaultUsers.add(userId);
-    }
+  const updateNewUsersOnRemove = (user: SelectTableRowProps) => {
+    updateNewChanges(user, newItHeads, newDefaultUsers);
   };
 
   /**
    * Update the lists of new IT heads and default users
    * when a user gets added to the list of IT heads.
    *
-   * @param userId The ID of the user to update.
+   * @param user The user to update.
    */
-  const updateNewUsersOnAdd = (userId: number) => {
-    if (newDefaultUsers.has(userId)) {
-      newDefaultUsers.delete(userId);
-    } else if (!newItHeads.has(userId)) {
-      newItHeads.add(userId);
-    }
+  const updateNewUsersOnAdd = (user: SelectTableRowProps) => {
+    updateNewChanges(user, newDefaultUsers, newItHeads);
   };
 
   /**
@@ -61,58 +57,41 @@ export default function ManageUsers() {
    * @param index The index of the user in the list of IT  heads.
    */
   const removeItHead = (index: number) => {
-    /* Get user who's being moved from "IT heads" to "default users" */
-    let user = itHeadsList.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      itHeadsTable,
+      defaultUsersTable,
+      setItHeads,
+      setDefaultUsers
+    );
 
-    /* Remove user from the "It heads" list */
-    let newItHeadsArray = [
-      ...itHeadsList.rows.slice(0, index),
-      ...itHeadsList.rows.slice(index + 1),
-    ];
-    setItHeads(newItHeadsArray);
-
-    /* Add user to the "default users" list */
-    defaultUsersList.rows.push(user);
-    setDefaultUsers(defaultUsersList.rows);
-
-    updateNewUsersOnRemove(parseInt(user.id));
+    updateNewUsersOnRemove(user);
   };
 
   /**
    * Remove all the selected users from the list of IT heads.
    *
-   * @param index The indices of the users in the list of IT  heads.
+   * @param indices The indices of the users in the list of IT  heads.
    */
   const removeSelectedItHeads = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = itHeadsList.rows[index];
-
-      itHeadsList.rows = [
-        ...itHeadsList.rows.slice(0, index),
-        ...itHeadsList.rows.slice(index + 1),
-      ];
-      defaultUsersList.rows.push(user);
-
-      updateNewUsersOnRemove(parseInt(user.id));
-    }
-
-    setItHeads(itHeadsList.rows);
-    setDefaultUsers(defaultUsersList.rows);
+    moveItemsBetweenTables(
+      indices,
+      itHeadsTable,
+      defaultUsersTable,
+      setItHeads,
+      setDefaultUsers,
+      newItHeads,
+      newDefaultUsers
+    );
   };
 
-  const itHeadsList = {
-    header: {
-      columns: [{ text: "User" }, { text: "Company" }],
-    },
-    rows: itHeads,
-    button: { text: "Remove", action: removeItHead },
-    outsideButtons: [
-      { text: "Remove all selected", action: removeSelectedItHeads },
-    ],
-  };
+  const itHeadsTable: SelectTableProps = createSelectTableProps(
+    ["User", "Company"],
+    itHeads,
+    "Remove",
+    removeItHead,
+    new Map([["Remove all selected", removeSelectedItHeads]])
+  );
 
   /**
    * Add a user to the list of IT heads.
@@ -120,55 +99,41 @@ export default function ManageUsers() {
    * @param index The index of the user in the list of IT  heads.
    */
   const addItHead = (index: number) => {
-    /* Get user who's being moved from "default users" to "IT heads" */
-    let user = defaultUsersList.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      defaultUsersTable,
+      itHeadsTable,
+      setDefaultUsers,
+      setItHeads
+    );
 
-    /* Remove user from the "default users" list */
-    let newDefaultUsersArray = [
-      ...defaultUsersList.rows.slice(0, index),
-      ...defaultUsersList.rows.slice(index + 1),
-    ];
-    setDefaultUsers(newDefaultUsersArray);
-
-    /* Add user to the "IT heads" list */
-    itHeadsList.rows.push(user);
-    setItHeads(itHeadsList.rows);
-
-    updateNewUsersOnAdd(parseInt(user.id));
+    updateNewUsersOnAdd(user);
   };
 
   /**
    * Add all the selected users to the list of IT heads.
    *
-   * @param index The indices of the users in the list of IT  heads.
+   * @param indices The indices of the users in the list of IT  heads.
    */
   const addSelectedItHeads = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = defaultUsersList.rows[index];
-
-      defaultUsersList.rows = [
-        ...defaultUsersList.rows.slice(0, index),
-        ...defaultUsersList.rows.slice(index + 1),
-      ];
-      itHeadsList.rows.push(user);
-
-      updateNewUsersOnAdd(parseInt(user.id));
-    }
-    setDefaultUsers(defaultUsersList.rows);
-    setItHeads(itHeadsList.rows);
+    moveItemsBetweenTables(
+      indices,
+      defaultUsersTable,
+      itHeadsTable,
+      setDefaultUsers,
+      setItHeads,
+      newDefaultUsers,
+      newItHeads
+    );
   };
 
-  const defaultUsersList = {
-    header: {
-      columns: [{ text: "User" }, { text: "Company" }],
-    },
-    rows: defaultUser,
-    button: { text: "Add", action: addItHead },
-    outsideButtons: [{ text: "Add all selected", action: addSelectedItHeads }],
-  };
+  const defaultUsersTable: SelectTableProps = createSelectTableProps(
+    ["Users", "Company"],
+    defaultUsers,
+    "Add",
+    addItHead,
+    new Map([["Add all selected", addSelectedItHeads]])
+  );
 
   /**
    * Send a GET request to get all users with the role 'Company IT Head'
@@ -178,14 +143,7 @@ export default function ManageUsers() {
   const fetchCompanyItHead = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyItHead`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
@@ -196,14 +154,7 @@ export default function ManageUsers() {
   const fetchCompanyIt = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/CompanyIt`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
@@ -214,20 +165,13 @@ export default function ManageUsers() {
   const fetchDefaultUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/role/Default`);
     const data = await response.json();
-    const users: UserProps[] = data.map((user: any) => {
-      return {
-        id: user.user_id,
-        email: user.email,
-        companyId: user.company_id,
-      };
-    });
-    return users;
+    return data.map((user: User) => user);
   };
 
   /**
    * Send a PATCH request to give some users the 'Company IT Head' role.
    */
-  const patchAddItHeadsRequest = () => {
+  const sendPatchAddItHeadsRequest = () => {
     if (newItHeads.size > 0) {
       fetch(`${baseUrl}/api/user_roles`, {
         method: "PATCH",
@@ -252,7 +196,7 @@ export default function ManageUsers() {
             alert("Something went wrong when saving new IT heads");
           }
         })
-        .catch(() => console.error("Failed to update user roles"));
+        .catch(() => alert("Failed to save users"));
     }
   };
 
@@ -284,7 +228,7 @@ export default function ManageUsers() {
             alert("Something went wrong when saving new default users");
           }
         })
-        .catch(() => console.error("Failed to update user roles"));
+        .catch(() => alert("Failed to save users"));
     }
   };
 
@@ -292,21 +236,18 @@ export default function ManageUsers() {
    * Save the changes made to the user lists.
    */
   const handleSave = () => {
-    patchAddItHeadsRequest();
+    sendPatchAddItHeadsRequest();
     patchAddDefaultUsersRequest();
   };
 
   useEffect(() => {
     fetchCompanyItHead().then((users) => {
       setItHeads(
-        users.map((user) => {
-          return {
-            id: user.id.toString(),
-            columns: [
-              { text: user.email },
-              { text: user.companyId.toString() },
-            ],
-          };
+        users.map((user: User) => {
+          return createRowProps(user.user_id, [
+            user.email,
+            user.company_id.toString(),
+          ]);
         })
       );
     });
@@ -315,24 +256,22 @@ export default function ManageUsers() {
       fetchDefaultUser().then((defaultUser) => {
         let users: SelectTableRowProps[] = [];
 
-        companyIt.map((user) => {
-          users.push({
-            id: user.id.toString(),
-            columns: [
-              { text: user.email },
-              { text: user.companyId.toString() },
-            ],
-          });
+        companyIt.map((user: User) => {
+          users.push(
+            createRowProps(user.user_id, [
+              user.email,
+              user.company_id.toString(),
+            ])
+          );
         });
 
-        defaultUser.map((user) => {
-          users.push({
-            id: user.id.toString(),
-            columns: [
-              { text: user.email },
-              { text: user.companyId.toString() },
-            ],
-          });
+        defaultUser.map((user: User) => {
+          users.push(
+            createRowProps(user.user_id, [
+              user.email,
+              user.company_id.toString(),
+            ])
+          );
         });
 
         setDefaultUsers(users);
@@ -355,19 +294,19 @@ export default function ManageUsers() {
       <section className="container left-aligned">
         <h2>Company IT heads</h2>
         <SelectTable
-          header={itHeadsList.header}
-          rows={itHeadsList.rows}
-          button={itHeadsList.button}
-          outsideButtons={itHeadsList.outsideButtons}
+          header={itHeadsTable.header}
+          rows={itHeadsTable.rows}
+          button={itHeadsTable.button}
+          outsideButtons={itHeadsTable.outsideButtons}
         />
       </section>
       <section className="container left-aligned">
         <h2>Default users</h2>
         <SelectTable
-          header={defaultUsersList.header}
-          rows={defaultUsersList.rows}
-          button={defaultUsersList.button}
-          outsideButtons={defaultUsersList.outsideButtons}
+          header={defaultUsersTable.header}
+          rows={defaultUsersTable.rows}
+          button={defaultUsersTable.button}
+          outsideButtons={defaultUsersTable.outsideButtons}
         />
       </section>
       <section className="container left-aligned">

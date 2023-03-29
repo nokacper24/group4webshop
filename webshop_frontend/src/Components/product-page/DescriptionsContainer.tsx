@@ -1,4 +1,4 @@
-import { Description } from "./ProductPage";
+import { Description } from "../../Interfaces";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
 // check if we are in production mode
@@ -6,10 +6,8 @@ if (import.meta.env.PROD) {
   baseUrl = "/";
 }
 
-export default function DescriptionsContianer(descriptions: Description[]) {
-  let prev_item: undefined | Description = undefined as
-    | undefined
-    | Description;
+export default function DescriptionsContainer(descriptions: Description[]) {
+  let prev_item: undefined | Description = undefined as undefined | Description;
   return (
     <>
       {descriptions.map((item) => {

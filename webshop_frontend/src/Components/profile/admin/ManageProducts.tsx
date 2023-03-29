@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "../managing/SelectTable";
-
-type ProductProps = {
-  id: string;
-  name: string;
-  description: string;
-};
+import { Product } from "../../../Interfaces";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "../managing/SelectTable";
+import {
+  createSelectTableProps,
+  createRowProps,
+} from "../managing/SelectTableFunctions";
 
 export default function ManageProducts() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -18,39 +19,31 @@ export default function ManageProducts() {
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
   const editProduct = (index: number) => {
-    console.log("Editing: ", index);
+    console.log("Editing: ", index); // TODO: Reroute to product page
   };
 
-  const productsList = {
-    header: {
-      columns: [{ text: "Product" }, { text: "Description" }],
-    },
-    rows: products,
-    button: { text: "Edit", action: editProduct },
-    outsideButtons: [],
-  };
+  const productsTable: SelectTableProps = createSelectTableProps(
+    ["Product", "Description"],
+    products,
+    "Edit",
+    editProduct,
+    new Map([])
+  );
 
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
-    const products: ProductProps[] = data.map((product: any) => {
-      return {
-        id: product.product_id,
-        name: product.display_name,
-        description: product.short_description,
-      };
-    });
-    return products;
+    return data.map((product: Product) => product);
   };
 
   useEffect(() => {
-    fetchProducts().then((products) => {
+    fetchProducts().then((products: Product[]) => {
       setProducts(
-        products.map((product) => {
-          return {
-            id: product.id,
-            columns: [{ text: product.name }, { text: product.description }],
-          };
+        products.map((product: Product) => {
+          return createRowProps(product.product_id, [
+            product.display_name,
+            product.short_description,
+          ]);
         })
       );
     });
@@ -60,10 +53,10 @@ export default function ManageProducts() {
     <section className="container left-aligned">
       <h1>Manage products</h1>
       <SelectTable
-        header={productsList.header}
-        rows={productsList.rows}
-        button={productsList.button}
-        outsideButtons={productsList.outsideButtons}
+        header={productsTable.header}
+        rows={productsTable.rows}
+        button={productsTable.button}
+        outsideButtons={productsTable.outsideButtons}
       />
     </section>
   );

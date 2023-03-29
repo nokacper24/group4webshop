@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
-
-type ProductProps = {
-  id: string;
-  name: string;
-};
 
 /**
  * Represents a Support Form component.
@@ -13,7 +9,7 @@ type ProductProps = {
  * @returns A Support Form component.
  */
 export default function SupportForm() {
-  const [products, setProducts] = useState<ProductProps[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
   // Check if we are in production mode
@@ -24,13 +20,7 @@ export default function SupportForm() {
   const fetchProducts = async () => {
     const response = await fetch(`${baseUrl}/api/products`);
     const data = await response.json();
-    const products: ProductProps[] = data.map((product: any) => {
-      return {
-        id: product.product_id,
-        name: product.display_name,
-      };
-    });
-    return products;
+    return data.map((product: Product) => product);
   };
 
   useEffect(() => {
