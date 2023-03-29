@@ -29,50 +29,6 @@ export type AccordionSectionProps = {
  */
 export function AccordionSection(props: AccordionSectionProps) {
   /**
-   * Deletes a row from the body of the section.
-   *
-   * @param id the ID of the row to be deleted
-   */
-  const deleteRow = (id: number) => {
-    content.rows = content.rows.filter((row) => row.id !== id);
-    setContent({ ...content });
-    props.registerContentChange(id, ChangeType.Delete);
-  };
-
-  /**
-   * Initializes the process of changing the content of a row.
-   *
-   * @param id the ID of the row to be edited
-   */
-  const editRow = (id: number) => {
-    console.log("edit: " + id);
-    props.registerContentChange(id, ChangeType.Edit);
-  };
-
-  /**
-   * Initializes the process of adding a row to the body of the section.
-   *
-   * @param title title of the row to be added
-   */
-  const addRow = (title: string) => {
-    //Temporary debug solution
-    if (content.rows.length < 2) {
-      content.rows.push({
-        title: title,
-        id: createID(),
-        editFunction: editRow,
-        removeFunction: deleteRow,
-      });
-      setContent({ ...content });
-    }
-  };
-
-  var latestID = 100;
-  const createID = (): number => {
-    return latestID++;
-  };
-
-  /**
    * Calls the deleteSection function in the parent component. Deleting itself in the process.
    */
   const deleteSelf = () => {
@@ -80,20 +36,6 @@ export function AccordionSection(props: AccordionSectionProps) {
     console.log(props);
     props.deleteSection(props.sectionID);
   };
-
-  const [content, setContent] = useState<AccordionHeaderProps>({
-    title: props.header.title,
-    rows: props.header.rows.map((row) => {
-      return {
-        title: row.title,
-        id: row.id,
-        editFunction: editRow,
-        removeFunction: deleteRow,
-      };
-    }),
-    addRow: addRow,
-    deleteSelf: deleteSelf,
-  });
 
   return (
     <>
