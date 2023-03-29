@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
     println!("cargo:warning= Running buil script...");
 
     dotenvy::dotenv().ok();
-    let build_react = std::env::var("BUILD_REACT").unwrap_or("false".to_string());
+    let build_react = std::env::var("BUILD_REACT").unwrap_or_else(|_| "false".to_string());
 
     // If BUILD_REACT=true, or if build in release mode, build the react app
     if build_react.eq_ignore_ascii_case("true") || !cfg!(debug_assertions) {

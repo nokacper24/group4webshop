@@ -28,8 +28,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     dotenv().ok();
-    let host = std::env::var("HOST").unwrap_or("localhost".to_string());
-    let port = std::env::var("PORT").unwrap_or("8080".to_string());
+    let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("{}:{}", host, port);
 
     info!("Starting server at https://{}", address);
