@@ -30,5 +30,6 @@ pub enum MailError {
 pub async fn send_email(
     email: Email,
 ) -> Result<(), MailError> {
+    log::info!("Sending email to {}\n with content {}", email.recipient_email, email.body);
     return Err(MailError::NotImplemented);
 }
