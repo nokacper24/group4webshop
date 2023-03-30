@@ -33,6 +33,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(upload_image);
     cfg.service(update_priorities);
     cfg.service(update_text_description);
+    cfg.service(update_image_description);
 }
 
 #[delete("/{product_id}/descriptions/{component_id}")]
@@ -433,7 +434,7 @@ async fn update_text_description(
 ) -> impl Responder {
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
-    
+
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -462,9 +463,10 @@ async fn update_text_description(
     match updated_component {
         Ok(description_component) => HttpResponse::Ok().json(description_component),
         Err(e) => match e {
-            DescriptionUpdateError::WrongComponentType => {
-                HttpResponse::BadRequest().json(format!("Wrong component type! Component with id {} is not a text component.", component_id))
-            }
+            DescriptionUpdateError::WrongComponentType => HttpResponse::BadRequest().json(format!(
+                "Wrong component type! Component with id {} is not a text component.",
+                component_id
+            )),
             DescriptionUpdateError::NotFound => {
                 HttpResponse::NotFound().json("No component found with given id and product.")
             }
@@ -474,4 +476,51 @@ async fn update_text_description(
             }
         },
     }
+}
+
+#[put("/{product_id}/descriptions/image/{component_id}")]
+async fn update_image_description(
+    payload: Multipart,
+    product_id: web::Path<String>,
+    pool: web::Data<Pool<Postgres>>,
+    req: HttpRequest,
+) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    match product::product_exists(&pool, product_id.as_str()).await {
+        Ok(exists) => {
+            if !exists {
+                return HttpResponse::NotFound().json("Product not found");
+            }
+        }
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        },
+    };
+
+    
+
+
+
+
+
+
+
+    return HttpResponse::NotImplemented().finish();
 }
