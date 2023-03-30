@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use chrono::{DateTime, Duration, Utc};
 use rand::rngs::OsRng;
@@ -7,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, Executor, {Pool, Postgres},
 };
+use std::fmt::Display;
+use std::{string, sync::Arc};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -574,4 +574,31 @@ pub async fn delete_users(pool: &Pool<Postgres>, users: &[UserID]) -> Result<(),
     transaction.commit().await?;
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct UserWithoutHash {
+    pub user_id: i32,
+    pub email: String,
+    pub company_id: i32,
+    pub role: Role,
+}
+
+pub async fn update_email(
+    pool: &Pool<Postgres>,
+    email: &str,
+    id: &i32,
+) -> Result<UserWithoutHash, sqlx::Error> {
+    let result_row = query_as!(
+        UserWithoutHash,
+        r#"UPDATE app_user 
+        SET email = $1
+        WHERE user_id = $2
+        RETURNING app_user.user_id, email, company_id, role as "role: _";"#,
+        email,
+        id,
+    )
+    .fetch_one(pool)
+    .await;
+    return result_row.into();
 }

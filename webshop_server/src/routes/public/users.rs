@@ -1,3 +1,4 @@
+//TODO: Make all endpoints private
 use crate::{
     data_access::{
         company, error_handling,
@@ -27,6 +28,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_users_by_role);
     cfg.service(update_user_roles);
     cfg.service(delete_users);
+    cfg.service(update_user);
 }
 
 #[derive(OpenApi)]
@@ -655,4 +657,37 @@ async fn delete_users(
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
+}
+
+#[derive(Deserialize, Serialize)]
+struct PartialUser {
+    email: Option<String>,
+}
+
+///Updates the user information of an ID.
+/// The JSON can be like this:
+/// ```
+/// {
+///     "email": john.doe@email.com
+/// }
+/// ```
+#[patch("/users/{id}")]
+async fn update_user(
+    pool: web::Data<Pool<Postgres>>,
+    id: web::Path<String>,
+    body: web::Json<PartialUser>,
+) -> impl Responder {
+    let mail = &body.email;
+    let id: i32 = match id.parse::<i32>() {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+    let returned_user = match mail {
+        Some(email) => match user::update_email(&pool, email, &id).await {
+            Ok(user) => user,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        },
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    HttpResponse::Ok().json(returned_user)
 }
