@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{string, sync::Arc};
 
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use chrono::{DateTime, Duration, Utc};
@@ -383,19 +383,15 @@ pub async fn get_partial_company_user(
 /// let user_exists: bool = user_exists("bob@name.com", &pool).await?;
 /// ```
 pub async fn user_exixts(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
-    let user = query!(
-        r#"SELECT user_id FROM app_user WHERE email = $1"#,
-        email
-    )
-    .fetch_optional(pool)
-    .await?;
+    let user = query!(r#"SELECT user_id FROM app_user WHERE email = $1"#, email)
+        .fetch_optional(pool)
+        .await?;
 
     match user {
         Some(_) => Ok(true),
         None => Ok(false),
     }
 }
-
 
 /// A struct representing an invite to a new user and a company.
 /// This is used to create a new user and link them to a new or existing company.
@@ -588,3 +584,21 @@ pub struct UserWithoutHash {
     pub role: Role,
 }
 
+pub async fn update_email(
+    pool: &Pool<Postgres>,
+    email: &str,
+    id: &i32,
+) -> Result<UserWithoutHash, sqlx::Error> {
+    let result_row = query_as!(
+        UserWithoutHash,
+        r#"UPDATE app_user 
+        SET email = $1
+        WHERE user_id = $2
+        RETURNING app_user.user_id, email, company_id, role as "role: _";"#,
+        email,
+        id,
+    )
+    .fetch_one(pool)
+    .await;
+    return result_row.into();
+}
