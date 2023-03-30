@@ -484,3 +484,8 @@ async fn delete_users(
         },
     }
 }
+
+#[derive(Deserialize, Serialize)]
+struct PartialUser {
+    email: Option<String>,
+}
