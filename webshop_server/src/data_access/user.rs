@@ -579,3 +579,12 @@ pub async fn delete_users(pool: &Pool<Postgres>, users: &Vec<UserID>) -> Result<
 
     Ok(())
 }
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct UserWithoutHash {
+    pub user_id: i32,
+    pub email: String,
+    pub company_id: i32,
+    pub role: Role,
+}
+
