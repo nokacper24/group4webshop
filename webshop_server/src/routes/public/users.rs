@@ -31,6 +31,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_users_by_role);
     cfg.service(update_user_roles);
     cfg.service(delete_users);
+    cfg.service(update_user);
 }
 
 #[derive(OpenApi)]
@@ -491,7 +492,14 @@ struct PartialUser {
     email: Option<String>,
 }
 
-#[patch("users/{id}")]
+///Updates the user information of an ID.
+/// The JSON can be like this:
+/// ```
+/// {
+///     "email": john.doe@email.com
+/// }
+/// ```
+#[patch("/users/{id}")]
 async fn update_user(
     pool: web::Data<Pool<Postgres>>,
     id: web::Path<String>,
