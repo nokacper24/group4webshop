@@ -1,3 +1,4 @@
+//TODO: Make all endpoints private
 use crate::{
     data_access::{
         error_handling,
@@ -488,4 +489,25 @@ async fn delete_users(
 #[derive(Deserialize, Serialize)]
 struct PartialUser {
     email: Option<String>,
+}
+
+#[patch("users/{id}")]
+async fn update_user(
+    pool: web::Data<Pool<Postgres>>,
+    id: web::Path<String>,
+    body: web::Json<PartialUser>,
+) -> impl Responder {
+    let mail = &body.email;
+    let id: i32 = match id.parse::<i32>() {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+    let returned_user = match mail {
+        Some(email) => match user::update_email(&pool, email, &id).await {
+            Ok(user) => user,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        },
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    HttpResponse::Ok().json(returned_user)
 }
