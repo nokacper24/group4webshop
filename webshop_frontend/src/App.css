@@ -553,6 +553,10 @@ form input {
   outline: 1px solid transparent;
 }
 
+.form-container>label {
+  margin-top: 0.5em;
+}
+
 .form-container> :is(label, select, input, textarea, p) {
   width: 90%;
   margin-inline: auto;
@@ -565,6 +569,7 @@ form input {
 
 .form-container>input {
   margin: initial;
+  margin-inline: auto;
   font-size: 1.1rem;
 }
 
