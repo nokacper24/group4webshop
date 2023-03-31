@@ -511,6 +511,7 @@ hr {
   height: 0.5rem;
   width: 100%;
   background-color: var(--bg-secondary);
+  border: none;
 }
 
 .m-t-1 {
