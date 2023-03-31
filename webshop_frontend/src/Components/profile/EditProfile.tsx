@@ -19,7 +19,7 @@ export default function EditProfile() {
   const [email, setEmail] = useState<string>("");
 
   const fetchUser = async () => {
-    const response = await fetch(`${baseUrl}/api/users/${userId}`);
+    const response = await fetch(`${baseUrl}/api/priv/users/${userId}`);
     const data = await response.json();
     const user: User = data;
     setUser(user);
@@ -35,7 +35,7 @@ export default function EditProfile() {
       user.email = email;
     }
 
-    fetch(`${baseUrl}/api/users/${userId}`, {
+    fetch(`${baseUrl}/api/priv/users/${userId}`, {
       method: "PATCH",
       headers: {
         Accept: "application:json",

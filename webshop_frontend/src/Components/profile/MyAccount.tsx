@@ -20,7 +20,7 @@ export default function MyAccount() {
   const [user, setUser] = useState<User>();
 
   const fetchUser = async () => {
-    const response = await fetch(`${baseUrl}/api/users/${userId}`);
+    const response = await fetch(`${baseUrl}/api/priv/users/${userId}`);
     const data = await response.json();
     const user: User = data;
     setUser(user);

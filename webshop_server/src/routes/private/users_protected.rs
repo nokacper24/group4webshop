@@ -54,7 +54,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 pub struct UserApiDoc;
 
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "List of all available users", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
@@ -78,7 +78,7 @@ async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 }
 
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "User with specific ID", body = User),
     (status = 400, description = "User ID not recognized"),
@@ -108,7 +108,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
 
 /// Get all the users that work for a specific company.
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "List of all users in a specific company", body = Vec<User>),
     (status = 400, description = "Company ID not recognized"),
@@ -141,7 +141,7 @@ async fn users_by_company(
 
 /// Get all the users that have access to a specific license.
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "List of all users with access to a speecific license", body = Vec<User>),
     (status = 400, description = "License ID not recognized"),
@@ -508,7 +508,7 @@ struct LicenseUsers {
 /// }
 /// ```
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 201, description = "License user successfully added", body = Vec<User>),
     (status = 400, description = "License user already existed"),
@@ -549,7 +549,7 @@ async fn add_license_users(
 /// }
 /// ```
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "License users successfully removed", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
@@ -569,7 +569,7 @@ async fn remove_license_users(
 
 /// Get all users that are the IT responsible for their company.
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     responses(
     (status = 200, description = "List of all users who's IT responsible for their company", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
@@ -602,7 +602,7 @@ struct UserRoles {
 
 /// Update users' roles.
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/priv",
     patch,
     responses(
         (status = 200, description = "Users' roles have been updated", body = Vec<UserRole>),
@@ -639,7 +639,7 @@ struct UserIDs {
 /// }
 /// ```
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/priv",
     delete,
     responses(
         (status = 200, description = "Users have been deleted.", body = Vec<i32>),

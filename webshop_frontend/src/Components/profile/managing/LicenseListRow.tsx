@@ -23,8 +23,11 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     <button className="default-button small-button">Cancel renewal</button>
   );
   const manageButton = (
-    <Link to={`../manage-license/${license.license_id}`}>
-      <button className="default-button small-button">Manage access</button>
+    <Link
+      to={`../manage-license/${license.license_id}`}
+      className="default-button small-button"
+    >
+      Manage access
     </Link>
   );
 

@@ -141,7 +141,9 @@ export default function ManageUsers() {
    * @returns A list of all company IT head users.
    */
   const fetchCompanyItHead = async () => {
-    const response = await fetch(`${baseUrl}/api/users/role/CompanyItHead`);
+    const response = await fetch(
+      `${baseUrl}/api/priv/users/role/CompanyItHead`
+    );
     const data = await response.json();
     return data.map((user: User) => user);
   };
@@ -152,7 +154,7 @@ export default function ManageUsers() {
    * @returns A list of all company IT users.
    */
   const fetchCompanyIt = async () => {
-    const response = await fetch(`${baseUrl}/api/users/role/CompanyIt`);
+    const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
     const data = await response.json();
     return data.map((user: User) => user);
   };
@@ -163,7 +165,7 @@ export default function ManageUsers() {
    * @returns A list of all default users.
    */
   const fetchDefaultUser = async () => {
-    const response = await fetch(`${baseUrl}/api/users/role/Default`);
+    const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
     const data = await response.json();
     return data.map((user: User) => user);
   };
@@ -173,7 +175,7 @@ export default function ManageUsers() {
    */
   const sendPatchAddItHeadsRequest = () => {
     if (newItHeads.size > 0) {
-      fetch(`${baseUrl}/api/user_roles`, {
+      fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -205,7 +207,7 @@ export default function ManageUsers() {
    */
   const patchAddDefaultUsersRequest = () => {
     if (newDefaultUsers.size > 0) {
-      fetch(`${baseUrl}/api/user_roles`, {
+      fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",

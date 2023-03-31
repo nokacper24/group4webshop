@@ -77,7 +77,9 @@ export default function CompanyUsers() {
    * @returns A list of all company users
    */
   const fetchCompanyUsers = async () => {
-    const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
+    const response = await fetch(
+      `${baseUrl}/api/priv/companies/${companyId}/users`
+    );
     const data = await response.json();
 
     const users: User[] = [];
@@ -94,7 +96,7 @@ export default function CompanyUsers() {
    * Send a DELETE request to remove users.
    */
   const sendDeleteUsersRequest = async () => {
-    fetch(`${baseUrl}/api/users`, {
+    fetch(`${baseUrl}/api/priv/users`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -161,7 +163,7 @@ export default function CompanyUsers() {
     const formData = new FormData();
     formData.append("email", email);
 
-    fetch(`${baseUrl}/api/generate_invite`, {
+    fetch(`${baseUrl}/api/priv/generate_invite`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -169,6 +171,7 @@ export default function CompanyUsers() {
       },
       body: JSON.stringify({
         email: email,
+        company_id: parseInt(companyId!),
       }),
     })
       .then((response) => {
@@ -193,7 +196,7 @@ export default function CompanyUsers() {
       formData.append("csv", csvEmail.current.files[0]);
     }
 
-    fetch(`${baseUrl}/api/generate_invites`, {
+    fetch(`${baseUrl}/api/priv/generate_invites`, {
       method: "POST",
       headers: {
         Accept: "multipart/form-data",
@@ -224,7 +227,6 @@ export default function CompanyUsers() {
     event.preventDefault();
 
     if (csvEmail.current && csvEmail.current?.value != "") {
-      console.log(csvEmail.current.value);
       sendPostRegisterUsersRequest();
     }
   };

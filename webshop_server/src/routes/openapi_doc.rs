@@ -5,7 +5,7 @@ use utoipa::{
 };
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
-use crate::routes::public::{licenses, products, testimonials, users};
+use crate::routes::public::{licenses, products, testimonials};
 
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
     let info = build_info();
@@ -14,10 +14,6 @@ pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
         (
             Url::new("Products", "/api-doc/openapi_products.json"),
             build_products_doc(info.clone()),
-        ),
-        (
-            Url::new("Users", "/api-doc/openapi_users.json"),
-            build_users_doc(info.clone()),
         ),
         (
             Url::new("Licenses", "/api-doc/openapi_licenses.json"),
@@ -52,12 +48,6 @@ fn build_info() -> openapi::Info {
 
 fn build_products_doc(info: openapi::Info) -> openapi::OpenApi {
     OpenApiBuilder::from(products::ProductsApiDoc::openapi())
-        .info(info)
-        .build()
-}
-
-fn build_users_doc(info: openapi::Info) -> openapi::OpenApi {
-    OpenApiBuilder::from(users::UserApiDoc::openapi())
         .info(info)
         .build()
 }

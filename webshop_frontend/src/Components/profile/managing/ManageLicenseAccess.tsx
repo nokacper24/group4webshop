@@ -171,7 +171,9 @@ export default function ManageLicenseAccess() {
    * @returns A list of all company users
    */
   const fetchCompanyUsers = async (companyId: number) => {
-    const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
+    const response = await fetch(
+      `${baseUrl}/api/priv/companies/${companyId}/users`
+    );
     const data = await response.json();
     const users: User[] = data.map((user: User) => user);
     return users;
@@ -183,7 +185,9 @@ export default function ManageLicenseAccess() {
    * @returns A list of users with license access.
    */
   const fetchUsersWithAccess = async () => {
-    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
+    const response = await fetch(
+      `${baseUrl}/api/priv/licenses/${licenseId}/users`
+    );
     const data = await response.json();
     const users: User[] = data.map((user: User) => user);
     return users;
@@ -194,7 +198,7 @@ export default function ManageLicenseAccess() {
    */
   const sendAddUsersRequest = () => {
     if (newUsersWithAccess.size > 0) {
-      fetch(`${baseUrl}/api/license_users`, {
+      fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -229,7 +233,7 @@ export default function ManageLicenseAccess() {
    */
   const sendRemoveUsersRequest = () => {
     if (newUsersWithoutAccess.size > 0) {
-      fetch(`${baseUrl}/api/license_users`, {
+      fetch(`${baseUrl}/api/priv/license_users`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
