@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { User } from "../../Interfaces";
+
+interface PartialUser {
+  email?: string;
+}
 
 export default function EditProfile() {
   let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -13,10 +17,6 @@ export default function EditProfile() {
   const [user, setUser] = useState<User>();
 
   const [email, setEmail] = useState<string>("");
-  const [oldPassword, setOldPassword] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [formAlert, setFormAlert] = useState<string>("");
 
   const fetchUser = async () => {
     const response = await fetch(`${baseUrl}/api/users/${userId}`);
@@ -26,48 +26,23 @@ export default function EditProfile() {
     return user;
   };
 
-  const patchEmail = async (email: string) => {
-    fetch(`${baseUrl}/api/users/${userId}`, {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-      }),
-    })
-      .then((response) => {
-        const status = response.status;
-        if (status == 200) {
-          location.reload();
-        } else {
-          alert("Something went wrong when saving e-mail");
-        }
-      })
-      .catch(() => alert("Failed to save e-mail"));
-  };
+  /* TODO: Do a single PATCH request for user  */
+  /* Include object property onlt if value is passed as parameter */
 
-  const patchPassword = async (newPassword: string) => {
+  const patchUser = async (email?: string) => {
+    let user: PartialUser = {};
+    if (email) {
+      user.email = email;
+    }
+
     fetch(`${baseUrl}/api/users/${userId}`, {
       method: "PATCH",
       headers: {
-        Accept: "application/json",
+        Accept: "application:json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        password: newPassword,
-      }),
-    })
-      .then((response) => {
-        const status = response.status;
-        if (status == 200) {
-          location.reload();
-        } else {
-          alert("Something went wrong when saving password");
-        }
-      })
-      .catch(() => alert("Failed to save password"));
+      body: JSON.stringify(user),
+    });
   };
 
   const checkCorrectPassword = async (oldPassword: string) => {
@@ -93,29 +68,32 @@ export default function EditProfile() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Check if confirmed password is incorrect
-    if (newPassword != confirmPassword) {
-      setFormAlert(
-        "Confirmed password does not match new password. Please make sure the passwords are identical"
-      );
-    } else {
-      // Check if user wants to update password
-      if (newPassword != "") {
-        // Check if old password is correct
-        checkCorrectPassword(oldPassword).then((result) => {
-          if (result) {
-            setFormAlert("");
-            patchPassword(newPassword);
-          } else {
-            setFormAlert("Old password is not correct");
-          }
-        });
-      }
-      // Check if user wants to change e-mail
-      if (email != user?.email) {
-        patchEmail(email);
-      }
+    if (email != user?.email) {
+      patchUser(email);
     }
+  };
+
+  const handlePasswordReset = () => {
+    fetch(`${baseUrl}/api/reset_password`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: user?.email,
+      }),
+    }).then((response) => {
+      let status = response.status;
+
+      if (status == 200) {
+        alert(
+          "We have sent you an e-mail with a link to reset password. It may take a few minutes. Check the spam folder if you do not see it."
+        );
+      } else {
+        alert("Failed to reset password.");
+      }
+    });
   };
 
   useEffect(() => {
@@ -146,37 +124,22 @@ export default function EditProfile() {
               onChange={(event) => setEmail(event.target.value)}
             ></input>
           </label>
-          <label>
-            Old password
-            <input
-              type="password"
-              placeholder="Old password"
-              onChange={(event) => setOldPassword(event.target.value)}
-            ></input>
-          </label>
-          <label>
-            New password
-            <input
-              type="password"
-              placeholder="New password"
-              onChange={(event) => setNewPassword(event.target.value)}
-            ></input>
-          </label>
-          <label>
-            Confirm new password
-            <input
-              type="password"
-              placeholder="Confirm new password"
-              onChange={(event) => setConfirmPassword(event.target.value)}
-            ></input>
-          </label>
+
           <div className="button-container">
             <button type="submit" className="default-button small-button">
               Save
             </button>
-            <p className="form-alert">{formAlert}</p>
           </div>
         </form>
+      </section>
+      <section className="container left-aligned">
+        <h1>Change password</h1>
+        <button
+          className="default-button small-button"
+          onClick={handlePasswordReset}
+        >
+          Reset password
+        </button>
       </section>
     </>
   );
