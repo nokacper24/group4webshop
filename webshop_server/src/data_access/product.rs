@@ -81,7 +81,7 @@ pub fn generate_id(display_name: &str) -> String {
     display_name
         .to_lowercase()
         .replace('.', "")
-        .replace(' ', "_").to_string()
+        .replace(' ', "_")
 }
 
 /// Returns all available products.
@@ -135,7 +135,10 @@ pub async fn create_product(
 
 /// Delete a product.
 /// Returns path to the main image of the product, so it can be deleted.
-pub async fn delete_product(pool: &Pool<Postgres>, product_id: &str) -> Result<String, sqlx::Error> {
+pub async fn delete_product(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<String, sqlx::Error> {
     let row = query!(
         r#"DELETE FROM product
         WHERE product_id = $1
@@ -144,7 +147,7 @@ pub async fn delete_product(pool: &Pool<Postgres>, product_id: &str) -> Result<S
     )
     .fetch_one(pool)
     .await?;
-    
+
     Ok(row.main_image)
 }
 

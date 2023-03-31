@@ -11,8 +11,8 @@ use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod data_access;
-mod utils;
 mod routes;
+mod utils;
 
 use routes::private::private;
 use routes::public::public;
@@ -28,8 +28,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     dotenv().ok();
-    let host = std::env::var("HOST").unwrap_or("localhost".to_string());
-    let port = std::env::var("PORT").unwrap_or("8080".to_string());
+    let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("{}:{}", host, port);
 
     info!("Starting server at https://{}", address);
@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let allowed_origins = std::env::var("ALLOWED_ORIGINS")
         .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
-        .split(",")
+        .split(',')
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
         let cors = Cors::default()

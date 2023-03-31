@@ -1,18 +1,16 @@
+//TODO: Make all endpoints private
 use crate::{
     data_access::{
-        error_handling,
-        user::{
-            self, LicenseUser, PartialRegisterCompanyUser, RegisterCompanyUser, Role, User, UserID,
-            UserRole,
-        },
+        company, error_handling,
+        user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::auth,
+    utils::{self, auth},
 };
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
-use chrono::{Duration, Utc};
-use futures::{FutureExt, StreamExt};
-use log::error;
+
+use futures::StreamExt;
+
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::str;
@@ -30,6 +28,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(get_users_by_role);
     cfg.service(update_user_roles);
     cfg.service(delete_users);
+    cfg.service(update_user);
 }
 
 #[derive(OpenApi)]
@@ -176,6 +175,7 @@ async fn users_by_license(
 #[derive(Deserialize, Serialize)]
 struct Invite {
     email: String,
+    company_id: Option<i32>,
 }
 
 #[post("/generate_invite")]
@@ -184,6 +184,17 @@ async fn generate_invite(
     invite: web::Json<Invite>,
     req: HttpRequest,
 ) -> impl Responder {
+    let company = match invite.company_id {
+        Some(company_id) => match company::get_company_by_id(&pool, &company_id).await {
+            Ok(company) => Ok(company),
+            Err(e) => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
+        None => Err("No company ID provided"),
+    };
+
     let user = match auth::validate_user(req.clone(), &pool).await {
         Ok(user) => user,
         Err(e) => match e {
@@ -198,12 +209,151 @@ async fn generate_invite(
     };
 
     match user.role {
-        user::Role::Admin | user::Role::CompanyItHead | user::Role::CompanyIt => {
-            return HttpResponse::NotImplemented()
-                .json("Can't generate a new user for proflex yet!");
+        user::Role::Admin => match company {
+            Ok(company) => {
+                let partial =
+                    user::create_partial_company_user(&invite.email, company.company_id, &pool)
+                        .await;
+                match partial {
+                    Ok(partial) => {
+                        let invite =
+                            user::create_invite(None, Some(partial.company_id), &pool).await;
+                        match invite {
+                            Ok(invite) => {
+                                let email = utils::email::Email::new(
+                                    partial.email,
+                                    "Invite to Proflex".to_string(),
+                                    invite.id,
+                                );
+                                let res = utils::email::send_email(email).await;
+                                match res {
+                                    Ok(_) => {
+                                        HttpResponse::Ok().json("Invite sent")
+                                    }
+                                    Err(e) => {
+                                        log::error!("Error: {}", e);
+                                        HttpResponse::InternalServerError()
+                                            .json("Internal Server Error")
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Error: {}", e);
+                                HttpResponse::InternalServerError()
+                                    .json("Internal Server Error")
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Error: {}", e);
+                        HttpResponse::InternalServerError().json("Internal Server Error")
+                    }
+                }
+            }
+            Err(e) => {
+                log::error!("Error: {}", e);
+                HttpResponse::InternalServerError().json("No company ID provided")
+            }
+        },
+
+        user::Role::CompanyItHead | user::Role::CompanyIt => {
+            match company {
+                Ok(company) => {
+                    if company.company_id == user.company_id {
+                        let partial = user::create_partial_company_user(
+                            &invite.email,
+                            company.company_id,
+                            &pool,
+                        )
+                        .await;
+                        match partial {
+                            Ok(partial) => {
+                                let invite =
+                                    user::create_invite(None, Some(partial.company_id), &pool)
+                                        .await;
+                                match invite {
+                                    Ok(invite) => {
+                                        let email = utils::email::Email::new(
+                                            partial.email,
+                                            "Invite to Proflex".to_string(),
+                                            invite.id,
+                                        );
+                                        let res = utils::email::send_email(email).await;
+                                        match res {
+                                            Ok(_) => {
+                                                HttpResponse::Ok().json("Invite sent")
+                                            }
+                                            Err(e) => {
+                                                log::error!("Error: {}", e);
+                                                HttpResponse::InternalServerError()
+                                                    .json("Internal Server Error")
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        log::error!("Error: {}", e);
+                                        HttpResponse::InternalServerError()
+                                            .json("Internal Server Error")
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                log::error!("Error: {}", e);
+                                HttpResponse::InternalServerError()
+                                    .json("Internal Server Error")
+                            }
+                        }
+                    } else {
+                        HttpResponse::Forbidden()
+                            .json("You don't have permission to invite users to this company")
+                    }
+                }
+                Err(_e) => {
+                    //if no id is provided, then the user is trying to invite a user to their company
+                    let comp_id = user.company_id;
+                    let partial =
+                        user::create_partial_company_user(&invite.email, comp_id, &pool).await;
+                    match partial {
+                        Ok(partial) => {
+                            let invite =
+                                user::create_invite(None, Some(partial.company_id), &pool).await;
+                            match invite {
+                                Ok(invite) => {
+                                    let email = utils::email::Email::new(
+                                        partial.email,
+                                        "Invite to Proflex".to_string(),
+                                        invite.id,
+                                    );
+                                    let res = utils::email::send_email(email).await;
+                                    match res {
+                                        Ok(_) => {
+                                            HttpResponse::Ok().json("Invite sent")
+                                        }
+                                        Err(e) => {
+                                            log::error!("Error: {}", e);
+                                            HttpResponse::InternalServerError()
+                                                .json("Internal Server Error")
+                                        }
+                                    }
+                                }
+                                Err(e) => {
+                                    log::error!("Error: {}", e);
+                                    HttpResponse::InternalServerError()
+                                        .json("Internal Server Error")
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("Error: {}", e);
+                            HttpResponse::InternalServerError()
+                                .json("Internal Server Error")
+                        }
+                    }
+                }
+            }
         }
         user::Role::Default => {
-            return HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.");
+            HttpResponse::Forbidden().json("Normal users don't have permission to generate a new user, please contact your company's IT department.")
         }
     }
 }
@@ -246,11 +396,11 @@ async fn generate_invites(
             }
 
             match user::create_partial_company_users(&other_users, &pool).await {
-                Ok(created_users) => return HttpResponse::Ok().json(created_users),
-                Err(_) => return HttpResponse::InternalServerError().finish(),
+                Ok(created_users) => HttpResponse::Ok().json(created_users),
+                Err(_) => HttpResponse::InternalServerError().finish(),
             }
         }
-        Err(e) => return HttpResponse::UnprocessableEntity().json(e.to_string()),
+        Err(e) => HttpResponse::UnprocessableEntity().json(e.to_string()),
     }
 }
 
@@ -284,8 +434,8 @@ async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, M
     }
 
     match String::from_utf8(buffer) {
-        Ok(text) => return Ok(text),
-        Err(e) => return Err(MultipartError::Parse(e.into())),
+        Ok(text) => Ok(text),
+        Err(e) => Err(MultipartError::Parse(e.into())),
     }
 }
 
@@ -302,12 +452,42 @@ async fn extract_text_from_multipart(mut payload: Multipart) -> Result<String, M
 /// assert_eq!(list, vec!["Hello", "world!"])
 /// ```
 fn csv_string_to_list(text: String) -> Vec<String> {
-    let list: Vec<&str> = text.split(",").collect();
+    let list: Vec<&str> = text.split(',').collect();
     let mut string_list = Vec::<String>::new();
     for word in list {
         string_list.push(word.trim().to_string());
     }
-    return string_list;
+    string_list
+}
+
+#[post("/register")]
+async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
+    match user::user_exixts(&invite.email, &pool).await {
+        Ok(true) => HttpResponse::BadRequest().json("User already exists"),
+        Ok(false) => {
+            let partial_user = user::create_partial_user(&invite.email, &pool).await;
+            match partial_user {
+                Ok(partial_user) => {
+                    let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
+                    match invite_obj {
+                        Ok(invite_obj) => HttpResponse::Created().json(invite_obj),
+                        Err(e) => {
+                            log::error!("Error: {}", e);
+                            HttpResponse::InternalServerError().json("Internal Server Error")
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    HttpResponse::InternalServerError().json("Internal Server Error")
+                }
+            }
+        }
+        Err(e) => {
+            log::error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -341,7 +521,7 @@ async fn add_license_users(
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::add_license_users(&pool, &other_users).await {
+    match user::add_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Created().json(other_users),
 
         Err(e) => match e {
@@ -381,11 +561,9 @@ async fn remove_license_users(
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::remove_license_users(&pool, &other_users).await {
+    match user::remove_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -438,11 +616,9 @@ async fn update_user_roles(
     other_users: web::Json<UserRoles>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::update_user_roles(&pool, &other_users).await {
+    match user::update_user_roles(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
 
@@ -477,10 +653,41 @@ async fn delete_users(
     other_users: web::Json<UserIDs>,
 ) -> impl Responder {
     let other_users = &other_users.users;
-    match user::delete_users(&pool, &other_users).await {
+    match user::delete_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
+}
+
+#[derive(Deserialize, Serialize)]
+struct PartialUser {
+    email: Option<String>,
+}
+
+///Updates the user information of an ID.
+/// The JSON can be like this:
+/// ```
+/// {
+///     "email": john.doe@email.com
+/// }
+/// ```
+#[patch("/users/{id}")]
+async fn update_user(
+    pool: web::Data<Pool<Postgres>>,
+    id: web::Path<String>,
+    body: web::Json<PartialUser>,
+) -> impl Responder {
+    let mail = &body.email;
+    let id: i32 = match id.parse::<i32>() {
+        Ok(id) => id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+    let returned_user = match mail {
+        Some(email) => match user::update_email(&pool, email, &id).await {
+            Ok(user) => user,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        },
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    HttpResponse::Ok().json(returned_user)
 }
