@@ -42,27 +42,11 @@ export default function EditProfile() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(user),
+    }).then((response) => {
+      if (response.status == 200) {
+        location.reload();
+      }
     });
-  };
-
-  const checkCorrectPassword = async (oldPassword: string) => {
-    let result = await fetch(`${baseUrl}/api/confirm_password`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        password: oldPassword,
-      }),
-    });
-
-    if (result.status == 200) {
-      return true;
-    } else {
-      return false;
-    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -75,7 +59,7 @@ export default function EditProfile() {
 
   const handlePasswordReset = () => {
     fetch(`${baseUrl}/api/reset_password`, {
-      method: "GET",
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -98,7 +82,10 @@ export default function EditProfile() {
 
   useEffect(() => {
     fetchUser()
-      .then((user: User) => setUser(user))
+      .then((user: User) => {
+        setUser(user);
+        setEmail(user.email);
+      })
       .catch(() => alert("Failed to load user details"));
   }, []);
 
@@ -119,6 +106,7 @@ export default function EditProfile() {
             E-mail
             <input
               type="text"
+              style={{ width: "min(30em, 70vw)" }}
               placeholder="E-mail"
               defaultValue={user?.email}
               onChange={(event) => setEmail(event.target.value)}
