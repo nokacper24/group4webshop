@@ -1,7 +1,7 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, post, put, web, HttpRequest, HttpResponse, Responder, get};
+use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
 use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
@@ -106,24 +106,28 @@ pub async fn create_product(
         }
     };
 
-    let (image_buffer, file_name, text_fields) =
+    let (extracted_image, text_fields) =
         match description_utils::extract_image_and_texts_from_multipart(
             payload,
             vec!["product_name", "price_per_unit", "short_description"],
         )
         .await
         {
-            Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
+            Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
             Err(e) => return match e {
                 ImageExtractorError::Utf8Error(e) => HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e)),
                 ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError().json(format!("Couldnt extract multipart: {}", e)),
-                ImageExtractorError::MissingField(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
                 ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'product_name', 'price_per_unit', 'short_description', 'image'"),
                 ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'product_name', 'price_per_unit', 'short_description', 'image', got '{}'",field)),
                 ImageExtractorError::FileTooLarge => HttpResponse::PayloadTooLarge().json("File too large"),
             },
         };
-    let image = match description_utils::parse_img(image_buffer) {
+    let extracted_img = match extracted_image {
+        Some(extracted_image) => extracted_image,
+        None => return HttpResponse::BadRequest().json("Missing image"),
+    };
+    let image = match description_utils::parse_img(extracted_img.img_buffer) {
         Ok(image) => image,
         Err(e) => {
             return match e {
@@ -166,9 +170,12 @@ pub async fn create_product(
     let product_id = product::generate_id(prod_name);
 
     let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
-    let file_name = match description_utils::save_image(image, &path, &file_name) {
+    let file_name = match description_utils::save_image(image, &path, &extracted_img.file_name) {
         Ok(file_name) => file_name,
-        Err(_) => return HttpResponse::InternalServerError().finish(),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
     };
 
     let new_product = Product::new(

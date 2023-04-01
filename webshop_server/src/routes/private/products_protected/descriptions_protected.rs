@@ -334,17 +334,18 @@ async fn upload_image(
         Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
     };
 
-    let (image_buffer, file_name, mut text_fields) =
+    let (image, mut text_fields) =
         match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
             .await
         {
-            Ok((image_buffer, file_name, text_fields)) => (image_buffer, file_name, text_fields),
+            Ok((image, text_fields)) => (image, text_fields),
             Err(e) => {
                 return match e {
                     ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
                         .json(format!("Couldnt extract multipart: {}", e)),
-                    ImageExtractorError::MissingField(field) => {
-                        HttpResponse::BadRequest().json(format!("Missing field: {}", field))
+                    ImageExtractorError::MissingContentDisposition(field) => {
+                        HttpResponse::BadRequest()
+                            .json(format!("Missing content dispositio: {}", field))
                     }
                     ImageExtractorError::MissingData => HttpResponse::BadRequest()
                         .json("Missing data, expected 'image' and 'alt_text'"),
@@ -364,7 +365,12 @@ async fn upload_image(
             }
         };
 
-    let image = match description_utils::parse_img(image_buffer) {
+    let extracted_image = match image {
+        Some(image) => image,
+        None => return HttpResponse::BadRequest().json("Missing image"),
+    };
+
+    let image = match description_utils::parse_img(extracted_image.img_buffer) {
         Ok(img) => img,
         Err(e) => {
             return match e {
@@ -389,7 +395,7 @@ async fn upload_image(
 
     let image_dir = format!("{}/{}", IMAGE_DIR, product_id.as_str());
 
-    let path = match description_utils::save_image(image, &image_dir, &file_name) {
+    let path = match description_utils::save_image(image, &image_dir, &extracted_image.file_name) {
         Ok(path) => path,
         Err(e) => {
             log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
@@ -511,16 +517,8 @@ async fn update_image_description(
         Err(e) => {
             error!("{}", e);
             return HttpResponse::InternalServerError().json("Internal Server Error");
-        },
+        }
     };
-
-    
-
-
-
-
-
-
 
     return HttpResponse::NotImplemented().finish();
 }
