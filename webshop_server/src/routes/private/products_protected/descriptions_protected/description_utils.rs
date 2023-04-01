@@ -203,11 +203,7 @@ pub enum ImageParsingError {
 /// # Returns
 ///
 /// The path to the saved image.
-pub fn save_image(
-    image: DynamicImage,
-    dir: &str,
-    file_name: &str,
-) -> Result<String, std::io::Error> {
+pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<String, ImageError> {
     std::fs::create_dir_all(dir)?;
 
     let file_name = sanitize_filename::sanitize(file_name).replace(' ', "-");
@@ -219,12 +215,7 @@ pub fn save_image(
         i += 1;
     }
 
-    if image.save(&path).is_err() {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Could not save image",
-        ));
-    }
+    image.save(&path)?;
 
     Ok(path)
 }

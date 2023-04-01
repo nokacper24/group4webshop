@@ -2,6 +2,7 @@ use std::fs;
 
 use actix_multipart::Multipart;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
+use image::ImageError;
 use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
@@ -172,10 +173,15 @@ pub async fn create_product(
     let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
     let file_name = match description_utils::save_image(image, &path, &extracted_img.file_name) {
         Ok(file_name) => file_name,
-        Err(e) => {
-            error!("{}", e);
-            return HttpResponse::InternalServerError().finish();
-        }
+        Err(e) => match e {
+            ImageError::Unsupported(e) => {
+                return HttpResponse::UnsupportedMediaType().json(format!("Format error: {}", e))
+            }
+            _ => {
+                log::error!("Couldnt save image: {}", e);
+                return HttpResponse::InternalServerError().finish();
+            }
+        },
     };
 
     let new_product = Product::new(

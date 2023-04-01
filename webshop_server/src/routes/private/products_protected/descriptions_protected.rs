@@ -14,7 +14,7 @@ use crate::{
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
-use image::ImageFormat;
+use image::{ImageError, ImageFormat};
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
 
@@ -397,11 +397,15 @@ async fn upload_image(
 
     let path = match description_utils::save_image(image, &image_dir, &extracted_image.file_name) {
         Ok(path) => path,
-        Err(e) => {
-            log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
-            return HttpResponse::InternalServerError()
-                .json("Internal Server Error while saving image");
-        }
+        Err(e) => match e {
+            ImageError::Unsupported(e) => {
+                return HttpResponse::UnsupportedMediaType().json(format!("Format error: {}", e))
+            }
+            _ => {
+                log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
+                return HttpResponse::InternalServerError().finish();
+            }
+        },
     };
 
     let alt_text = match text_fields.remove("alt_text") {
