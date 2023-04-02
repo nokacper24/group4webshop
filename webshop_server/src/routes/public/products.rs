@@ -38,12 +38,12 @@ pub struct ProductsApiDoc;
 )]
 #[get("/products")]
 pub async fn all_available_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    match product::get_products(&pool, true).await{
+    match product::get_products(&pool, true).await {
         Ok(products) => HttpResponse::Ok().json(products),
         Err(e) => {
             error!("Error: {}", e);
             HttpResponse::InternalServerError().json("Internal Server Error")
-        },
+        }
     }
 }
 

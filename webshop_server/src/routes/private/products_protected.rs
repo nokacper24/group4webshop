@@ -1,7 +1,7 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder, patch};
+use actix_web::{delete, get, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageError;
 use log::error;
 use sqlx::{Pool, Postgres};
@@ -391,18 +391,15 @@ pub async fn update_availability(
 
     match product::update_product_available(&pool, &product_id, available.into_inner()).await {
         Ok(_) => HttpResponse::NoContent().finish(),
-        Err(e) => {
-            match e {
-                sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
-                _ => {
-                    error!("{}", e);
-                    HttpResponse::InternalServerError().finish()
-                }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+            _ => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
             }
-        }
+        },
     }
 }
-
 
 #[delete("/products/{product_id}")]
 pub async fn delete_product(

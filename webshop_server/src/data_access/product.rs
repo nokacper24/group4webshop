@@ -103,17 +103,20 @@ pub fn generate_id(display_name: &str) -> String {
 }
 
 /// Returns all products.
-/// 
-/// 
+///
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database pool
 /// * `only_available`
 ///     - true - only available products are returned, should be used for the public api
 ///     - false - all products are returned
-/// 
+///
 /// # Returns
-pub async fn get_products(pool: &Pool<Postgres>, only_available: bool) -> Result<Vec<Product>, sqlx::Error> {
+pub async fn get_products(
+    pool: &Pool<Postgres>,
+    only_available: bool,
+) -> Result<Vec<Product>, sqlx::Error> {
     let products = if only_available {
         query_as!(
             Product,
@@ -217,7 +220,8 @@ pub async fn update_product_available(
     product_id: &str,
     available: bool,
 ) -> Result<Product, sqlx::Error> {
-    query_as!(Product,
+    query_as!(
+        Product,
         r#"UPDATE product
         SET available = $1
         WHERE product_id = $2

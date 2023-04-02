@@ -621,7 +621,7 @@ pub async fn update_full_width(
     if result.rows_affected() == 0 {
         return Err(sqlx::Error::RowNotFound);
     }
-    
+
     Ok(())
 }
 
