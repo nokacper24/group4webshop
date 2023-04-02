@@ -1,7 +1,7 @@
 use std::fs;
 
 use actix_multipart::Multipart;
-use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Responder, patch};
 use image::ImageError;
 use log::error;
 use sqlx::{Pool, Postgres};
@@ -25,6 +25,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_product);
     cfg.service(delete_product);
     cfg.service(update_product);
+    cfg.service(update_availability);
     cfg.service(
         web::scope("/products")
             .configure(descriptions_protected::configure)
@@ -363,6 +364,45 @@ pub async fn update_product(
         }
     }
 }
+
+#[patch("/products/{product_id}/available")]
+pub async fn update_availability(
+    pool: web::Data<Pool<Postgres>>,
+    product_id: web::Path<String>,
+    available: web::Json<bool>,
+    req: HttpRequest,
+) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    match product::update_product_available(&pool, &product_id, available.into_inner()).await {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(e) => {
+            match e {
+                sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
+                _ => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    }
+}
+
 
 #[delete("/products/{product_id}")]
 pub async fn delete_product(

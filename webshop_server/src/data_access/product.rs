@@ -210,6 +210,25 @@ pub async fn update_product(
     .await
 }
 
+/// Update the availability of a product.
+/// Returns the updated product.
+pub async fn update_product_available(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    available: bool,
+) -> Result<Product, sqlx::Error> {
+    query_as!(Product,
+        r#"UPDATE product
+        SET available = $1
+        WHERE product_id = $2
+        RETURNING *"#,
+        available,
+        product_id
+    )
+    .fetch_one(pool)
+    .await
+}
+
 /// Returns true if the product exists, false otherwise.
 pub async fn product_exists(pool: &Pool<Postgres>, product_id: &str) -> Result<bool, sqlx::Error> {
     let product = query!(
