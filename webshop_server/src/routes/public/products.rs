@@ -1,4 +1,5 @@
 use actix_web::{get, web, HttpResponse, Responder};
+use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -7,7 +8,7 @@ pub mod descriptions;
 use crate::data_access::product::{self, Product};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg.service(all_products);
+    cfg.service(all_available_products);
     cfg.service(product_by_id);
     cfg.service(web::scope("/products").configure(descriptions::configure));
 }
@@ -15,7 +16,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        all_products,
+        all_available_products,
         product_by_id,
     ),
     components(
@@ -36,20 +37,14 @@ pub struct ProductsApiDoc;
 )
 )]
 #[get("/products")]
-pub async fn all_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    let products = product::get_products(&pool).await;
-
-    //error check
-    if products.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+pub async fn all_available_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+    match product::get_products(&pool, true).await {
+        Ok(products) => HttpResponse::Ok().json(products),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
-
-    //parse to json
-    if let Ok(products) = products {
-        return HttpResponse::Ok().json(products);
-    }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
 /// Get a specific product by name

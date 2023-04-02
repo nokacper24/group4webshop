@@ -17,21 +17,39 @@ pub struct Product {
 }
 impl Product {
     pub fn new(
-        product_id: String,
-        display_name: String,
+        product_id: &str,
+        display_name: &str,
         price_per_user: f32,
-        short_description: String,
-        main_image: String,
+        short_description: &str,
+        main_image: &str,
         available: bool,
     ) -> Self {
         Self {
-            product_id,
-            display_name,
+            product_id: product_id.to_string(),
+            display_name: display_name.to_string(),
             price_per_user,
-            short_description,
-            main_image,
+            short_description: short_description.to_string(),
+            main_image: main_image.to_string(),
             available,
         }
+    }
+    pub fn product_id(&self) -> &str {
+        &self.product_id
+    }
+    pub fn display_name(&self) -> &str {
+        &self.display_name
+    }
+    pub fn price_per_user(&self) -> f32 {
+        self.price_per_user
+    }
+    pub fn short_description(&self) -> &str {
+        &self.short_description
+    }
+    pub fn main_image(&self) -> &str {
+        &self.main_image
+    }
+    pub fn available(&self) -> bool {
+        self.available
     }
 }
 
@@ -84,15 +102,38 @@ pub fn generate_id(display_name: &str) -> String {
         .replace(' ', "_")
 }
 
-/// Returns all available products.
-pub async fn get_products(pool: &Pool<Postgres>) -> Result<Vec<Product>, sqlx::Error> {
-    let products = query_as!(
-        Product,
-        r#"SELECT *
-        FROM product WHERE available = true"#
-    )
-    .fetch_all(pool)
-    .await?;
+/// Returns all products.
+///
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `only_available`
+///     - true - only available products are returned, should be used for the public api
+///     - false - all products are returned
+///
+/// # Returns
+pub async fn get_products(
+    pool: &Pool<Postgres>,
+    only_available: bool,
+) -> Result<Vec<Product>, sqlx::Error> {
+    let products = if only_available {
+        query_as!(
+            Product,
+            r#"SELECT *
+            FROM product WHERE available = true"#
+        )
+        .fetch_all(pool)
+        .await?
+    } else {
+        query_as!(
+            Product,
+            r#"SELECT *
+            FROM product"#
+        )
+        .fetch_all(pool)
+        .await?
+    };
     Ok(products)
 }
 
@@ -155,11 +196,12 @@ pub async fn delete_product(
 pub async fn update_product(
     pool: &Pool<Postgres>,
     new_product: &Product,
-) -> Result<(), sqlx::Error> {
-    query!(
+) -> Result<Product, sqlx::Error> {
+    query_as!(Product,
         r#"UPDATE product
         SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5
-        WHERE product_id = $6"#,
+        WHERE product_id = $6
+        RETURNING *"#,
         new_product.display_name,
         new_product.price_per_user,
         new_product.short_description,
@@ -167,9 +209,28 @@ pub async fn update_product(
         new_product.available,
         new_product.product_id
     )
-    .execute(pool)
-    .await?;
-    Ok(())
+    .fetch_one(pool)
+    .await
+}
+
+/// Update the availability of a product.
+/// Returns the updated product.
+pub async fn update_product_available(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    available: bool,
+) -> Result<Product, sqlx::Error> {
+    query_as!(
+        Product,
+        r#"UPDATE product
+        SET available = $1
+        WHERE product_id = $2
+        RETURNING *"#,
+        available,
+        product_id
+    )
+    .fetch_one(pool)
+    .await
 }
 
 /// Returns true if the product exists, false otherwise.
