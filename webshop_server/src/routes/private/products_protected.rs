@@ -299,26 +299,32 @@ pub async fn update_product(
                     }
                 }
             };
-
-            if let Err(e) = description_utils::remove_image(&unupadted_product.main_image()) {
-                log::error!("Couldnt remove image from file system: {}", e);
-                return HttpResponse::InternalServerError().json("Internal Server Error");
-            };
-
             let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
-            match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
-                Ok(file_name) => file_name,
-                Err(e) => match e {
-                    ImageError::Unsupported(e) => {
-                        return HttpResponse::UnsupportedMediaType()
-                            .json(format!("Format error: {}", e))
-                    }
+            let new_path =
+                match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
+                    Ok(file_name) => file_name,
+                    Err(e) => match e {
+                        ImageError::Unsupported(e) => {
+                            return HttpResponse::UnsupportedMediaType()
+                                .json(format!("Format error: {}", e))
+                        }
+                        _ => {
+                            log::error!("Couldnt save image: {}", e);
+                            return HttpResponse::InternalServerError()
+                                .json("Internal Server Error");
+                        }
+                    },
+                };
+            if let Err(e) = description_utils::remove_image(unupadted_product.main_image()) {
+                match e.kind() {
+                    std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {
-                        log::error!("Couldnt save image: {}", e);
+                        error!("Couldnt remove image from file system: {}", e);
                         return HttpResponse::InternalServerError().json("Internal Server Error");
                     }
-                },
+                }
             }
+            new_path
         }
         // no new image was provided, use old one
         None => String::from(unupadted_product.main_image()),
