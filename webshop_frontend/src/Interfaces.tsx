@@ -26,6 +26,12 @@ export interface User {
   role: string;
 }
 
+export interface MeUser {
+    email: string;
+    role: string;
+    company_id: number;
+}
+
 export interface Company {
   company_id: number;
   company_name: string;

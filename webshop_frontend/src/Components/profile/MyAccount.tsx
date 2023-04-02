@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { User } from "../../Interfaces";
+import { MeUser, User } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
 
 /**
@@ -17,12 +17,15 @@ export default function MyAccount() {
   }
 
   const { userId } = useParams();
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<MeUser>();
 
-  const fetchUser = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/${userId}`);
+  const fetchUser = async (): Promise<MeUser> => {
+    const response = await fetch(`${baseUrl}/api/priv/me`, {
+      method: "GET",
+      credentials: "include",
+    });
     const data = await response.json();
-    const user: User = data;
+    const user: MeUser = data;
     setUser(user);
     return user;
   };
