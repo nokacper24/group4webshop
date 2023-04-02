@@ -473,7 +473,7 @@ async fn update_text_description(
     match updated_component {
         Ok(description_component) => HttpResponse::Ok().json(description_component),
         Err(e) => match e {
-            DescriptionUpdateError::WrongComponentType => HttpResponse::BadRequest().json(format!(
+            DescriptionUpdateError::WrongComponentType => HttpResponse::Conflict().json(format!(
                 "Wrong component type! Component with id {} is not a text component.",
                 component_id
             )),
@@ -491,10 +491,13 @@ async fn update_text_description(
 #[put("/{product_id}/descriptions/image/{component_id}")]
 async fn update_image_description(
     payload: Multipart,
-    product_id: web::Path<String>,
+    path_parms: web::Path<(String, i32)>,
     pool: web::Data<Pool<Postgres>>,
     req: HttpRequest,
 ) -> impl Responder {
+    let product_id = path_parms.0.as_str();
+    let component_id = path_parms.1;
+
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -512,17 +515,147 @@ async fn update_image_description(
         }
     };
 
-    match product::product_exists(&pool, product_id.as_str()).await {
-        Ok(exists) => {
-            if !exists {
-                return HttpResponse::NotFound().json("Product not found");
+    let unupdated_desc = match product::description::get_description_component_checked(
+        &pool,
+        product_id,
+        component_id,
+    )
+    .await
+    {
+        Ok(desc) => desc,
+        Err(e) => {
+            return match e {
+                sqlx::Error::RowNotFound => {
+                    HttpResponse::NotFound().json("No component found with given id and product.")
+                }
+                _ => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().json("Internal Server Error")
+                }
             }
         }
-        Err(e) => {
-            error!("{}", e);
+    };
+    let unupdated_img_comp = match unupdated_desc.image() {
+        Some(img_comp) => img_comp,
+        None => {
+            return HttpResponse::Conflict().json(format!(
+                "Wrong component type! Component with id {} is not an image component.",
+                path_parms.1
+            ))
+        }
+    };
+
+    let (image, mut text_fields) =
+        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
+            .await
+        {
+            Ok((image, text_fields)) => (image, text_fields),
+            Err(e) => {
+                return match e {
+                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
+                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MissingContentDisposition(field) => {
+                        HttpResponse::BadRequest()
+                            .json(format!("Missing content dispositio: {}", field))
+                    }
+                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
+                        .json("Missing data, expected 'image' and 'alt_text'"),
+                    ImageExtractorError::UnexpectedField(e) => {
+                        HttpResponse::BadRequest().json(format!(
+                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                            e
+                        ))
+                    }
+                    ImageExtractorError::Utf8Error(e) => {
+                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                    }
+                    ImageExtractorError::FileTooLarge => {
+                        HttpResponse::PayloadTooLarge().json("File too large")
+                    }
+                }
+            }
+        };
+
+    let new_image_path = match image {
+        Some(image) => {
+            let new_img = match description_utils::parse_img(image.img_buffer) {
+                Ok(img) => img,
+                Err(e) => {
+                    return match e {
+                        ImageParsingError::DecodeError(e) => HttpResponse::UnsupportedMediaType()
+                            .json(format!("Decode error: {}", e)),
+                        ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(
+                            format!("No format found. Supported formats: {:?}", ALLOWED_FORMATS),
+                        ),
+                        ImageParsingError::UnsuppoertedFormat(e) => {
+                            HttpResponse::UnsupportedMediaType().json(format!(
+                                "Unsupported format, found {:?}. Supported formats: {:?}",
+                                e, ALLOWED_FORMATS
+                            ))
+                        }
+                        ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
+                            .json(format!("Image reader error: {}", e)),
+                    }
+                }
+            };
+
+            let image_dir = format!("{}/{}", IMAGE_DIR, product_id);
+
+            let new_img_path =
+                match description_utils::save_image(new_img, &image_dir, &image.file_name) {
+                    Ok(path) => path,
+                    Err(e) => match e {
+                        ImageError::Unsupported(e) => {
+                            return HttpResponse::UnsupportedMediaType()
+                                .json(format!("Format error: {}", e))
+                        }
+                        _ => {
+                            log::error!("Couldnt save image to {}, Error: {}", &image_dir, e);
+                            return HttpResponse::InternalServerError().finish();
+                        }
+                    },
+                };
+            if let Err(e) = description_utils::remove_image(unupdated_img_comp.image_path()) {
+                match e.kind() {
+                    std::io::ErrorKind::NotFound => {} // Image already deleted
+                    _ => {
+                        error!("{}", e);
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                }
+            }
+            new_img_path
+        }
+        None => unupdated_img_comp.image_path().to_string(),
+    };
+
+    let alt_text = match text_fields.remove("alt_text") {
+        Some(alt_text) => alt_text,
+        None => {
             return HttpResponse::InternalServerError().json("Internal Server Error");
         }
     };
 
-    return HttpResponse::NotImplemented().finish();
+    let new_img_comp = product::description::ImageComponent::new(None, new_image_path, alt_text);
+
+    let updated_component =
+        product::description::update_image_component(&pool, product_id, new_img_comp, component_id)
+            .await;
+
+    match updated_component {
+        Ok(description_component) => HttpResponse::Ok().json(description_component),
+        Err(e) => match e {
+            DescriptionUpdateError::WrongComponentType => HttpResponse::Conflict().json(format!(
+                "Wrong component type! Component with id {} is not an image component.",
+                component_id
+            )),
+            DescriptionUpdateError::NotFound => {
+                HttpResponse::NotFound().json("No component found with given id and product.")
+            }
+            DescriptionUpdateError::SqlxError(e) => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().json("Internal Server Error")
+            }
+        },
+    }
 }
