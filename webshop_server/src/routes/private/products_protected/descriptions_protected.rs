@@ -30,6 +30,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(description_swap_priorities);
     cfg.service(add_text_description);
     cfg.service(update_priority);
+    cfg.service(set_full_width);
     cfg.service(upload_image);
     cfg.service(update_priorities);
     cfg.service(update_text_description);
@@ -129,6 +130,49 @@ async fn update_priority(
                 }
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
             },
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+}
+
+#[patch("/{product_id}/descriptions/{component_id}/full-width")]
+async fn set_full_width(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(String, i32)>,
+    full_width: web::Json<bool>,
+    req: HttpRequest,
+) -> impl Responder {
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let (product_id, component_id) = path.into_inner();
+    let query_result = product::description::update_full_width(
+        &pool,
+        product_id.as_str(),
+        component_id,
+        full_width.into_inner(),
+    )
+    .await;
+    match query_result {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                HttpResponse::NotFound().json("Product or description not found")
+            }
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
