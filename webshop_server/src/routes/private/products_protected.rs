@@ -185,11 +185,11 @@ pub async fn create_product(
     };
 
     let new_product = Product::new(
-        product_id,
-        prod_name.to_string(),
+        &product_id,
+        prod_name,
         price_per_unit,
-        short_description.to_string(),
-        file_name.to_string(),
+        short_description,
+        &file_name,
         false,
     );
 
@@ -222,17 +222,139 @@ pub async fn create_product(
     (status = 500, description = "Internal Server Error")
 )
 )]
-#[put("/products")]
+#[put("/products/{product_id}")]
 pub async fn update_product(
+    payload: Multipart,
     pool: web::Data<Pool<Postgres>>,
-    product: web::Json<Product>,
+    req: HttpRequest,
+    product_id: web::Path<String>,
 ) -> impl Responder {
-    match product::update_product(&pool, &product).await {
-        Ok(product) => HttpResponse::Created().json(product),
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let unupadted_product = match product::get_product_by_id(&pool, &product_id).await {
+        Ok(product) => product,
         Err(e) => match e {
-            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
+            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
         },
+    };
+
+    let (extracted_image, text_fields) =
+        match description_utils::extract_image_and_texts_from_multipart(
+            payload,
+            vec!["product_name", "price_per_unit", "short_description"],
+        )
+        .await
+        {
+            Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
+            Err(e) => return match e {
+                ImageExtractorError::Utf8Error(e) => HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e)),
+                ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError().json(format!("Couldnt extract multipart: {}", e)),
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
+                ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'product_name', 'price_per_unit', 'short_description', 'image'"),
+                ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'product_name', 'price_per_unit', 'short_description', 'image', got '{}'",field)),
+                ImageExtractorError::FileTooLarge => HttpResponse::PayloadTooLarge().json("File too large"),
+            },
+        };
+
+    let new_image_path = match extracted_image {
+        Some(extracted_image) => {
+            // new image was provided, remove old one and save new one
+            let new_img = match description_utils::parse_img(extracted_image.img_buffer) {
+                Ok(image) => image,
+                Err(e) => {
+                    return match e {
+                        ImageParsingError::DecodeError(e) => HttpResponse::UnsupportedMediaType()
+                            .json(format!("Decode error: {}", e)),
+                        ImageParsingError::NoFormatFound => {
+                            HttpResponse::BadRequest().json(format!(
+                                "No format found. Supported formats: {:?}",
+                                descriptions_protected::ALLOWED_FORMATS
+                            ))
+                        }
+                        ImageParsingError::UnsuppoertedFormat(e) => {
+                            HttpResponse::UnsupportedMediaType().json(format!(
+                                "Unsupported format, found {:?}. Supported formats: {:?}",
+                                e,
+                                descriptions_protected::ALLOWED_FORMATS
+                            ))
+                        }
+                        ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
+                            .json(format!("Image reader error: {}", e)),
+                    }
+                }
+            };
+
+            if let Err(e) = description_utils::remove_image(&unupadted_product.main_image()) {
+                log::error!("Couldnt remove image from file system: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            };
+
+            let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
+            match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
+                Ok(file_name) => file_name,
+                Err(e) => match e {
+                    ImageError::Unsupported(e) => {
+                        return HttpResponse::UnsupportedMediaType()
+                            .json(format!("Format error: {}", e))
+                    }
+                    _ => {
+                        log::error!("Couldnt save image: {}", e);
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                },
+            }
+        }
+        // no new image was provided, use old one
+        None => String::from(unupadted_product.main_image()),
+    };
+
+    let prod_name = match text_fields.get("product_name") {
+        Some(prod_name) => prod_name,
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let price_per_unit = match text_fields.get("price_per_unit") {
+        Some(price_per_unit) => match price_per_unit.parse::<f32>() {
+            Ok(price_per_unit) => price_per_unit,
+            Err(_) => return HttpResponse::InternalServerError().finish(),
+        },
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let short_description = match text_fields.get("short_description") {
+        Some(short_description) => short_description,
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+
+    let product_to_update = Product::new(
+        unupadted_product.product_id(),
+        prod_name,
+        price_per_unit,
+        short_description,
+        &new_image_path,
+        unupadted_product.available(),
+    );
+
+    match product::update_product(&pool, &product_to_update).await {
+        Ok(updated_product) => HttpResponse::Ok().json(updated_product),
+        Err(e) => {
+            log::error!("Couldnt update product: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
 }
 
