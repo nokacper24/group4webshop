@@ -15,6 +15,27 @@ pub struct DescriptionComponent {
     image: Option<ImageComponent>,
 }
 
+impl DescriptionComponent {
+    pub fn component_id(&self) -> i32 {
+        self.component_id
+    }
+    pub fn priority(&self) -> i32 {
+        self.priority
+    }
+    pub fn full_width(&self) -> bool {
+        self.full_width
+    }
+    pub fn product_id(&self) -> &str {
+        &self.product_id
+    }
+    pub fn text(&self) -> &Option<TextComponent> {
+        &self.text
+    }
+    pub fn image(&self) -> &Option<ImageComponent> {
+        &self.image
+    }
+}
+
 /// Description component error.  
 /// Invalid component means that the component has
 /// - both Text and image are None  
@@ -46,6 +67,12 @@ impl ImageComponent {
             image_path,
             alt_text,
         }
+    }
+    pub fn image_id(&self) -> &Option<i32> {
+        &self.image_id
+    }
+    pub fn image_path(&self) -> &str {
+        &self.image_path
     }
 }
 
@@ -504,15 +531,54 @@ pub async fn update_text_component(
         text_comp.text_title,
         text_comp.paragraph,
         text_id
-    ).execute(pool).await;
+    )
+    .execute(pool)
+    .await;
 
     if let Err(e) = result {
         return Err(DescriptionUpdateError::SqlxError(e));
     }
-    match get_description_component_checked (pool, product_id, component_id).await {
-        Ok (desc_comp) => {return Ok(desc_comp)},
-        Err (e) => return Err(DescriptionUpdateError::SqlxError(e)),
-        
+    match get_description_component_checked(pool, product_id, component_id).await {
+        Ok(desc_comp) => Ok(desc_comp),
+        Err(e) => Err(DescriptionUpdateError::SqlxError(e)),
+    }
+}
+
+pub async fn update_image_component(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    image_comp: ImageComponent,
+    component_id: i32,
+) -> Result<DescriptionComponent, DescriptionUpdateError> {
+    let desc_comp = match get_description_component_checked(pool, product_id, component_id).await {
+        Ok(desc_comp) => desc_comp,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return Err(DescriptionUpdateError::NotFound),
+            _ => return Err(DescriptionUpdateError::SqlxError(e)),
+        },
+    };
+    let image_id = match desc_comp.image {
+        Some(image) => image.image_id,
+        None => return Err(DescriptionUpdateError::WrongComponentType),
+    };
+
+    let result = query!(
+        r#"UPDATE product_image
+        SET image_path = $1, alt_text = $2
+        WHERE image_id = $3;"#,
+        image_comp.image_path,
+        image_comp.alt_text,
+        image_id
+    )
+    .execute(pool)
+    .await;
+
+    if let Err(e) = result {
+        return Err(DescriptionUpdateError::SqlxError(e));
+    }
+    match get_description_component_checked(pool, product_id, component_id).await {
+        Ok(desc_comp) => Ok(desc_comp),
+        Err(e) => Err(DescriptionUpdateError::SqlxError(e)),
     }
 }
 
