@@ -17,21 +17,39 @@ pub struct Product {
 }
 impl Product {
     pub fn new(
-        product_id: String,
-        display_name: String,
+        product_id: &str,
+        display_name: &str,
         price_per_user: f32,
-        short_description: String,
-        main_image: String,
+        short_description: &str,
+        main_image: &str,
         available: bool,
     ) -> Self {
         Self {
-            product_id,
-            display_name,
+            product_id: product_id.to_string(),
+            display_name: display_name.to_string(),
             price_per_user,
-            short_description,
-            main_image,
+            short_description: short_description.to_string(),
+            main_image: main_image.to_string(),
             available,
         }
+    }
+    pub fn product_id(&self) -> &str {
+        &self.product_id
+    }
+    pub fn display_name(&self) -> &str {
+        &self.display_name
+    }
+    pub fn price_per_user(&self) -> f32 {
+        self.price_per_user
+    }
+    pub fn short_description(&self) -> &str {
+        &self.short_description
+    }
+    pub fn main_image(&self) -> &str {
+        &self.main_image
+    }
+    pub fn available(&self) -> bool {
+        self.available
     }
 }
 
@@ -175,11 +193,12 @@ pub async fn delete_product(
 pub async fn update_product(
     pool: &Pool<Postgres>,
     new_product: &Product,
-) -> Result<(), sqlx::Error> {
-    query!(
+) -> Result<Product, sqlx::Error> {
+    query_as!(Product,
         r#"UPDATE product
         SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5
-        WHERE product_id = $6"#,
+        WHERE product_id = $6
+        RETURNING *"#,
         new_product.display_name,
         new_product.price_per_user,
         new_product.short_description,
@@ -187,9 +206,8 @@ pub async fn update_product(
         new_product.available,
         new_product.product_id
     )
-    .execute(pool)
-    .await?;
-    Ok(())
+    .fetch_one(pool)
+    .await
 }
 
 /// Returns true if the product exists, false otherwise.
