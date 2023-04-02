@@ -596,8 +596,32 @@ pub async fn update_priority(
         component_id,
         product_id,
     );
+    let result = pool.execute(query).await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
+    Ok(())
+}
 
-    pool.execute(query).await?;
+pub async fn update_full_width(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    component_id: i32,
+    full_width: bool,
+) -> Result<(), sqlx::Error> {
+    let query = query!(
+        r#"UPDATE description_component
+        SET full_width = $1
+        WHERE component_id = $2 AND product_id=$3;"#,
+        full_width,
+        component_id,
+        product_id,
+    );
+    let result = pool.execute(query).await?;
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    }
+    
     Ok(())
 }
 
