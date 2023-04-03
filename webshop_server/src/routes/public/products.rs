@@ -1,7 +1,7 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use log::error;
 use sqlx::{Pool, Postgres};
-use utoipa::OpenApi;
+use utoipa::{OpenApi, openapi::{Paths, PathsBuilder, PathItem}};
 
 pub mod descriptions;
 
@@ -24,7 +24,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     ),
     tags(
         (name = "Products", description = "Api endpoints for products"),
-        (name = "Product Descriptions", description = "Api endpoints for product descriptions")
     ),
 )]
 pub struct ProductsApiDoc;

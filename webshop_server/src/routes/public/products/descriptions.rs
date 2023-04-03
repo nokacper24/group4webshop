@@ -24,7 +24,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         )
     ),
     tags(
-        (name = "Products", description = "Api endpoints for products"),
         (name = "Product Descriptions", description = "Api endpoints for product descriptions")
     ),
 )]
