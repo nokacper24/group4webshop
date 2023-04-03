@@ -18,34 +18,41 @@ fn public_docs() -> Vec<openapi::OpenApi> {
     ]
 }
 
-pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
-    let info = build_info();
+fn protected_docs() -> Vec<openapi::OpenApi> {
+    vec![
+        // nothing here yet
+    ]
+}
 
+fn admin_docs() -> Vec<openapi::OpenApi> {
+    vec![
+        // nothing here yet
+    ]
+}
+
+pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
     cfg.service(SwaggerUi::new("/api-doc/swagger-ui/{_:.*}").urls(vec![
         (
             Url::new("Public", "/api-doc/public_endpoints.json"),
-            build_public_endpoints_doc(info.clone()),
+            build_docs(PrivacyLevel::Public),
         ),
         (
-            Url::new("Products", "/api-doc/openapi_products.json"),
-            build_products_doc(info.clone()),
+            Url::new("Protected", "/api-doc/openapi_products.json"),
+            build_docs(PrivacyLevel::Protected),
         ),
         (
-            Url::new("Descriptions", "/api-doc/openapi_descriptions.json"),
-            build_description_doc(info.clone()),
-        ),
-        (
-            Url::new("Licenses", "/api-doc/openapi_licenses.json"),
-            build_licenses_doc(info.clone()),
-        ),
-        (
-            Url::new("Testimonials", "/api-doc/openapi_testimonials.json"),
-            build_licenses_doc(info),
+            Url::new("Admin", "/api-doc/openapi_descriptions.json"),
+            build_docs(PrivacyLevel::Admin),
         ),
     ]));
 }
 
-fn build_info() -> openapi::Info {
+fn build_info(level: PrivacyLevel) -> openapi::Info {
+    let description = match level {
+        PrivacyLevel::Public => "Public endpoints. No authentication required.",
+        PrivacyLevel::Protected => "Protected endpoints. Authentication required.",
+        PrivacyLevel::Admin => "Admin endpoints. Authentication required, with admin privileges.",
+    };
     InfoBuilder::new()
         .title("ProFlex API")
         .version("1.0.0")
@@ -62,35 +69,24 @@ fn build_info() -> openapi::Info {
                 .url(Some("https://www.gnu.org/licenses/gpl-3.0.en.html"))
                 .build(),
         ))
+        .description(Some(description.to_string()))
         .build()
 }
 
-fn build_products_doc(info: openapi::Info) -> openapi::OpenApi {
-    OpenApiBuilder::from(products::ProductsApiDoc::openapi())
-        .info(info)
-        .build()
+enum PrivacyLevel {
+    Public,
+    Protected,
+    Admin,
 }
 
-fn build_description_doc(info: openapi::Info) -> openapi::OpenApi {
-    OpenApiBuilder::from(products::descriptions::DescriptionApiDoc::openapi())
-        .info(info)
-        .build()
-}
+fn build_docs(level: PrivacyLevel) -> openapi::OpenApi {
+    let all_pub_docs = match level {
+        PrivacyLevel::Public => public_docs(),
+        PrivacyLevel::Protected => protected_docs(),
+        PrivacyLevel::Admin => admin_docs(),
+    };
+    let info = build_info(level);
 
-fn build_licenses_doc(info: openapi::Info) -> openapi::OpenApi {
-    OpenApiBuilder::from(licenses::LicensesOpenApi::openapi())
-        .info(info)
-        .build()
-}
-
-fn build_testimonials_doc(info: openapi::Info) -> openapi::OpenApi {
-    OpenApiBuilder::from(testimonials::TestimonialsOpenApi::openapi())
-        .info(info)
-        .build()
-}
-
-fn build_public_endpoints_doc(info: openapi::Info) -> openapi::OpenApi {
-    let all_pub_docs = public_docs();
     OpenApiBuilder::new()
         .components(extract_components(all_pub_docs.clone()))
         .paths(extract_paths(all_pub_docs.clone()))
@@ -112,7 +108,8 @@ fn extract_components(docs: Vec<openapi::OpenApi>) -> Option<openapi::Components
     for doc in docs {
         if let Some(mut doc_components) = doc.components {
             components.schemas.append(&mut doc_components.schemas);
-            components.security_schemes
+            components
+                .security_schemes
                 .append(&mut doc_components.security_schemes);
             components.responses.append(&mut doc_components.responses);
         }
