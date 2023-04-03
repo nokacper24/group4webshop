@@ -16,6 +16,10 @@ pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
             build_products_doc(info.clone()),
         ),
         (
+            Url::new("Descriptions", "/api-doc/openapi_descriptions.json"),
+            build_description_doc(info.clone()),
+        ),
+        (
             Url::new("Licenses", "/api-doc/openapi_licenses.json"),
             build_licenses_doc(info.clone()),
         ),
@@ -48,6 +52,12 @@ fn build_info() -> openapi::Info {
 
 fn build_products_doc(info: openapi::Info) -> openapi::OpenApi {
     OpenApiBuilder::from(products::ProductsApiDoc::openapi())
+        .info(info)
+        .build()
+}
+
+fn build_description_doc(info: openapi::Info) -> openapi::OpenApi {
+    OpenApiBuilder::from(products::descriptions::DescriptionApiDoc::openapi())
         .info(info)
         .build()
 }

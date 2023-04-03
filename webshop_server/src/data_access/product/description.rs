@@ -2,10 +2,11 @@ use serde::{Deserialize, Serialize};
 use sqlx::{
     query, Executor, {Pool, Postgres},
 };
+use utoipa::ToSchema;
 
 /// Description component. Contains either text or image.
 /// Database has constraints to ensure that only one of them is Some.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct DescriptionComponent {
     component_id: i32,
     priority: i32,
@@ -47,13 +48,13 @@ pub enum DescriptionCompError {
     SqlxError(sqlx::Error),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct TextComponent {
     text_id: Option<i32>,
     text_title: String,
     paragraph: String,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct ImageComponent {
     image_id: Option<i32>,
     image_path: String,

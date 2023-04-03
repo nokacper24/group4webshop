@@ -23,14 +23,17 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         schemas(Product)
     ),
     tags(
-        (name = "Products", description = "Api endpoints for products")
+        (name = "Products", description = "Api endpoints for products"),
+        (name = "Product Descriptions", description = "Api endpoints for product descriptions")
     ),
 )]
 pub struct ProductsApiDoc;
 
+/// Get all available products
 #[utoipa::path(
     context_path = "/api",
     get,
+    tag = "Products",
     responses(
     (status = 200, description = "List of all available products", body = Vec<Product>),
     (status = 500, description = "Internal Server Error"),
@@ -47,10 +50,11 @@ pub async fn all_available_products(pool: web::Data<Pool<Postgres>>) -> impl Res
     }
 }
 
-/// Get a specific product by name
+/// Get a specific product by id
 #[utoipa::path (
     context_path = "/api",
     get,
+    tag = "Products",
     responses(
         (status = 200, description = "Returns a specific product", body = Product),
         (status = 404, description = "Product not found"),
