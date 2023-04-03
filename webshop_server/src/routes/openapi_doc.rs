@@ -9,6 +9,15 @@ use crate::routes::public::{licenses, products, testimonials};
 
 use super::public::products::descriptions;
 
+fn public_docs() -> Vec<openapi::OpenApi> {
+    vec![
+        products::ProductsApiDoc::openapi(),
+        descriptions::DescriptionApiDoc::openapi(),
+        licenses::LicensesOpenApi::openapi(),
+        testimonials::TestimonialsOpenApi::openapi(),
+    ]
+}
+
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
     let info = build_info();
 
@@ -81,46 +90,42 @@ fn build_testimonials_doc(info: openapi::Info) -> openapi::OpenApi {
 }
 
 fn build_public_endpoints_doc(info: openapi::Info) -> openapi::OpenApi {
+    let all_pub_docs = public_docs();
     OpenApiBuilder::new()
-        .components(build_public_components())
-        .paths(build_public_paths())
-        .tags(build_public_tags())
+        .components(extract_components(all_pub_docs.clone()))
+        .paths(extract_paths(all_pub_docs.clone()))
+        .tags(extract_tags(all_pub_docs))
         .info(info)
         .build()
 }
 
-fn build_public_paths() -> Paths {
+fn extract_paths(docs: Vec<openapi::OpenApi>) -> Paths {
     let mut paths = Paths::new();
-    paths
-        .paths
-        .append(&mut products::ProductsApiDoc::openapi().paths.paths);
-    paths
-        .paths
-        .append(&mut descriptions::DescriptionApiDoc::openapi().paths.paths);
+    for mut doc in docs {
+        paths.paths.append(&mut doc.paths.paths);
+    }
     paths
 }
 
-fn build_public_components() -> Option<openapi::Components> {
+fn extract_components(docs: Vec<openapi::OpenApi>) -> Option<openapi::Components> {
     let mut components = openapi::Components::new();
-    if let Some(mut products_components) = products::ProductsApiDoc::openapi().components {
-        components.schemas.append(&mut products_components.schemas);
-    }
-    if let Some(mut descriptions_components) = descriptions::DescriptionApiDoc::openapi().components
-    {
-        components
-            .schemas
-            .append(&mut descriptions_components.schemas);
+    for doc in docs {
+        if let Some(mut doc_components) = doc.components {
+            components.schemas.append(&mut doc_components.schemas);
+            components.security_schemes
+                .append(&mut doc_components.security_schemes);
+            components.responses.append(&mut doc_components.responses);
+        }
     }
     Some(components)
 }
 
-fn build_public_tags() -> Option<Vec<utoipa::openapi::Tag>> {
+fn extract_tags(docs: Vec<openapi::OpenApi>) -> Option<Vec<utoipa::openapi::Tag>> {
     let mut tags = Vec::new();
-    if let Some(mut products_tags) = products::ProductsApiDoc::openapi().tags {
-        tags.append(&mut products_tags);
-    }
-    if let Some(mut descriptions_tags) = descriptions::DescriptionApiDoc::openapi().tags {
-        tags.append(&mut descriptions_tags);
+    for doc in docs {
+        if let Some(mut doc_tags) = doc.tags {
+            tags.append(&mut doc_tags);
+        }
     }
     Some(tags)
 }
