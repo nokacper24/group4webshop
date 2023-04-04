@@ -4,8 +4,9 @@ use actix_multipart::Multipart;
 use actix_web::{delete, get, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageError;
 use log::error;
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::OpenApi;
+use utoipa::{OpenApi, ToSchema};
 
 pub mod descriptions_protected;
 
@@ -33,6 +34,40 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     );
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        get_all_products,
+        create_product,
+        update_product,
+    ),
+    components(
+        schemas(
+            Product,
+            NewProductForm,
+        )
+    ),
+    tags(
+        (
+            name = "Products",
+            description = "Api endpoints for products"
+        ),
+    ),
+)]
+pub struct ProductsApiDoc;
+
+/// Get all products.
+///
+/// Includes products that are not available.
+#[utoipa::path(
+    context_path = "/api/priv",
+    get,
+    tag = "Products",
+    responses(
+    (status = 200, description = "List of all products", body = Vec<Product>),
+    (status = 500, description = "Internal Server Error"),
+)
+)]
 #[get("/products")]
 pub async fn get_all_products(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
     match auth::validate_user(req, &pool).await {
@@ -61,29 +96,29 @@ pub async fn get_all_products(pool: web::Data<Pool<Postgres>>, req: HttpRequest)
     }
 }
 
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        create_product,
-        update_product,
-    ),
-    components(
-        schemas(Product)
-    ),
-    tags(
-        (name = "Products", description = "Api endpoints for products")
-    ),
-)]
-pub struct ProtectedProductsApiDoc;
-
+#[derive(Deserialize, Serialize, ToSchema)]
+struct NewProductForm {
+    product_name: String,
+    price_per_unit: i32,
+    short_description: String,
+    #[schema(value_type = String, format = Binary)]
+    image: Vec<u8>,
+}
+/// Create a new product.
 #[utoipa::path(
-    context_path = "/api",
+    context_path = "/api/priv",
     post,
     responses(
-    (status = 200, description = "Product created", body = Product),
-    (status = 403, description = "Forbidden - no permission to create products"),
-    (status = 500, description = "Internal Server Error")
-)
+        (status = 200, description = "Product created", body = Product),
+        (status = 403, description = "Forbidden - no permission to create products"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    tag = "Products",
+    request_body(
+        content_type = "multipart/form-data",
+        description = "Product creation form",
+        content = NewProductForm,
+    ),
 )]
 #[post("/products")]
 pub async fn create_product(
@@ -159,6 +194,7 @@ pub async fn create_product(
     };
     let price_per_unit = match text_fields.get("price_per_unit") {
         Some(price_per_unit) => match price_per_unit.parse::<f32>() {
+            // TODO, dobt internal server error here
             Ok(price_per_unit) => price_per_unit,
             Err(_) => return HttpResponse::InternalServerError().finish(),
         },
@@ -214,13 +250,15 @@ pub async fn create_product(
     }
 }
 
+/// Updates a product
 #[utoipa::path(
-    context_path = "/api",
-    post,
+    context_path = "/api/priv",
+    put,
+    tag = "Products",
     responses(
-    (status = 200, description = "Product updated", body = Product),
-    (status = 403, description = "Forbidden - no permission to update products"),
-    (status = 500, description = "Internal Server Error")
+        (status = 200, description = "Product updated", body = Product),
+        (status = 403, description = "Forbidden - no permission to update products"),
+        (status = 500, description = "Internal Server Error")
 )
 )]
 #[put("/products/{product_id}")]
@@ -337,6 +375,7 @@ pub async fn update_product(
     };
     let price_per_unit = match text_fields.get("price_per_unit") {
         Some(price_per_unit) => match price_per_unit.parse::<f32>() {
+            // TODO, dont internal server error here
             Ok(price_per_unit) => price_per_unit,
             Err(_) => return HttpResponse::InternalServerError().finish(),
         },
