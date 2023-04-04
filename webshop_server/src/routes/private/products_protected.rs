@@ -108,7 +108,7 @@ struct NewProductForm {
     image: Vec<u8>,
 }
 /// Create a new product.
-/// 
+///
 /// Availablity is set to false by default. Must be **PATCH**ed to `true` in a separate request.
 #[utoipa::path(
     context_path = "/api/priv",
@@ -260,7 +260,6 @@ pub async fn create_product(
         }
     }
 }
-
 
 /// Form for updating a product, image is optional (nullable).
 #[derive(Deserialize, Serialize, ToSchema)]

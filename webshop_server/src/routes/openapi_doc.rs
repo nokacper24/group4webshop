@@ -1,4 +1,4 @@
-use crate::routes::{public, private};
+use crate::routes::{private, public};
 use actix_web::web;
 use utoipa::{
     openapi::{self, ContactBuilder, InfoBuilder, OpenApiBuilder, Paths},
