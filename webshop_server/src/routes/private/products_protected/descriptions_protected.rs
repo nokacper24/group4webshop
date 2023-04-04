@@ -50,7 +50,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     ),
     components(
         schemas(
-            
+            //
         )
     ),
     tags(
@@ -270,7 +270,7 @@ async fn set_full_width(
 }
 
 /// Update multiple priorities at once.
-/// 
+///
 /// All descriptions must belong to the specified product. The unique priority constraint must be satisfied.
 #[utoipa::path(
     context_path = "/api/priv/products",
@@ -367,7 +367,6 @@ async fn update_priorities(
     }
 }
 
-
 /// Swap the priorities of two descriptions.
 #[utoipa::path(
     context_path = "/api/priv/products",
@@ -394,7 +393,7 @@ async fn update_priorities(
 async fn swap_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    description_ids: web::Json<(i32,i32)>,
+    description_ids: web::Json<(i32, i32)>,
     req: HttpRequest,
 ) -> impl Responder {
     let description_ids = description_ids.into_inner();
@@ -431,7 +430,7 @@ async fn swap_priorities(
             e => {
                 error!("{}", e);
                 HttpResponse::InternalServerError().finish()
-            },
+            }
         },
     }
 }
@@ -518,7 +517,10 @@ async fn create_image_component(
                 return HttpResponse::NotFound().json("Product not found");
             }
         }
-        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        Err(e) => {
+            error!("{}", e);
+            return HttpResponse::InternalServerError().finish();
+        }
     };
 
     let (image, mut text_fields) =
@@ -528,8 +530,11 @@ async fn create_image_component(
             Ok((image, text_fields)) => (image, text_fields),
             Err(e) => {
                 return match e {
-                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
-                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MultipartError(e) => {
+                        error!("{}", e);
+                        HttpResponse::InternalServerError()
+                            .json(format!("Couldnt extract multipart"))
+                    }
                     ImageExtractorError::MissingContentDisposition(field) => {
                         HttpResponse::BadRequest()
                             .json(format!("Missing content dispositio: {}", field))
@@ -574,7 +579,8 @@ async fn create_image_component(
                         e, ALLOWED_FORMATS
                     )),
                 ImageParsingError::IoError(e) => {
-                    HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().json(format!("Image reader error"))
                 }
             }
         }
@@ -598,7 +604,7 @@ async fn create_image_component(
     let alt_text = match text_fields.remove("alt_text") {
         Some(alt_text) => alt_text,
         None => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            return HttpResponse::InternalServerError().finish();
         }
     };
 
@@ -616,7 +622,8 @@ async fn create_image_component(
                 HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
             }
             DescriptionCompError::SqlxError(e) => {
-                HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
             }
         },
     }
@@ -669,7 +676,7 @@ async fn update_text_component(
             }
             DescriptionUpdateError::SqlxError(e) => {
                 error!("{}", e);
-                HttpResponse::InternalServerError().json("Internal Server Error")
+                HttpResponse::InternalServerError().finish()
             }
         },
     }
@@ -717,7 +724,7 @@ async fn update_image_component(
                 }
                 _ => {
                     error!("{}", e);
-                    HttpResponse::InternalServerError().json("Internal Server Error")
+                    HttpResponse::InternalServerError().finish()
                 }
             }
         }
@@ -739,8 +746,11 @@ async fn update_image_component(
             Ok((image, text_fields)) => (image, text_fields),
             Err(e) => {
                 return match e {
-                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
-                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MultipartError(e) => {
+                        error!("{}", e);
+                        HttpResponse::InternalServerError()
+                            .json(format!("Couldnt extract multipart"))
+                    }
                     ImageExtractorError::MissingContentDisposition(field) => {
                         HttpResponse::BadRequest()
                             .json(format!("Missing content dispositio: {}", field))
@@ -780,8 +790,10 @@ async fn update_image_component(
                                 e, ALLOWED_FORMATS
                             ))
                         }
-                        ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
-                            .json(format!("Image reader error: {}", e)),
+                        ImageParsingError::IoError(e) => {
+                            error!("{}", e);
+                            HttpResponse::InternalServerError().json(format!("Image reader error"))
+                        }
                     }
                 }
             };
@@ -819,7 +831,7 @@ async fn update_image_component(
     let alt_text = match text_fields.remove("alt_text") {
         Some(alt_text) => alt_text,
         None => {
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            return HttpResponse::InternalServerError().finish();
         }
     };
 
@@ -841,7 +853,7 @@ async fn update_image_component(
             }
             DescriptionUpdateError::SqlxError(e) => {
                 error!("{}", e);
-                HttpResponse::InternalServerError().json("Internal Server Error")
+                HttpResponse::InternalServerError().finish()
             }
         },
     }
