@@ -24,6 +24,7 @@ fn protected_routes_docs() -> Vec<openapi::OpenApi> {
 fn admin_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
         private::products_protected::ProductsApiDoc::openapi(),
+        private::products_protected::descriptions_protected::DescriptionApiDoc::openapi(),
     ]
 }
 

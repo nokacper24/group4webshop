@@ -17,6 +17,7 @@ use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Respon
 use image::{ImageError, ImageFormat};
 use log::{error, warn};
 use sqlx::{Pool, Postgres};
+use utoipa::OpenApi;
 
 pub mod description_utils;
 
@@ -26,17 +27,58 @@ pub const ALLOWED_FORMATS: [ImageFormat; 3] =
 pub const IMAGE_DIR: &str = "resources/images";
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(create_text_component);
+    cfg.service(create_image_component);
+    cfg.service(update_text_component);
+    cfg.service(update_image_component);
     cfg.service(delete_description_component);
-    cfg.service(description_swap_priorities);
-    cfg.service(add_text_description);
+    cfg.service(swap_priorities);
     cfg.service(update_priority);
     cfg.service(set_full_width);
-    cfg.service(upload_image);
     cfg.service(update_priorities);
-    cfg.service(update_text_description);
-    cfg.service(update_image_description);
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        delete_description_component,
+        update_priority,
+        set_full_width,
+        update_priorities,
+        swap_priorities,
+
+    ),
+    components(
+        schemas(
+            
+        )
+    ),
+    tags(
+        (
+            name = "Product Descriptions",
+            description = "API endpoints for managing product descriptions."
+        ),
+    ),
+)]
+pub struct DescriptionApiDoc;
+
+/// Delete a description component.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    delete,
+    tag = "Product Descriptions",
+    responses(
+        (status = 204, description = "No Content - successfully deleted"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission delete a description component"),
+        (status = 404, description = "Not found - product or description not found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product to delete", example = "my_product"),
+        ("component_id", description = "ID of the component to delete", example = "1")
+    )
+)]
 #[delete("/{product_id}/descriptions/{component_id}")]
 async fn delete_description_component(
     pool: web::Data<Pool<Postgres>>,
@@ -85,6 +127,32 @@ async fn delete_description_component(
     HttpResponse::NoContent().finish()
 }
 
+/// Update the priority of a description component.
+///
+/// Priotiy must be unique for descriptions of a product.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    patch,
+    tag = "Product Descriptions",
+    responses(
+        (status = 204, description = "No Content - successfully updated"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission delete a description component"),
+        (status = 404, description = "Not found - product or description not found"),
+        (status = 409, description = "Conflict - priority already in use"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product", example = "my_product"),
+        ("component_id", description = "ID of the component", example = "1"),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "New priority",
+        content =i32,
+        example = json!(1),
+    ),
+)]
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
     pool: web::Data<Pool<Postgres>>,
@@ -135,6 +203,29 @@ async fn update_priority(
     }
 }
 
+/// Update the full_width attribute of a description component.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    patch,
+    tag = "Product Descriptions",
+    responses(
+        (status = 204, description = "No Content - successfully updated"),
+
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission delete a description component"),
+        (status = 404, description = "Not found - product or description not found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product", example = "my_product"),
+        ("component_id", description = "ID of the component", example = "1"),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "full_width attribute",
+        content = bool,
+    ),
+)]
 #[patch("/{product_id}/descriptions/{component_id}/full-width")]
 async fn set_full_width(
     pool: web::Data<Pool<Postgres>>,
@@ -178,6 +269,31 @@ async fn set_full_width(
     }
 }
 
+/// Update multiple priorities at once.
+/// 
+/// All descriptions must belong to the specified product. The unique priority constraint must be satisfied.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    patch,
+    tag = "Product Descriptions",
+    responses(
+        (status = 204, description = "No Content - successfully updated"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission delete a description component"),
+        (status = 404, description = "Not found - product or description not found"),
+        (status = 409, description = "Conflict - priority already in use or description does not belong to product"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "List of tuples of description id and new priority. `[(component_id, new_priority), ...])]`",
+        content = Vec<(i32, i32)>,
+        example = json!([ (1, 1), (2, 2), (3, 3) ]),
+    ),
+)]
 #[patch("/{product_id}/descriptions/all/priorities")]
 async fn update_priorities(
     pool: web::Data<Pool<Postgres>>,
@@ -251,13 +367,37 @@ async fn update_priorities(
     }
 }
 
+
+/// Swap the priorities of two descriptions.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    patch,
+    tag = "Product Descriptions",
+    responses(
+        (status = 204, description = "No Content - successfully updated"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission delete a description component"),
+        (status = 404, description = "Not found - product or description not found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "IDs of the descriptions to swap the priorities of. `(component_id_1, component_id_2)`",
+        content = (i32, i32),
+        example = json!((1, 2)),
+    ),
+)]
 #[patch("/{product_id}/descriptions/priorityswap")]
-async fn description_swap_priorities(
+async fn swap_priorities(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    description_ids: web::Json<Vec<i32>>,
+    description_ids: web::Json<(i32,i32)>,
     req: HttpRequest,
 ) -> impl Responder {
+    let description_ids = description_ids.into_inner();
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -278,23 +418,26 @@ async fn description_swap_priorities(
     let descriptions = product::description::swap_priority(
         &pool,
         product_id.as_str(),
-        (description_ids[0], description_ids[1]),
+        (description_ids.0, description_ids.1),
     )
     .await;
 
     match descriptions {
-        Ok(descriptions) => HttpResponse::Ok().json(descriptions),
+        Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => match e {
             sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().json(format!("Product or description not found: {}", e))
+                HttpResponse::NotFound().json(format!("Product or description not found."))
             }
-            _ => HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e)),
+            e => {
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
+            },
         },
     }
 }
 
 #[post("/{product_id}/descriptions/text")]
-async fn add_text_description(
+async fn create_text_component(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
     description: web::Json<product::description::TextComponent>,
@@ -346,7 +489,7 @@ async fn add_text_description(
 }
 
 #[post("/{product_id}/descriptions/image")]
-async fn upload_image(
+async fn create_image_component(
     payload: Multipart,
     product_id: web::Path<String>,
     pool: web::Data<Pool<Postgres>>,
@@ -480,7 +623,7 @@ async fn upload_image(
 }
 
 #[put("/{product_id}/descriptions/text/{component_id}")]
-async fn update_text_description(
+async fn update_text_component(
     path_parms: web::Path<(String, i32)>,
     description: web::Json<product::description::TextComponent>,
     pool: web::Data<Pool<Postgres>>,
@@ -533,7 +676,7 @@ async fn update_text_description(
 }
 
 #[put("/{product_id}/descriptions/image/{component_id}")]
-async fn update_image_description(
+async fn update_image_component(
     payload: Multipart,
     path_parms: web::Path<(String, i32)>,
     pool: web::Data<Pool<Postgres>>,
