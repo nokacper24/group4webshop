@@ -425,7 +425,7 @@ async fn swap_priorities(
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => match e {
             sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().json(format!("Product or description not found."))
+                HttpResponse::NotFound().json("Product or description not found.".to_string())
             }
             e => {
                 error!("{}", e);
@@ -533,7 +533,7 @@ async fn create_image_component(
                     ImageExtractorError::MultipartError(e) => {
                         error!("{}", e);
                         HttpResponse::InternalServerError()
-                            .json(format!("Couldnt extract multipart"))
+                            .json("Couldnt extract multipart".to_string())
                     }
                     ImageExtractorError::MissingContentDisposition(field) => {
                         HttpResponse::BadRequest()
@@ -580,7 +580,7 @@ async fn create_image_component(
                     )),
                 ImageParsingError::IoError(e) => {
                     error!("{}", e);
-                    HttpResponse::InternalServerError().json(format!("Image reader error"))
+                    HttpResponse::InternalServerError().json("Image reader error".to_string())
                 }
             }
         }
@@ -749,7 +749,7 @@ async fn update_image_component(
                     ImageExtractorError::MultipartError(e) => {
                         error!("{}", e);
                         HttpResponse::InternalServerError()
-                            .json(format!("Couldnt extract multipart"))
+                            .json("Couldnt extract multipart".to_string())
                     }
                     ImageExtractorError::MissingContentDisposition(field) => {
                         HttpResponse::BadRequest()
@@ -792,7 +792,8 @@ async fn update_image_component(
                         }
                         ImageParsingError::IoError(e) => {
                             error!("{}", e);
-                            HttpResponse::InternalServerError().json(format!("Image reader error"))
+                            HttpResponse::InternalServerError()
+                                .json("Image reader error".to_string())
                         }
                     }
                 }
