@@ -93,17 +93,16 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     };
     let user = user::get_user_by_id(&pool, id).await;
 
-    //error check
-    if user.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
-    }
-
     //parse to json
-    if let Ok(user) = user {
-        return HttpResponse::Ok().json(user);
+   match user {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(e) => {
+            match e {
+                sqlx::Error::RowNotFound => HttpResponse::NotFound().json("User not found"),
+                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+            }
+        }
     }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
 /// Get all the users that work for a specific company.
