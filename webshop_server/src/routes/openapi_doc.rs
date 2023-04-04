@@ -1,4 +1,4 @@
-use crate::routes::public;
+use crate::routes::{public, private};
 use actix_web::web;
 use utoipa::{
     openapi::{self, ContactBuilder, InfoBuilder, OpenApiBuilder, Paths},
@@ -23,7 +23,7 @@ fn protected_routes_docs() -> Vec<openapi::OpenApi> {
 
 fn admin_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
-        // nothing here yet
+        private::products_protected::ProductsApiDoc::openapi(),
     ]
 }
 
@@ -34,11 +34,11 @@ pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
             build_docs(PrivacyLevel::Public),
         ),
         (
-            Url::new("Protected", "/api-doc/openapi_products.json"),
+            Url::new("Protected", "/api-doc/protected_endpoints.json"),
             build_docs(PrivacyLevel::Protected),
         ),
         (
-            Url::new("Admin", "/api-doc/openapi_descriptions.json"),
+            Url::new("Admin", "/api-doc/admin_endpoints.json"),
             build_docs(PrivacyLevel::Admin),
         ),
     ]));
