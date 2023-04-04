@@ -286,7 +286,6 @@ struct UpdateProductForm {
         (status = 415, description = "Unsupoorted media type - unsupported image format"),
         (status = 500, description = "Internal Server Error")
     ),
-    tag = "Products",
     params(
         ("product_id", description = "Product ID of the product to update", example = "new_product")
     ),
@@ -455,7 +454,6 @@ pub async fn update_product(
         (status = 404, description = "Not found - product not found"),
         (status = 500, description = "Internal Server Error")
     ),
-    tag = "Products",
     params(
         ("product_id", description = "Product ID of the product to update", example = "new_product")
     ),
@@ -514,7 +512,6 @@ pub async fn update_availability(
         (status = 409, description = "Conflict - product is used in a license"),
         (status = 500, description = "Internal Server Error")
     ),
-    tag = "Products",
     params(
         ("product_id", description = "Product ID of the product to delete", example = "new_product")
     )
