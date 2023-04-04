@@ -194,12 +194,14 @@ pub async fn create_product(
     };
     let price_per_unit = match text_fields.get("price_per_unit") {
         Some(price_per_unit) => match price_per_unit.parse::<f32>() {
-            // TODO, dobt internal server error here
             Ok(price_per_unit) => price_per_unit,
-            Err(_) => return HttpResponse::InternalServerError().finish(),
+            Err(_) => return HttpResponse::BadRequest().body("Price must be a number."),
         },
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if price_per_unit <= 0.0 {
+        return HttpResponse::BadRequest().body("Price must be greater than 0.");
+    }
     let short_description = match text_fields.get("short_description") {
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
@@ -375,12 +377,15 @@ pub async fn update_product(
     };
     let price_per_unit = match text_fields.get("price_per_unit") {
         Some(price_per_unit) => match price_per_unit.parse::<f32>() {
-            // TODO, dont internal server error here
             Ok(price_per_unit) => price_per_unit,
-            Err(_) => return HttpResponse::InternalServerError().finish(),
+            Err(_) => return HttpResponse::BadRequest().json("Price must be a number."),
         },
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if price_per_unit <= 0.0 {
+        return HttpResponse::BadRequest().body("Price must be greater than 0.");
+    }
+
     let short_description = match text_fields.get("short_description") {
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
