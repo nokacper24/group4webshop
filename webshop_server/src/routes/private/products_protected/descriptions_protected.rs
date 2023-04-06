@@ -3,7 +3,7 @@ use crate::{
         error_handling,
         product::{
             self,
-            description::{DescriptionCompError, DescriptionUpdateError},
+            description::{DescriptionCompError, DescriptionUpdateError, TextComponent, DescriptionComponent, ImageComponent},
         },
         user,
     },
@@ -46,11 +46,14 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         set_full_width,
         update_priorities,
         swap_priorities,
+        create_text_component,
 
     ),
     components(
         schemas(
-            //
+            DescriptionComponent,
+            TextComponent,
+            ImageComponent,
         )
     ),
     tags(
@@ -435,11 +438,47 @@ async fn swap_priorities(
     }
 }
 
+/// Create a new text description component for a product.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    post,
+    tag = "Product Descriptions",
+    responses(
+        (status = 201, description = "Created - successfully created", content_type = "application/json", body = DescriptionComponent, example = json!({
+            "component_id": 0,
+            "full_width": false,
+            "image": null,
+            "priority": 1,
+            "product_id": "my_product",
+            "text": {
+              "paragraph": "Some text.",
+              "text_id": 0,
+              "text_title": "Title"
+            }
+          })),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission to create a description component"),
+        (status = 404, description = "Not found - product not found"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "The text component to create. If ID is provided, it will be ignored and a new ID will be generated.",
+        content = TextComponent,
+        example = json!({
+            "text_title": "This Is A Title",
+            "paragraph": "This is a paragraph. Blah blah blah.",
+        }),
+    ),
+)]
 #[post("/{product_id}/descriptions/text")]
 async fn create_text_component(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    description: web::Json<product::description::TextComponent>,
+    description: web::Json<TextComponent>,
     req: HttpRequest,
 ) -> impl Responder {
     match auth::validate_user(req, &pool).await {
@@ -475,7 +514,7 @@ async fn create_text_component(
     )
     .await;
     match created_component {
-        Ok(created_component) => HttpResponse::Ok().json(created_component),
+        Ok(created_component) => HttpResponse::Created().json(created_component),
         Err(e) => match e {
             DescriptionCompError::InvalidComponent(e) => {
                 HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
