@@ -1,3 +1,4 @@
+use crate::routes::{private, public};
 use actix_web::web;
 use utoipa::{
     openapi::{self, ContactBuilder, InfoBuilder, OpenApiBuilder, Paths},
@@ -5,28 +6,25 @@ use utoipa::{
 };
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
-use crate::routes::public::{licenses, products, testimonials};
-
-use super::public::products::descriptions;
-
-fn public_docs() -> Vec<openapi::OpenApi> {
+fn public_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
-        products::ProductsApiDoc::openapi(),
-        descriptions::DescriptionApiDoc::openapi(),
-        licenses::LicensesOpenApi::openapi(),
-        testimonials::TestimonialsOpenApi::openapi(),
+        public::products::ProductsApiDoc::openapi(),
+        public::products::descriptions::DescriptionApiDoc::openapi(),
+        public::licenses::LicensesOpenApi::openapi(),
+        public::testimonials::TestimonialsOpenApi::openapi(),
     ]
 }
 
-fn protected_docs() -> Vec<openapi::OpenApi> {
+fn protected_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
         // nothing here yet
     ]
 }
 
-fn admin_docs() -> Vec<openapi::OpenApi> {
+fn admin_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
-        // nothing here yet
+        private::products_protected::ProductsApiDoc::openapi(),
+        private::products_protected::descriptions_protected::DescriptionApiDoc::openapi(),
     ]
 }
 
@@ -37,11 +35,11 @@ pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
             build_docs(PrivacyLevel::Public),
         ),
         (
-            Url::new("Protected", "/api-doc/openapi_products.json"),
+            Url::new("Protected", "/api-doc/protected_endpoints.json"),
             build_docs(PrivacyLevel::Protected),
         ),
         (
-            Url::new("Admin", "/api-doc/openapi_descriptions.json"),
+            Url::new("Admin", "/api-doc/admin_endpoints.json"),
             build_docs(PrivacyLevel::Admin),
         ),
     ]));
@@ -59,8 +57,8 @@ fn build_info(level: PrivacyLevel) -> openapi::Info {
         .contact(Some(
             ContactBuilder::new()
                 .name(Some("ProFlex"))
-                .email(Some("admin@proflexdomain.com"))
-                .url(Some("https://proflexdomain.com"))
+                .email(Some("admin_proflex@gmail.com"))
+                .url(Some("/"))
                 .build(),
         ))
         .license(Some(
@@ -70,27 +68,32 @@ fn build_info(level: PrivacyLevel) -> openapi::Info {
                 .build(),
         ))
         .description(Some(description.to_string()))
+        .terms_of_service(Some("/terms-of-service".to_string()))
         .build()
 }
 
+/// The privacy level of the endpoints.
 enum PrivacyLevel {
+    /// Public endpoints. No authentication required.
     Public,
+    /// Protected endpoints. Authentication required.
     Protected,
+    /// Admin endpoints. Authentication required, with admin privileges.
     Admin,
 }
 
 fn build_docs(level: PrivacyLevel) -> openapi::OpenApi {
-    let all_pub_docs = match level {
-        PrivacyLevel::Public => public_docs(),
-        PrivacyLevel::Protected => protected_docs(),
-        PrivacyLevel::Admin => admin_docs(),
+    let all_docs = match level {
+        PrivacyLevel::Public => public_routes_docs(),
+        PrivacyLevel::Protected => protected_routes_docs(),
+        PrivacyLevel::Admin => admin_routes_docs(),
     };
     let info = build_info(level);
 
     OpenApiBuilder::new()
-        .components(extract_components(all_pub_docs.clone()))
-        .paths(extract_paths(all_pub_docs.clone()))
-        .tags(extract_tags(all_pub_docs))
+        .components(extract_components(all_docs.clone()))
+        .paths(extract_paths(all_docs.clone()))
+        .tags(extract_tags(all_docs))
         .info(info)
         .build()
 }

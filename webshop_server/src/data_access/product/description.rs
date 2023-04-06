@@ -383,6 +383,8 @@ pub async fn update_priorities_bulk(
     Ok(())
 }
 
+/// Creates a new text component.
+/// If the ID is set, it will be ignored and a new serial ID will be generated.
 pub async fn create_text_component(
     pool: &Pool<Postgres>,
     product_id: &str,
@@ -446,6 +448,7 @@ pub async fn create_image_component(
 }
 
 /// Creates a new text component and returns the id.
+/// If id is already set, it will be ignored and a serial id will be generated.
 async fn insert_text_component(
     pool: &Pool<Postgres>,
     text_component: &TextComponent,

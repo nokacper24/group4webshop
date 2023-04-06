@@ -1,7 +1,7 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use log::error;
 use sqlx::{Pool, Postgres};
-use utoipa::{OpenApi, openapi::{Paths, PathsBuilder, PathItem}};
+use utoipa::OpenApi;
 
 pub mod descriptions;
 
