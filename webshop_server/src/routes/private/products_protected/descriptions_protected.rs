@@ -535,7 +535,6 @@ async fn create_text_component(
     }
 }
 
-
 /// Form for creation of an image description component.
 #[derive(Deserialize, Serialize, ToSchema)]
 struct NewImageComponentForm {
