@@ -3,7 +3,10 @@ use crate::{
         error_handling,
         product::{
             self,
-            description::{DescriptionCompError, DescriptionUpdateError, TextComponent, DescriptionComponent, ImageComponent},
+            description::{
+                DescriptionCompError, DescriptionComponent, DescriptionUpdateError, ImageComponent,
+                TextComponent,
+            },
         },
         user,
     },
@@ -16,8 +19,9 @@ use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::{ImageError, ImageFormat};
 use log::{error, warn};
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
-use utoipa::OpenApi;
+use utoipa::{OpenApi, ToSchema};
 
 pub mod description_utils;
 
@@ -48,14 +52,16 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         swap_priorities,
         create_text_component,
         update_text_component,
-
-
+        create_image_component,
+        update_image_component,
     ),
     components(
         schemas(
             DescriptionComponent,
             TextComponent,
             ImageComponent,
+            NewImageComponentForm,
+            UpdateImageComponentForm,
         )
     ),
     tags(
@@ -529,6 +535,49 @@ async fn create_text_component(
     }
 }
 
+
+/// Form for creation of an image description component.
+#[derive(Deserialize, Serialize, ToSchema)]
+struct NewImageComponentForm {
+    image: Vec<u8>,
+    alt_text: String,
+}
+
+/// Create a new image description component for a product.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    post,
+    tag = "Product Descriptions",
+    responses(
+        (status = 201, description = "Created - successfully created", content_type = "application/json", body = DescriptionComponent, example = json!({
+            "component_id": 0,
+            "full_width": false,
+            "image": {
+              "image_id": 0,
+              "alt_text": "image description",
+              "image_path": "resources/images/my_product/my_image.png"
+            },
+            "priority": 1,
+            "product_id": "my_product",
+            "text": null
+          })),
+        (status = 400, description = "Bad Request - invalid component"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission to create a description component"),
+        (status = 404, description = "Not found - product not found"),
+        (status = 413, description = "Payload Too Large - image too large"),
+        (status = 415, description = "Unsupported Media Type - unsupported image format"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+    ),
+    request_body(
+        content_type = "multipart/form-data",
+        description = "Description image creation form.",
+        content = NewImageComponentForm,
+    ),
+)]
 #[post("/{product_id}/descriptions/image")]
 async fn create_image_component(
     payload: Multipart,
@@ -763,6 +812,50 @@ async fn update_text_component(
     }
 }
 
+/// Update image description component form. The image is optional, if not provided the image will not be updated.
+#[derive(Deserialize, Serialize, ToSchema)]
+struct UpdateImageComponentForm {
+    image: Option<Vec<u8>>,
+    alt_text: String,
+}
+
+/// Update an image description component.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    put,
+    tag = "Product Descriptions",
+    responses(
+        (status = 200, description = "Ok - successfully updated", content_type = "application/json", body = DescriptionComponent, example = json!({
+            "component_id": 0,
+            "full_width": false,
+            "image": {
+              "alt_text": "image description",
+              "image_id": 0,
+              "image_path": "resources/images/my_product/my_image.png"
+            },
+            "priority": 1,
+            "product_id": "my_product",
+            "text": null
+          })),
+        (status = 400, description = "Bad Request - invalid component"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission to create a description component"),
+        (status = 404, description = "Not found - product not found"),
+        (status = 409, description = "Conflict - wrong component type"),
+        (status = 413, description = "Payload Too Large - image too large"),
+        (status = 415, description = "Unsupported Media Type - unsupported image format"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+        ("component_id", description = "ID of the description component to update.", example = 1),
+    ),
+    request_body(
+        content_type = "multipart/form-data",
+        description = "The new image component. The image_id will be ignored if provided.",
+        content = UpdateImageComponentForm,
+    ),
+)]
 #[put("/{product_id}/descriptions/image/{component_id}")]
 async fn update_image_component(
     payload: Multipart,
