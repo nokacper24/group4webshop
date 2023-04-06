@@ -47,6 +47,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         update_priorities,
         swap_priorities,
         create_text_component,
+        update_text_component,
+
 
     ),
     components(
@@ -456,6 +458,7 @@ async fn swap_priorities(
               "text_title": "Title"
             }
           })),
+        (status = 400, description = "Bad Request - invalid component"),
         (status = 401, description = "Unauthorized - no valid authentification"),
         (status = 403, description = "Forbidden - no permission to create a description component"),
         (status = 404, description = "Not found - product not found"),
@@ -668,10 +671,49 @@ async fn create_image_component(
     }
 }
 
+/// Update a text description component.
+#[utoipa::path(
+    context_path = "/api/priv/products",
+    put,
+    tag = "Product Descriptions",
+    responses(
+        (status = 200, description = "Ok - successfully updated", content_type = "application/json", body = DescriptionComponent, example = json!({
+            "component_id": 0,
+            "full_width": false,
+            "image": null,
+            "priority": 1,
+            "product_id": "my_product",
+            "text": {
+              "paragraph": "Some text.",
+              "text_id": 0,
+              "text_title": "Title"
+            }
+          })),
+        (status = 400, description = "Bad Request - invalid component"),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission to create a description component"),
+        (status = 404, description = "Not found - product not found"),
+        (status = 409, description = "Conflict - wrong component type"),
+        (status = 500, description = "Internal Server Error")
+    ),
+    params(
+        ("product_id", description = "ID of the product which descriptions to manipulate.", example = "my_product"),
+        ("component_id", description = "ID of the description component to update.", example = 1),
+    ),
+    request_body(
+        content_type = "application/json",
+        description = "The new text component. The text_id will be ignored if provided.",
+        content = TextComponent,
+        example = json!({
+            "text_title": "This Is A Title",
+            "paragraph": "This is a paragraph. Blah blah blah.",
+        }),
+    ),
+)]
 #[put("/{product_id}/descriptions/text/{component_id}")]
 async fn update_text_component(
     path_parms: web::Path<(String, i32)>,
-    description: web::Json<product::description::TextComponent>,
+    description: web::Json<TextComponent>,
     pool: web::Data<Pool<Postgres>>,
     req: HttpRequest,
 ) -> impl Responder {
