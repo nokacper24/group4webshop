@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Use an official Node runtime as a parent image
 FROM node:lts AS react-build
 
@@ -34,6 +32,9 @@ COPY --from=react-build /app/dist ./webshop_frontend/dist/
 # Set the environment variable for the frontend directory
 ENV FRONT_DIST_DIR=webshop_frontend/dist
 
+# Set the environment variable for the resources directory
+ENV RESOURCES_DIR=/webshop/resources/images
+
 # Set env vat to use offline db
 ENV SQLX_OFFLINE=true
 
@@ -41,7 +42,7 @@ ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
 # Use an official Ubuntu runtime as a parent image
-FROM alpine:latest
+FROM rust:latest
 
 # Set the working directory
 WORKDIR /app
@@ -49,6 +50,8 @@ WORKDIR /app
 # Copy built Rust app to the container
 COPY --from=rust-build /app/target/release/webshop_server ./
 
-# Start Rust server on container startup
-RUN ls
+# Expose the port
+EXPOSE 8080
+
+# Run the app
 CMD ["./webshop_server"]

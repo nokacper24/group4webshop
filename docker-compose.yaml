@@ -11,6 +11,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - ./database/sql_scripts:/sql_scripts
+
   adminer-prod:
     image: adminer
     restart: always
@@ -18,14 +19,19 @@ services:
       - 8083:8080
 
   webshop:
-    build:
-      dockerfile: prod_img.Dockerfile
+    image: nokacper24/g4webshop:1.0
     ports:
       - "8080:8080"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      ALLOWED_ORIGINS: https://127.0.0.1:8080,https://localhost:8080,https://localhost:5173,https://127.0.0.1:5173
+      DATABASE_URL: postgresql://postgres:password@db-prod:5432/proflex
+      CERT_PATH: /certs/certificate.pem
+      PRIV_KEY_PATH: /certs/privatekey.pem
     depends_on:
       - db-prod
     volumes:
-      - ./webshop:/webshop
-
-    
-  
+      - ./app:/webshop
+      - ./app/certs:/certs
+    restart: always
