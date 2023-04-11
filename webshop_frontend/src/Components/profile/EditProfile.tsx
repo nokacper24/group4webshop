@@ -48,6 +48,8 @@ export default function EditProfile() {
       if (response.status == 200) {
         // Refresh
         navigate(0);
+      } else {
+        alert("Failed to save changes");
       }
     });
   };
