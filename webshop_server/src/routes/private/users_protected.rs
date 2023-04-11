@@ -94,14 +94,12 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
     let user = user::get_user_by_id(&pool, id).await;
 
     //parse to json
-   match user {
+    match user {
         Ok(user) => HttpResponse::Ok().json(user),
-        Err(e) => {
-            match e {
-                sqlx::Error::RowNotFound => HttpResponse::NotFound().json("User not found"),
-                _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-            }
-        }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => HttpResponse::NotFound().json("User not found"),
+            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
     }
 }
 
@@ -461,7 +459,7 @@ fn csv_string_to_list(text: String) -> Vec<String> {
 
 #[post("/register")]
 async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
-    match user::user_exixts(&invite.email, &pool).await {
+    match user::user_exists(&invite.email, &pool).await {
         Ok(true) => HttpResponse::BadRequest().json("User already exists"),
         Ok(false) => {
             let partial_user = user::create_partial_user(&invite.email, &pool).await;
