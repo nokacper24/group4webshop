@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Company, License, Product } from "../../../Interfaces";
+import { useNavigate } from "react-router-dom";
 
 /**
  * A form for creating a license.
@@ -12,6 +13,8 @@ export default function CreateLicenseForm() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -69,7 +72,8 @@ export default function CreateLicenseForm() {
       const status = response.status;
       if (status == 201) {
         alert("License created.");
-        location.reload();
+        // Refresh
+        navigate(0);
       } else {
         alert("Something went wrong when creating the license. Try again.");
       }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { License, Product, User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
@@ -21,6 +21,14 @@ import {
  * @returns A Manage License Access page component.
  */
 export default function ManageLicenseAccess() {
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
+    baseUrl = "";
+  }
+
+  const navigate = useNavigate();
+
   const { licenseId } = useParams();
   const [license, setLicense] = useState<License>({
     license_id: 0,
@@ -131,12 +139,6 @@ export default function ManageLicenseAccess() {
     new Map([["Remove selected", removeSelectedUsersAccess]])
   );
 
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
-
   const isInitialMount = useRef(true);
 
   /**
@@ -217,7 +219,8 @@ export default function ManageLicenseAccess() {
           const status = response.status;
           if (status == 201) {
             alert("User access successfully added");
-            location.reload();
+            // Refresh
+            navigate(0);
           } else if (status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
@@ -252,7 +255,8 @@ export default function ManageLicenseAccess() {
           const status = response.status;
           if (status == 200) {
             alert("User access successfully removed");
-            location.reload();
+            // Refresh
+            navigate(0);
           } else {
             alert("Something went wrong when removing users");
           }

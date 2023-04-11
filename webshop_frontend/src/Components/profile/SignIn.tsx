@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /**
  * Represents the Sign In form for users to access their profile.
@@ -13,6 +13,8 @@ export default function SignIn() {
   if (import.meta.env.PROD) {
     baseUrl = "../";
   }
+
+  const navigate = useNavigate();
 
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
@@ -32,9 +34,9 @@ export default function SignIn() {
     });
 
     if (result.status === 200) {
-      console.log("User logged in");
+      // Refresh
+      navigate(0);
     } else {
-      console.log("User not logged in");
       password.current!.value = "";
     }
   };

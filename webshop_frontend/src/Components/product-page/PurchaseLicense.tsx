@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
 
@@ -16,6 +16,8 @@ export default function PurchaseLicense() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const { productId } = useParams();
   const [product, setProduct] = useState<Product>({
@@ -82,7 +84,8 @@ export default function PurchaseLicense() {
       const status = response.status;
       if (status == 201) {
         alert("License successfully purchased!");
-        location.reload();
+        // Refresh
+        navigate(0);
       } else {
         alert(
           "Sorry, something went wrong when purchasing the license. Try again."

@@ -11,6 +11,7 @@ import {
   moveItemBetweenTables,
   moveItemsBetweenTables,
 } from "../managing/SelectTableFunctions";
+import { useNavigate } from "react-router-dom";
 
 /**
  * A Manage Users page.
@@ -24,6 +25,8 @@ export default function ManageUsers() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const [itHeads, setItHeads] = useState<SelectTableRowProps[]>([]);
   const [newItHeads] = useState<Set<string>>(new Set());
@@ -193,7 +196,8 @@ export default function ManageUsers() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            location.reload();
+            // Refresh
+            navigate(0);
           } else {
             alert("Something went wrong when saving new IT heads");
           }
@@ -225,7 +229,8 @@ export default function ManageUsers() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            location.reload();
+            // Refresh
+            navigate(0);
           } else {
             alert("Something went wrong when saving new default users");
           }

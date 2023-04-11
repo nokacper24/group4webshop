@@ -12,6 +12,7 @@ import {
   moveItemsBetweenTables,
   updateNewChanges,
 } from "../managing/SelectTableFunctions";
+import { useNavigate } from "react-router-dom";
 
 /**
  * An admin page for managing companies' licenses.
@@ -25,6 +26,8 @@ export default function AdminCompanyLicenses() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const [validLicenses, setValidLicenses] = useState<SelectTableRowProps[]>([]);
   const [invalidLicenses, setInvalidLicenses] = useState<SelectTableRowProps[]>(
@@ -147,7 +150,8 @@ export default function AdminCompanyLicenses() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            location.reload();
+            // Refresh
+            navigate(0);
           } else {
             alert("Something went wrong when saving licenses");
           }
@@ -179,7 +183,8 @@ export default function AdminCompanyLicenses() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            location.reload();
+            // Refresh
+            navigate(0);
           } else {
             alert("Something went wrong when saving licenses");
           }

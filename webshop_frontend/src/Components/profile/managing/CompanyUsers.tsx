@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
@@ -19,6 +19,8 @@ export default function CompanyUsers() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const { companyId } = useParams();
 
@@ -113,7 +115,8 @@ export default function CompanyUsers() {
       .then((response) => {
         const status = response.status;
         if (status == 200) {
-          location.reload();
+          // Refresh
+          navigate(0);
         } else {
           alert("Something went wrong when saving users");
         }

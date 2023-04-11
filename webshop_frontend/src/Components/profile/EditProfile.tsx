@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { User } from "../../Interfaces";
 
 interface PartialUser {
@@ -12,6 +12,8 @@ export default function EditProfile() {
   if (import.meta.env.PROD) {
     baseUrl = "";
   }
+
+  const navigate = useNavigate();
 
   const { userId } = useParams();
   const [user, setUser] = useState<User>();
@@ -44,7 +46,8 @@ export default function EditProfile() {
       body: JSON.stringify(user),
     }).then((response) => {
       if (response.status == 200) {
-        location.reload();
+        // Refresh
+        navigate(0);
       }
     });
   };
