@@ -1,0 +1,31 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+  db-prod:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./database/sql_scripts:/sql_scripts
+  adminer-prod:
+    image: adminer
+    restart: always
+    ports:
+      - 8083:8080
+
+  webshop:
+    build:
+      dockerfile: prod_img.Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-prod
+    volumes:
+      - ./webshop:/webshop
+
+    
+  
