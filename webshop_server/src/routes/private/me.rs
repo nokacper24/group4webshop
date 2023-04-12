@@ -10,6 +10,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 
 #[derive(serde::Serialize)]
 struct MeUser {
+    user_id: i32,
     email: String,
     role: String,
     company_id: i32,
@@ -18,6 +19,7 @@ struct MeUser {
 impl From<crate::data_access::user::User> for MeUser {
     fn from(user: crate::data_access::user::User) -> Self {
         Self {
+            user_id: user.user_id,
             email: user.email,
             role: user.role.to_string(),
             company_id: user.company_id,

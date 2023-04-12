@@ -4,14 +4,11 @@ import { Description, Product, Testimonial } from "../../Interfaces";
 import DescriptionsContainer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import PurchaseLicenseButton from "./PurchaseLicenseButton";
-
-let counter = 0;
-
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "";
-}
+import {
+  fetchDescriptionComponents,
+  fetchProduct,
+  fetchTestimonials,
+} from "../../ApiController";
 
 /**
  * The product page component.
@@ -25,30 +22,18 @@ export default function ProductPage() {
   const [descriptions, setDescriptions] = useState<Description[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
-  const fetchProduct = async () => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data: Product = await response.json();
-    setProduct(data);
-  };
-
-  const fetchDescriptionComponents = async () => {
-    const response = await fetch(
-      `${baseUrl}/api/products/${productId}/descriptions`
-    );
-    const data: Description[] = await response.json();
-    setDescriptions(data);
-  };
-
-  const fetchTestimonials = async () => {
-    const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
-    const data: Testimonial[] = await response.json();
-    setTestimonials(data);
-  };
-
   useEffect(() => {
-    fetchProduct();
-    fetchDescriptionComponents();
-    fetchTestimonials();
+    fetchProduct(productId!).then((product: Product) => {
+      if (product.product_id) {
+        setProduct(product);
+        fetchTestimonials(product.product_id).then(
+          (testimonials: Testimonial[]) => setTestimonials(testimonials)
+        );
+        fetchDescriptionComponents(product.product_id).then(
+          (descriptions: Description[]) => setDescriptions(descriptions)
+        );
+      }
+    });
   }, []);
 
   return (
@@ -86,9 +71,10 @@ export default function ProductPage() {
         </>
       )}
       {!product && (
-        <div className="container">
+        <section className="container">
           <h1>Product not found</h1>
-        </div>
+          <p>Sorry, could not find the product you were looking for!</p>
+        </section>
       )}
     </>
   );

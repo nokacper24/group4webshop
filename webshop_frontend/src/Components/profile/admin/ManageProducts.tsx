@@ -8,14 +8,9 @@ import {
   createSelectTableProps,
   createRowProps,
 } from "../managing/SelectTableFunctions";
+import { fetchProducts } from "../../../ApiController";
 
 export default function ManageProducts() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
-
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
   const editProduct = (index: number) => {
@@ -29,12 +24,6 @@ export default function ManageProducts() {
     editProduct,
     new Map([])
   );
-
-  const fetchProducts = async () => {
-    const response = await fetch(`${baseUrl}/api/products`);
-    const data = await response.json();
-    return data.map((product: Product) => product);
-  };
 
   useEffect(() => {
     fetchProducts().then((products: Product[]) => {

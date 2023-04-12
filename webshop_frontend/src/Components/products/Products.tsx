@@ -1,26 +1,13 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../Interfaces";
 import { ProductCard, ProductCardProps } from "./ProductCard";
-
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "";
-}
+import { fetchProducts } from "../../ApiController";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
 
-  const fetchProducts = async () => {
-    const response = await fetch(`${baseUrl}/api/products`);
-    const data = await response.json();
-    const products = data.map((product: Product) => product);
-
-    setProducts(products);
-  };
-
   useEffect(() => {
-    fetchProducts();
+    fetchProducts().then((products: Product[]) => setProducts(products));
   }, []);
 
   return (
