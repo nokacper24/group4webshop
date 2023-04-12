@@ -4,8 +4,10 @@ const DEFAULT_REACT_DIST: &str = "../webshop_frontend/dist";
 const DUMMY_OUT_DIR: &str = "./target/debug/build/webshop_server-dummy-hmtl";
 
 fn main() -> std::io::Result<()> {
+    println!("cargo:rerun-if-changed={}", DEFAULT_REACT_DIST);
     dotenvy::dotenv().ok();
-    let react_dist = std::env::var("FRONT_DIST_DIR").unwrap_or_else(|_| DEFAULT_REACT_DIST.to_string());
+    let react_dist =
+        std::env::var("FRONT_DIST_DIR").unwrap_or_else(|_| DEFAULT_REACT_DIST.to_string());
 
     match resource_dir(react_dist).build() {
         Ok(_) => {

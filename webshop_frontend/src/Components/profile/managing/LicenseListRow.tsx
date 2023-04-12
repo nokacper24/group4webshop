@@ -19,9 +19,6 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     setCollapsed((c) => !c);
   };
 
-  const cancelButton = (
-    <button className="default-button small-button">Cancel renewal</button>
-  );
   const manageButton = (
     <Link
       to={`../manage-license/${license.license_id}`}
@@ -33,12 +30,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
 
   let buttons;
   if (license.valid == true) {
-    buttons = (
-      <span className="button-container">
-        {cancelButton}
-        {manageButton}
-      </span>
-    );
+    buttons = <span className="button-container">{manageButton}</span>;
   } else {
     buttons = <span className="button-container">{manageButton}</span>;
   }
