@@ -3,7 +3,7 @@ import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
-import { showPopup } from "../Edit-popups/RowEditPopup";
+import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
 
 /**
  * Renders a table consisting of the header and a body with rows connected to the header through
@@ -93,39 +93,27 @@ export default function AccordionTable() {
    *
    * @param title The title of the new section
    */
-  const newSection = (title: string) => {
+  const newSection = () => {
     const id = sectionList.length;
-    sectionList.push({
-      header: {
-        title: title,
-      },
-      rows: [],
-      sectionID: id,
-      registerContentChange: registerContentChange,
-      deleteSection: deleteSection,
-    });
-    setSectionList([...sectionList]);
-    showPopup();
-    console.log(sectionList);
-
-    /* setSectionList((sections) => [
-      ...sections,
-      {
+    showHeaderPopup({ title: undefined, informationCallBack: finishCreation });
+    function finishCreation(title: string) {
+      sectionList.push({
         header: {
           title: title,
-          rows: [],
         },
+        rows: [],
         sectionID: id,
         registerContentChange: registerContentChange,
         deleteSection: deleteSection,
-      },
-    ]);
-    console.log(sectionList); */
+      });
+      setSectionList([...sectionList]);
+    }
+    console.log(sectionList);
   };
 
   return (
     <div className="accordion-table">
-      <button onClick={() => newSection("Testy")}>New section</button>
+      <button onClick={() => newSection()}>New section</button>
       {sectionList.map((section) => {
         return (
           <AccordionSection
