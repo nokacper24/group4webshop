@@ -45,7 +45,7 @@ COPY --from=react-build /app/dist ./webshop_frontend/dist/
 ENV FRONT_DIST_DIR=webshop_frontend/dist
 
 # Set the environment variable for the resources/images directory
-ENV RESOURCES_DIR=/webshop/resources/images
+ENV RESOURCES_DIR=/resources/images
 
 # Set env var to use offline db
 ENV SQLX_OFFLINE=true
