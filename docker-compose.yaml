@@ -8,9 +8,11 @@ services:
     ports:
       - '5432:5432'
     environment:
+      POSTGRES_DB: proflex
       POSTGRES_PASSWORD: password
     volumes:
       - ./database/sql_scripts:/sql_scripts
+      - ./app/postgres-data:/var/lib/postgresql/data
 
   adminer-prod:
     image: adminer
