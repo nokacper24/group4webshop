@@ -26,10 +26,15 @@ export interface User {
   role: string;
 }
 
+export interface PartialUser {
+  email?: string;
+}
+
 export interface MeUser {
-    email: string;
-    role: string;
-    company_id: number;
+  user_id: number;
+  email: string;
+  role: string;
+  company_id: number;
 }
 
 export interface Company {

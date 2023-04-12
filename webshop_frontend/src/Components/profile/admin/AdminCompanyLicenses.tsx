@@ -13,6 +13,13 @@ import {
   updateNewChanges,
 } from "../managing/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
+import { fetchLicensesVital } from "../../../ApiController";
+
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+// Check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "";
+}
 
 /**
  * An admin page for managing companies' licenses.
@@ -21,12 +28,6 @@ import { useNavigate } from "react-router-dom";
  * @returns A page for administrating company licenses.
  */
 export default function AdminCompanyLicenses() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
-
   const navigate = useNavigate();
 
   const [validLicenses, setValidLicenses] = useState<SelectTableRowProps[]>([]);
@@ -36,17 +37,6 @@ export default function AdminCompanyLicenses() {
 
   const [newValidatedLicenses] = useState<Set<string>>(new Set());
   const [newInvalidatedLicenses] = useState<Set<string>>(new Set());
-
-  /**
-   * Get all licenses.
-   *
-   * @returns All licenses.
-   */
-  const fetchLicenses = async () => {
-    const response = await fetch(`${baseUrl}/api/licenses_vital`);
-    const data = await response.json();
-    return data.map((license: LicenseVital) => license);
-  };
 
   /**
    * Remove a license from list of valid licenses.
@@ -199,7 +189,7 @@ export default function AdminCompanyLicenses() {
   };
 
   useEffect(() => {
-    fetchLicenses()
+    fetchLicensesVital()
       .then((licenses: LicenseVital[]) => {
         let validLicenses: SelectTableRowProps[] = [];
         let invalidLicenses: SelectTableRowProps[] = [];

@@ -6,6 +6,7 @@ import SelectTable, {
 } from "./SelectTable";
 import { User } from "../../../Interfaces";
 import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
+import { fetchCompanyUsers } from "../../../ApiController";
 
 /**
  * A page for managing company users.
@@ -30,8 +31,9 @@ export default function CompanyUsers() {
   const singleEmail = useRef<HTMLInputElement>(null);
   const csvEmail = useRef<HTMLInputElement>(null);
 
-  const editUser = () => {
-    console.log("Editing user...");
+  const editUser = (index: number) => {
+    let userId = users[index].id;
+    navigate(`/profile/${userId}/license-access`);
   };
 
   /**
@@ -72,27 +74,6 @@ export default function CompanyUsers() {
     editUser,
     new Map([["Remove selected", removeUsers]])
   );
-
-  /**
-   * Send a GET request to get the company users.
-   *
-   * @returns A list of all company users
-   */
-  const fetchCompanyUsers = async () => {
-    const response = await fetch(
-      `${baseUrl}/api/priv/companies/${companyId}/users`
-    );
-    const data = await response.json();
-
-    const users: User[] = [];
-
-    data.map((user: User) => {
-      if (user.role != "Admin" && user.role != "CompanyItHead") {
-        users.push(user);
-      }
-    });
-    return users;
-  };
 
   /**
    * Send a DELETE request to remove users.
@@ -182,10 +163,10 @@ export default function CompanyUsers() {
         if (status == 200) {
           resetSingleEmailInput();
         } else {
-          alert("Something went wrong when adding user");
+          alert("Something went wrong when inviting user");
         }
       })
-      .catch(() => alert("Failed to add user"));
+      .catch(() => alert("Failed to invite user"));
   };
 
   /**
@@ -210,12 +191,12 @@ export default function CompanyUsers() {
         const status = response.status;
         if (status == 200) {
           resetCsvEmailInput();
-          alert("Users succesfully created");
+          alert("Users invited");
         } else {
-          alert("Something went wrong when adding users");
+          alert("Something went wrong when inviting users");
         }
       })
-      .catch(() => alert("Failed to add users"));
+      .catch(() => alert("Failed to invite users"));
   };
 
   const handleSubmitSingleEmail = (event: React.FormEvent<HTMLFormElement>) => {
@@ -235,9 +216,17 @@ export default function CompanyUsers() {
   };
 
   useEffect(() => {
-    fetchCompanyUsers().then((users) => {
+    fetchCompanyUsers(companyId!).then((users: User[]) => {
+      let filteredUsers: User[] = [];
+
+      users.map((user: User) => {
+        if (user.role != "Admin" && user.role != "CompanyItHead") {
+          filteredUsers.push(user);
+        }
+      });
+
       setUsers(
-        users.map((user: User) => {
+        filteredUsers.map((user: User) => {
           return createRowProps(user.user_id, [user.email]);
         })
       );
@@ -269,7 +258,7 @@ export default function CompanyUsers() {
         </button>
       </section>
       <section className="container left-aligned">
-        <h1>Add users</h1>
+        <h1>Invite users</h1>
         <p>
           Add users by writing their e-mail in the field below. Alternatively,
           you can upload a comma separated file (CSV) with multiple e-mails.
@@ -292,7 +281,7 @@ export default function CompanyUsers() {
             className="default-button small-button"
             type="submit"
           >
-            Add
+            Invite
           </button>
         </form>
         <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
@@ -305,7 +294,7 @@ export default function CompanyUsers() {
             className="default-button small-button"
             type="submit"
           >
-            Add
+            Invite
           </button>
         </form>
       </section>

@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import { MeUser, User } from "../../Interfaces";
+import { Link } from "react-router-dom";
+import { MeUser } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
+
+interface Props {
+  user: MeUser;
+}
 
 /**
  * Represents the My Account page.
@@ -9,37 +12,13 @@ import LicenseList from "./managing/LicenseList";
  *
  * @returns The My Account page component.
  */
-export default function MyAccount() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
-
-  const { userId } = useParams();
-  const [user, setUser] = useState<MeUser>();
-
-  const fetchUser = async (): Promise<MeUser> => {
-    const response = await fetch(`${baseUrl}/api/priv/me`, {
-      method: "GET",
-      credentials: "include",
-    });
-    const data = await response.json();
-    const user: MeUser = data;
-    setUser(user);
-    return user;
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
+export default function MyAccount(props: Props) {
   const companyLicenses = (
     <>
       <h2>Company users</h2>
       <div className="button-container">
         <Link
-          to={`../company-users/${user?.company_id}`}
+          to={`../company-users/${props.user.company_id}`}
           className="default-button small-button"
         >
           Manage users
@@ -47,7 +26,7 @@ export default function MyAccount() {
       </div>
 
       <h2>Licenses</h2>
-      <LicenseList companyId={user ? user.company_id : -1} />
+      <LicenseList companyId={props.user ? props.user.company_id : NaN} />
     </>
   );
 
@@ -69,7 +48,7 @@ export default function MyAccount() {
   );
 
   let userRoleSection;
-  switch (user?.role) {
+  switch (props.user?.role) {
     case "Admin":
       userRoleSection = adminButtons;
       break;
@@ -86,7 +65,7 @@ export default function MyAccount() {
         <h1>My account</h1>
         <div className="user-details">
           <p>
-            E-mail: {user?.email} <br></br>
+            E-mail: {props.user?.email} <br></br>
           </p>
           <Link className="default-button small-button" to="edit">
             Edit profile

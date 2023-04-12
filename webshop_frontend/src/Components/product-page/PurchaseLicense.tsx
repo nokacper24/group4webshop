@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
+import { fetchProduct, postLicense } from "../../ApiController";
 
 /**
  * Represents a Purchase License page.
@@ -11,12 +12,6 @@ import LicensePrices from "./LicensePrices";
  * @returns The Purchase License page component.
  */
 export default function PurchaseLicense() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
-
   const navigate = useNavigate();
 
   const { productId } = useParams();
@@ -32,13 +27,6 @@ export default function PurchaseLicense() {
 
   const price = useRef<HTMLSelectElement>(null);
   const formAlert = useRef<HTMLParagraphElement>(null);
-
-  const fetchProduct = async () => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product: Product = data;
-    setProduct(product);
-  };
 
   /**
    * Update the total price in the object's state.
@@ -68,33 +56,6 @@ export default function PurchaseLicense() {
   };
 
   /**
-   * Send a POST request to create a license.
-   *
-   * @param license The license to create.
-   */
-  const postLicense = async (license: License) => {
-    fetch(`${baseUrl}/api/priv/licenses`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(license),
-    }).then((response) => {
-      const status = response.status;
-      if (status == 201) {
-        alert("License successfully purchased!");
-        // Refresh
-        navigate(0);
-      } else {
-        alert(
-          "Sorry, something went wrong when purchasing the license. Try again."
-        );
-      }
-    });
-  };
-
-  /**
    * Check if the form has valid values, and purchase licenses
    * with selected plans if form is valid.
    *
@@ -117,12 +78,22 @@ export default function PurchaseLicense() {
         valid: true,
       };
 
-      postLicense(license);
+      postLicense(license).then((response: Response) => {
+        if (response.status == 201) {
+          alert("License successfully purchased");
+          // Refresh
+          navigate(0);
+        } else {
+          alert(
+            "Sorry, something went wrong when purchasing license. Please try again."
+          );
+        }
+      });
     }
   };
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(productId!).then((product: Product) => setProduct(product));
   }, []);
 
   return (

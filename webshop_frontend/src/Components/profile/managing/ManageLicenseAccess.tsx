@@ -12,6 +12,11 @@ import {
   moveItemBetweenTables,
   moveItemsBetweenTables,
 } from "./SelectTableFunctions";
+import {
+  fetchCompanyUsers,
+  fetchLicense,
+  fetchProduct,
+} from "../../../ApiController";
 
 /**
  * A Manage License Access page.
@@ -142,46 +147,6 @@ export default function ManageLicenseAccess() {
   const isInitialMount = useRef(true);
 
   /**
-   * Send a GET request to get a product.
-   *
-   * @param productId The ID of the product.
-   * @returns The product object.
-   */
-  const fetchProduct = async (productId: string) => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product: Product = data;
-    return product;
-  };
-
-  /**
-   * Send a GET request to get the license information.
-   *
-   * @returns The license object
-   */
-  const fetchLicense = async () => {
-    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
-    const data = await response.json();
-    const license: License = data;
-    return license;
-  };
-
-  /**
-   * Send a GET request to get the company users.
-   *
-   * @param companyId The ID of the company
-   * @returns A list of all company users
-   */
-  const fetchCompanyUsers = async (companyId: number) => {
-    const response = await fetch(
-      `${baseUrl}/api/priv/companies/${companyId}/users`
-    );
-    const data = await response.json();
-    const users: User[] = data.map((user: User) => user);
-    return users;
-  };
-
-  /**
    * Send a GET request to get the users with access to the license.
    *
    * @returns A list of users with license access.
@@ -199,7 +164,7 @@ export default function ManageLicenseAccess() {
    * Send a POST request to add users' access to the license.
    */
   const sendAddUsersRequest = () => {
-    if (newUsersWithAccess.size > 0) {
+    if (newUsersWithAccess.size > 0 && licenseId) {
       fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
@@ -210,7 +175,7 @@ export default function ManageLicenseAccess() {
           users: Array.from(newUsersWithAccess, (id) => {
             return {
               user_id: id,
-              license_id: licenseId ? parseInt(licenseId) : NaN,
+              license_id: parseInt(licenseId),
             };
           }),
         }),
@@ -278,39 +243,41 @@ export default function ManageLicenseAccess() {
 
   useEffect(() => {
     // Get license
-    fetchLicense()
-      .then((license) => {
+    fetchLicense(licenseId!)
+      .then((license: License) => {
         setLicense(license);
         // Get the product the license is for
-        fetchProduct(license.product_id).then((product) => {
+        fetchProduct(license.product_id).then((product: Product) => {
           license.product_name = product.display_name;
         });
         // Get all company users
-        fetchCompanyUsers(license.company_id).then((users) => {
-          // Sort users between those with and without license access
-          fetchUsersWithAccess()
-            .then((x) => {
-              let withoutAccess: User[] = [];
-              let withAccess: User[] = [];
+        fetchCompanyUsers(license.company_id.toString()).then(
+          (users: User[]) => {
+            // Sort users between those with and without license access
+            fetchUsersWithAccess()
+              .then((x) => {
+                let withoutAccess: User[] = [];
+                let withAccess: User[] = [];
 
-              withoutAccess = users.filter(
-                (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
-              );
-              withAccess = x;
+                withoutAccess = users.filter(
+                  (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
+                );
+                withAccess = x;
 
-              setUsersWithoutAccess(
-                withoutAccess.map((user) => {
-                  return createRowProps(user.user_id, [user.email]);
-                })
-              );
-              setUsersWithAccess(
-                withAccess.map((user) => {
-                  return createRowProps(user.user_id, [user.email]);
-                })
-              );
-            })
-            .catch(() => alert("Failed to fetch users with license access"));
-        });
+                setUsersWithoutAccess(
+                  withoutAccess.map((user) => {
+                    return createRowProps(user.user_id, [user.email]);
+                  })
+                );
+                setUsersWithAccess(
+                  withAccess.map((user) => {
+                    return createRowProps(user.user_id, [user.email]);
+                  })
+                );
+              })
+              .catch(() => alert("Failed to fetch users with license access"));
+          }
+        );
       })
       .catch((e) => alert("Failed to get license or users"));
   }, []);

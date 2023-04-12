@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
@@ -8,14 +8,11 @@ import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
 import CompanyUsers from "./managing/CompanyUsers";
 import { useEffect, useState } from "react";
-import { User } from "../../Interfaces";
 import EditProfile from "./EditProfile";
-
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT + "/";
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "../";
-}
+import EditUserAccess from "./managing/EditUserAccess";
+import PageNotFound from "../PageNotFound";
+import { checkSignInStatus, fetchMe } from "../../ApiController";
+import { MeUser } from "../../Interfaces";
 
 /**
  * The user Profile page.
@@ -25,30 +22,15 @@ if (import.meta.env.PROD) {
  * @returns The Profile page component.
  */
 export default function Profile() {
-  const [user, setUser] = useState<User>();
-
-  // check sign in status
-  const checkSignInStatus = async () => {
-    let result = await fetch(baseUrl + "api/priv/logged_in", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (result.status === 200) {
-      const data: User = await result.json();
-      setUser(data);
-
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   const [signedIn, setSignedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<MeUser>();
 
   useEffect(() => {
-    checkSignInStatus().then((result) => {
-      setSignedIn(result);
+    checkSignInStatus().then((signedIn: boolean) => {
+      setSignedIn(signedIn);
+      if (signedIn) {
+        fetchMe().then((user: MeUser) => setUser(user));
+      }
     });
   }, [signedIn]);
 
@@ -57,11 +39,19 @@ export default function Profile() {
       <Routes>
         <Route
           path="/"
-          element={signedIn ? <Navigate to={`${user?.user_id}`} /> : <SignIn />}
+          element={signedIn && user ? <MyAccount user={user} /> : <SignIn />}
         />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
-        <Route path="/:userId/*" element={<MyAccount />} />
-        <Route path="/:userId/edit" element={<EditProfile />} />
+        <Route
+          path="/edit"
+          element={
+            user ? (
+              <EditProfile user={user} />
+            ) : (
+              <section className="container">Error</section>
+            )
+          }
+        />
 
         {/* License manager */}
         <Route
@@ -69,6 +59,7 @@ export default function Profile() {
           element={<ManageLicenseAccess />}
         />
         <Route path="/company-users/:companyId" element={<CompanyUsers />} />
+        <Route path="/:userId/license-access" element={<EditUserAccess />} />
 
         {/* Admin */}
         <Route
@@ -77,6 +68,8 @@ export default function Profile() {
         ></Route>
         <Route path="/admin-products" element={<ManageProducts />}></Route>
         <Route path="/admin-users" element={<ManageUsers />}></Route>
+
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
   );
