@@ -11,6 +11,7 @@ use utoipa::{OpenApi, ToSchema};
 pub mod descriptions_protected;
 
 use crate::{
+    IMAGES_DIR,
     data_access::{error_handling::PostgresDBError, user},
     routes::private::products_protected::descriptions_protected::description_utils::{
         self, ImageExtractorError, ImageParsingError,
@@ -218,7 +219,7 @@ pub async fn create_product(
 
     let product_id = product::generate_id(prod_name);
 
-    let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
+    let path = format!("{}/{}", IMAGES_DIR, product_id);
     let file_name = match description_utils::save_image(image, &path, &extracted_img.file_name) {
         Ok(file_name) => file_name,
         Err(e) => match e {
@@ -371,7 +372,7 @@ pub async fn update_product(
                     }
                 }
             };
-            let path = format!("{}/{}", descriptions_protected::IMAGE_DIR, product_id);
+            let path = format!("{}/{}", IMAGES_DIR, product_id);
             let new_path =
                 match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
                     Ok(file_name) => file_name,
@@ -567,7 +568,7 @@ pub async fn delete_product(
             };
             if let Err(e) = fs::remove_dir(format!(
                 "{}/{}",
-                descriptions_protected::IMAGE_DIR,
+                IMAGES_DIR,
                 product_id
             )) {
                 log::error!("Couldnt remove image folder from file system: {}", e);
