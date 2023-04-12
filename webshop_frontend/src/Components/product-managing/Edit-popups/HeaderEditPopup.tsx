@@ -24,7 +24,7 @@ export default function RowEditPopup() {
     <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
         <form className="popup-form">
-          <h2>Edit paragraph</h2>
+          <h2>Edit section header</h2>
           <label htmlFor="title">Title:</label>
           <input type="text" ref={titleRef} id="title" name="title" />
 
