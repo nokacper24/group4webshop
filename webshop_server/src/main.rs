@@ -22,6 +22,13 @@ use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
+const IMAGES_DIR: &'static str = {
+    match option_env!("RESOURCES_DIR") {
+        Some(path) => path,
+        None => "resources/images",
+    }
+};
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info,sqlx=off");
@@ -94,9 +101,15 @@ fn load_rustls_config() -> rustls::ServerConfig {
         .with_safe_defaults()
         .with_no_client_auth();
 
+    // CERT_PATH=certificate.pem
+    // PRIV_KEY_PATH=privatekey.pem
+    
+    let cert_path = std::env::var("CERT_PATH").expect("CERT_PATH environment variable not set");
+    let priv_key_path = std::env::var("PRIV_KEY_PATH").expect("PRIV_KEY_PATH environment variable not set");
+
     // load TLS key/cert files
-    let cert_file = &mut BufReader::new(File::open("certificate.pem").unwrap());
-    let key_file = &mut BufReader::new(File::open("privatekey.pem").unwrap());
+    let cert_file = &mut BufReader::new(File::open(&cert_path).unwrap());
+    let key_file = &mut BufReader::new(File::open(&priv_key_path).unwrap());
 
     // convert files to key/cert objects
     let cert_chain = certs(cert_file)

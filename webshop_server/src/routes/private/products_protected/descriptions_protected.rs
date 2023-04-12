@@ -1,4 +1,5 @@
 use crate::{
+    IMAGES_DIR,
     data_access::{
         error_handling,
         product::{
@@ -28,7 +29,6 @@ pub mod description_utils;
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
 pub const ALLOWED_FORMATS: [ImageFormat; 3] =
     [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
-pub const IMAGE_DIR: &str = "resources/images";
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_text_component);
@@ -676,7 +676,7 @@ async fn create_image_component(
         }
     };
 
-    let image_dir = format!("{}/{}", IMAGE_DIR, product_id.as_str());
+    let image_dir = format!("{}/{}", IMAGES_DIR, product_id.as_str());
 
     let path = match description_utils::save_image(image, &image_dir, &extracted_image.file_name) {
         Ok(path) => path,
@@ -972,7 +972,7 @@ async fn update_image_component(
                 }
             };
 
-            let image_dir = format!("{}/{}", IMAGE_DIR, product_id);
+            let image_dir = format!("{}/{}", IMAGES_DIR, product_id);
 
             let new_img_path =
                 match description_utils::save_image(new_img, &image_dir, &image.file_name) {
