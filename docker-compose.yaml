@@ -14,12 +14,6 @@ services:
       - ./database/sql_scripts:/sql_scripts
       - ./app/postgres-data:/var/lib/postgresql/data
 
-  adminer-prod:
-    image: adminer
-    restart: always
-    ports:
-      - 8083:8080
-
   webshop:
     image: nokacper24/g4webshop:1.0
     ports:
