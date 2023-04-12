@@ -1,10 +1,12 @@
 import { AccordionHeader } from "./Accordion/AccordionHeader";
 import AccordionTable from "./Accordion/AccordionTable";
+import HeaderEditPopup from "./Edit-popups/HeaderEditPopup";
 import RowEditPopup from "./Edit-popups/RowEditPopup";
 
 export default function ManagePage() {
   return (
     <>
+      <HeaderEditPopup></HeaderEditPopup>
       <RowEditPopup
         image={false}
         title={undefined}
