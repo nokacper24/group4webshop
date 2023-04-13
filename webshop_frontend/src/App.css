@@ -798,7 +798,7 @@ form a:hover {
 .banner {
   width: 100%;
   height: 30rem;
-  background-image: url(https://unsplash.it/1200/500);
+  /* background-image: set inline app */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
