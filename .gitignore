@@ -2,6 +2,11 @@ target
 .env
 .obsidian/
 webshop_server/resources/
+webshop_server/certificate.pem
+webshop_server/privatekey.pem
+
+# docker volume with resources, certs etc
+app/
 
 # Logs
 logs

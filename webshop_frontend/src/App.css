@@ -105,6 +105,12 @@ h3 {
   -webkit-text-fill-color: transparent;
 }
 
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 button {
   font-family: var(--ff-primary);
   cursor: pointer;
@@ -118,6 +124,7 @@ button {
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
+  text-decoration: none;
   transition: background var(--transition-speed);
 }
 
@@ -166,6 +173,7 @@ label {
 }
 
 .container {
+  width: 100%;
   max-width: var(--max-width);
   margin-inline: auto;
   padding: 1em 2em;
@@ -210,7 +218,7 @@ nav {
 
 #skip-navigation {
   position: absolute;
-  left: 1rem;
+  left: 10rem;
   top: -1000px;
   padding: 0.5em;
   color: var(--text-secondary);
@@ -318,6 +326,10 @@ nav {
 
 .nav-link.active {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.active:is(:hover, :focus) {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Navbar -- Mobile */
@@ -496,8 +508,10 @@ nav {
 
 hr {
   margin: 0;
-  height: 5px;
+  height: 0.5rem;
+  width: 100%;
   background-color: var(--bg-secondary);
+  border: none;
 }
 
 .m-t-1 {
@@ -525,12 +539,23 @@ form>h1 {
   font-size: 2rem;
 }
 
+form input {
+  margin-inline: 0.5em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  font-size: 1rem;
+}
+
 .form-container {
   width: min(80vw, 700px);
   margin-block: 1em;
   background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
+}
+
+.form-container>label {
+  margin-top: 0.5em;
 }
 
 .form-container> :is(label, select, input, textarea, p) {
@@ -543,13 +568,10 @@ form>h1 {
   text-align: left;
 }
 
-.form-container>label {
-  margin-top: 1em;
-}
-
 .form-container>input {
+  margin: initial;
+  margin-inline: auto;
   font-size: 1.1rem;
-  padding: 0.5em;
 }
 
 .form-container>textarea {
@@ -606,14 +628,14 @@ form a:hover {
 }
 
 .hero {
+  height: min(100vh, 40em);
+  width: 100%;
   margin-top: calc(0px - var(--header-height));
-  height: 100vh;
-  max-width: 100%;
   background: var(--text-primary);
-  background-image: url(./assets/hero.jpg);
+  background-image: url(assets/hero.jpg);
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 100%;
+  background-position: 50% 70%;
   overflow: hidden;
 }
 
@@ -637,16 +659,17 @@ form a:hover {
 
 .hero-title {
   color: var(--text-secondary);
-  font-size: 3em;
+  font-size: 5rem;
   font-weight: 400;
   font-family: var(--ff-title);
+  line-height: 3rem;
 
   -webkit-text-fill-color: initial;
 }
 
 .hero-text {
-  font-size: 1.3rem;
-  margin: 0 0 2em 0;
+  font-size: 2rem;
+  margin-block: 3rem;
 }
 
 .hero-button {
@@ -766,12 +789,27 @@ form a:hover {
 }
 
 /* || INDIVIDUAL PRODUCT PAGE */
+.product-page-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .banner {
   width: 100%;
-  height: 80vh;
+  height: 30rem;
   background-image: url(https://unsplash.it/1200/500);
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
+}
+
+.banner-title {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-family: var(--ff-title);
+
+  -webkit-text-fill-color: initial;
 }
 
 .banner-inner {
@@ -795,50 +833,65 @@ form a:hover {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.product-description {
-  padding-block: 2em;
+.product-description-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 3em;
+  gap: 1em;
+  margin-top: 2rem;
 }
 
-.product-description-row {
+.description-row {
   display: flex;
   flex-direction: row;
   gap: 3em;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
+  margin: 0 2em;
+  width: auto;
+}
+
+.description-component {
+  flex-basis: 50%;
+  max-width: 45rem;
+}
+
+.full-width-desc {
+  width: auto;
+  max-width: auto;
+  min-width: auto;
+}
+
+.text-description {
+  text-align: center;
+
+}
+
+.image-description {
+  overflow: hidden;
+}
+
+.image-description img {
+  border-radius: 0.5rem;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 800px) {
+  .description-row {
+    flex-direction: column;
+    gap: 2em;
+  }
 }
 
 .text-item-wrapper {
   text-align: center;
 }
 
-.row-text {
-  max-width: 50vw;
-  line-height: 1.5em;
-  margin-inline: auto;
-}
-
-@media (max-width: 800px) {
-  .product-description-row {
-    flex-direction: column;
-  }
-
-  .row-text {
-    max-width: 80vw;
-  }
-}
-
 /* Gallery */
 .gallery-wrapper {
-  padding-inline: 0;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
   text-align: center;
-  align-items: center;
   color: var(--text-secondary);
   background-color: var(--bg-primary);
   background-image: linear-gradient(var(--bg-gradient-secondary));
@@ -956,7 +1009,7 @@ form a:hover {
 .about-us-banner {
   position: relative;
   height: 90vh;
-  max-width: 100%;
+  width: 100%;
   margin-top: calc(0px - var(--header-height));
   color: var(--text-secondary);
   background: var(--text-primary);
@@ -1010,15 +1063,12 @@ form a:hover {
 
 .collapsed {
   visibility: collapse;
+  display: none;
 }
 
 .button-container {
   display: flex;
   gap: 1em;
-}
-
-.button-container>a {
-  text-decoration: none;
 }
 
 /* || MANAGE/ADMIN PAGES */
@@ -1028,6 +1078,10 @@ form a:hover {
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
+}
+
+.button-container {
+  margin-bottom: 1em;
 }
 
 .table-container+.button-container {

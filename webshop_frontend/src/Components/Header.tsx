@@ -52,6 +52,17 @@ export default function Header() {
     }
   };
 
+  const handleNavClick = () => {
+    navToggle.current?.classList.remove("active");
+
+    closeMenu();
+    setIsOpen(false);
+
+    if (nav.current) {
+      nav.current.style.position = "absolute";
+    }
+  };
+
   const handleClick = () => {
     // Toggle icon from hamburger to X
     navToggle.current?.classList.toggle("active");
@@ -73,7 +84,7 @@ export default function Header() {
         </a>
 
         {/* ProFlex Logo */}
-        <NavLink className="logo-link" to="/">
+        <NavLink onClick={handleNavClick} className="logo-link" to="/">
           <svg
             className="logo"
             xmlns="http://www.w3.org/2000/svg"
@@ -107,28 +118,44 @@ export default function Header() {
             data-state="closed"
           >
             <li>
-              <NavLink className="nav-link" to="/">
+              <NavLink onClick={handleNavClick} className="nav-link" to="/">
                 Home
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/products">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/products"
+              >
                 Products
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/about">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/about"
+              >
                 About
               </NavLink>
             </li>
             <li>
-              <NavLink className="nav-link" to="/support">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/support"
+              >
                 Support
               </NavLink>
             </li>
             {/* User profile icon */}
             <li>
-              <NavLink className="nav-link" to="/profile">
+              <NavLink
+                onClick={handleNavClick}
+                className="nav-link"
+                to="/profile"
+              >
                 <svg
                   className="nav-icon"
                   xmlns="http://www.w3.org/2000/svg"

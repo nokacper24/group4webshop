@@ -6,6 +6,13 @@ import CreateCompanyAccount from "./register/CreateCompanyAccount";
 import AdminCompanyLicenses from "./admin/AdminCompanyLicenses";
 import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
+import CompanyUsers from "./managing/CompanyUsers";
+import { useEffect, useState } from "react";
+import EditProfile from "./EditProfile";
+import EditUserAccess from "./managing/EditUserAccess";
+import PageNotFound from "../PageNotFound";
+import { checkSignInStatus, fetchMe } from "../../ApiController";
+import { MeUser } from "../../Interfaces";
 
 /**
  * The user Profile page.
@@ -15,22 +22,54 @@ import ManageUsers from "./admin/ManageUsers";
  * @returns The Profile page component.
  */
 export default function Profile() {
+  const [signedIn, setSignedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<MeUser>();
+
+  useEffect(() => {
+    checkSignInStatus().then((signedIn: boolean) => {
+      setSignedIn(signedIn);
+      if (signedIn) {
+        fetchMe().then((user: MeUser) => setUser(user));
+      }
+    });
+  }, [signedIn]);
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<SignIn />} />
+        <Route
+          path="/"
+          element={signedIn && user ? <MyAccount user={user} /> : <SignIn />}
+        />
         <Route path="/create-account/*" element={<CreateCompanyAccount />} />
-        <Route path="/:userId" element={<MyAccount />} />
+        <Route
+          path="/edit"
+          element={
+            user ? (
+              <EditProfile user={user} />
+            ) : (
+              <section className="container">Error</section>
+            )
+          }
+        />
+
+        {/* License manager */}
         <Route
           path="/manage-license/:licenseId"
           element={<ManageLicenseAccess />}
         />
+        <Route path="/company-users/:companyId" element={<CompanyUsers />} />
+        <Route path="/:userId/license-access" element={<EditUserAccess />} />
+
+        {/* Admin */}
         <Route
           path="/admin-company-licenses"
           element={<AdminCompanyLicenses />}
         ></Route>
         <Route path="/admin-products" element={<ManageProducts />}></Route>
         <Route path="/admin-users" element={<ManageUsers />}></Route>
+
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
   );

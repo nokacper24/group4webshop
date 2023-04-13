@@ -1,8 +1,7 @@
+import { Product } from "../../Interfaces";
+
 type ProductSelectProps = {
-  products: {
-    id: string;
-    name: string;
-  }[];
+  products: Product[];
 };
 
 /**
@@ -21,7 +20,7 @@ export default function ProductSelect({ products }: ProductSelectProps) {
       </option>
 
       {products.map((product) => (
-        <option key={product.id}>{product.name}</option>
+        <option key={product.product_id}>{product.display_name}</option>
       ))}
     </select>
   );

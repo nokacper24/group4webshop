@@ -1,27 +1,23 @@
 import { Link } from "react-router-dom";
+import { Product } from "../../Interfaces";
 
 export type ProductCardProps = {
-  props: {
-    product_id: string;
-    name: string;
-    description: string;
-    sourceImage: string;
-  };
+  product: Product;
 };
 
-export const ProductCard = ({ props: product }: ProductCardProps) => {
+export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <li>
       <Link className="product-card" to={`/products/${product.product_id}`}>
         <img
           height={200}
           width={300}
-          src={product.sourceImage}
-          alt={product.name}
+          src={product.main_image}
+          alt={product.display_name}
           className="card-image"
         ></img>
-        <h2>{product.name}</h2>
-        <p className="card-description">{product.description}</p>
+        <h2>{product.display_name}</h2>
+        <p className="card-description">{product.short_description}</p>
       </Link>
     </li>
   );

@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
-
-interface ProductProps {
-  product_id: string;
-  display_name: string;
-  price_per_user: number;
-  short_description: string;
-}
+import { fetchProduct, postLicense } from "../../ApiController";
 
 /**
  * Represents a Purchase License page.
@@ -17,35 +12,21 @@ interface ProductProps {
  * @returns The Purchase License page component.
  */
 export default function PurchaseLicense() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
+  const navigate = useNavigate();
 
   const { productId } = useParams();
-  const [product, setProduct] = useState<ProductProps>({
-    product_id: "PLACEHOLDER",
-    display_name: "PLACEHOLDER",
+  const [product, setProduct] = useState<Product>({
+    product_id: "",
+    display_name: "",
     price_per_user: 0,
-    short_description: "PLACEHOLDER",
+    short_description: "",
+    main_image: "",
+    available: false,
   });
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const price = useRef<HTMLSelectElement>(null);
   const formAlert = useRef<HTMLParagraphElement>(null);
-
-  const fetchProduct = async () => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product = {
-      product_id: data.product_id,
-      display_name: data.display_name,
-      price_per_user: data.price_per_user,
-      short_description: data.short_description,
-    };
-    setProduct(product);
-  };
 
   /**
    * Update the total price in the object's state.
@@ -75,33 +56,6 @@ export default function PurchaseLicense() {
   };
 
   /**
-   * Send a POST request to create a license.
-   *
-   * @param license The license to create.
-   */
-  const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/licenses`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      /* TODO: Send along cookie for authentication */
-      body: license,
-    }).then((response) => {
-      const status = response.status;
-      if (status == 201) {
-        alert("License successfully purchased!");
-        location.reload();
-      } else {
-        alert(
-          "Sorry, something went wrong when purchasing the license. Try again."
-        );
-      }
-    });
-  };
-
-  /**
    * Check if the form has valid values, and purchase licenses
    * with selected plans if form is valid.
    *
@@ -111,23 +65,35 @@ export default function PurchaseLicense() {
     event.preventDefault();
 
     if (validateForm()) {
-      let license = JSON.stringify({
+      let license: License = {
+        license_id: NaN,
         company_id: 1 /* TODO: Get real company */,
-        product_id: productId,
+        product_id: product.product_id,
+        product_name: product.display_name,
         start_date: new Date(),
         end_date: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ),
-        amount: totalPrice / product.price_per_user,
+        amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
-      });
+      };
 
-      postLicense(license);
+      postLicense(license).then((response: Response) => {
+        if (response.status == 201) {
+          alert("License successfully purchased");
+          // Refresh
+          navigate(0);
+        } else {
+          alert(
+            "Sorry, something went wrong when purchasing license. Please try again."
+          );
+        }
+      });
     }
   };
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(productId!).then((product: Product) => setProduct(product));
   }, []);
 
   return (
@@ -151,7 +117,7 @@ export default function PurchaseLicense() {
             refs={{ price }}
           />
 
-          <p className="total-price">TOTAL: {totalPrice}</p>
+          <p className="total-price">TOTAL: ${totalPrice}</p>
 
           <button type="submit" className="default-button submit-button">
             Buy

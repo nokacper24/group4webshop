@@ -10,7 +10,6 @@ CREATE TABLE company (
 
 CREATE TABLE register_company_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL,
     company_id INT NOT NULL,
@@ -28,7 +27,6 @@ CREATE TABLE app_user (
 
 CREATE TABLE register_user (
     id SERIAL PRIMARY KEY,
-    key TEXT NOT NULL,
     email TEXT NOT NULL,
     exp_date timestamptz NOT NULL
 );
@@ -49,7 +47,7 @@ CREATE TABLE cookies (
     cookie TEXT NOT NULL,
     exp timestamptz NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE product (
@@ -78,7 +76,7 @@ CREATE TABLE user_license (
     user_id INT NOT NULL,
     PRIMARY KEY (license_id, user_id),
     FOREIGN KEY (license_id) REFERENCES license(license_id),
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id)
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE category (
@@ -120,7 +118,7 @@ CREATE TABLE description_component (
     component_id SERIAL PRIMARY KEY,
     priority INT NOT NULL,
     product_id TEXT NOT NULL,
-    full_width BOOLEAN NOT NULL,
+    full_width BOOLEAN NOT NULL DEFAULT FALSE,
     image_id INT,
     text_id INT,
     FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE,

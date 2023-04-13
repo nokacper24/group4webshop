@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { LicenseProps } from "../MyAccount";
+import { License } from "../../../Interfaces";
 
 type LicenseRowProps = {
-  license: LicenseProps;
+  license: License;
 };
 
 /**
@@ -14,29 +14,23 @@ type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
-  const { userId } = useParams();
   const [collapsed, setCollapsed] = useState(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
   };
 
-  const cancelButton = (
-    <button className="default-button small-button">Cancel renewal</button>
-  );
   const manageButton = (
-    <Link to={`../manage-license/${license.licenseId}`}>
-      <button className="default-button small-button">Manage access</button>
+    <Link
+      to={`../manage-license/${license.license_id}`}
+      className="default-button small-button"
+    >
+      Manage access
     </Link>
   );
 
   let buttons;
   if (license.valid == true) {
-    buttons = (
-      <span className="button-container">
-        {cancelButton}
-        {manageButton}
-      </span>
-    );
+    buttons = <span className="button-container">{manageButton}</span>;
   } else {
     buttons = <span className="button-container">{manageButton}</span>;
   }
@@ -44,7 +38,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   return (
     <React.Fragment>
       <tr className="row-header">
-        <td>{license.productId}</td>
+        <td>{license.product_name}</td>
         <td>{0}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>
@@ -70,8 +64,8 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
         <td colSpan={5}>
           <p>
-            Active period: {license.startDate.toLocaleDateString()} to{" "}
-            {license.endDate.toLocaleDateString()}
+            Active period: {new Date(license.start_date).toLocaleDateString()}{" "}
+            to {new Date(license.end_date).toLocaleDateString()}
             {buttons}
           </p>
         </td>

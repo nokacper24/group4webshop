@@ -22,6 +22,11 @@ export type SelectTableProps = {
   outsideButtons: { text: string; action: (selectedIndex: number[]) => void }[];
 };
 
+export type SelectTableRowProps = {
+  id: string;
+  columns: { text: string }[];
+};
+
 /**
  * Represents a Select Table component.
  * A table where multiple rows can be selected for an action.

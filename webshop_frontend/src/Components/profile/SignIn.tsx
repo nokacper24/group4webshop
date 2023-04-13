@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { verifySignInInfo } from "../../ApiController";
 
 /**
  * Represents the Sign In form for users to access their profile.
@@ -7,19 +8,30 @@ import { Link } from "react-router-dom";
  * @returns A Sign In component.
  */
 export default function SignIn() {
+  const navigate = useNavigate();
+
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
 
-  const verifySignInInfo = () => {
-    // Placeholder solution. TODO: Implement real solution.
-    if (email.current) {
-      localStorage.setItem("authenticated", email.current.value);
-    }
+  const handleSignIn = () => {
+    verifySignInInfo(email.current!.value, password.current!.value).then(
+      (response: Response) => {
+        if (response.status === 200) {
+          // Refresh
+          navigate(0);
+        } else {
+          password.current!.value = "";
+        }
+      }
+    );
   };
 
   return (
     <section className="center-container">
-      <form className="container form-container">
+      <form
+        className="container form-container"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <h1>Sign in</h1>
         <p>
           Not a customer yet?
@@ -47,7 +59,7 @@ export default function SignIn() {
         ></input>
 
         <button
-          onClick={verifySignInInfo}
+          onClick={handleSignIn}
           className="default-button m-t-1"
           type="submit"
           value="Sign in"

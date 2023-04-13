@@ -1,0 +1,7 @@
+webshop_frontend/dist
+webshop_frontend/node_modules
+**/.env
+**/.pem
+**/.key
+webshop_server/target
+webshop_server/resources

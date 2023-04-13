@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, query_as, {Pool, Postgres},
+    query, query_as, Executor, {Pool, Postgres},
 };
 use utoipa::ToSchema;
 
@@ -39,7 +39,7 @@ pub struct LicenseVitalInfo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct InvalidLicense {
+pub struct LicenseValidation {
     license_id: i32,
     valid: bool,
 }
@@ -126,18 +126,21 @@ pub async fn create_license(
 /// Update the validation of licenses
 pub async fn update_license_validations(
     pool: &Pool<Postgres>,
-    licenses: &Vec<InvalidLicense>,
+    licenses: &Vec<LicenseValidation>,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for license in licenses.iter() {
-        query!(
-            r#"UPDATE license
-            SET valid = $1
-            WHERE license_id = $2"#,
-            license.valid,
-            license.license_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"UPDATE license
+                SET valid = $1
+                WHERE license_id = $2"#,
+                license.valid,
+                license.license_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }

@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{Postgres, Pool, query_as};
+use sqlx::{query_as, Pool, Postgres};
 
 #[derive(Deserialize, Serialize)]
 pub struct Company {
-    company_id: i32,
+    pub company_id: i32,
     company_name: String,
     company_address: String,
 }
@@ -12,7 +12,9 @@ pub struct Company {
 /// returns a vector of all companies.
 /// returns an error if the database query failed.
 pub async fn get_all_companies(pool: &Pool<Postgres>) -> Result<Vec<Company>, sqlx::Error> {
-    let companies = query_as!(Company, "SELECT * FROM company").fetch_all(pool).await?;
+    let companies = query_as!(Company, "SELECT * FROM company")
+        .fetch_all(pool)
+        .await?;
     Ok(companies)
 }
 
@@ -24,9 +26,13 @@ pub async fn get_company_by_id(
     pool: &Pool<Postgres>,
     company_id: &i32,
 ) -> Result<Company, sqlx::Error> {
-    let company = query_as!(Company, "SELECT * FROM company WHERE company_id = $1", company_id)
-        .fetch_one(pool)
-        .await?;
+    let company = query_as!(
+        Company,
+        "SELECT * FROM company WHERE company_id = $1",
+        company_id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(company)
 }
 
@@ -43,10 +49,14 @@ pub async fn create_company(
     company_address: &str,
 ) -> Result<Company, sqlx::Error> {
     if company_name.is_empty() {
-        return Err(sqlx::Error::ColumnNotFound("Company name cannot be empty".to_string()));
+        return Err(sqlx::Error::ColumnNotFound(
+            "Company name cannot be empty".to_string(),
+        ));
     }
     if company_address.is_empty() {
-        return Err(sqlx::Error::ColumnNotFound("Company address cannot be empty".to_string()));
+        return Err(sqlx::Error::ColumnNotFound(
+            "Company address cannot be empty".to_string(),
+        ));
     }
     let company = query_as!(
         Company,

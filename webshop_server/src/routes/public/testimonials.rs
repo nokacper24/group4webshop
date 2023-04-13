@@ -26,6 +26,7 @@ pub struct TestimonialsOpenApi;
 #[utoipa::path(
   context_path = "/api",
   get,
+  tag = "Testimonials",
   responses(
   (status = 200, description = "List of all testimonials for a product", body = Vec<Testimonial>),
   (status = 500, description = "Internal Server Error"),

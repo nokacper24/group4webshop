@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Testimonial } from "../../../Interfaces";
 import { ParagraphSlide } from "./ParagraphSlide";
 import { SlideType } from "./SlideTypes";
 
@@ -7,16 +8,7 @@ import { SlideType } from "./SlideTypes";
  */
 export type GalleryProps = {
   galleryName: string;
-  slides: {
-    // The slides of the gallery
-    slideId: string;
-    mainContent: string;
-    reviewerProfile: {
-      picturePath: string;
-      name: string;
-    };
-    slideType: SlideType;
-  }[];
+  testimonials: Testimonial[];
 };
 
 /**
@@ -33,7 +25,7 @@ export default function Gallery(props: GalleryProps) {
 
   // If there is only one slide, hide the buttons, otherwise the buttons are initialized.
   useEffect(() => {
-    if (props.slides.length > 1) {
+    if (props.testimonials.length > 1) {
       if (prevButton.current && nextButton.current) {
         prevButton.current.style.display = "flex";
         nextButton.current.style.display = "flex";
@@ -60,24 +52,29 @@ export default function Gallery(props: GalleryProps) {
     let currentIndex = index + amount;
 
     // If the index is out of bounds, set it to the first or last slide
-    if (currentIndex >= props.slides.length) {
+    if (currentIndex >= props.testimonials.length) {
       currentIndex = 0;
     } else if (currentIndex < 0) {
-      currentIndex = props.slides.length - 1;
+      currentIndex = props.testimonials.length - 1;
     }
     setIndex(currentIndex);
 
     let prev = index - 1;
     if (prev < 0) {
-      prev = props.slides.length - 1;
+      prev = props.testimonials.length - 1;
     }
     let next = index + 1;
-    if (next >= props.slides.length) {
+    if (next >= props.testimonials.length) {
       next = 0;
     }
     // Update the previous and next slide
-    setPrevSlide(props.slides[prev].slideId);
-    setNextSlide(props.slides[next].slideId);
+    setPrevSlide(props.testimonials[prev].testimonial_id.toString());
+    setNextSlide(props.testimonials[next].testimonial_id.toString());
+  };
+
+  const reviewerProfile = {
+    picturePath: props.testimonials[index].author_pic,
+    name: props.testimonials[index].author,
   };
 
   return (
@@ -102,22 +99,15 @@ export default function Gallery(props: GalleryProps) {
       </a>
       <div className="slides-view">
         <div className="slides-container" ref={container}>
-          {props.slides.map((slide) => {
-            switch (
-              // Used for future proofing in case we want to use gallery again with other type of slides
-              slide.slideType
-            ) {
-              case SlideType.PARAGRAPH: {
-                return (
-                  <ParagraphSlide
-                    id={slide.slideId}
-                    key={slide.slideId}
-                    paragraph={slide.mainContent}
-                    reviewerProfile={slide.reviewerProfile}
-                  />
-                );
-              }
-            }
+          {props.testimonials.map((slide) => {
+            return (
+              <ParagraphSlide
+                id={slide.testimonial_id.toString()}
+                key={slide.testimonial_id}
+                paragraph={slide.text}
+                reviewerProfile={reviewerProfile}
+              />
+            );
           })}
         </div>
       </div>

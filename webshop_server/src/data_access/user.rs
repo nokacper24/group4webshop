@@ -3,8 +3,10 @@ use chrono::{DateTime, Duration, Utc};
 use rand::rngs::OsRng;
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query, query_as, {Pool, Postgres},
+    query, query_as, Executor, {Pool, Postgres},
 };
+use std::fmt::Display;
+use std::{string, sync::Arc};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -32,13 +34,13 @@ pub enum Role {
     Default,
 }
 
-impl Role {
-    pub fn to_string(&self) -> String {
+impl Display for Role {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Role::Admin => "Admin".to_string(),
-            Role::CompanyItHead => "CompanyItHead".to_string(),
-            Role::CompanyIt => "CompanyIt".to_string(),
-            Role::Default => "Default".to_string(),
+            Role::Admin => write!(f, "Admin"),
+            Role::CompanyItHead => write!(f, "CompanyItHead"),
+            Role::CompanyIt => write!(f, "CompanyIt"),
+            Role::Default => write!(f, "Default"),
         }
     }
 }
@@ -123,36 +125,42 @@ pub async fn get_role_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<Role,
 /// Give users' access to licenses
 pub async fn add_license_users(
     pool: &Pool<Postgres>,
-    users: &Vec<LicenseUser>,
+    users: &[LicenseUser],
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"INSERT INTO user_license(license_id, user_id)
-            VALUES ($1, $2)"#,
-            user.license_id,
-            user.user_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"INSERT INTO user_license(license_id, user_id)
+                VALUES ($1, $2)"#,
+                user.license_id,
+                user.user_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }
 
 /// Remove users' access to licenses
 pub async fn remove_license_users(
     pool: &Pool<Postgres>,
-    users: &Vec<LicenseUser>,
+    users: &[LicenseUser],
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"DELETE FROM user_license
-            WHERE license_id = $1 AND user_id = $2"#,
-            user.license_id,
-            user.user_id,
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"DELETE FROM user_license
+                WHERE license_id = $1 AND user_id = $2"#,
+                user.license_id,
+                user.user_id,
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
 }
 
@@ -193,7 +201,6 @@ fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> 
 /// A struct to represent a user that is registering themselves and a company.
 pub struct RegisterUser {
     pub id: i32,
-    pub key: String,
     pub email: String,
     pub exp_date: DateTime<Utc>,
 }
@@ -209,13 +216,12 @@ pub async fn create_partial_user(
     email: &str,
     pool: &Pool<Postgres>,
 ) -> Result<RegisterUser, sqlx::Error> {
-    let key = Uuid::new_v4().to_string();
+    let _key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(
-        r#"INSERT INTO register_user (key, email, exp_date)
-        VALUES ($1, $2, $3)"#,
-        key,
+        r#"INSERT INTO register_user (email, exp_date)
+        VALUES ($1, $2)"#,
         email,
         exp_date
     )
@@ -226,7 +232,7 @@ pub async fn create_partial_user(
         Ok(_) => {
             let user = query_as!(
                 RegisterUser,
-                r#"SELECT id, key, email, exp_date FROM register_user WHERE email = $1"#,
+                r#"SELECT id, email, exp_date FROM register_user WHERE email = $1"#,
                 email
             )
             .fetch_one(pool)
@@ -237,13 +243,33 @@ pub async fn create_partial_user(
     }
 }
 
+pub async fn get_partial_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<RegisterUser, sqlx::Error> {
+    let user = query_as!(
+        RegisterUser,
+        r#"SELECT id, email, exp_date FROM register_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(user)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
     pub id: i32,
-    pub key: String,
     pub email: String,
     pub company_id: i32,
     pub exp_date: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PartialRegisterCompanyUser {
+    pub email: String,
+    pub company_id: i32,
 }
 
 /// Creates a new user that is registering themselves and linking to a company.
@@ -259,13 +285,11 @@ pub async fn create_partial_company_user(
     company_id: i32,
     pool: &Pool<Postgres>,
 ) -> Result<RegisterCompanyUser, sqlx::Error> {
-    let key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(
-        r#"INSERT INTO register_company_user (key, email, company_id, exp_date)
-        VALUES ($1, $2, $3, $4)"#,
-        key,
+        r#"INSERT INTO register_company_user (email, company_id, exp_date)
+        VALUES ($1, $2, $3)"#,
         email,
         company_id,
         exp_date
@@ -277,7 +301,7 @@ pub async fn create_partial_company_user(
         Ok(_) => {
             let user = query_as!(
                 RegisterCompanyUser,
-                r#"SELECT id, key, email, company_id, exp_date FROM register_company_user WHERE email = $1"#,
+                r#"SELECT id, email, company_id, exp_date FROM register_company_user WHERE email = $1"#,
                 email
             )
             .fetch_one(pool)
@@ -285,6 +309,87 @@ pub async fn create_partial_company_user(
             Ok(user)
         }
         Err(e) => Err(e),
+    }
+}
+
+/// Creates new users that is registering themselves and linking to a company.
+/// Returns the partial users that were created.
+/// # Arguments
+/// * `email` - The email of the user
+/// * `company_id` - The id of the company the user is registering for
+/// * `pool` - The database pool
+/// # Returns
+/// * `RegisterCompanyUser` - The partial user that was created
+pub async fn create_partial_company_users(
+    users: &[PartialRegisterCompanyUser],
+    pool: &Pool<Postgres>,
+) -> Result<Vec<RegisterCompanyUser>, sqlx::Error> {
+    let exp_date = Utc::now() + Duration::days(1);
+
+    let mut transaction = pool.begin().await?;
+    let mut email_list = Vec::<String>::new();
+
+    for user in users.iter() {
+        transaction
+            .execute(query!(
+                r#"INSERT INTO register_company_user (email, company_id, exp_date)
+                VALUES ($1, $2, $3)"#,
+                user.email,
+                user.company_id,
+                exp_date
+            ))
+            .await?;
+
+        email_list.push(user.email.clone());
+    }
+    transaction.commit().await?;
+
+    let created_users = query_as!(
+        RegisterCompanyUser,
+        r#"SELECT id, email, company_id, exp_date
+            FROM register_company_user
+            WHERE email = ANY($1)"#,
+        &email_list
+    )
+    .fetch_all(pool)
+    .await;
+    created_users
+}
+
+pub async fn get_partial_company_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<RegisterCompanyUser, sqlx::Error> {
+    let user = query_as!(
+        RegisterCompanyUser,
+        r#"SELECT id, email, company_id, exp_date FROM register_company_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(user)
+}
+
+/// Fetches a user by their email address and returns a boolean indicating if the user exists.
+/// # Arguments
+/// * `email` - The email of the user
+/// * `pool` - The database pool
+/// # Returns
+/// * `bool` - A boolean indicating if the user exists
+/// # Errors
+/// * `sqlx::Error` - An error from the database
+/// # Example
+/// ```rust
+/// let user_exists: bool = user_exists("bob@name.com", &pool).await?;
+/// ```
+pub async fn user_exists(email: &str, pool: &Pool<Postgres>) -> Result<bool, sqlx::Error> {
+    let user = query!(r#"SELECT user_id FROM app_user WHERE email = $1"#, email)
+        .fetch_optional(pool)
+        .await?;
+
+    match user {
+        Some(_) => Ok(true),
+        None => Ok(false),
     }
 }
 
@@ -334,6 +439,76 @@ pub async fn create_invite(
     }
 }
 
+pub async fn get_invite(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
+    let invite = query_as!(
+        Invite,
+        r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
+        id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(invite)
+}
+
+pub async fn delete_invite(id: &str, pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM invite_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
+pub enum UserCreationError {
+    Database(sqlx::Error),
+    Hashing(argon2::Error),
+    Hashing2(argon2::password_hash::Error),
+}
+
+pub async fn create_user(
+    email: &str,
+    pass: &str,
+    company_id: i32,
+    role: Role,
+    pool: &Pool<Postgres>,
+) -> Result<User, UserCreationError> {
+    let pass_hash = match hash(pass) {
+        Ok(hash) => hash,
+        Err(e) => return Err(UserCreationError::Hashing2(e)),
+    };
+
+    let insert = query!(
+        r#"INSERT INTO app_user (email, pass_hash, company_id, role)
+        VALUES ($1, $2, $3, $4)"#,
+        email,
+        pass_hash,
+        company_id,
+        role as _
+    )
+    .execute(pool)
+    .await;
+
+    match insert {
+        Ok(_) => {
+            let user = query_as!(
+                User,
+                r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+                FROM app_user
+                WHERE email = $1"#,
+                email
+            )
+            .fetch_one(pool)
+            .await;
+            match user {
+                Ok(user) => Ok(user),
+                Err(e) => Err(UserCreationError::Database(e)),
+            }
+        }
+        Err(e) => Err(UserCreationError::Database(e)),
+    }
+}
+
 /// Get all users that are IT responsible for a company
 pub async fn get_users_by_role(
     pool: &Pool<Postgres>,
@@ -360,18 +535,70 @@ pub struct UserRole {
 /// Update users' roles
 pub async fn update_user_roles(
     pool: &Pool<Postgres>,
-    users: &Vec<UserRole>,
+    users: &[UserRole],
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     for user in users.iter() {
-        query!(
-            r#"UPDATE app_user
-            SET role = $1
-            WHERE user_id = $2"#,
-            user.role as _,
-            user.user_id
-        )
-        .execute(pool)
-        .await?;
+        transaction
+            .execute(query!(
+                r#"UPDATE app_user
+                SET role = $1
+                WHERE user_id = $2"#,
+                user.role as _,
+                user.user_id
+            ))
+            .await?;
     }
+    transaction.commit().await?;
+
     Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct UserID {
+    user_id: i32,
+}
+
+/// Delete users
+pub async fn delete_users(pool: &Pool<Postgres>, users: &[UserID]) -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    for user in users.iter() {
+        transaction
+            .execute(query!(
+                r#"DELETE FROM app_user
+                   WHERE user_id = $1"#,
+                user.user_id,
+            ))
+            .await?;
+    }
+    transaction.commit().await?;
+
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct UserWithoutHash {
+    pub user_id: i32,
+    pub email: String,
+    pub company_id: i32,
+    pub role: Role,
+}
+
+pub async fn update_email(
+    pool: &Pool<Postgres>,
+    email: &str,
+    id: &i32,
+) -> Result<UserWithoutHash, sqlx::Error> {
+    let result_row = query_as!(
+        UserWithoutHash,
+        r#"UPDATE app_user 
+        SET email = $1
+        WHERE user_id = $2
+        RETURNING app_user.user_id, email, company_id, role as "role: _";"#,
+        email,
+        id,
+    )
+    .fetch_one(pool)
+    .await;
+    return result_row.into();
 }

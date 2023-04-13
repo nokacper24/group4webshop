@@ -24,7 +24,7 @@ export const ParagraphSlide = (props: ParagraphSlideProps) => {
       <div className="reviewer-profile">
         <img
           src={props.reviewerProfile.picturePath}
-          alt={props.reviewerProfile.name}
+          alt={props.reviewerProfile.name + "'s face"}
           height="80"
           width="80"
           className="reviewer-picture"

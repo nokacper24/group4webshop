@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+privatekey.pem
+domain.key
+certificate.pem

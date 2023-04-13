@@ -10,7 +10,6 @@ pub mod companies;
 pub mod licenses;
 pub mod products;
 pub mod testimonials;
-pub mod users;
 
 #[get("")]
 async fn index() -> impl Responder {
@@ -22,8 +21,8 @@ pub fn public(cfg: &mut web::ServiceConfig) {
     cfg.configure(categories::configure);
     cfg.configure(licenses::configure);
     cfg.configure(products::configure);
-    cfg.configure(users::configure);
     cfg.configure(auth::configure);
     cfg.configure(companies::configure);
     cfg.configure(testimonials::configure);
+    cfg.default_service(web::route().to(super::api_not_found));
 }
