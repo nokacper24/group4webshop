@@ -1,12 +1,22 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { License, Product, User } from "../../../Interfaces";
-import SelectTable from "./SelectTable";
-
-export type SelectTableRowProps = {
-  id: string;
-  columns: { text: string }[];
-};
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "./SelectTable";
+import {
+  createSelectTableProps,
+  createRowProps,
+  updateNewChanges,
+  moveItemBetweenTables,
+  moveItemsBetweenTables,
+} from "./SelectTableFunctions";
+import {
+  fetchCompanyUsers,
+  fetchLicense,
+  fetchProduct,
+} from "../../../ApiController";
 
 /**
  * A Manage License Access page.
@@ -16,6 +26,14 @@ export type SelectTableRowProps = {
  * @returns A Manage License Access page component.
  */
 export default function ManageLicenseAccess() {
+  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+  // Check if we are in production mode
+  if (import.meta.env.PROD) {
+    baseUrl = "";
+  }
+
+  const navigate = useNavigate();
+
   const { licenseId } = useParams();
   const [license, setLicense] = useState<License>({
     license_id: 0,
@@ -27,10 +45,9 @@ export default function ManageLicenseAccess() {
     product_id: "0",
     product_name: "",
   });
-  const [users, setUsers] = useState<User[]>([]);
 
-  const [changedUsersWithoutAccess] = useState<Map<string, string>>(new Map());
-  const [changedUsersWithAccess] = useState<Map<string, string>>(new Map());
+  const [newUsersWithoutAccess] = useState<Set<string>>(new Set());
+  const [newUsersWithAccess] = useState<Set<string>>(new Set());
 
   const [usersWithoutAccess, setUsersWithoutAccess] = useState<
     SelectTableRowProps[]
@@ -40,53 +57,21 @@ export default function ManageLicenseAccess() {
   );
 
   /**
-   * Update if the user access has been changed (from original) when adding user.
-   *
-   * @param user The user to check if their access has changed.
-   */
-  const updateChangedOnAdd = (user: SelectTableRowProps) => {
-    if (changedUsersWithoutAccess.has(user.id)) {
-      changedUsersWithoutAccess.delete(user.id);
-    } else if (!changedUsersWithAccess.has(user.id)) {
-      changedUsersWithAccess.set(user.id, user.columns[0].text);
-    }
-  };
-
-  /**
-   * Update if the user access has been changed (from original) when removing user.
-   *
-   * @param user The user to check if their access has changed.
-   */
-  const updateChangedOnRemove = (user: SelectTableRowProps) => {
-    if (changedUsersWithAccess.has(user.id)) {
-      changedUsersWithAccess.delete(user.id);
-    } else if (!changedUsersWithoutAccess.has(user.id)) {
-      changedUsersWithoutAccess.set(user.id, user.columns[0].text);
-    }
-  };
-
-  /**
    * Add a user to the list of users with license access.
    *
    * @param index The index of the user in the list of users without
    *        access to be added to the list of users with access.
    */
   const addUserAccess = (index: number) => {
-    /* Get the user to be moved from "without access" to "with access" */
-    let user = withoutAccessTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      withoutAccessTable,
+      withAccessTable,
+      setUsersWithoutAccess,
+      setUsersWithAccess
+    );
 
-    /* Remove user from the "without access" list */
-    let newWithoutAccessArray = [
-      ...withoutAccessTable.rows.slice(0, index),
-      ...withoutAccessTable.rows.slice(index + 1),
-    ];
-    setUsersWithoutAccess(newWithoutAccessArray);
-
-    /* Add user to the "with access" list */
-    withAccessTable.rows.push(user);
-    setUsersWithAccess(withAccessTable.rows);
-
-    updateChangedOnAdd(user);
+    updateNewChanges(user, newUsersWithoutAccess, newUsersWithAccess);
   };
 
   /**
@@ -96,21 +81,15 @@ export default function ManageLicenseAccess() {
    *        access to be added to the list of users without access.
    */
   const removeUserAccess = (index: number) => {
-    /* Get the user to be moved from "with access" to "without access" */
-    let user = withAccessTable.rows[index];
+    let user = moveItemBetweenTables(
+      index,
+      withAccessTable,
+      withoutAccessTable,
+      setUsersWithAccess,
+      setUsersWithoutAccess
+    );
 
-    /* Remove user from the "with access" list */
-    let newWithAccessArray = [
-      ...withAccessTable.rows.slice(0, index),
-      ...withAccessTable.rows.slice(index + 1),
-    ];
-    setUsersWithAccess(newWithAccessArray);
-
-    /* Add user to the "without access" list */
-    withoutAccessTable.rows.push(user);
-    setUsersWithoutAccess(withoutAccessTable.rows);
-
-    updateChangedOnRemove(user);
+    updateNewChanges(user, newUsersWithAccess, newUsersWithoutAccess);
   };
 
   /**
@@ -119,23 +98,16 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addSelectedUsersAccess = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = withoutAccessTable.rows[index];
-      withoutAccessTable.rows = [
-        ...withoutAccessTable.rows.slice(0, index),
-        ...withoutAccessTable.rows.slice(index + 1),
-      ];
-
-      withAccessTable.rows.push(user);
-
-      updateChangedOnAdd(user);
-    }
-    setUsersWithoutAccess(withoutAccessTable.rows);
-    setUsersWithAccess(withAccessTable.rows);
+  const addSelectedUsersAccess = (indices: number[]) => {
+    moveItemsBetweenTables(
+      indices,
+      withoutAccessTable,
+      withAccessTable,
+      setUsersWithoutAccess,
+      setUsersWithAccess,
+      newUsersWithoutAccess,
+      newUsersWithAccess
+    );
   };
 
   /**
@@ -144,93 +116,35 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeSelectedUsersAccess = (selectedRowsIndices: number[]) => {
-    let sortedIndices = selectedRowsIndices.sort((a, b) => a - b);
-
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = withAccessTable.rows[index];
-      withAccessTable.rows = [
-        ...withAccessTable.rows.slice(0, index),
-        ...withAccessTable.rows.slice(index + 1),
-      ];
-
-      withoutAccessTable.rows.push(user);
-
-      updateChangedOnRemove(user);
-    }
-
-    setUsersWithAccess(withAccessTable.rows);
-    setUsersWithoutAccess(withoutAccessTable.rows);
+  const removeSelectedUsersAccess = (indices: number[]) => {
+    moveItemsBetweenTables(
+      indices,
+      withAccessTable,
+      withoutAccessTable,
+      setUsersWithAccess,
+      setUsersWithoutAccess,
+      newUsersWithAccess,
+      newUsersWithoutAccess
+    );
   };
 
-  const withoutAccessTable = {
-    header: {
-      columns: [{ text: "Users" }],
-    },
-    rows: usersWithoutAccess,
-    button: { text: "Add", action: addUserAccess },
-    outsideButtons: [
-      { text: "Add all selected", action: addSelectedUsersAccess },
-    ],
-  };
+  const withoutAccessTable: SelectTableProps = createSelectTableProps(
+    ["Users"],
+    usersWithoutAccess,
+    "Add",
+    addUserAccess,
+    new Map([["Add selected", addSelectedUsersAccess]])
+  );
 
-  const withAccessTable = {
-    header: {
-      columns: [{ text: "Users" }],
-    },
-    rows: usersWithAccess,
-    button: { text: "Remove", action: removeUserAccess },
-    outsideButtons: [
-      { text: "Remove all selected", action: removeSelectedUsersAccess },
-    ],
-  };
-
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
+  const withAccessTable: SelectTableProps = createSelectTableProps(
+    ["Users"],
+    usersWithAccess,
+    "Remove",
+    removeUserAccess,
+    new Map([["Remove selected", removeSelectedUsersAccess]])
+  );
 
   const isInitialMount = useRef(true);
-
-  /**
-   * Send a GET request to get a product.
-   *
-   * @param productId The ID of the product.
-   * @returns The product object.
-   */
-  const fetchProduct = async (productId: string) => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product: Product = data;
-    return product;
-  };
-
-  /**
-   * Send a GET request to get the license information.
-   *
-   * @returns The license object
-   */
-  const fetchLicense = async () => {
-    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
-    const data = await response.json();
-    const license: License = data;
-    return license;
-  };
-
-  /**
-   * Send a GET request to get the company users.
-   *
-   * @param companyId The ID of the company
-   * @returns A list of all company users
-   */
-  const fetchCompanyUsers = async (companyId: number) => {
-    const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
-    const data = await response.json();
-    const users: User[] = data.map((user: User) => user);
-    return users;
-  };
 
   /**
    * Send a GET request to get the users with access to the license.
@@ -238,7 +152,9 @@ export default function ManageLicenseAccess() {
    * @returns A list of users with license access.
    */
   const fetchUsersWithAccess = async () => {
-    const response = await fetch(`${baseUrl}/api/licenses/${licenseId}/users`);
+    const response = await fetch(
+      `${baseUrl}/api/priv/licenses/${licenseId}/users`
+    );
     const data = await response.json();
     const users: User[] = data.map((user: User) => user);
     return users;
@@ -248,18 +164,18 @@ export default function ManageLicenseAccess() {
    * Send a POST request to add users' access to the license.
    */
   const sendAddUsersRequest = () => {
-    if (changedUsersWithAccess.size > 0) {
-      fetch(`${baseUrl}/api/license_users`, {
+    if (newUsersWithAccess.size > 0 && licenseId) {
+      fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(changedUsersWithAccess, (item) => {
+          users: Array.from(newUsersWithAccess, (id) => {
             return {
-              user_id: item[0],
-              license_id: licenseId ? parseInt(licenseId) : NaN,
+              user_id: id,
+              license_id: parseInt(licenseId),
             };
           }),
         }),
@@ -267,14 +183,16 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 201) {
-            location.reload();
-          } else if (status == 400) {
+            alert("User access successfully added");
+            // Refresh
+            navigate(0);
+          } else if (status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
-            alert("Something went wrong when saving users");
+            alert("Something went wrong when adding users");
           }
         })
-        .catch(() => alert("Failed to save license access for users"));
+        .catch(() => alert("Failed to add license access for users"));
     }
   };
 
@@ -282,17 +200,17 @@ export default function ManageLicenseAccess() {
    * Send a DELETE request to remove users' access to the license.
    */
   const sendRemoveUsersRequest = () => {
-    if (changedUsersWithoutAccess.size > 0) {
-      fetch(`${baseUrl}/api/license_users`, {
+    if (newUsersWithoutAccess.size > 0) {
+      fetch(`${baseUrl}/api/priv/license_users`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          users: Array.from(changedUsersWithoutAccess, (item) => {
+          users: Array.from(newUsersWithoutAccess, (id) => {
             return {
-              user_id: item[0],
+              user_id: id,
               license_id: licenseId ? parseInt(licenseId) : NaN,
             };
           }),
@@ -301,12 +219,14 @@ export default function ManageLicenseAccess() {
         .then((response) => {
           const status = response.status;
           if (status == 200) {
-            location.reload();
+            alert("User access successfully removed");
+            // Refresh
+            navigate(0);
           } else {
-            alert("Something went wrong when saving users");
+            alert("Something went wrong when removing users");
           }
         })
-        .catch(() => alert("Failed to save license access for users"));
+        .catch(() => alert("Failed to remove license access for users"));
     }
   };
 
@@ -322,47 +242,45 @@ export default function ManageLicenseAccess() {
   };
 
   useEffect(() => {
-    // Get license and users
-    fetchLicense()
-      .then((license) => {
+    // Get license
+    fetchLicense(licenseId!)
+      .then((license: License) => {
         setLicense(license);
-        fetchProduct(license.product_id).then((product) => {
+        // Get the product the license is for
+        fetchProduct(license.product_id).then((product: Product) => {
           license.product_name = product.display_name;
         });
-        fetchCompanyUsers(license.company_id).then((users) => setUsers(users));
+        // Get all company users
+        fetchCompanyUsers(license.company_id.toString()).then(
+          (users: User[]) => {
+            // Sort users between those with and without license access
+            fetchUsersWithAccess()
+              .then((x) => {
+                let withoutAccess: User[] = [];
+                let withAccess: User[] = [];
+
+                withoutAccess = users.filter(
+                  (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
+                );
+                withAccess = x;
+
+                setUsersWithoutAccess(
+                  withoutAccess.map((user) => {
+                    return createRowProps(user.user_id, [user.email]);
+                  })
+                );
+                setUsersWithAccess(
+                  withAccess.map((user) => {
+                    return createRowProps(user.user_id, [user.email]);
+                  })
+                );
+              })
+              .catch(() => alert("Failed to fetch users with license access"));
+          }
+        );
       })
       .catch((e) => alert("Failed to get license or users"));
   }, []);
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      // Sort users between those with and without license access
-      fetchUsersWithAccess()
-        .then((x) => {
-          let withoutAccess: User[] = [];
-          let withAccess: User[] = [];
-
-          withoutAccess = users.filter(
-            (arr1) => !x.find((arr2) => arr2.user_id === arr1.user_id)
-          );
-          withAccess = x;
-
-          setUsersWithoutAccess(
-            withoutAccess.map((user) => {
-              return { id: user.user_id, columns: [{ text: user.email }] };
-            })
-          );
-          setUsersWithAccess(
-            withAccess.map((user) => {
-              return { id: user.user_id, columns: [{ text: user.email }] };
-            })
-          );
-        })
-        .catch(() => alert("Failed to fetch users with license access"));
-    }
-  }, [users]);
 
   return (
     <>
@@ -371,13 +289,13 @@ export default function ManageLicenseAccess() {
         <p>
           Product: {license.product_name}
           <br></br>
-          Active users: {usersWithAccess.length - changedUsersWithAccess.size}
+          Active users: {usersWithAccess.length - newUsersWithAccess.size}
           <br></br>
           Total allowed: {license.amount}
           <br></br>
-          Start date: {license.start_date.toDateString()}
+          Start date: {new Date(license.start_date).toDateString()}
           <br></br>
-          End date: {license.end_date.toDateString()}
+          End date: {new Date(license.end_date).toDateString()}
           <br></br>
           Status: {license.valid ? "Valid" : "Invalid"}
           <br></br>

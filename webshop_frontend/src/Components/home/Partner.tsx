@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom";
 
 export type PartnerProps = {
-  partner: {
-    name: string;
-    link: string;
-    imageSize: number[];
-    imageSource: string;
-  };
+  name: string;
+  link: string;
+  imageSize: number[];
+  imageSource: string;
 };
 
 /**
@@ -15,16 +13,16 @@ export type PartnerProps = {
  * @param partner A partner object.
  * @returns The Partner component as a JSX element.
  */
-export default function Partner({ partner }: PartnerProps) {
+export default function Partner(props: PartnerProps) {
   return (
     <li>
-      <Link target="_blank" to={partner.link}>
+      <Link target="_blank" to={props.link}>
         <img
           className="partner-logo"
-          src={partner.imageSource}
-          width={partner.imageSize[0]}
-          height={partner.imageSize[1]}
-          alt={partner.name + " logo"}
+          src={props.imageSource}
+          width={props.imageSize[0]}
+          height={props.imageSize[1]}
+          alt={props.name + " logo"}
         ></img>
       </Link>
     </li>

@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { verifySignInInfo } from "../../ApiController";
 
 /**
  * Represents the Sign In form for users to access their profile.
@@ -7,43 +8,30 @@ import { Link } from "react-router-dom";
  * @returns A Sign In component.
  */
 export default function SignIn() {
-    let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT+ "/";
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "../";
-}
+  const navigate = useNavigate();
 
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
 
-  const verifySignInInfo = async () => {
-    let result = await fetch(baseUrl + "api/login", {
-        method: "POST",
-        body: JSON.stringify({
-            email: email.current?.value,
-            password: password.current?.value,
-        }),
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-            "credentials": "include",
-        },
-    })
-
-    if (result.status === 200) {
-        console.log("User logged in");
-        
-    }
-    else {
-        console.log("User not logged in");
-        password.current!.value = "";
-    }
+  const handleSignIn = () => {
+    verifySignInInfo(email.current!.value, password.current!.value).then(
+      (response: Response) => {
+        if (response.status === 200) {
+          // Refresh
+          navigate(0);
+        } else {
+          password.current!.value = "";
+        }
+      }
+    );
   };
 
   return (
     <section className="center-container">
-
-      <form className="container form-container" onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="container form-container"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <h1>Sign in</h1>
         <p>
           Not a customer yet?
@@ -71,7 +59,7 @@ if (import.meta.env.PROD) {
         ></input>
 
         <button
-          onClick={verifySignInInfo}
+          onClick={handleSignIn}
           className="default-button m-t-1"
           type="submit"
           value="Sign in"
