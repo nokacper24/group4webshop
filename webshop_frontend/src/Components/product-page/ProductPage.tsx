@@ -44,6 +44,7 @@ export default function ProductPage() {
             <div className="banner-inner">
               <div className="banner-highlight">
                 <h1 className="banner-title">{product.display_name}</h1>
+                <p className="banner-description">{product.short_description}</p>
                 <PurchaseLicenseButton />
               </div>
             </div>
