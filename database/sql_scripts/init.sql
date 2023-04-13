@@ -54,7 +54,7 @@ CREATE TABLE product (
     product_id TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
     price_per_user REAL NOT NULL,
-    short_description TEXT NOT NULL,
+    short_description VARCHAR(256) NOT NULL,
     main_image TEXT NOT NULL,
     available BOOLEAN NOT NULL
 );

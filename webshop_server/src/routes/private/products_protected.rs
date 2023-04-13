@@ -216,6 +216,9 @@ pub async fn create_product(
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if short_description.len() > 256 {
+        return HttpResponse::BadRequest().body("Short description must be less than 256 characters.");
+    }
 
     let product_id = product::generate_id(prod_name);
 
@@ -422,6 +425,9 @@ pub async fn update_product(
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if short_description.len() > 256 {
+        return HttpResponse::BadRequest().body("Short description must be less than 256 characters.");
+    }
 
     let product_to_update = Product::new(
         unupadted_product.product_id(),

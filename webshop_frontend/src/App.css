@@ -770,6 +770,7 @@ form a:hover {
 .card-description {
   line-height: 1em;
   margin-top: 0;
+  color: var(--text-primary);
 }
 
 @media only screen and (max-width: 1100px) {
@@ -812,6 +813,15 @@ form a:hover {
   font-family: var(--ff-title);
 
   -webkit-text-fill-color: initial;
+}
+
+.banner-description {
+  color: var(--text-secondary);
+  font-family: var(--ff-primary);
+  -webkit-text-fill-color: initial;
+  margin-top: -1rem;
+  text-align: center;
+  max-width: var(--max-width);
 }
 
 .banner-inner {
