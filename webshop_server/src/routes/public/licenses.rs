@@ -9,6 +9,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(licenses_vital);
     cfg.service(license_by_id);
     cfg.service(licenses_by_company);
+    cfg.service(licenses_for_user);
 }
 
 #[derive(OpenApi)]
@@ -17,7 +18,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         licenses,
         licenses_vital,
         license_by_id,
-        licenses_by_company
+        licenses_by_company,
+        licenses_for_user
     ),
     components(
         schemas(License)
@@ -128,6 +130,7 @@ async fn license_by_id(
     tag = "Licenses",
     responses(
         (status = 200, description = "Returns all licenses for a specific company", body = Vec<License>),
+        (status = 400, description = "Bad Request"),
         (status = 500, description = "Internal Server Error"),
         ),
     params(
@@ -142,13 +145,13 @@ async fn licenses_by_company(
 ) -> impl Responder {
     let company_id = match company_id.parse::<i32>() {
         Ok(company_id) => company_id,
-        Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
+        Err(_) => return HttpResponse::BadRequest().finish(),
     };
     let license = license::get_licenses_by_company(&pool, &company_id).await;
 
     // Error check
     if license.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+        return HttpResponse::InternalServerError().finish();
     }
 
     // Parse to JSON
@@ -156,5 +159,44 @@ async fn licenses_by_company(
         return HttpResponse::Ok().json(license);
     }
 
-    HttpResponse::InternalServerError().json("Internal Server Error")
+    HttpResponse::InternalServerError().finish()
+}
+
+/// Get all licenses for a user.
+#[utoipa::path (
+    context_path = "/api",
+    get,
+    tag = "Licenses",
+    responses(
+        (status = 200, description = "Returns all licenses for a specific user", body = Vec<LicenseVitalInfo>),
+        (status = 400, description = "Bad Request"),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    params(
+        ("user_id", description = "The ID of the user"),
+        )
+    )
+]
+#[get("/user_license/user/{user_id}")]
+async fn licenses_for_user(
+    pool: web::Data<Pool<Postgres>>,
+    user_id: web::Path<String>,
+) -> impl Responder {
+    let user_id = match user_id.parse::<i32>() {
+        Ok(user_id) => user_id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+    let license = license::get_license_for_user(&pool, &user_id).await;
+
+    // Error check
+    if license.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+
+    // Parse to JSON
+    if let Ok(license) = license {
+        return HttpResponse::Ok().json(license);
+    }
+
+    HttpResponse::InternalServerError().finish()
 }

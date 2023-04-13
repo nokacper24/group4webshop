@@ -36,6 +36,7 @@ pub struct LicenseVitalInfo {
     product_id: String,
     display_name: String,
     valid: bool,
+    amount: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,7 +63,7 @@ pub async fn get_licenses_vital_info(
 ) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
     let licenses = query_as!(
         LicenseVitalInfo,
-        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid
+        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid, amount
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)"#
@@ -143,4 +144,25 @@ pub async fn update_license_validations(
     transaction.commit().await?;
 
     Ok(())
+}
+
+/// Returns all licenses that a user has access to
+pub async fn get_license_for_user(
+    pool: &Pool<Postgres>,
+    user_id: &i32,
+) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
+    let licenses = query_as!(
+        LicenseVitalInfo,
+        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid, amount
+        FROM user_license
+        JOIN license USING (license_id)
+        JOIN product ON product.product_id = license.product_id
+        JOIN company ON company.company_id = license.company_id
+        AND user_id = $1"#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(licenses)
 }

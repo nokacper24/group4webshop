@@ -16,6 +16,7 @@ export interface LicenseVital {
   product_id: string;
   display_name: string;
   valid: boolean;
+  amount: number;
 }
 
 export interface User {
