@@ -1,9 +1,8 @@
-import { SelectTableProps, SelectTableRowProps } from "./SelectTable";
-
-interface Button {
-  text: string;
-  action: (indices: number[]) => void;
-}
+import {
+  OutsideButton,
+  SelectTableProps,
+  SelectTableRowProps,
+} from "./SelectTable";
 
 /**
  * Create an object that represents the props for a Select Table.
@@ -28,7 +27,7 @@ export function createSelectTableProps(
     };
   });
 
-  let outsideButtonItems: Button[] = [];
+  let outsideButtonItems: OutsideButton[] = [];
   outsideButtons.forEach((value, key) => {
     outsideButtonItems.push({
       text: key,

@@ -4,14 +4,14 @@ import { License, Product, User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "./SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
   updateNewChanges,
   moveItemBetweenTables,
   moveItemsBetweenTables,
-} from "./SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import {
   fetchCompanyUsers,
   fetchLicense,

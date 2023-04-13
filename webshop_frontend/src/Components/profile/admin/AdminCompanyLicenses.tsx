@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
 import { LicenseVital } from "../../../Interfaces";
 import {
@@ -11,7 +11,7 @@ import {
   moveItemBetweenTables,
   moveItemsBetweenTables,
   updateNewChanges,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
 import { fetchLicensesVital } from "../../../ApiController";
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SelectTableButton from "./SelectTableButton";
+import { Button } from "./SelectTable";
 
 /**
  * rowIndex: the row's index in the list, starts at 0.
@@ -15,10 +16,7 @@ export type RowProps = {
   }[];
   updateSelected: (checked: boolean, index: number) => void;
   selectAll: string;
-  button: {
-    text: string;
-    action: (index: number) => void;
-  };
+  button: Button;
 };
 
 /**

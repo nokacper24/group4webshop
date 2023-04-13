@@ -3,11 +3,11 @@ import { Product } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { fetchProducts } from "../../../ApiController";
 
 export default function ManageProducts() {
