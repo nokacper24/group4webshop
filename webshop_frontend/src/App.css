@@ -148,6 +148,12 @@ button {
   margin-inline: auto;
 }
 
+.hidden-label {
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
+}
+
 table {
   border-spacing: 0;
   border-collapse: separate;
@@ -1071,7 +1077,7 @@ form a:hover {
   gap: 1em;
 }
 
-/* || MANAGE/ADMIN PAGES */
+/* || MANAGER/ADMIN PAGES */
 /* Select Table */
 .table-container {
   max-height: 20em;
@@ -1120,12 +1126,6 @@ form a:hover {
 
 .select-table input[type="checkbox"] {
   transform: scale(1.5);
-}
-
-.select-table>tbody label {
-  height: 0px;
-  width: 0px;
-  overflow: hidden;
 }
 
 .checkbox-column {

@@ -44,12 +44,8 @@ export default function SelectTableRow(props: RowProps) {
   return (
     <tr className={`${selected ? "selected-row" : ""}`}>
       <td>
-        <label>Select</label>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={() => toggleSelect()}
-        />
+        <label className="hidden-label">Select</label>
+        <input type="checkbox" checked={selected} onChange={toggleSelect} />
       </td>
       {props.columns.map((column, index) => (
         <td key={index}>{column.text}</td>
