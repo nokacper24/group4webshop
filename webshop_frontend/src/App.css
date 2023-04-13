@@ -124,6 +124,7 @@ button {
   border-radius: 5px;
   border: none;
   outline: 1px solid transparent;
+  text-decoration: none;
   transition: background var(--transition-speed);
 }
 
@@ -510,6 +511,7 @@ hr {
   height: 0.5rem;
   width: 100%;
   background-color: var(--bg-secondary);
+  border: none;
 }
 
 .m-t-1 {
@@ -537,12 +539,23 @@ form>h1 {
   font-size: 2rem;
 }
 
+form input {
+  margin-inline: 0.5em;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  font-size: 1rem;
+}
+
 .form-container {
   width: min(80vw, 700px);
   margin-block: 1em;
   background-color: var(--bg-neutral);
   overflow: hidden;
   outline: 1px solid transparent;
+}
+
+.form-container>label {
+  margin-top: 0.5em;
 }
 
 .form-container> :is(label, select, input, textarea, p) {
@@ -555,13 +568,10 @@ form>h1 {
   text-align: left;
 }
 
-.form-container>label {
-  margin-top: 1em;
-}
-
 .form-container>input {
+  margin: initial;
+  margin-inline: auto;
   font-size: 1.1rem;
-  padding: 0.5em;
 }
 
 .form-container>textarea {
@@ -1059,10 +1069,6 @@ form a:hover {
 .button-container {
   display: flex;
   gap: 1em;
-}
-
-.button-container>a {
-  text-decoration: none;
 }
 
 /* || MANAGE/ADMIN PAGES */

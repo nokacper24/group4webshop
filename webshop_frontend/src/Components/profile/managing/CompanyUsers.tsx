@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { SelectTableRowProps } from "../managing/ManageLicenseAccess";
-import SelectTable from "./SelectTable";
+import { useNavigate, useParams } from "react-router-dom";
+import SelectTable, {
+  SelectTableProps,
+  SelectTableRowProps,
+} from "./SelectTable";
 import { User } from "../../../Interfaces";
+import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
+import { fetchCompanyUsers } from "../../../ApiController";
 
 /**
  * A page for managing company users.
@@ -17,6 +21,8 @@ export default function CompanyUsers() {
     baseUrl = "";
   }
 
+  const navigate = useNavigate();
+
   const { companyId } = useParams();
 
   const [users, setUsers] = useState<SelectTableRowProps[]>([]);
@@ -25,8 +31,9 @@ export default function CompanyUsers() {
   const singleEmail = useRef<HTMLInputElement>(null);
   const csvEmail = useRef<HTMLInputElement>(null);
 
-  const editUser = () => {
-    console.log("Editing user...");
+  const editUser = (index: number) => {
+    let userId = users[index].id;
+    navigate(`/profile/${userId}/license-access`);
   };
 
   /**
@@ -48,51 +55,31 @@ export default function CompanyUsers() {
 
     for (let i = sortedIndices.length - 1; i >= 0; i--) {
       let index = sortedIndices[i];
-      let user = usersList.rows[index];
-      usersList.rows = [
-        ...usersList.rows.slice(0, index),
-        ...usersList.rows.slice(index + 1),
+      let user = usersTable.rows[index];
+      usersTable.rows = [
+        ...usersTable.rows.slice(0, index),
+        ...usersTable.rows.slice(index + 1),
       ];
 
       updateNewRemovedUsers(user.id);
     }
 
-    setUsers(usersList.rows);
+    setUsers(usersTable.rows);
   };
 
-  const usersList = {
-    header: {
-      columns: [{ text: "User" }],
-    },
-    rows: users,
-    button: { text: "Edit", action: editUser },
-    outsideButtons: [{ text: "Remove selected", action: removeUsers }],
-  };
-
-  /**
-   * Send a GET request to get the company users.
-   *
-   * @returns A list of all company users
-   */
-  const fetchCompanyUsers = async () => {
-    const response = await fetch(`${baseUrl}/api/companies/${companyId}/users`);
-    const data = await response.json();
-
-    const users: User[] = [];
-
-    data.map((user: User) => {
-      if (user.role != "Admin" && user.role != "CompanyItHead") {
-        users.push(user);
-      }
-    });
-    return users;
-  };
+  const usersTable: SelectTableProps = createSelectTableProps(
+    ["User"],
+    users,
+    "Edit",
+    editUser,
+    new Map([["Remove selected", removeUsers]])
+  );
 
   /**
    * Send a DELETE request to remove users.
    */
   const sendDeleteUsersRequest = async () => {
-    fetch(`${baseUrl}/api/users`, {
+    fetch(`${baseUrl}/api/priv/users`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -109,7 +96,8 @@ export default function CompanyUsers() {
       .then((response) => {
         const status = response.status;
         if (status == 200) {
-          location.reload();
+          // Refresh
+          navigate(0);
         } else {
           alert("Something went wrong when saving users");
         }
@@ -159,7 +147,7 @@ export default function CompanyUsers() {
     const formData = new FormData();
     formData.append("email", email);
 
-    fetch(`${baseUrl}/api/generate_invite`, {
+    fetch(`${baseUrl}/api/priv/generate_invite`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -167,6 +155,7 @@ export default function CompanyUsers() {
       },
       body: JSON.stringify({
         email: email,
+        company_id: parseInt(companyId!),
       }),
     })
       .then((response) => {
@@ -174,10 +163,10 @@ export default function CompanyUsers() {
         if (status == 200) {
           resetSingleEmailInput();
         } else {
-          alert("Something went wrong when adding user");
+          alert("Something went wrong when inviting user");
         }
       })
-      .catch(() => alert("Failed to add user"));
+      .catch(() => alert("Failed to invite user"));
   };
 
   /**
@@ -191,7 +180,7 @@ export default function CompanyUsers() {
       formData.append("csv", csvEmail.current.files[0]);
     }
 
-    fetch(`${baseUrl}/api/generate_invites`, {
+    fetch(`${baseUrl}/api/priv/generate_invites`, {
       method: "POST",
       headers: {
         Accept: "multipart/form-data",
@@ -202,12 +191,12 @@ export default function CompanyUsers() {
         const status = response.status;
         if (status == 200) {
           resetCsvEmailInput();
-          alert("Users succesfully created");
+          alert("Users invited");
         } else {
-          alert("Something went wrong when adding users");
+          alert("Something went wrong when inviting users");
         }
       })
-      .catch(() => alert("Failed to add users"));
+      .catch(() => alert("Failed to invite users"));
   };
 
   const handleSubmitSingleEmail = (event: React.FormEvent<HTMLFormElement>) => {
@@ -222,19 +211,23 @@ export default function CompanyUsers() {
     event.preventDefault();
 
     if (csvEmail.current && csvEmail.current?.value != "") {
-      console.log(csvEmail.current.value);
       sendPostRegisterUsersRequest();
     }
   };
 
   useEffect(() => {
-    fetchCompanyUsers().then((users) => {
+    fetchCompanyUsers(companyId!).then((users: User[]) => {
+      let filteredUsers: User[] = [];
+
+      users.map((user: User) => {
+        if (user.role != "Admin" && user.role != "CompanyItHead") {
+          filteredUsers.push(user);
+        }
+      });
+
       setUsers(
-        users.map((user: User) => {
-          return {
-            id: user.user_id,
-            columns: [{ text: user.email }],
-          };
+        filteredUsers.map((user: User) => {
+          return createRowProps(user.user_id, [user.email]);
         })
       );
     });
@@ -255,17 +248,17 @@ export default function CompanyUsers() {
           address, but will have to go through all the initial steps again.
         </p>
         <SelectTable
-          header={usersList.header}
-          rows={usersList.rows}
-          button={usersList.button}
-          outsideButtons={usersList.outsideButtons}
+          header={usersTable.header}
+          rows={usersTable.rows}
+          button={usersTable.button}
+          outsideButtons={usersTable.outsideButtons}
         />
         <button className="default-button small-button" onClick={handleSave}>
           Save changes
         </button>
       </section>
       <section className="container left-aligned">
-        <h1>Add users</h1>
+        <h1>Invite users</h1>
         <p>
           Add users by writing their e-mail in the field below. Alternatively,
           you can upload a comma separated file (CSV) with multiple e-mails.
@@ -277,7 +270,6 @@ export default function CompanyUsers() {
             E-mail
             <input
               ref={singleEmail}
-              style={{ marginInline: "1em", padding: "0.5em" }}
               type="email"
               name="email"
               placeholder="john.doe@company.com"
@@ -289,25 +281,20 @@ export default function CompanyUsers() {
             className="default-button small-button"
             type="submit"
           >
-            Add
+            Invite
           </button>
         </form>
         <form className="m-t-1" onSubmit={handleSubmitCsvEmail}>
           <label style={{ display: "inline-block" }}>
             Choose a file
-            <input
-              ref={csvEmail}
-              style={{ marginInline: "1em", padding: "0.5em" }}
-              type="file"
-              accept=".csv"
-            ></input>
+            <input ref={csvEmail} type="file" accept=".csv"></input>
           </label>
           <button
             style={{ display: "inline-block" }}
             className="default-button small-button"
             type="submit"
           >
-            Add
+            Invite
           </button>
         </form>
       </section>

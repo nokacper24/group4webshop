@@ -1,6 +1,6 @@
 use crate::data_access::license::{self, License, LicenseValidation, PartialLicense};
 
-use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use actix_web::{patch, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
@@ -67,10 +67,8 @@ async fn update_license_validations(
     other_licenses: web::Json<LicenseValidations>,
 ) -> impl Responder {
     let other_licenses = &other_licenses.licenses;
-    match license::update_license_validations(&pool, &other_licenses).await {
+    match license::update_license_validations(&pool, other_licenses).await {
         Ok(_) => HttpResponse::Ok().json(other_licenses),
-        Err(e) => match e {
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+        Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }

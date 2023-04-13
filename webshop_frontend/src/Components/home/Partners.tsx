@@ -57,7 +57,13 @@ export default function Partners() {
   return (
     <ul className="partners">
       {partners.map((partner) => (
-        <Partner key={partner.name} partner={partner} />
+        <Partner
+          key={partner.name}
+          name={partner.name}
+          link={partner.link}
+          imageSize={partner.imageSize}
+          imageSource={partner.imageSource}
+        />
       ))}
     </ul>
   );

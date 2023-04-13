@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Product } from "../../Interfaces";
+import { useNavigate, useParams } from "react-router-dom";
+import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
+import { fetchProduct, postLicense } from "../../ApiController";
 
 /**
  * Represents a Purchase License page.
@@ -11,11 +12,7 @@ import LicensePrices from "./LicensePrices";
  * @returns The Purchase License page component.
  */
 export default function PurchaseLicense() {
-  let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-  // Check if we are in production mode
-  if (import.meta.env.PROD) {
-    baseUrl = "";
-  }
+  const navigate = useNavigate();
 
   const { productId } = useParams();
   const [product, setProduct] = useState<Product>({
@@ -30,13 +27,6 @@ export default function PurchaseLicense() {
 
   const price = useRef<HTMLSelectElement>(null);
   const formAlert = useRef<HTMLParagraphElement>(null);
-
-  const fetchProduct = async () => {
-    const response = await fetch(`${baseUrl}/api/products/${productId}`);
-    const data = await response.json();
-    const product: Product = data;
-    setProduct(product);
-  };
 
   /**
    * Update the total price in the object's state.
@@ -66,32 +56,6 @@ export default function PurchaseLicense() {
   };
 
   /**
-   * Send a POST request to create a license.
-   *
-   * @param license The license to create.
-   */
-  const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/priv/licenses`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: license,
-    }).then((response) => {
-      const status = response.status;
-      if (status == 201) {
-        alert("License successfully purchased!");
-        location.reload();
-      } else {
-        alert(
-          "Sorry, something went wrong when purchasing the license. Try again."
-        );
-      }
-    });
-  };
-
-  /**
    * Check if the form has valid values, and purchase licenses
    * with selected plans if form is valid.
    *
@@ -101,23 +65,35 @@ export default function PurchaseLicense() {
     event.preventDefault();
 
     if (validateForm()) {
-      let license = JSON.stringify({
+      let license: License = {
+        license_id: NaN,
         company_id: 1 /* TODO: Get real company */,
-        product_id: productId,
+        product_id: product.product_id,
+        product_name: product.display_name,
         start_date: new Date(),
         end_date: new Date(
           new Date().setFullYear(new Date().getFullYear() + 1)
         ),
         amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
-      });
+      };
 
-      postLicense(license);
+      postLicense(license).then((response: Response) => {
+        if (response.status == 201) {
+          alert("License successfully purchased");
+          // Refresh
+          navigate(0);
+        } else {
+          alert(
+            "Sorry, something went wrong when purchasing license. Please try again."
+          );
+        }
+      });
     }
   };
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(productId!).then((product: Product) => setProduct(product));
   }, []);
 
   return (

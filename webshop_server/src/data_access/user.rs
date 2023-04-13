@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, Executor, {Pool, Postgres},
 };
+use std::fmt::Display;
+use std::{string, sync::Arc};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -32,13 +34,13 @@ pub enum Role {
     Default,
 }
 
-impl Role {
-    pub fn to_string(&self) -> String {
+impl Display for Role {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Role::Admin => "Admin".to_string(),
-            Role::CompanyItHead => "CompanyItHead".to_string(),
-            Role::CompanyIt => "CompanyIt".to_string(),
-            Role::Default => "Default".to_string(),
+            Role::Admin => write!(f, "Admin"),
+            Role::CompanyItHead => write!(f, "CompanyItHead"),
+            Role::CompanyIt => write!(f, "CompanyIt"),
+            Role::Default => write!(f, "Default"),
         }
     }
 }
@@ -123,7 +125,7 @@ pub async fn get_role_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<Role,
 /// Give users' access to licenses
 pub async fn add_license_users(
     pool: &Pool<Postgres>,
-    users: &Vec<LicenseUser>,
+    users: &[LicenseUser],
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for user in users.iter() {
@@ -144,7 +146,7 @@ pub async fn add_license_users(
 /// Remove users' access to licenses
 pub async fn remove_license_users(
     pool: &Pool<Postgres>,
-    users: &Vec<LicenseUser>,
+    users: &[LicenseUser],
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for user in users.iter() {
@@ -214,7 +216,7 @@ pub async fn create_partial_user(
     email: &str,
     pool: &Pool<Postgres>,
 ) -> Result<RegisterUser, sqlx::Error> {
-    let key = Uuid::new_v4().to_string();
+    let _key = Uuid::new_v4().to_string();
     let exp_date = Utc::now() + Duration::days(1);
 
     let insert = query!(
@@ -319,7 +321,7 @@ pub async fn create_partial_company_user(
 /// # Returns
 /// * `RegisterCompanyUser` - The partial user that was created
 pub async fn create_partial_company_users(
-    users: &Vec<PartialRegisterCompanyUser>,
+    users: &[PartialRegisterCompanyUser],
     pool: &Pool<Postgres>,
 ) -> Result<Vec<RegisterCompanyUser>, sqlx::Error> {
     let exp_date = Utc::now() + Duration::days(1);
@@ -533,7 +535,7 @@ pub struct UserRole {
 /// Update users' roles
 pub async fn update_user_roles(
     pool: &Pool<Postgres>,
-    users: &Vec<UserRole>,
+    users: &[UserRole],
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for user in users.iter() {
@@ -558,7 +560,7 @@ pub struct UserID {
 }
 
 /// Delete users
-pub async fn delete_users(pool: &Pool<Postgres>, users: &Vec<UserID>) -> Result<(), sqlx::Error> {
+pub async fn delete_users(pool: &Pool<Postgres>, users: &[UserID]) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for user in users.iter() {
         transaction
@@ -572,4 +574,31 @@ pub async fn delete_users(pool: &Pool<Postgres>, users: &Vec<UserID>) -> Result<
     transaction.commit().await?;
 
     Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct UserWithoutHash {
+    pub user_id: i32,
+    pub email: String,
+    pub company_id: i32,
+    pub role: Role,
+}
+
+pub async fn update_email(
+    pool: &Pool<Postgres>,
+    email: &str,
+    id: &i32,
+) -> Result<UserWithoutHash, sqlx::Error> {
+    let result_row = query_as!(
+        UserWithoutHash,
+        r#"UPDATE app_user 
+        SET email = $1
+        WHERE user_id = $2
+        RETURNING app_user.user_id, email, company_id, role as "role: _";"#,
+        email,
+        id,
+    )
+    .fetch_one(pool)
+    .await;
+    return result_row.into();
 }

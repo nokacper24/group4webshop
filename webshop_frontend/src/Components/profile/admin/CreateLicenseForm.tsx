@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Company, License, Product } from "../../../Interfaces";
+import { useNavigate } from "react-router-dom";
+import { fetchCompanies, fetchProducts } from "../../../ApiController";
 
 /**
  * A form for creating a license.
@@ -13,40 +15,20 @@ export default function CreateLicenseForm() {
     baseUrl = "";
   }
 
+  const navigate = useNavigate();
+
   const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
-  /**
-   * Get all companies.
-   *
-   * @returns All companies.
-   */
-  const fetchCompanies = async () => {
-    const response = await fetch(`${baseUrl}/api/companies`);
-    const data = await response.json();
-    return data.map((company: Company) => company);
-  };
-
-  /**
-   * Get all products.
-   *
-   * @returns All products.
-   */
-  const fetchProducts = async () => {
-    const response = await fetch(`${baseUrl}/api/products`);
-    const data = await response.json();
-    return data.map((product: Product) => product);
-  };
-
   useEffect(() => {
     fetchCompanies()
-      .then((companies) => {
+      .then((companies: Company[]) => {
         setCompanies(companies);
       })
       .catch(() => alert("Failed to load companies"));
 
     fetchProducts()
-      .then((products) => {
+      .then((products: Product[]) => {
         setProducts(products);
       })
       .catch(() => alert("Failed to load products"));
@@ -69,7 +51,8 @@ export default function CreateLicenseForm() {
       const status = response.status;
       if (status == 201) {
         alert("License created.");
-        location.reload();
+        // Refresh
+        navigate(0);
       } else {
         alert("Something went wrong when creating the license. Try again.");
       }

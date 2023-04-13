@@ -1,9 +1,9 @@
 use actix_web::{HttpResponse, Responder};
 use serde_json::json;
 
-pub mod public;
-pub mod private;
 pub mod openapi_doc;
+pub mod private;
+pub mod public;
 pub mod serving_images;
 
 pub async fn not_found() -> impl Responder {

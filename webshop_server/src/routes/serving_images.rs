@@ -1,3 +1,4 @@
+use crate::IMAGES_DIR;
 use actix_files::NamedFile;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 
@@ -11,8 +12,9 @@ async fn get_image(req: HttpRequest) -> impl Responder {
         Ok(path) => path,
         Err(_) => return HttpResponse::InternalServerError().finish(),
     };
-    let path = std::path::Path::new("resources/images/").join(path);
-    match NamedFile::open(path) {
+    let images_path = format!("{}/", IMAGES_DIR);
+    let full_path = std::path::Path::new(&images_path).join(path);
+    match NamedFile::open(full_path.clone()) {
         Ok(file) => file.into_response(&req),
         Err(_) => HttpResponse::NotFound().finish(),
     }

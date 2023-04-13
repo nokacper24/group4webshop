@@ -32,6 +32,7 @@ pub struct LicensesOpenApi;
 #[utoipa::path(
     context_path = "/api",
     get,
+    tag = "Licenses",
     responses(
     (status = 200, description = "List of all licenses", body = Vec<License>),
     (status = 500, description = "Internal Server Error"),
@@ -58,6 +59,7 @@ pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 #[utoipa::path(
     context_path = "/api",
     get,
+    tag = "Licenses",
     responses(
     (status = 200, description = "List of all licenses with only their vital information", body = Vec<License>),
     (status = 500, description = "Internal Server Error"),
@@ -84,6 +86,7 @@ pub async fn licenses_vital(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 #[utoipa::path (
     context_path = "/api",
     get,
+    tag = "Licenses",
     responses(
         (status = 200, description = "Returns a specific license", body = License),
         (status = 404, description = "License not found"),
@@ -122,6 +125,7 @@ async fn license_by_id(
 #[utoipa::path (
     context_path = "/api",
     get,
+    tag = "Licenses",
     responses(
         (status = 200, description = "Returns all licenses for a specific company", body = Vec<License>),
         (status = 500, description = "Internal Server Error"),
