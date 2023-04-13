@@ -12,7 +12,6 @@ export type RowEditPopupProps = {
   content: string | undefined;
 };
 
-
 let popupRef: RefObject<HTMLDivElement>;
 export default function RowEditPopup(props: RowEditPopupProps) {
   popupRef = useRef<HTMLDivElement>(null);
@@ -60,8 +59,16 @@ export default function RowEditPopup(props: RowEditPopupProps) {
           )}
 
           <div>
-            <button className="hero-button popup-button" type="button">Save</button>
-            <button className="hero-button popup-button" type="button" onClick={() => hidePopup()}>Cancel</button>
+            <button className="hero-button popup-button" type="button">
+              Save
+            </button>
+            <button
+              className="hero-button popup-button"
+              type="button"
+              onClick={() => hidePopup()}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -69,12 +76,10 @@ export default function RowEditPopup(props: RowEditPopupProps) {
   );
 }
 
-export function showPopup() {
+export function showPopup(func: () => void) {
   popupRef.current?.classList.add("popup-visible");
 }
 
 function hidePopup() {
   popupRef.current?.classList.remove("popup-visible");
 }
-
-

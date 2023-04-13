@@ -39,6 +39,7 @@ export function AccordionBody(props: AccordionBodyProps) {
   const createID = (): number => {
     return latestID++;
   };
+
   /**
    * Deletes a row from the body of the section.
    *

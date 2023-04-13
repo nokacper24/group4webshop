@@ -37,6 +37,8 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.deleteSection(props.sectionID);
   };
 
+  
+
   return (
     <>
       <AccordionHeader
