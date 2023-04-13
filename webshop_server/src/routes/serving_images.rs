@@ -14,7 +14,7 @@ async fn get_image(req: HttpRequest) -> impl Responder {
     };
     let images_path = format!("{}/", IMAGES_DIR);
     let full_path = std::path::Path::new(&images_path).join(path);
-    match NamedFile::open(full_path.clone()) {
+    match NamedFile::open(full_path) {
         Ok(file) => file.into_response(&req),
         Err(_) => HttpResponse::NotFound().finish(),
     }

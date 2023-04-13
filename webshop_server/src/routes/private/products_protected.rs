@@ -11,11 +11,11 @@ use utoipa::{OpenApi, ToSchema};
 pub mod descriptions_protected;
 
 use crate::{
-    IMAGES_DIR,
     data_access::{error_handling::PostgresDBError, user},
     routes::private::products_protected::descriptions_protected::description_utils::{
         self, ImageExtractorError, ImageParsingError,
     },
+    IMAGES_DIR,
     {
         data_access::product::{self, Product},
         utils::auth,
@@ -217,7 +217,8 @@ pub async fn create_product(
         None => return HttpResponse::InternalServerError().finish(),
     };
     if short_description.len() > 256 {
-        return HttpResponse::BadRequest().body("Short description must be less than 256 characters.");
+        return HttpResponse::BadRequest()
+            .body("Short description must be less than 256 characters.");
     }
 
     let product_id = product::generate_id(prod_name);
@@ -426,7 +427,8 @@ pub async fn update_product(
         None => return HttpResponse::InternalServerError().finish(),
     };
     if short_description.len() > 256 {
-        return HttpResponse::BadRequest().body("Short description must be less than 256 characters.");
+        return HttpResponse::BadRequest()
+            .body("Short description must be less than 256 characters.");
     }
 
     let product_to_update = Product::new(
@@ -572,11 +574,7 @@ pub async fn delete_product(
             if let Err(e) = description_utils::remove_image(&img_path) {
                 log::error!("Couldnt remove main image from file system: {}", e);
             };
-            if let Err(e) = fs::remove_dir(format!(
-                "{}/{}",
-                IMAGES_DIR,
-                product_id
-            )) {
+            if let Err(e) = fs::remove_dir(format!("{}/{}", IMAGES_DIR, product_id)) {
                 log::error!("Couldnt remove image folder from file system: {}", e);
             };
             HttpResponse::NoContent().finish()
