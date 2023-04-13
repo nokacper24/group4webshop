@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SelectTableButton from "./SelectTableButton";
-import { Button } from "./SelectTable";
+import { Button } from "../../../Interfaces";
 
 /**
  * rowIndex: the row's index in the list, starts at 0.

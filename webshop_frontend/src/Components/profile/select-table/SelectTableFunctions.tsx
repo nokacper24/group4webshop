@@ -1,8 +1,5 @@
-import {
-  OutsideButton,
-  SelectTableProps,
-  SelectTableRowProps,
-} from "./SelectTable";
+import { OutsideButton } from "../../../Interfaces";
+import { SelectTableProps, SelectTableRowProps } from "./SelectTable";
 
 /**
  * Create an object that represents the props for a Select Table.

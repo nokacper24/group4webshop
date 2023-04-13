@@ -80,3 +80,13 @@ export interface Testimonial {
   author_pic: string;
   product_id: string;
 }
+
+export interface Button {
+  text: string;
+  action: (index: number) => void;
+}
+
+export interface OutsideButton {
+  text: string;
+  action: (indices: number[]) => void;
+}
