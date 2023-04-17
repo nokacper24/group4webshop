@@ -40,7 +40,7 @@ export default function ProductPage() {
     <>
       {product && (
         <>
-          <section className="banner" style={{backgroundImage:"url(/"+product.main_image+")"}}>
+          <section className="banner" style={{backgroundImage:`url(/${product.main_image})`}}>
             <div className="banner-inner">
               <div className="banner-highlight">
                 <h1 className="banner-title">{product.display_name}</h1>
