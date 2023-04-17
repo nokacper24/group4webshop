@@ -1170,16 +1170,15 @@ form a:hover {
   border-bottom: 1px dotted currentColor;
 }
 
-/* Toggle switch */ 
-
-.toggle-switch {
+/* Toggle button */
+.toggle-button {
   position: relative;
   display: block;
   width: 3.5em;
   height: 2em;
 }
 
-.switch > input {
+.switch>input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -1188,38 +1187,35 @@ form a:hover {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: #ccc;
   border-radius: 1em;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 400ms;
+  transition: 400ms;
 }
 
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 1.5em;
   width: 1.5em;
   left: 0.25em;
   top: 0.25em;
   background-color: white;
   border-radius: 1em;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 400ms;
+  transition: 400ms;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--bg-secondary);
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 5px #2196F3;
+input:focus+.slider {
+  box-shadow: 0 0 0.3em var(--text-primary);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(1.5em);
   -ms-transform: translateX(1.5em);
   transform: translateX(1.5em);
