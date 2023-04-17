@@ -10,6 +10,12 @@ import {
   fetchTestimonials,
 } from "../../ApiController";
 
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+// check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "";
+}
+
 /**
  * The product page component.
  *
@@ -42,7 +48,7 @@ export default function ProductPage() {
         <>
           <section
             className="banner"
-            style={{ backgroundImage: `url(/${product.main_image})` }}
+            style={{ backgroundImage: `url(${baseUrl}/${product.main_image})` }}
           >
             <div className="banner-inner">
               <div className="banner-highlight">
