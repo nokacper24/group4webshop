@@ -18,7 +18,11 @@ export default function ToggleTableRow(props: RowProps) {
       <tr>
         <td>{row.text}</td>
         <td style={{ width: "6em" }}>
-          <ToggleButton handleClick={handleClick} checked={row.toggleOn} />
+          <ToggleButton
+            id={props.rowIndex.toString()}
+            handleClick={handleClick}
+            checked={row.toggleOn}
+          />
         </td>
       </tr>
     </>
