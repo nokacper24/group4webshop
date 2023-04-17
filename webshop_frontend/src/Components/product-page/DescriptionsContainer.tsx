@@ -1,11 +1,5 @@
 import { Description } from "../../Interfaces";
 
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "";
-}
-
 export default function DescriptionsContainer(descriptions: Description[]) {
   let prev_item: undefined | Description = undefined as undefined | Description;
   return (
@@ -86,7 +80,7 @@ function ImageDescription(props: ImageDescriptionProps) {
   return (
     <div className={classes}>
       <img
-        src={`${baseUrl}/${props.description.image?.image_path}`}
+        src={`${props.description.image?.image_path}`}
         alt={props.description.image?.alt_text}
       />
     </div>

@@ -217,6 +217,10 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 
     image.save(&path)?;
 
+    if !path.starts_with("/") {
+        path = format!("/{}", path);
+    }
+
     Ok(path)
 }
 
