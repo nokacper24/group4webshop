@@ -45,7 +45,7 @@ export default function ProductPage() {
               <div className="banner-highlight">
                 <h1 className="banner-title">{product.display_name}</h1>
                 <p className="banner-description">{product.short_description}</p>
-                <PurchaseLicenseButton />
+                <PurchaseLicenseButton active = {product.available}/>
               </div>
             </div>
           </section>
@@ -67,7 +67,7 @@ export default function ProductPage() {
           <section className="container">
             <h2>Purchase</h2>
             <p>Purchase licenses for this product for your enterprise today!</p>
-            <PurchaseLicenseButton />
+            <PurchaseLicenseButton active = {product.available} />
           </section>
         </>
       )}

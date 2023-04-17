@@ -10,6 +10,10 @@
   --bg-gradient-primary: 125deg, rgba(46, 116, 181, 0.4) 10%, rgba(95, 139, 5, 0.4) 100%;
   --bg-gradient-secondary: 0deg, rgb(40, 29, 64) 10%, rgb(103, 75, 165) 100%;
 
+  /* Button colr variables */
+  --btn-primary: var(--bg-secondary);
+  --btn-disabled: #5E7284;
+
   /* Text colour variables */
   --text-primary: #000;
   --text-secondary: #fff;
@@ -675,7 +679,7 @@ form a:hover {
 .hero-button {
   padding: 0.2em 1.5em;
   color: var(--text-secondary);
-  background-color: var(--bg-secondary);
+  background-color: var(--btn-primary);
   border: 2px solid var(--text-secondary);
   border-radius: 0.5em;
   font-size: 1.3rem;
@@ -691,6 +695,15 @@ form a:hover {
 .hero-button:is(:hover, :focus) {
   color: var(--bg-secondary);
   background-color: var(--text-secondary);
+}
+
+.hero-button:disabled {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-thickness: 4px;
+  background-color: var(--btn-disabled);
+  border-color: var(--text-secondary);
+  cursor: not-allowed;
 }
 
 .partners {
