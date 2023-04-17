@@ -22,7 +22,7 @@ use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-const IMAGES_DIR: &'static str = {
+const IMAGES_DIR: &str = {
     match option_env!("RESOURCES_DIR") {
         Some(path) => path,
         None => "resources/images",
@@ -103,13 +103,14 @@ fn load_rustls_config() -> rustls::ServerConfig {
 
     // CERT_PATH=certificate.pem
     // PRIV_KEY_PATH=privatekey.pem
-    
+
     let cert_path = std::env::var("CERT_PATH").expect("CERT_PATH environment variable not set");
-    let priv_key_path = std::env::var("PRIV_KEY_PATH").expect("PRIV_KEY_PATH environment variable not set");
+    let priv_key_path =
+        std::env::var("PRIV_KEY_PATH").expect("PRIV_KEY_PATH environment variable not set");
 
     // load TLS key/cert files
-    let cert_file = &mut BufReader::new(File::open(&cert_path).unwrap());
-    let key_file = &mut BufReader::new(File::open(&priv_key_path).unwrap());
+    let cert_file = &mut BufReader::new(File::open(cert_path).unwrap());
+    let key_file = &mut BufReader::new(File::open(priv_key_path).unwrap());
 
     // convert files to key/cert objects
     let cert_chain = certs(cert_file)

@@ -40,7 +40,7 @@ pub struct LicenseVitalInfo {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct InvalidLicense {
+pub struct LicenseValidation {
     license_id: i32,
     valid: bool,
 }
@@ -127,7 +127,7 @@ pub async fn create_license(
 /// Update the validation of licenses
 pub async fn update_license_validations(
     pool: &Pool<Postgres>,
-    licenses: &[InvalidLicense],
+    licenses: &Vec<LicenseValidation>,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for license in licenses.iter() {

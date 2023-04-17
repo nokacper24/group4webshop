@@ -1,5 +1,4 @@
 use crate::{
-    IMAGES_DIR,
     data_access::{
         error_handling,
         product::{
@@ -15,6 +14,7 @@ use crate::{
         ImageExtractorError, ImageParsingError,
     },
     utils::auth,
+    IMAGES_DIR,
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
