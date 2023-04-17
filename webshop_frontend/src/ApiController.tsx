@@ -121,6 +121,18 @@ export const fetchLicensesVital = async () => {
 };
 
 /**
+ * Get all licenses that a specific user has access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The user's licenses.
+ */
+export const fetchLicensesForUser = async (userId: string) => {
+  const response = await fetch(`${baseUrl}/api/user_licenses/user/${userId}`);
+  const data: LicenseVital[] = await response.json();
+  return data;
+};
+
+/**
  * Create a license.
  *
  * @param license The license to create.
