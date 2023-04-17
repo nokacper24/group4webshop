@@ -824,6 +824,7 @@ form a:hover {
   color: var(--text-secondary);
   font-weight: 400;
   font-family: var(--ff-title);
+  text-align: center;
 
   -webkit-text-fill-color: initial;
 }
@@ -848,7 +849,7 @@ form a:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  height: 15em;
+  min-height: 15em;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -856,6 +857,18 @@ form a:hover {
 
   width: inherit;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.unavailable-tag {
+  color: var(--text-secondary);
+  background-color: rgba(188, 0, 0, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  margin-block: 1rem;
+}
+
+.unavailable-tag>p{
+  margin: 0;
 }
 
 .product-description-container {
