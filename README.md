@@ -13,4 +13,4 @@ The website can be accessed at [group04.web-tek.ninja](https://group04.web-tek.n
 We used [React](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/) for the front-end development. For more information, please refer to the [webshop_frontend README](./webshop_frontend/README.md).
 
 ### Back-end (IDATA2306)
-The back-end was written in [Rust](https://www.rust-lang.org/), using the [Actix](https://actix.rs/) framework. We utilized [SQLx](https://crates.io/crates/sqlx) for database access. For more information, please refer to the [webshop_server README](./webshop_server/README.md).
+The back-end was written in [Rust](https://www.rust-lang.org/), using the [Actix](https://actix.rs/) framework. We utilized [SQLx](https://crates.io/crates/sqlx) for database access and [PostgreSQL](https://www.postgresql.org/) for the database itself. For more information, please refer to the [webshop_server README](./webshop_server/README.md).
