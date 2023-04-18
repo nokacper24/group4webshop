@@ -9,7 +9,7 @@ In addition you will need a PostgreSQL database running. We recommend using [Doc
 Since we're using [SQLx](https://crates.io/crates/sqlx), you *need* a live database in order to compile, because the SQL queries are compile-time checked. If you however need to compile without a live database, see [Build with no database](#build-with-no-database).
 
 ### Environmental variables
-You can put all environmental variables inside a `.env` file at the root of the Rust project directory (this directory).  
+You can put all environmental variables inside a `.env` file at the root of the Rust project directory (this directory), or you can set them manually.  
 
 #### Environmental variable needed to build
 ```bash
@@ -27,7 +27,7 @@ RESOURCES_DIR="/resources/images"
 DATABASE_URL=postgresql://user:password@url/db_name
 HOST=localhost # optionbal, default 'localhost'
 PORT=8080 # optional, default '8080'
-ALLOWED_ORIGINS=https://group04.web-tek.ninja # list of allowed origins, separated `,`
+ALLOWED_ORIGINS=https://group04.web-tek.ninja # list of allowed origins, separated with `,`
 CERT_PATH=certificate.pem # path to certificate
 PRIV_KEY_PATH=privatekey.pem # path to privatekey
 ```
