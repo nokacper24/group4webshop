@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 SLEEP_TIME=10
 source .env
 docker pull ghcr.io/nokacper24/group4webshop:${IMG_TAG:-main}
