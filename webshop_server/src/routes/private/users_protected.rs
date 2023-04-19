@@ -91,7 +91,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let user = user::get_user_by_id(&pool, id).await;
+    let user = user::get_user_by_id(&pool, &id).await;
 
     //parse to json
     match user {
