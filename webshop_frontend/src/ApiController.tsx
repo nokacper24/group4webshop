@@ -128,7 +128,21 @@ export const fetchLicensesVital = async () => {
  */
 export const fetchLicensesForUser = async (userId: string) => {
   const response = await fetch(`${baseUrl}/api/user_licenses/user/${userId}`);
-  const data: LicenseVital[] = await response.json();
+  const data: License[] = await response.json();
+  return data;
+};
+
+/**
+ * Get all company licenses for a specific user that they have no access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The company's licenses the user doesn't have.
+ */
+export const fetchLicensesForUserNoAccess = async (userId: string) => {
+  const response = await fetch(
+    `${baseUrl}/api/user_licenses/user/${userId}/no_access`
+  );
+  const data: License[] = await response.json();
   return data;
 };
 
