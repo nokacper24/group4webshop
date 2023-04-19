@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ToggleButton } from "../../../ToggleButton";
 /* import { Description } from "../../product-page/ProductPage"; */
 
 export type AccordionRowProps = {
@@ -51,10 +52,11 @@ export function AccordionRow(props: AccordionRowProps) {
           />
         </svg>
       </button>
-      <label className="toggle-switch">
-        <input type="checkbox" />
-        <span className="slider"></span>
-      </label>
+      <ToggleButton
+        id={props.title + props.id}
+        checked={false}
+        handleClick={(checked: boolean, id: string) => {}}
+      ></ToggleButton>
       <button
         className="accordion-remove-button"
         onClick={() => props.removeFunction(props.id)}
