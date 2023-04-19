@@ -16,10 +16,19 @@ let popupRef: RefObject<HTMLDivElement>;
 export default function RowEditPopup(props: RowEditPopupProps) {
   popupRef = useRef<HTMLDivElement>(null);
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
-        <form className="popup-form">
+        <form
+          className="popup-form"
+          onSubmit={(event) => {
+            handleSubmit(event);
+          }}
+        >
           {props.image ? (
             <>
               <h2>Edit image</h2>

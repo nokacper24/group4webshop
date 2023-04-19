@@ -20,10 +20,19 @@ export default function RowEditPopup() {
   popupRef = useRef<HTMLDivElement>(null);
   titleRef = useRef(null);
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
-        <form className="popup-form">
+        <form
+          className="popup-form"
+          onSubmit={(event) => {
+            handleSubmit(event);
+          }}
+        >
           <h2>Edit section header</h2>
           <label htmlFor="title">Title:</label>
           <input type="text" ref={titleRef} id="title" name="title" />
