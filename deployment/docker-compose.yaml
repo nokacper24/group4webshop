@@ -1,7 +1,7 @@
 version: '3.1'
 
 services:
-  db-prod:
+  db:
     image: postgres
     restart: always
     ports:
@@ -21,11 +21,11 @@ services:
       HOST: 0.0.0.0
       PORT: 8080
       ALLOWED_ORIGINS: https://group04.web-tek.ninja
-      DATABASE_URL: postgresql://backend_user:PASSWORD@db-prod:5432/proflex # Change PASSWORD on the server!
+      DATABASE_URL: postgresql://backend_user:PASSWORD@db:5432/proflex # Change PASSWORD on the server!
       CERT_PATH: /certs/live/group04.web-tek.ninja/cert.pem
       PRIV_KEY_PATH: /certs/live/group04.web-tek.ninja/privkey.pem
     depends_on:
-      - db-prod
+      - db
     volumes:
       - ./app/resources:/resources
       - /etc/letsencrypt/live/group04.web-tek.ninja:/certs/live/group04.web-tek.ninja
