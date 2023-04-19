@@ -147,18 +147,42 @@ pub async fn update_license_validations(
 }
 
 /// Returns all licenses that a user has access to
-pub async fn get_license_for_user(
+pub async fn get_licenses_for_user(
     pool: &Pool<Postgres>,
     user_id: &i32,
-) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
+) -> Result<Vec<License>, sqlx::Error> {
     let licenses = query_as!(
-        LicenseVitalInfo,
-        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid, amount
-        FROM user_license
-        JOIN license USING (license_id)
-        JOIN product ON product.product_id = license.product_id
-        JOIN company ON company.company_id = license.company_id
-        AND user_id = $1"#,
+        License,
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id
+        FROM license
+        JOIN user_license USING (license_id)
+        WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(licenses)
+}
+
+/// Returns all of a user's company's licenses that the user has no access to
+pub async fn get_licenses_for_user_no_access(
+    pool: &Pool<Postgres>,
+    company_id: &i32,
+    user_id: &i32,
+) -> Result<Vec<License>, sqlx::Error> {
+    let licenses = query_as!(
+        License,
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id
+        FROM license
+        WHERE company_id = $1
+        AND license_id NOT IN(
+            SELECT license_id
+            FROM license
+            JOIN user_license USING (license_id)
+            WHERE user_id = $2)
+        "#,
+        company_id,
         user_id
     )
     .fetch_all(pool)

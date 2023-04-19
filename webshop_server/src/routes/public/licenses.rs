@@ -1,4 +1,7 @@
-use crate::data_access::license::{self, License};
+use crate::data_access::{
+    license::{self, License},
+    user,
+};
 
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
@@ -10,6 +13,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(license_by_id);
     cfg.service(licenses_by_company);
     cfg.service(licenses_for_user);
+    cfg.service(licenses_for_user_no_access);
 }
 
 #[derive(OpenApi)]
@@ -19,7 +23,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         licenses_vital,
         license_by_id,
         licenses_by_company,
-        licenses_for_user
+        licenses_for_user,
+        licenses_for_user_no_access
     ),
     components(
         schemas(License)
@@ -168,7 +173,7 @@ async fn licenses_by_company(
     get,
     tag = "Licenses",
     responses(
-        (status = 200, description = "Returns all licenses for a specific user", body = Vec<LicenseVitalInfo>),
+        (status = 200, description = "Returns all licenses for a specific user", body = Vec<License>),
         (status = 400, description = "Bad Request"),
         (status = 500, description = "Internal Server Error"),
         ),
@@ -177,7 +182,7 @@ async fn licenses_by_company(
         )
     )
 ]
-#[get("/user_license/user/{user_id}")]
+#[get("/user_licenses/user/{user_id}")]
 async fn licenses_for_user(
     pool: web::Data<Pool<Postgres>>,
     user_id: web::Path<String>,
@@ -186,16 +191,62 @@ async fn licenses_for_user(
         Ok(user_id) => user_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
-    let license = license::get_license_for_user(&pool, &user_id).await;
+    let other_licenses = license::get_licenses_for_user(&pool, &user_id).await;
 
     // Error check
-    if license.is_err() {
+    if other_licenses.is_err() {
         return HttpResponse::InternalServerError().finish();
     }
 
     // Parse to JSON
-    if let Ok(license) = license {
-        return HttpResponse::Ok().json(license);
+    if let Ok(other_licenses) = other_licenses {
+        return HttpResponse::Ok().json(other_licenses);
+    }
+
+    HttpResponse::InternalServerError().finish()
+}
+
+/// Get all licenses for user's company's that the user does not have access to.
+#[utoipa::path (
+    context_path = "/api",
+    get,
+    tag = "Licenses",
+    responses(
+        (status = 200, description = "Returns all company licenses that a specific user does not have access to", body = Vec<License>),
+        (status = 400, description = "Bad Request"),
+        (status = 500, description = "Internal Server Error"),
+        ),
+    params(
+        ("user_id", description = "The ID of the user"),
+        )
+    )
+]
+#[get("/user_licenses/user/{user_id}/no_access")]
+async fn licenses_for_user_no_access(
+    pool: web::Data<Pool<Postgres>>,
+    user_id: web::Path<String>,
+) -> impl Responder {
+    let user_id = match user_id.parse::<i32>() {
+        Ok(user_id) => user_id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+
+    let company_id = match user::get_user_by_id(&pool, &user_id).await {
+        Ok(user) => user.company_id,
+        Err(_) => return HttpResponse::BadRequest().finish(),
+    };
+
+    let other_licenses =
+        license::get_licenses_for_user_no_access(&pool, &company_id, &user_id).await;
+
+    // Error check
+    if other_licenses.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+
+    // Parse to JSON
+    if let Ok(other_licenses) = other_licenses {
+        return HttpResponse::Ok().json(other_licenses);
     }
 
     HttpResponse::InternalServerError().finish()
