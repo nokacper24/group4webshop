@@ -1,2 +1,2 @@
 @echo off
-docker-compose exec db bash -c "psql -U postgres -d proflex < /sql_scripts/init.sql"
+docker-compose exec db bash -c "psql -U postgres -d proflex < /sql_scripts/initialize.sql"
