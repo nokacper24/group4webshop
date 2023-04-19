@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AccordionBody, addNewRow } from "./AccordionBody";
+import { AccordionBody } from "./AccordionBody";
 import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
@@ -21,6 +21,7 @@ export type AccordionSectionProps = {
   deleteSection: (id: number) => void;
 };
 
+let latestID = 100;
 /**
  * The main component for managing a header and its body.
  *
@@ -37,16 +38,68 @@ export function AccordionSection(props: AccordionSectionProps) {
     props.deleteSection(props.sectionID);
   };
 
-  
+  /**
+   * React recommends that when two children need the same data, it is best to move it to the parent.
+   * The row control system has therefore been moved from AccordionBody.
+   */
+
+  /**
+   * Initializes the process of adding a row to the body of the section.
+   *
+   * @param title title of the row to be added
+   */
+  const addRow = (title: string) => {
+    //Temporary debug solution
+    if (rows.length < 2) {
+      rows.push({
+        title: title,
+        id: createID(),
+      });
+      setRows([...rows]);
+    }
+  };
+
+  const createID = (): number => {
+    return latestID++;
+  };
+
+  /**
+   * Deletes a row from the body of the section.
+   *
+   * @param id the ID of the row to be deleted
+   */
+  const deleteRow = (id: number) => {
+    let newRows = rows.filter((row) => row.id !== id);
+    setRows(newRows);
+    props.registerContentChange(id, ChangeType.Delete);
+  };
+
+  /**
+   * Initializes the process of changing the content of a row.
+   *
+   * @param id the ID of the row to be edited
+   */
+  const editRow = (id: number) => {
+    console.log("edit: " + id);
+    props.registerContentChange(id, ChangeType.Edit);
+  };
+
+  const [rows, setRows] = useState<{ title: string; id: number }[]>([
+    ...props.rows,
+  ]);
 
   return (
     <>
       <AccordionHeader
         title={props.header.title}
-        addRow={addNewRow}
         deleteSelf={deleteSelf}
+        addRow={addRow}
       ></AccordionHeader>
-      <AccordionBody rows={props.rows} registerContentChange={props.registerContentChange}></AccordionBody>
+      <AccordionBody
+        rows={rows}
+        editRow={editRow}
+        deleteRow={deleteRow}
+      ></AccordionBody>
     </>
   );
 }
