@@ -16,11 +16,11 @@ services:
       - ./app/postgres-data:/var/lib/postgresql/data
 
   webshop:
-    image: ghcr.io/nokacper24/group4webshop:main
-    ports:
-      - "443:8080"
     env_file:
       - .env
+    image: ghcr.io/nokacper24/group4webshop:{IMG_TAG:-main}
+    ports:
+      - "443:8080"
     environment:
       HOST: 0.0.0.0
       PORT: 8080
