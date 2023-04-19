@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { License, LicenseVital, User } from "../../../Interfaces";
+import { License, User } from "../../../Interfaces";
 import {
-  fetchCompanyLicenses,
   fetchLicensesForUser,
+  fetchLicensesForUserNoAccess,
+  fetchProduct,
   fetchUser,
 } from "../../../ApiController";
 import ToggleTable from "../toggle-table/ToggleTable";
@@ -21,36 +22,48 @@ type LicenseAccessProps = {
 export default function EditUserAccess() {
   const { userId } = useParams();
   const [user, setUser] = useState<User>();
-  const [companyLicenses, setCompanyLicenses] =
-    useState<LicenseAccessProps[]>();
-  const [userLicenses, setUserLicenses] = useState<LicenseVital[]>();
+  const [licenses, setLicenses] = useState<LicenseAccessProps[]>([]);
+  const [newLicenseAccess, setNewLicenseAccess] = useState<
+    LicenseAccessProps[]
+  >([]);
 
   useEffect(() => {
+    // Get user
     fetchUser(userId!).then((user) => {
       setUser(user);
-      if (user.company_id && user.user_id) {
-        fetchCompanyLicenses(user.company_id).then(
-          (companyLicenses: License[]) => {
-            fetchLicensesForUser(user.user_id).then(
-              (userLicenses: LicenseVital[]) => {
-                setUserLicenses(userLicenses);
+      // If user's ID is found
+      if (user.user_id) {
+        // Get user's licenses with and without access
+        fetchLicensesForUser(user.user_id).then((licensesWithAccess) => {
+          fetchLicensesForUserNoAccess(user.user_id).then(
+            (licensesWithoutAccess) => {
+              let tempLicenses: LicenseAccessProps[] = [];
 
-                let licenses: LicenseAccessProps[] = [];
-                let licenseIds: number[] = [];
-
-                userLicenses.forEach((license) => {
-                  licenseIds.push(license.license_id);
+              licensesWithAccess.forEach((license) => {
+                tempLicenses.push({
+                  license: license,
+                  access: true,
                 });
+              });
 
-                companyLicenses.forEach((license: License) => {
-                  if (licenseIds.includes(license.license_id)) {
-                    licenses.push();
-                  }
+              licensesWithoutAccess.forEach((license) => {
+                tempLicenses.push({
+                  license: license,
+                  access: false,
                 });
-              }
-            );
-          }
-        );
+              });
+
+              // Update all licenses to include license's product name
+              tempLicenses.forEach((license) => {
+                fetchProduct(license.license.product_id).then((product) => {
+                  license.license.product_name = product.display_name;
+                });
+              });
+
+              setLicenses(tempLicenses);
+            }
+          );
+        });
       }
     });
   }, []);
