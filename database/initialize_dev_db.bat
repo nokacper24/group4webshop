@@ -6,7 +6,7 @@ docker-compose up -d
 
 echo Docker compose done.
 echo Waiting %SLEEP_TIME% seconds for the database to start...
-timeout /t %SLEEP_TIME%
+timeout /t %SLEEP_TIME% /nobreak
 
 docker-compose exec db bash -c "psql -U postgres -d proflex < /sql_scripts/initialize.sql"
 docker-compose exec db bash -c "psql -U postgres -d proflex < /sql_scripts/populate_dev.sql"
