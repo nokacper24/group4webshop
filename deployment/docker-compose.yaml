@@ -18,7 +18,7 @@ services:
   webshop:
     env_file:
       - .env
-    image: ghcr.io/nokacper24/group4webshop:{IMG_TAG:-main}
+    image: ghcr.io/nokacper24/group4webshop:${IMG_TAG:-main}
     ports:
       - "443:8080"
     environment:
