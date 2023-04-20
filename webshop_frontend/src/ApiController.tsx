@@ -24,8 +24,12 @@ if (import.meta.env.PROD) {
  */
 export const fetchUser = async (userId: string) => {
   const response = await fetch(`${baseUrl}/api/priv/users/${userId}`);
-  const data: User = await response.json();
-  return data;
+  if (response.ok) {
+    const data: User = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch user.");
+  }
 };
 
 /**
@@ -38,8 +42,12 @@ export const fetchMe = async () => {
     method: "GET",
     credentials: "include",
   });
-  const data: MeUser = await response.json();
-  return data;
+  if (response.ok) {
+    const data: MeUser = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch user.");
+  }
 };
 
 /**
@@ -93,8 +101,12 @@ export const fetchCompanyUsers = async (companyId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/companies/${companyId}/users`
   );
-  const data: User[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
 };
 
 /**
@@ -105,8 +117,12 @@ export const fetchCompanyUsers = async (companyId: string) => {
  */
 export const fetchLicense = async (licenseId: string) => {
   const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
-  const data: License = await response.json();
-  return data;
+  if (response.ok) {
+    const data: License = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch license.");
+  }
 };
 
 /**
@@ -116,8 +132,12 @@ export const fetchLicense = async (licenseId: string) => {
  */
 export const fetchLicensesVital = async () => {
   const response = await fetch(`${baseUrl}/api/licenses_vital`);
-  const data: LicenseVital[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: LicenseVital[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
 };
 
 /**
@@ -143,8 +163,12 @@ export const postLicense = async (license: License) => {
  */
 export const fetchCompanies = async () => {
   const response = await fetch(`${baseUrl}/api/companies`);
-  const data: Company[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Company[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch companies.");
+  }
 };
 
 /**
@@ -157,8 +181,12 @@ export const fetchCompanyLicenses = async (companyId: number) => {
   const response = await fetch(
     `${baseUrl}/api/companies/${companyId}/licenses`
   );
-  const data: License[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: License[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
 };
 
 /**
@@ -169,8 +197,12 @@ export const fetchCompanyLicenses = async (companyId: number) => {
  */
 export const fetchProduct = async (productId: string) => {
   const response = await fetch(`${baseUrl}/api/products/${productId}`);
-  const data: Product = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Product = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch product.");
+  }
 };
 
 /**
@@ -180,8 +212,12 @@ export const fetchProduct = async (productId: string) => {
  */
 export const fetchProducts = async () => {
   const response = await fetch(`${baseUrl}/api/products`);
-  const data: Product[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Product[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch products.");
+  }
 };
 
 /**
@@ -194,8 +230,12 @@ export const fetchDescriptionComponents = async (productId: string) => {
   const response = await fetch(
     `${baseUrl}/api/products/${productId}/descriptions`
   );
-  const data: Description[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Description[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch descriptions.");
+  }
 };
 
 /**
@@ -206,8 +246,12 @@ export const fetchDescriptionComponents = async (productId: string) => {
  */
 export const fetchTestimonials = async (productId: string) => {
   const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
-  const data: Testimonial[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Testimonial[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch testimonials.");
+  }
 };
 
 /**
