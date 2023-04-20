@@ -162,8 +162,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER delete_description_component_trigger
 AFTER DELETE ON description_component
 FOR EACH ROW EXECUTE FUNCTION delete_description_component();
-
-CREATE USER backend_user WITH PASSWORD 'password';
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO backend_user;
 COMMIT;
