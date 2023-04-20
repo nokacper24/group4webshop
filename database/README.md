@@ -4,9 +4,9 @@ In order to run the project, you will need a PostgreSQL database. This directory
 ## Initial setup
 Firstly, you will need to start the database. You can use the shell script [run_compose_up.sh](run_compose_up.sh) (Unix) or batch script [run_compose_up.bat](run_compose_up.bat) (Windows) to run the docker-compose file. Alternatively, you can run the following command from the context of this directory:
 ```bash
-docker-compose up -d # Usually on Windows
+docker-compose up -d # Windows
 # OR
-docker compose up -d # Usually on linux
+docker compose up -d # Unix
 ```
 This will start the database and adminer. Adminer is a web-based database management tool that we use in the development enviroment for debugging and sanity checks. You can access it at [http://localhost:8080](http://localhost:8080). The default credentials are:
 ```
