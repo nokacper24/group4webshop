@@ -14,3 +14,7 @@ We used [React](https://react.dev/) with [TypeScript](https://www.typescriptlang
 
 ### Back-end (IDATA2306)
 The back-end was written in [Rust](https://www.rust-lang.org/), using the [Actix](https://actix.rs/) framework. We utilized [SQLx](https://crates.io/crates/sqlx) for database access and [PostgreSQL](https://www.postgresql.org/) for the database itself. For more information, please refer to the [webshop_server README](./webshop_server/README.md).
+
+### Depolyment
+For easy deployment, we used [Docker](https://www.docker.com/). We build the docker image in a GirhubAction on every push to the main (and dev) branch. The images are published as packages linked to this reposotry.  
+For deployment instructions, refer to the [deployment README](./deployment/README.md).
