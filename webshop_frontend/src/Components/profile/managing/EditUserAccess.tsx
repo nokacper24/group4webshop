@@ -7,7 +7,10 @@ import {
   fetchProduct,
   fetchUser,
 } from "../../../ApiController";
-import ToggleTable from "../toggle-table/ToggleTable";
+import ToggleTable, {
+  ToggleTableHeaderProps,
+  ToggleTableRowProps,
+} from "../toggle-table/ToggleTable";
 
 type LicenseAccessProps = {
   license: License;
@@ -23,9 +26,17 @@ export default function EditUserAccess() {
   const { userId } = useParams();
   const [user, setUser] = useState<User>();
   const [licenses, setLicenses] = useState<LicenseAccessProps[]>([]);
-  const [newLicenseAccess, setNewLicenseAccess] = useState<
+  const [newLicensesAccess, setNewLicensesAccess] = useState<
     LicenseAccessProps[]
   >([]);
+
+  const headers: ToggleTableHeaderProps = {
+    text: ["License", "Start", "End", "Amount", "Active"],
+  };
+  const [rows, setRows] = useState<ToggleTableRowProps[]>([]);
+  const handleClick = (checked: boolean, id: string) => {
+    console.log("Checked: ", checked, "ID: ", id);
+  };
 
   useEffect(() => {
     // Get user
@@ -39,6 +50,7 @@ export default function EditUserAccess() {
             (licensesWithoutAccess) => {
               let tempLicenses: LicenseAccessProps[] = [];
 
+              // Add licenses with access to temporary list and set access to true
               licensesWithAccess.forEach((license) => {
                 tempLicenses.push({
                   license: license,
@@ -46,17 +58,11 @@ export default function EditUserAccess() {
                 });
               });
 
+              // Add licenses without access to temporary list and set access to false
               licensesWithoutAccess.forEach((license) => {
                 tempLicenses.push({
                   license: license,
                   access: false,
-                });
-              });
-
-              // Update all licenses to include license's product name
-              tempLicenses.forEach((license) => {
-                fetchProduct(license.license.product_id).then((product) => {
-                  license.license.product_name = product.display_name;
                 });
               });
 
@@ -67,6 +73,47 @@ export default function EditUserAccess() {
       }
     });
   }, []);
+
+  const fetchProductNames = async () => {
+    let tempLicenses: LicenseAccessProps[] = licenses;
+
+    let names: { id: string; name: string }[] = [];
+    tempLicenses.map((license) => {
+      fetchProduct(license.license.product_id).then((product) => {
+        names.push({ id: product.product_id, name: product.display_name });
+      });
+    });
+
+    // return tempLicenses;
+    console.log("Names: ", names);
+    return names;
+  };
+
+  useEffect(() => {
+    console.log("Licenses have been updated");
+
+    // Update all licenses to include license's product name
+    fetchProductNames().then((licenses) => {
+      // Fill table rows
+      /* let tempRows: ToggleTableRowProps[] = [];
+      licenses.forEach((license) => {
+        let lic = license.license;
+        tempRows.push({
+          row: {
+            text: [
+              lic.product_name,
+              new Date(lic.start_date).toLocaleDateString(),
+              new Date(lic.end_date).toLocaleDateString(),
+              lic.amount.toString(),
+            ],
+            toggleOn: license.access,
+          },
+        });
+      });
+
+      setRows(tempRows); */
+    });
+  }, [licenses]);
 
   return (
     <>
@@ -79,7 +126,7 @@ export default function EditUserAccess() {
         <p>
           For user: <b>{user?.email}</b>
         </p>
-        <ToggleTable />
+        <ToggleTable headers={headers} rows={rows} handleClick={handleClick} />
       </section>
     </>
   );

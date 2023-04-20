@@ -4,23 +4,22 @@ import { ToggleTableRowProps } from "./ToggleTable";
 type RowProps = {
   rowIndex: number;
   row: ToggleTableRowProps;
+  handleClick: (checked: boolean, id: string) => void;
 };
 
 export default function ToggleTableRow(props: RowProps) {
-  const handleClick = () => {
-    console.log("Click");
-  };
-
   const row = props.row.row;
 
   return (
     <>
       <tr>
-        <td>{row.text}</td>
+        {row.text.map((text) => {
+          return <td>{text}</td>;
+        })}
         <td style={{ width: "6em" }}>
           <ToggleButton
             id={props.rowIndex.toString()}
-            handleClick={handleClick}
+            handleClick={props.handleClick}
             checked={row.toggleOn}
           />
         </td>

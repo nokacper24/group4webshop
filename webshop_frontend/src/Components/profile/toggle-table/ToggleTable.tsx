@@ -6,12 +6,13 @@ export interface ToggleTableHeaderProps {
 }
 
 export interface ToggleTableRowProps {
-  row: { text: string; toggleOn: boolean };
+  row: { text: string[]; toggleOn: boolean };
 }
 
 export interface ToggleTableProps {
   headers: ToggleTableHeaderProps;
   rows: ToggleTableRowProps[];
+  handleClick: (checked: boolean, id: string) => void;
 }
 
 /**
@@ -21,47 +22,21 @@ export interface ToggleTableProps {
  *
  * @returns A Toggle Table component.
  */
-export default function ToggleTable() {
-  const headers: ToggleTableHeaderProps = {
-    text: ["License", "Active"],
-  };
-
-  const row1: ToggleTableRowProps = {
-    row: {
-      text: "License 1",
-      toggleOn: false,
-    },
-  };
-
-  const row2: ToggleTableRowProps = {
-    row: {
-      text: "License 2",
-      toggleOn: true,
-    },
-  };
-
-  const placeholder: ToggleTableProps = {
-    headers: headers,
-    rows: [row1, row2],
-  };
-
-  const handleSave = () => {
-    console.log("Saving...");
-  };
-
+export default function ToggleTable(props: ToggleTableProps) {
   return (
     <>
       <table className="toggle-table">
-        <ToggleTableHeader text={placeholder.headers.text} />
+        <ToggleTableHeader text={props.headers.text} />
         <tbody>
-          {placeholder.rows.map((item: ToggleTableRowProps, index: number) => (
-            <ToggleTableRow rowIndex={index} row={item} />
+          {props.rows.map((item: ToggleTableRowProps, index: number) => (
+            <ToggleTableRow
+              rowIndex={index}
+              row={item}
+              handleClick={props.handleClick}
+            />
           ))}
         </tbody>
       </table>
-      <button className="default-button" onClick={handleSave}>
-        Save
-      </button>
     </>
   );
 }
