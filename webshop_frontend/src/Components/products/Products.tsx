@@ -11,15 +11,13 @@ export default function Products() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let response = fetchProducts();
-    response
+    fetchProducts()
       .then((data) => {
         setProducts(data);
+        setLoading(false);
       })
       .catch((error) => {
         setError(error);
-      })
-      .finally(() => {
         setLoading(false);
       });
   }, []);
