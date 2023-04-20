@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
 import { fetchProducts } from "../../ApiController";

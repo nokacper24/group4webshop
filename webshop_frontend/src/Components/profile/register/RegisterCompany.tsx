@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Represents the Register Company component on the Create Account page.
  * Takes in the user input in a form to create their account.
@@ -8,7 +6,7 @@ import React from "react";
  */
 export default function RegisterCompany() {
   return (
-    <React.Fragment>
+    <>
       <p>Fill out all the fields to create your account.</p>
 
       <label htmlFor="create-account_email">E-mail</label>
@@ -67,7 +65,7 @@ export default function RegisterCompany() {
         Register
       </button>
       <p className="form-alert"></p>
-    </React.Fragment>
+    </>
   );
 }
 

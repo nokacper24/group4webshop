@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Represents the Verify component on the Create Account page.
  *
@@ -7,7 +5,7 @@ import React from "react";
  */
 export function EmailVerify() {
   return (
-    <React.Fragment>
+    <>
       <p>
         We sent you an e-mail with a verification link. Please follow the
         instructions in the e-mail to verify your account. It may take a few
@@ -17,6 +15,6 @@ export function EmailVerify() {
         Do not see the e-mail? Check your spam folder.<br></br>
         If you did not receive it, <a href="#">resend e-mail</a>.
       </p>
-    </React.Fragment>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 /**
@@ -11,7 +10,7 @@ import { Link } from "react-router-dom";
  */
 export function RegisterEmail() {
   return (
-    <React.Fragment>
+    <>
       <p>
         Type in your business e-mail and we will send you a registration link.
         This is only intended for license managers.
@@ -34,6 +33,6 @@ export function RegisterEmail() {
           Send verification
         </button>
       </Link>
-    </React.Fragment>
+    </>
   );
 }
