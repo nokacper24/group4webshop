@@ -16,5 +16,7 @@ We used [React](https://react.dev/) with [TypeScript](https://www.typescriptlang
 The back-end was written in [Rust](https://www.rust-lang.org/), using the [Actix](https://actix.rs/) framework. We utilized [SQLx](https://crates.io/crates/sqlx) for database access and [PostgreSQL](https://www.postgresql.org/) for the database itself. For more information, please refer to the [webshop_server README](./webshop_server/README.md).
 
 ### Depolyment
-For easy deployment, we used [Docker](https://www.docker.com/). We build the docker image in a GirhubAction on every push to the main (and dev) branch. The images are published as packages linked to this reposotry.  
-For deployment instructions, refer to the [deployment README](./deployment/README.md).
+For easy deployment, we used [Docker](https://www.docker.com/).  
+We build the docker image using [Dockerfile](./Dockerfile), you can run docker build manually and run the image locally if you need to do so.  
+However, we build the docker image automatically using GithubActions. The image is published to [Packages](https://github.com/nokacper24/group4webshop/pkgs/container/group4webshop) on every push to either [main](../../tree/main) or [dev](../../tree/dev) branch, tagging images appropriately.
+For more information about our deployment process, please refer to the [deployment README](./deployment/README.md).
