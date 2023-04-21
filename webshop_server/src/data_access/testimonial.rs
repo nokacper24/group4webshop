@@ -141,3 +141,22 @@ pub async fn update_testimonial(
     .await?;
     Ok(testimonial)
 }
+
+/// Delete an existing testimonial
+pub async fn delete_testimonial(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+    testimonial_id: &i32,
+) -> Result<Testimonial, sqlx::Error> {
+    let testimonial = query_as!(
+        Testimonial,
+        r#"DELETE FROM testimonial
+        WHERE product_id = $1 AND testimonial_id = $2
+        RETURNING *"#,
+        product_id,
+        testimonial_id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(testimonial)
+}

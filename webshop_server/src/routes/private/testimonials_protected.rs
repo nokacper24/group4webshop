@@ -1,7 +1,7 @@
 use crate::{data_access::{testimonial::{self, Testimonial, PartialTestimonial}, user, product}, utils::auth, routes::private::products_protected::descriptions_protected::{description_utils::{self, ImageExtractorError, ImageParsingError}, self}, IMAGES_DIR};
 
 use actix_multipart::Multipart;
-use actix_web::{web, HttpResponse, Responder, post, put};
+use actix_web::{web, HttpResponse, Responder, post, put, delete, HttpRequest};
 use image::ImageError;
 use log::error;
 use serde::{Deserialize, Serialize};
@@ -11,6 +11,7 @@ use utoipa::{OpenApi, ToSchema};
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_testimonial);
     cfg.service(update_testimonial);
+    cfg.service(delete_testimonial);
 }
 
 #[derive(OpenApi)]
@@ -18,6 +19,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     paths(
         create_testimonial,
         update_testimonial,
+        delete_testimonial,
     ),
     components(
         schemas(Testimonial, PartialTestimonial, NewTestimonialForm, UpdateTestimonialForm)
@@ -72,7 +74,7 @@ struct UpdateTestimonialForm {
 pub async fn create_testimonial(
     pool: web::Data<Pool<Postgres>>,
     product_id: web::Path<String>,
-    req: actix_web::HttpRequest,
+    req: HttpRequest,
     payload: Multipart,
 ) -> impl Responder {
     match auth::validate_user(req, &pool).await {
@@ -218,12 +220,12 @@ pub async fn create_testimonial(
 #[put("/testimonials/{product_id}/{testimonial_id}")]
 pub async fn update_testimonial(
     pool: web::Data<Pool<Postgres>>,
-    parmams: web::Path<(String, i32)>,
-    req: actix_web::HttpRequest,
+    params: web::Path<(String, i32)>,
+    req: HttpRequest,
     payload: Multipart,
 ) -> impl Responder {
-    let product_id = &parmams.0;
-    let testimonial_id = parmams.1;
+    let product_id = &params.0;
+    let testimonial_id = params.1;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -357,4 +359,72 @@ pub async fn update_testimonial(
                 HttpResponse::InternalServerError().finish()
             }
         }
+}
+
+/// Deletes a testimonial
+#[utoipa::path(
+    context_path = "/api/priv",
+    delete,
+    tag = "Testimonials",
+    responses(
+        (status = 200, description = "Testimonial deleted", body = Testimonial),
+        (status = 401, description = "Unauthorized - no valid authentification"),
+        (status = 403, description = "Forbidden - no permission to update a testimonial"),
+        (status = 404, description = "Not found - testimonial not found"),
+        (status = 400, description = "Bad request - invalid params"),
+        (status = 500, description = "Internal Server Error")
+        
+    ),
+    params(
+        ("product_id", description = "The id of the product"),
+        ("testimonial_id", description = "The id of the testimonial"),
+    ),
+)]
+#[delete("/testimonials/{product_id}/{testimonial_id}")]
+pub async fn delete_testimonial(
+    req: HttpRequest,
+    pool: web::Data<Pool<Postgres>>,
+    paramas: web::Path<(String, i32)>,
+) -> impl Responder {
+    let product_id = &paramas.0;
+    let testimonial_id = paramas.1;
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let deleted_testimonial = match testimonial::delete_testimonial(&pool, &product_id, &testimonial_id).await{
+        Ok(testimonial) => testimonial,
+        Err(e) => {
+            match e {
+                sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Testimonial not found"),
+                _ => {
+                    log::error!("Couldnt delete testimonial from db: {}", e);
+                    return HttpResponse::InternalServerError().finish();
+                }
+            }
+        }
+    };
+    if let Err(e) = description_utils::remove_image(&deleted_testimonial.author_pic()) {
+        match e.kind() {
+            std::io::ErrorKind::NotFound => {} // Image already deleted
+            _ => {
+                error!("Couldnt remove image from file system: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        }
+    }
+    HttpResponse::Ok().json(deleted_testimonial)
 }
