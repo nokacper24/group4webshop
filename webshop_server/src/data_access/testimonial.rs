@@ -13,6 +13,39 @@ pub struct Testimonial {
     product_id: String,
 }
 
+impl Testimonial {
+    pub fn new(
+        testimonial_id: i32,
+        author: String,
+        text: String,
+        author_pic: String,
+        product_id: String,
+    ) -> Self {
+        Self {
+            testimonial_id,
+            author,
+            text,
+            author_pic,
+            product_id,
+        }
+    }
+    pub fn testimonial_id(&self) -> i32 {
+        self.testimonial_id
+    }
+    pub fn author(&self) -> &String {
+        &self.author
+    }
+    pub fn text(&self) -> &String {
+        &self.text
+    }
+    pub fn author_pic(&self) -> &String {
+        &self.author_pic
+    }
+    pub fn product_id(&self) -> &String {
+        &self.product_id
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PartialTestimonial {
     author: String,
@@ -44,6 +77,25 @@ pub async fn get_testimonials_by_product(
         product_id
     )
     .fetch_all(pool)
+    .await?;
+    Ok(testimonial)
+}
+
+/// Returns a specific testimonial for a specific product
+pub async fn get_testimonial_by_prod_and_id(
+    pool: &Pool<Postgres>,
+    product_id: &String,
+    testimonial_id: &i32,
+) -> Result<Testimonial, sqlx::Error> {
+    let testimonial = query_as!(
+        Testimonial,
+        r#"SELECT * 
+        FROM testimonial 
+        WHERE product_id = $1 AND testimonial_id = $2"#,
+        product_id,
+        testimonial_id
+    )
+    .fetch_one(pool)
     .await?;
     Ok(testimonial)
 }
