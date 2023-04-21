@@ -31,7 +31,10 @@ pub struct TestimonialsOpenApi;
   responses(
   (status = 200, description = "List of all testimonials for a product", body = Vec<Testimonial>),
   (status = 500, description = "Internal Server Error"),
-)
+),
+  params(
+    ("product_id", description = "The id of the product"),
+  ),
 )]
 #[get("/testimonials/{product_id}")]
 pub async fn get_testimonials_by_product(
