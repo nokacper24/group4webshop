@@ -50,10 +50,10 @@ VALUES ('Jane Doe', 'I am extremely impressed with the time management software 
        ('Stephanie Smith', 'This has enabled us to streamline our operations and save time. The product is easy to use and the customer service is top-notch.', 'stephanie_smith.jpg', 'time_management_software');
 
 INSERT INTO product_image (image_path, alt_text)
-VALUES ('time_management_software.jpg', 'Time Management Software Interface'),
-       ('tax_software.jpg', 'Tax Software Interface'),
-       ('resources/images/statistics_software/Ifky_exploding_battery_90043413-fc3e-4064-b3df-b759a2939771.png',	'Solid block exploading, flames and sparks are visible.'),
-       ('resources/images/statistics_software/Oransj_automation_software_on_monitor_877a0f15-b70e-4134-b815-c88471661f42.png',	'A display with charts and graphs.');
+VALUES ('/time_management_software.jpg', 'Time Management Software Interface'),
+       ('/tax_software.jpg', 'Tax Software Interface'),
+       ('/resources/images/statistics_software/Ifky_exploding_battery_90043413-fc3e-4064-b3df-b759a2939771.png',	'Solid block exploading, flames and sparks are visible.'),
+       ('/resources/images/statistics_software/Oransj_automation_software_on_monitor_877a0f15-b70e-4134-b815-c88471661f42.png',	'A display with charts and graphs.');
 
 INSERT INTO product_text (text_title, paragraph)
 VALUES ('Time Management Software Features', 'Our time management software offers a range of features such as task scheduling, time tracking, and reporting. These features help organizations streamline their work processes and improve productivity.'),
