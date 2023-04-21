@@ -3,6 +3,8 @@ use futures::StreamExt;
 use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use std::{collections::HashMap, io::Cursor};
 
+use crate::IMAGES_DIR;
+
 pub enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
     MultipartError(actix_multipart::MultipartError),
@@ -226,5 +228,13 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 
 /// Removes a file from the file system.
 pub fn remove_image(path: &str) -> Result<(), std::io::Error> {
-    std::fs::remove_file(path)
+    let real_path = {
+        if !IMAGES_DIR.starts_with("/") {
+            &path[1..]
+        } else {
+            path
+        }
+    };
+
+    std::fs::remove_file(real_path)
 }
