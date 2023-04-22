@@ -3,10 +3,7 @@ import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 
 export type AccordionBodyProps = {
-  rows: {
-    title: string;
-    id: number;
-  }[];
+  rows: AccordionRowProps[];
   editRow: (id: number) => void;
   deleteRow: (id: number) => void;
 };
@@ -26,6 +23,8 @@ export function AccordionBody(props: AccordionBodyProps) {
             key={"row" + row.id}
             title={row.title}
             id={row.id}
+            content={row.content}
+            image={row.image}
             editFunction={props.editRow}
             removeFunction={props.deleteRow}
           ></AccordionRow>
