@@ -24,15 +24,20 @@ type PrivateAccordionRowProps = {
  * @param props the props of the component, must be of AccordionRowProps type
  * @returns the React component for the Accordion row
  */
-  const [state, setState] = useState<String>(); //TODO: Update this when getting input
-
-  if (props.title.length <= 0) {
-    props.title = "Title";
 export function AccordionRow(props: PrivateAccordionRowProps) {
+  const [state, setState] = useState<AccordionRowProps>(props);
+  const [visible, setVisible] = useState<boolean>(true);
+  if (state.title.length <= 0) {
+    setState({ ...state, title: "Untitled" });
   }
+
+  const changeVisibility = (checked: boolean, id: string) => {
+    setVisible(checked);
+  };
+
   return (
     <div className="accordion-row">
-      <p>{props.title}</p>
+      <p>{state.title}</p>
       <button
         className="accordion-edit-button"
         onClick={() => props.editFunction(props.id)}
@@ -62,9 +67,9 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
         </svg>
       </button>
       <ToggleButton
-        id={props.title + props.id}
-        checked={false}
-        handleClick={(checked: boolean, id: string) => {}}
+        id={state.title + props.id}
+        checked={visible}
+        handleClick={changeVisibility}
       ></ToggleButton>
       <button
         className="accordion-remove-button"
