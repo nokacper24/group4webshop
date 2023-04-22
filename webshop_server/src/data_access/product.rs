@@ -1,3 +1,5 @@
+/// Data access implementation for products.
+/// This module contains all functions to access products in the database.
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, {Pool, Postgres},
@@ -50,48 +52,6 @@ impl Product {
     }
     pub fn available(&self) -> bool {
         self.available
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PartialProduct {
-    display_name: String,
-    price_per_user: f32,
-    short_description: String,
-    main_image: String,
-    available: bool,
-}
-impl PartialProduct {
-    pub fn new(
-        display_name: String,
-        price_per_user: f32,
-        short_description: String,
-        main_image: String,
-        available: bool,
-    ) -> Self {
-        Self {
-            display_name,
-            price_per_user,
-            short_description,
-            main_image,
-            available,
-        }
-    }
-    fn generate_id(&self) -> String {
-        self.display_name
-            .to_lowercase()
-            .replace('.', "")
-            .replace(' ', "_")
-    }
-    fn into_product(self) -> Product {
-        Product {
-            product_id: self.generate_id(),
-            display_name: self.display_name,
-            price_per_user: self.price_per_user,
-            short_description: self.short_description,
-            main_image: self.main_image,
-            available: self.available,
-        }
     }
 }
 
