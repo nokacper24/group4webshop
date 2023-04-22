@@ -33,6 +33,6 @@ To update to the latest image, run the following script:
 ```bash
 ./update.img.sh
 ```
-This will pull latest images and run `docker compose down` and `docker compose up -d` commands.  
+This will pull latest images and run `docker compose up -d`, restarting only changed containers. 
 
 We are looking into automating this process in the future.
