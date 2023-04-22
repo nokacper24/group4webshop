@@ -4,8 +4,8 @@ pub mod auth;
 pub mod licenses_protected;
 pub mod me;
 pub mod products_protected;
-pub mod users_protected;
 pub mod testimonials_protected;
+pub mod users_protected;
 
 #[get("")]
 async fn index() -> impl Responder {

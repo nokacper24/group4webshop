@@ -1,7 +1,19 @@
-use crate::{data_access::{testimonial::{self, Testimonial, PartialTestimonial}, user, product}, utils::auth, routes::private::products_protected::descriptions_protected::{description_utils::{self, ImageExtractorError, ImageParsingError}, self}, IMAGES_DIR};
+use crate::{
+    data_access::{
+        product,
+        testimonial::{self, PartialTestimonial, Testimonial},
+        user,
+    },
+    routes::private::products_protected::descriptions_protected::{
+        self,
+        description_utils::{self, ImageExtractorError, ImageParsingError},
+    },
+    utils::auth,
+    IMAGES_DIR,
+};
 
 use actix_multipart::Multipart;
-use actix_web::{web, HttpResponse, Responder, post, put, delete, HttpRequest};
+use actix_web::{delete, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageError;
 use log::error;
 use serde::{Deserialize, Serialize};
@@ -58,8 +70,7 @@ struct UpdateTestimonialForm {
         (status = 400, description = "Bad request - invalid form data"),
         (status = 413, description = "Payload too large - image too large"),
         (status = 415, description = "Unsupoorted media type - unsupported image format"),
-        (status = 500, description = "Internal Server Error")
-        
+        (status = 500, description = "Internal Server Error"),
     ),
     params(
         ("product_id", description = "The id of the product"),
@@ -114,14 +125,29 @@ pub async fn create_testimonial(
         .await
         {
             Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
-            Err(e) => return match e {
-                ImageExtractorError::Utf8Error(e) => HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e)),
-                ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError().json(format!("Couldnt extract multipart: {}", e)),
-                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
-                ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'author', 'text', 'image'"),
-                ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'author', 'text', 'image', got '{}'",field)),
-                ImageExtractorError::FileTooLarge => HttpResponse::PayloadTooLarge().json("File too large"),
-            },
+            Err(e) => {
+                return match e {
+                    ImageExtractorError::Utf8Error(e) => {
+                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                    }
+                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
+                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MissingContentDisposition(field) => {
+                        HttpResponse::BadRequest().json(format!("Missing field: {}", field))
+                    }
+                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
+                        .json("Missing data, expected 'author', 'text', 'image'"),
+                    ImageExtractorError::UnexpectedField(field) => {
+                        HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected expected 'author', 'text', 'image', got '{}'",
+                        field
+                    ))
+                    }
+                    ImageExtractorError::FileTooLarge => {
+                        HttpResponse::PayloadTooLarge().json("File too large")
+                    }
+                }
+            }
         };
     let extracted_img = match extracted_image {
         Some(extracted_image) => extracted_image,
@@ -181,15 +207,14 @@ pub async fn create_testimonial(
         product_id.to_string(),
     );
 
-    match testimonial::create_testimonial(&pool, testimonial).await{
-        Ok(testimonial) => return HttpResponse::Created().json(testimonial),
+    match testimonial::create_testimonial(&pool, testimonial).await {
+        Ok(testimonial) => HttpResponse::Created().json(testimonial),
         Err(e) => {
             log::error!("Couldnt create testimonial: {}", e);
-            return HttpResponse::InternalServerError().finish();
+            HttpResponse::InternalServerError().finish()
         }
     }
 }
-
 
 /// Update a testimonial.
 #[utoipa::path(
@@ -204,8 +229,7 @@ pub async fn create_testimonial(
         (status = 400, description = "Bad request - invalid form data"),
         (status = 413, description = "Payload too large - image too large"),
         (status = 415, description = "Unsupoorted media type - unsupported image format"),
-        (status = 500, description = "Internal Server Error")
-        
+        (status = 500, description = "Internal Server Error"),
     ),
     params(
         ("product_id", description = "The id of the product"),
@@ -243,22 +267,20 @@ pub async fn update_testimonial(
         }
     };
 
-    let unupdated_testimonial = match testimonial::get_testimonial_by_prod_and_id(
-        &pool,
-        &product_id,
-        &testimonial_id,
-    ).await {
-        Ok(testimonial) => testimonial,
-        Err(e) => {
-            match e {
-                sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Testimonial not found"),
+    let unupdated_testimonial =
+        match testimonial::get_testimonial_by_prod_and_id(&pool, product_id, &testimonial_id).await
+        {
+            Ok(testimonial) => testimonial,
+            Err(e) => match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::NotFound().json("Testimonial not found")
+                }
                 _ => {
                     log::error!("Couldnt get testimonial: {}", e);
                     return HttpResponse::InternalServerError().finish();
                 }
-            }
-        }
-    };
+            },
+        };
 
     let (extracted_image, text_fields) =
         match description_utils::extract_image_and_texts_from_multipart(
@@ -268,19 +290,34 @@ pub async fn update_testimonial(
         .await
         {
             Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
-            Err(e) => return match e {
-                ImageExtractorError::Utf8Error(e) => HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e)),
-                ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError().json(format!("Couldnt extract multipart: {}", e)),
-                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest().json(format!("Missing field: {}", field)),
-                ImageExtractorError::MissingData => HttpResponse::BadRequest().json("Missing data, expected 'author', 'text', 'image'"),
-                ImageExtractorError::UnexpectedField(field) => HttpResponse::BadRequest().json(format!("Unexpected field! Expected expected 'author', 'text', 'image', got '{}'",field)),
-                ImageExtractorError::FileTooLarge => HttpResponse::PayloadTooLarge().json("File too large"),
-            },
+            Err(e) => {
+                return match e {
+                    ImageExtractorError::Utf8Error(e) => {
+                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                    }
+                    ImageExtractorError::MultipartError(e) => HttpResponse::InternalServerError()
+                        .json(format!("Couldnt extract multipart: {}", e)),
+                    ImageExtractorError::MissingContentDisposition(field) => {
+                        HttpResponse::BadRequest().json(format!("Missing field: {}", field))
+                    }
+                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
+                        .json("Missing data, expected 'author', 'text', 'image'"),
+                    ImageExtractorError::UnexpectedField(field) => {
+                        HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected expected 'author', 'text', 'image', got '{}'",
+                        field
+                    ))
+                    }
+                    ImageExtractorError::FileTooLarge => {
+                        HttpResponse::PayloadTooLarge().json("File too large")
+                    }
+                }
+            }
         };
 
-        let new_img_path = match extracted_image{
-            Some(extracted_image) => {
-                // new image was provided, remove old one and save new one
+    let new_img_path = match extracted_image {
+        Some(extracted_image) => {
+            // new image was provided, remove old one and save new one
             let new_img = match description_utils::parse_img(extracted_image.img_buffer) {
                 Ok(image) => image,
                 Err(e) => {
@@ -321,7 +358,7 @@ pub async fn update_testimonial(
                         }
                     },
                 };
-            if let Err(e) = description_utils::remove_image(&unupdated_testimonial.author_pic()) {
+            if let Err(e) = description_utils::remove_image(unupdated_testimonial.author_pic()) {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {
@@ -331,34 +368,34 @@ pub async fn update_testimonial(
                 }
             }
             new_path
-            },
-            None => unupdated_testimonial.author_pic().to_string(),
-        };
-
-        let new_author = match text_fields.get("author") {
-            Some(author) => author.to_string(),
-            None => return HttpResponse::InternalServerError().finish(),
-        };
-        let new_text = match text_fields.get("text") {
-            Some(text) => text.to_string(),
-            None => return HttpResponse::InternalServerError().finish(),
-        };
-
-        let new_testimonial = Testimonial::new(
-            testimonial_id,
-            new_author,
-            new_text,
-            new_img_path,
-            product_id.to_string(),
-        );
-
-        match testimonial::update_testimonial(&pool, new_testimonial).await {
-            Ok(updated_testimonial) => HttpResponse::Ok().json(updated_testimonial),
-            Err(e) => {
-                error!("Couldnt update testimonial: {}", e);
-                HttpResponse::InternalServerError().finish()
-            }
         }
+        None => unupdated_testimonial.author_pic().to_string(),
+    };
+
+    let new_author = match text_fields.get("author") {
+        Some(author) => author.to_string(),
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+    let new_text = match text_fields.get("text") {
+        Some(text) => text.to_string(),
+        None => return HttpResponse::InternalServerError().finish(),
+    };
+
+    let new_testimonial = Testimonial::new(
+        testimonial_id,
+        new_author,
+        new_text,
+        new_img_path,
+        product_id.to_string(),
+    );
+
+    match testimonial::update_testimonial(&pool, new_testimonial).await {
+        Ok(updated_testimonial) => HttpResponse::Ok().json(updated_testimonial),
+        Err(e) => {
+            error!("Couldnt update testimonial: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 /// Deletes a testimonial
@@ -372,8 +409,7 @@ pub async fn update_testimonial(
         (status = 403, description = "Forbidden - no permission to update a testimonial"),
         (status = 404, description = "Not found - testimonial not found"),
         (status = 400, description = "Bad request - invalid params"),
-        (status = 500, description = "Internal Server Error")
-        
+        (status = 500, description = "Internal Server Error"),
     ),
     params(
         ("product_id", description = "The id of the product"),
@@ -405,19 +441,20 @@ pub async fn delete_testimonial(
         }
     };
 
-    let deleted_testimonial = match testimonial::delete_testimonial(&pool, &product_id, &testimonial_id).await{
-        Ok(testimonial) => testimonial,
-        Err(e) => {
-            match e {
-                sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Testimonial not found"),
+    let deleted_testimonial =
+        match testimonial::delete_testimonial(&pool, product_id, &testimonial_id).await {
+            Ok(testimonial) => testimonial,
+            Err(e) => match e {
+                sqlx::Error::RowNotFound => {
+                    return HttpResponse::NotFound().json("Testimonial not found")
+                }
                 _ => {
                     log::error!("Couldnt delete testimonial from db: {}", e);
                     return HttpResponse::InternalServerError().finish();
                 }
-            }
-        }
-    };
-    if let Err(e) = description_utils::remove_image(&deleted_testimonial.author_pic()) {
+            },
+        };
+    if let Err(e) = description_utils::remove_image(deleted_testimonial.author_pic()) {
         match e.kind() {
             std::io::ErrorKind::NotFound => {} // Image already deleted
             _ => {

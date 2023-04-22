@@ -219,7 +219,7 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 
     image.save(&path)?;
 
-    if !path.starts_with("/") {
+    if !path.starts_with('/') {
         path = format!("/{}", path);
     }
 
@@ -229,7 +229,7 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 /// Removes a file from the file system.
 pub fn remove_image(path: &str) -> Result<(), std::io::Error> {
     let real_path = {
-        if !IMAGES_DIR.starts_with("/") {
+        if !IMAGES_DIR.starts_with('/') {
             &path[1..]
         } else {
             path

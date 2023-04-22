@@ -42,11 +42,11 @@ pub async fn get_testimonials_by_product(
     product_id: web::Path<String>,
 ) -> impl Responder {
     let testimonials = testimonial::get_testimonials_by_product(&pool, &product_id).await;
-    return match testimonials {
+    match testimonials {
         Ok(testimonials) => HttpResponse::Ok().json(testimonials),
         Err(e) => {
             error!("Error getting testimonials: {}", e);
             HttpResponse::InternalServerError().json("Internal Server Error")
         }
-    };
+    }
 }
