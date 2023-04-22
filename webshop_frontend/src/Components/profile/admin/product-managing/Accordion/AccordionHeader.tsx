@@ -2,7 +2,7 @@ import { AccordionRow, AccordionRowProps } from "./AccordionRow";
 
 export type AccordionHeaderProps = {
   title: string;
-  addRow: (title: string) => void;
+  addRow: () => void;
   deleteSelf: () => void;
 };
 
@@ -31,7 +31,7 @@ export function AccordionHeader(props: AccordionHeaderProps) {
         </button>
         <button
           className="add-button overlay-button accordion-button-icon"
-          onClick={() => props.addRow("TestAdd")}
+          onClick={() => props.addRow()}
         >
           <svg
             className="header-icon"
