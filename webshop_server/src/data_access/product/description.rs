@@ -1,3 +1,6 @@
+//! Description component data access implementation.
+//! Allowing for CRUD operations on description components.
+
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query, Executor, {Pool, Postgres},
@@ -17,35 +20,9 @@ pub struct DescriptionComponent {
 }
 
 impl DescriptionComponent {
-    pub fn component_id(&self) -> i32 {
-        self.component_id
-    }
-    pub fn priority(&self) -> i32 {
-        self.priority
-    }
-    pub fn full_width(&self) -> bool {
-        self.full_width
-    }
-    pub fn product_id(&self) -> &str {
-        &self.product_id
-    }
-    pub fn text(&self) -> &Option<TextComponent> {
-        &self.text
-    }
     pub fn image(&self) -> &Option<ImageComponent> {
         &self.image
     }
-}
-
-/// Description component error.  
-/// Invalid component means that the component has
-/// - both Text and image are None  
-/// - both Text and image are Some  
-///
-/// SqlxError is a wrapper for sqlx::Error
-pub enum DescriptionCompError {
-    InvalidComponent(String),
-    SqlxError(sqlx::Error),
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -389,7 +366,7 @@ pub async fn create_text_component(
     pool: &Pool<Postgres>,
     product_id: &str,
     text_comp: TextComponent,
-) -> Result<DescriptionComponent, DescriptionCompError> {
+) -> Result<DescriptionComponent, sqlx::Error> {
     let text_comp = insert_text_component(pool, &text_comp).await?;
 
     let result_row = query!(
@@ -404,7 +381,7 @@ pub async fn create_text_component(
 
     let result_row = match result_row {
         Ok(result_row) => result_row,
-        Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        Err(err) => return Err(err),
     };
 
     Ok(DescriptionComponent {
@@ -421,7 +398,7 @@ pub async fn create_image_component(
     pool: &Pool<Postgres>,
     product_id: &str,
     image_comp: ImageComponent,
-) -> Result<DescriptionComponent, DescriptionCompError> {
+) -> Result<DescriptionComponent, sqlx::Error> {
     let image_comp = insert_image_component(pool, &image_comp).await?;
     let returned_row = query!(
         r#"INSERT INTO description_component (product_id, image_id)
@@ -434,7 +411,7 @@ pub async fn create_image_component(
     .await;
     let returned_row = match returned_row {
         Ok(returned_row) => returned_row,
-        Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        Err(err) => return Err(err),
     };
 
     Ok(DescriptionComponent {
@@ -452,7 +429,7 @@ pub async fn create_image_component(
 async fn insert_text_component(
     pool: &Pool<Postgres>,
     text_component: &TextComponent,
-) -> Result<TextComponent, DescriptionCompError> {
+) -> Result<TextComponent, sqlx::Error> {
     let result_row = query!(
         r#"INSERT INTO product_text (text_title, paragraph)
         VALUES ($1, $2)
@@ -465,7 +442,7 @@ async fn insert_text_component(
 
     let result_row = match result_row {
         Ok(result_row) => result_row,
-        Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        Err(err) => return Err(err),
     };
 
     let text_component = TextComponent {
@@ -480,7 +457,7 @@ async fn insert_text_component(
 async fn insert_image_component(
     pool: &Pool<Postgres>,
     image_component: &ImageComponent,
-) -> Result<ImageComponent, DescriptionCompError> {
+) -> Result<ImageComponent, sqlx::Error> {
     let result_row = query!(
         r#"INSERT INTO product_image (image_path, alt_text)
         VALUES ($1, $2)
@@ -493,7 +470,7 @@ async fn insert_image_component(
 
     let result_row = match result_row {
         Ok(result_row) => result_row,
-        Err(err) => return Err(DescriptionCompError::SqlxError(err)),
+        Err(err) => return Err(err),
     };
 
     let image_comp = ImageComponent {

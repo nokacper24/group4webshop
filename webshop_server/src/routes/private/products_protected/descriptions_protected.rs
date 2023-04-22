@@ -4,8 +4,7 @@ use crate::{
         product::{
             self,
             description::{
-                DescriptionCompError, DescriptionComponent, DescriptionUpdateError, ImageComponent,
-                TextComponent,
+                DescriptionComponent, DescriptionUpdateError, ImageComponent, TextComponent,
             },
         },
         user,
@@ -519,14 +518,10 @@ async fn create_text_component(
     .await;
     match created_component {
         Ok(created_component) => HttpResponse::Created().json(created_component),
-        Err(e) => match e {
-            DescriptionCompError::InvalidComponent(e) => {
-                HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
-            }
-            DescriptionCompError::SqlxError(e) => {
-                HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
-            }
-        },
+        Err(e) => {
+            error!("Error while creating text component: {}", e);
+            HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
+        }
     }
 }
 
@@ -703,15 +698,10 @@ async fn create_image_component(
 
     match created_component {
         Ok(created_component) => HttpResponse::Ok().json(created_component),
-        Err(e) => match e {
-            DescriptionCompError::InvalidComponent(e) => {
-                HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
-            }
-            DescriptionCompError::SqlxError(e) => {
-                error!("{}", e);
-                HttpResponse::InternalServerError().finish()
-            }
-        },
+        Err(e) => {
+            error!("Error wgile creating image component: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
     }
 }
 
