@@ -4,12 +4,12 @@ use crate::{
         testimonial::{self, PartialTestimonial, Testimonial},
         user,
     },
-    routes::private::products_protected::descriptions_protected::{
-        self,
-        description_utils::{self, ImageExtractorError, ImageParsingError},
+    utils::{
+        auth,
+        img_multipart::{
+            self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
+        },
     },
-    utils::auth,
-    IMAGES_DIR,
 };
 
 use actix_multipart::Multipart;
@@ -118,11 +118,8 @@ pub async fn create_testimonial(
     }
 
     let (extracted_image, text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(
-            payload,
-            vec!["author", "text"],
-        )
-        .await
+        match img_multipart::extract_image_and_texts_from_multipart(payload, vec!["author", "text"])
+            .await
         {
             Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
             Err(e) => {
@@ -153,7 +150,7 @@ pub async fn create_testimonial(
         Some(extracted_image) => extracted_image,
         None => return HttpResponse::BadRequest().json("Missing image"),
     };
-    let image = match description_utils::parse_img(extracted_img.img_buffer) {
+    let image = match img_multipart::parse_img(extracted_img.img_buffer) {
         Ok(image) => image,
         Err(e) => {
             return match e {
@@ -162,13 +159,12 @@ pub async fn create_testimonial(
                 }
                 ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
                     "No format found. Supported formats: {:?}",
-                    descriptions_protected::ALLOWED_FORMATS
+                    ALLOWED_FORMATS
                 )),
                 ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
                     .json(format!(
                         "Unsupported format, found {:?}. Supported formats: {:?}",
-                        e,
-                        descriptions_protected::ALLOWED_FORMATS
+                        e, ALLOWED_FORMATS
                     )),
                 ImageParsingError::IoError(e) => {
                     HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
@@ -187,7 +183,7 @@ pub async fn create_testimonial(
     };
 
     let path = format!("{}/{}", IMAGES_DIR, product_id);
-    let file_name = match description_utils::save_image(image, &path, &extracted_img.file_name) {
+    let file_name = match img_multipart::save_image(image, &path, &extracted_img.file_name) {
         Ok(file_name) => file_name,
         Err(e) => match e {
             ImageError::Unsupported(e) => {
@@ -283,11 +279,8 @@ pub async fn update_testimonial(
         };
 
     let (extracted_image, text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(
-            payload,
-            vec!["author", "text"],
-        )
-        .await
+        match img_multipart::extract_image_and_texts_from_multipart(payload, vec!["author", "text"])
+            .await
         {
             Ok((extracted_image, text_fields)) => (extracted_image, text_fields),
             Err(e) => {
@@ -318,23 +311,19 @@ pub async fn update_testimonial(
     let new_img_path = match extracted_image {
         Some(extracted_image) => {
             // new image was provided, remove old one and save new one
-            let new_img = match description_utils::parse_img(extracted_image.img_buffer) {
+            let new_img = match img_multipart::parse_img(extracted_image.img_buffer) {
                 Ok(image) => image,
                 Err(e) => {
                     return match e {
                         ImageParsingError::DecodeError(e) => HttpResponse::UnsupportedMediaType()
                             .json(format!("Decode error: {}", e)),
-                        ImageParsingError::NoFormatFound => {
-                            HttpResponse::BadRequest().json(format!(
-                                "No format found. Supported formats: {:?}",
-                                descriptions_protected::ALLOWED_FORMATS
-                            ))
-                        }
+                        ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(
+                            format!("No format found. Supported formats: {:?}", ALLOWED_FORMATS),
+                        ),
                         ImageParsingError::UnsuppoertedFormat(e) => {
                             HttpResponse::UnsupportedMediaType().json(format!(
                                 "Unsupported format, found {:?}. Supported formats: {:?}",
-                                e,
-                                descriptions_protected::ALLOWED_FORMATS
+                                e, ALLOWED_FORMATS
                             ))
                         }
                         ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
@@ -344,7 +333,7 @@ pub async fn update_testimonial(
             };
             let path = format!("{}/{}", IMAGES_DIR, product_id);
             let new_path =
-                match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
+                match img_multipart::save_image(new_img, &path, &extracted_image.file_name) {
                     Ok(file_name) => file_name,
                     Err(e) => match e {
                         ImageError::Unsupported(e) => {
@@ -358,7 +347,7 @@ pub async fn update_testimonial(
                         }
                     },
                 };
-            if let Err(e) = description_utils::remove_image(unupdated_testimonial.author_pic()) {
+            if let Err(e) = img_multipart::remove_image(unupdated_testimonial.author_pic()) {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {
@@ -454,7 +443,7 @@ pub async fn delete_testimonial(
                 }
             },
         };
-    if let Err(e) = description_utils::remove_image(deleted_testimonial.author_pic()) {
+    if let Err(e) = img_multipart::remove_image(deleted_testimonial.author_pic()) {
         match e.kind() {
             std::io::ErrorKind::NotFound => {} // Image already deleted
             _ => {

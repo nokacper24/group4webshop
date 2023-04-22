@@ -10,25 +10,20 @@ use crate::{
         },
         user,
     },
-    routes::private::products_protected::descriptions_protected::description_utils::{
-        ImageExtractorError, ImageParsingError,
+    utils::{
+        auth,
+        img_multipart::{
+            self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
+        },
     },
-    utils::auth,
-    IMAGES_DIR,
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
-use image::{ImageError, ImageFormat};
+use image::ImageError;
 use log::{error, warn};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
-
-pub mod description_utils;
-
-const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
-pub const ALLOWED_FORMATS: [ImageFormat; 3] =
-    [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_text_component);
@@ -129,7 +124,7 @@ async fn delete_description_component(
         },
     };
     if let Some(path) = img_path {
-        if let Err(e) = description_utils::remove_image(&path) {
+        if let Err(e) = img_multipart::remove_image(&path) {
             error!("Error while deleting image: {}.", e);
             warn!("Image file may be left in the file system.");
             return HttpResponse::InternalServerError().json("Internal Server Error");
@@ -613,46 +608,47 @@ async fn create_image_component(
         }
     };
 
-    let (image, mut text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
-            .await
-        {
-            Ok((image, text_fields)) => (image, text_fields),
-            Err(e) => {
-                return match e {
-                    ImageExtractorError::MultipartError(e) => {
-                        error!("{}", e);
-                        HttpResponse::InternalServerError()
-                            .json("Couldnt extract multipart".to_string())
-                    }
-                    ImageExtractorError::MissingContentDisposition(field) => {
-                        HttpResponse::BadRequest()
-                            .json(format!("Missing content dispositio: {}", field))
-                    }
-                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
-                        .json("Missing data, expected 'image' and 'alt_text'"),
-                    ImageExtractorError::UnexpectedField(e) => {
-                        HttpResponse::BadRequest().json(format!(
-                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
-                            e
-                        ))
-                    }
-                    ImageExtractorError::Utf8Error(e) => {
-                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
-                    }
-                    ImageExtractorError::FileTooLarge => {
-                        HttpResponse::PayloadTooLarge().json("File too large")
-                    }
+    let (image, mut text_fields) = match img_multipart::extract_image_and_texts_from_multipart(
+        payload,
+        vec!["alt_text"],
+    )
+    .await
+    {
+        Ok((image, text_fields)) => (image, text_fields),
+        Err(e) => {
+            return match e {
+                ImageExtractorError::MultipartError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError()
+                        .json("Couldnt extract multipart".to_string())
+                }
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest()
+                    .json(format!("Missing content dispositio: {}", field)),
+                ImageExtractorError::MissingData => {
+                    HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
+                }
+                ImageExtractorError::UnexpectedField(e) => {
+                    HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                        e
+                    ))
+                }
+                ImageExtractorError::Utf8Error(e) => {
+                    HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                }
+                ImageExtractorError::FileTooLarge => {
+                    HttpResponse::PayloadTooLarge().json("File too large")
                 }
             }
-        };
+        }
+    };
 
     let extracted_image = match image {
         Some(image) => image,
         None => return HttpResponse::BadRequest().json("Missing image"),
     };
 
-    let image = match description_utils::parse_img(extracted_image.img_buffer) {
+    let image = match img_multipart::parse_img(extracted_image.img_buffer) {
         Ok(img) => img,
         Err(e) => {
             return match e {
@@ -678,7 +674,7 @@ async fn create_image_component(
 
     let image_dir = format!("{}/{}", IMAGES_DIR, product_id.as_str());
 
-    let path = match description_utils::save_image(image, &image_dir, &extracted_image.file_name) {
+    let path = match img_multipart::save_image(image, &image_dir, &extracted_image.file_name) {
         Ok(path) => path,
         Err(e) => match e {
             ImageError::Unsupported(e) => {
@@ -912,43 +908,44 @@ async fn update_image_component(
         }
     };
 
-    let (image, mut text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
-            .await
-        {
-            Ok((image, text_fields)) => (image, text_fields),
-            Err(e) => {
-                return match e {
-                    ImageExtractorError::MultipartError(e) => {
-                        error!("{}", e);
-                        HttpResponse::InternalServerError()
-                            .json("Couldnt extract multipart".to_string())
-                    }
-                    ImageExtractorError::MissingContentDisposition(field) => {
-                        HttpResponse::BadRequest()
-                            .json(format!("Missing content dispositio: {}", field))
-                    }
-                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
-                        .json("Missing data, expected 'image' and 'alt_text'"),
-                    ImageExtractorError::UnexpectedField(e) => {
-                        HttpResponse::BadRequest().json(format!(
-                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
-                            e
-                        ))
-                    }
-                    ImageExtractorError::Utf8Error(e) => {
-                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
-                    }
-                    ImageExtractorError::FileTooLarge => {
-                        HttpResponse::PayloadTooLarge().json("File too large")
-                    }
+    let (image, mut text_fields) = match img_multipart::extract_image_and_texts_from_multipart(
+        payload,
+        vec!["alt_text"],
+    )
+    .await
+    {
+        Ok((image, text_fields)) => (image, text_fields),
+        Err(e) => {
+            return match e {
+                ImageExtractorError::MultipartError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError()
+                        .json("Couldnt extract multipart".to_string())
+                }
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest()
+                    .json(format!("Missing content dispositio: {}", field)),
+                ImageExtractorError::MissingData => {
+                    HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
+                }
+                ImageExtractorError::UnexpectedField(e) => {
+                    HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                        e
+                    ))
+                }
+                ImageExtractorError::Utf8Error(e) => {
+                    HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                }
+                ImageExtractorError::FileTooLarge => {
+                    HttpResponse::PayloadTooLarge().json("File too large")
                 }
             }
-        };
+        }
+    };
 
     let new_image_path = match image {
         Some(image) => {
-            let new_img = match description_utils::parse_img(image.img_buffer) {
+            let new_img = match img_multipart::parse_img(image.img_buffer) {
                 Ok(img) => img,
                 Err(e) => {
                     return match e {
@@ -975,7 +972,7 @@ async fn update_image_component(
             let image_dir = format!("{}/{}", IMAGES_DIR, product_id);
 
             let new_img_path =
-                match description_utils::save_image(new_img, &image_dir, &image.file_name) {
+                match img_multipart::save_image(new_img, &image_dir, &image.file_name) {
                     Ok(path) => path,
                     Err(e) => match e {
                         ImageError::Unsupported(e) => {
@@ -988,7 +985,7 @@ async fn update_image_component(
                         }
                     },
                 };
-            if let Err(e) = description_utils::remove_image(unupdated_img_comp.image_path()) {
+            if let Err(e) = img_multipart::remove_image(unupdated_img_comp.image_path()) {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {

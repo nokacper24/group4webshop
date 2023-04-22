@@ -22,13 +22,6 @@ use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-const IMAGES_DIR: &str = {
-    match option_env!("RESOURCES_DIR") {
-        Some(path) => path,
-        None => "resources/images",
-    }
-};
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info,sqlx=off");

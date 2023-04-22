@@ -3,7 +3,16 @@ use futures::StreamExt;
 use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use std::{collections::HashMap, io::Cursor};
 
-use crate::IMAGES_DIR;
+pub const IMAGES_DIR: &str = {
+    match option_env!("RESOURCES_DIR") {
+        Some(path) => path,
+        None => "resources/images",
+    }
+};
+
+const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
+pub const ALLOWED_FORMATS: [ImageFormat; 3] =
+    [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 
 pub enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
@@ -142,7 +151,7 @@ async fn extract_image_from_field(
             Ok(data) => data,
             Err(e) => return Err(ImageExtractorError::MultipartError(e)),
         };
-        if image_buffer.len() + data.len() > super::MAX_IMAGE_SIZE {
+        if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
             return Err(ImageExtractorError::FileTooLarge);
         } else {
             image_buffer.extend_from_slice(&data);
@@ -178,7 +187,7 @@ pub fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, ImageParsingError>
 
     match image_format {
         Some(format) => {
-            if !super::ALLOWED_FORMATS.contains(&format) {
+            if !ALLOWED_FORMATS.contains(&format) {
                 return Err(ImageParsingError::UnsuppoertedFormat(format));
             }
         }
