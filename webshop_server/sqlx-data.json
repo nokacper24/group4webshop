@@ -839,6 +839,53 @@
     },
     "query": "UPDATE product\n        SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5\n        WHERE product_id = $6\n        RETURNING *"
   },
+  "62bef44cbcf97c443e4720fb125c2a35310adc65cebd87e77b359c7f82e477f1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "testimonial_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_pic",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO testimonial (author, text, author_pic, product_id)\n        VALUES ($1, $2, $3, $4)\n        RETURNING *"
+  },
   "6335e4730cf6aa8b107dab85cb6ba4367271a68859fabf99a266aabad67ff289": {
     "describe": {
       "columns": [
@@ -1236,6 +1283,51 @@
     },
     "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\"\n        FROM app_user\n        WHERE role = $1"
   },
+  "7ef940de8af38a90fc409e636578e79b4eaa76f0fc3ac0e6fd4f26f2339cfb3a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "testimonial_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_pic",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "DELETE FROM testimonial\n        WHERE product_id = $1 AND testimonial_id = $2\n        RETURNING *"
+  },
   "80a8788fbf7f9d1223b41ccd12b0d28dac461866d22689a828c4b432e4874d33": {
     "describe": {
       "columns": [
@@ -1553,6 +1645,51 @@
       }
     },
     "query": "UPDATE app_user \n        SET email = $1\n        WHERE user_id = $2\n        RETURNING app_user.user_id, email, company_id, role as \"role: _\";"
+  },
+  "b145fc3ab8dc880cace8ab5bd27258a857ce0f2ab0779485f91b841c2e19c4cb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "testimonial_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_pic",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT * \n        FROM testimonial \n        WHERE product_id = $1 AND testimonial_id = $2"
   },
   "b6866e254f562a1bb239abe465363296c6021b89cdcc8d654aeff0d4b6be3d23": {
     "describe": {
@@ -2280,5 +2417,53 @@
       }
     },
     "query": "SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"
+  },
+  "ff7dab083bbcc4d642f26b551b87ed8b483d04b31bff4659a4060db3231aae7d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "testimonial_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "author",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_pic",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 4,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE testimonial\n        SET author = $1, text = $2, author_pic = $3, product_id = $4\n        WHERE testimonial_id = $5\n        RETURNING *"
   }
 }
