@@ -46,9 +46,6 @@ impl ImageComponent {
             alt_text,
         }
     }
-    pub fn image_id(&self) -> &Option<i32> {
-        &self.image_id
-    }
     pub fn image_path(&self) -> &str {
         &self.image_path
     }
@@ -145,74 +142,6 @@ pub async fn get_all_image_paths(
         paths.push(row.image_path);
     }
     Result::Ok(paths)
-}
-
-/// Returns a description component by id.
-#[deprecated]
-pub async fn get_description_component_by_id(
-    pool: &Pool<Postgres>,
-    component_id: i32,
-) -> Result<DescriptionComponent, sqlx::Error> {
-    let row = query!(
-        r#"SELECT component_id, priority, full_width, product_id,
-        description_component.text_id AS "text_id?",
-        text_title AS "text_title?", paragraph AS "paragraph?",
-        description_component.image_id, image_path AS "image_path?",
-        alt_text AS "alt_text?"
-        FROM description_component
-        FULL JOIN product_text ON  description_component.text_id = product_text.text_id
-        FULL JOIN product_image ON description_component.image_id = product_image.image_id
-        WHERE description_component.component_id = $1;"#,
-        component_id
-    )
-    .fetch_one(pool)
-    .await?;
-
-    // text component
-    if row.text_id.is_some() {
-        if let (Some(text_id), Some(text_title), Some(paragraph)) =
-            (Some(row.text_id), row.text_title, row.paragraph)
-        {
-            return Result::Ok(DescriptionComponent {
-                component_id: row.component_id,
-                priority: row.priority,
-                full_width: row.full_width,
-                product_id: row.product_id,
-                text: Some(TextComponent {
-                    text_id,
-                    text_title,
-                    paragraph,
-                }),
-                image: None,
-            });
-        }
-    // image component
-    } else if row.image_id.is_some() {
-        if let (Some(image_id), Some(image_path), Some(alt_text)) =
-            (Some(row.image_id), row.image_path, row.alt_text)
-        {
-            return Result::Ok(DescriptionComponent {
-                component_id: row.component_id,
-                priority: row.priority,
-                full_width: row.full_width,
-                product_id: row.product_id,
-                text: None,
-                image: Some(ImageComponent {
-                    image_id,
-                    image_path,
-                    alt_text,
-                }),
-            });
-        }
-    } else {
-        // Should never happen, db has constraints
-        return Err(sqlx::Error::Decode(
-            "Could not decode description component, corrupt data".into(),
-        ));
-    }
-    Err(sqlx::Error::Decode(
-        "Could not decode description component, corrupt data".into(),
-    ))
 }
 
 /// Returns a description component by id.
