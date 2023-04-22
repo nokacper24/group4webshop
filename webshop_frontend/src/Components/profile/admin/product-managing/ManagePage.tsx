@@ -6,11 +6,7 @@ export default function ManagePage() {
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
-      <RowEditPopup
-        image={false}
-        title={undefined}
-        content={undefined}
-      ></RowEditPopup>
+      <RowEditPopup></RowEditPopup>
       <section className="container">
         <h2>Manage product</h2>
         <form>
