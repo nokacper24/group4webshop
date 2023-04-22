@@ -48,7 +48,7 @@ export default function RowEditPopup() {
             <button
               className="hero-button popup-button"
               type="button"
-              onClick={() => hide()}
+              onClick={() => hidePopup()}
             >
               Cancel
             </button>
@@ -71,9 +71,9 @@ function save() {
   props.informationCallBack(
     titleRef.current ? titleRef.current.value : "Undefined Header"
   );
-  hide();
+  hidePopup();
 }
 
-function hide() {
+function hidePopup() {
   popupRef.current?.classList.remove("popup-visible");
 }
