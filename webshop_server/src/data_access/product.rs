@@ -38,15 +38,6 @@ impl Product {
     pub fn product_id(&self) -> &str {
         &self.product_id
     }
-    pub fn display_name(&self) -> &str {
-        &self.display_name
-    }
-    pub fn price_per_user(&self) -> f32 {
-        self.price_per_user
-    }
-    pub fn short_description(&self) -> &str {
-        &self.short_description
-    }
     pub fn main_image(&self) -> &str {
         &self.main_image
     }
