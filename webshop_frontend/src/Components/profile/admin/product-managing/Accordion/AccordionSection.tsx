@@ -3,6 +3,7 @@ import { AccordionBody } from "./AccordionBody";
 import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
+import { showPopup } from "../Edit-popups/RowEditPopup";
 
 /**
  * The props of the AccordionSection component.
@@ -11,10 +12,7 @@ export type AccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: {
-    title: string;
-    id: number;
-  }[];
+  rows: AccordionRowProps[];
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
@@ -48,12 +46,23 @@ export function AccordionSection(props: AccordionSectionProps) {
    *
    * @param title title of the row to be added
    */
-  const addRow = (title: string) => {
+  const addRow = () => {
     //Temporary debug solution
     if (rows.length < 2) {
+      showPopup({
+        image: false,
+        title: undefined,
+        content: undefined,
+        informationCallBack: finishCreation,
+      });
+    }
+    function finishCreation(image: boolean, title: string, content: string) {
+      props.registerContentChange(createID(), ChangeType.Add);
       rows.push({
         title: title,
         id: createID(),
+        image: image,
+        content: content,
       });
       setRows([...rows]);
     }
@@ -81,12 +90,28 @@ export function AccordionSection(props: AccordionSectionProps) {
    */
   const editRow = (id: number) => {
     console.log("edit: " + id);
+    let row = rows.find((row) => row.id === id);
+    if (row) {
+      showPopup({
+        image: row.image,
+        title: row.title,
+        content: row.content,
+        informationCallBack: finishEdit,
+      });
+      function finishEdit(image: boolean, title: string, content: string) {
+        if (row) {
+          row.image = image;
+          row.title = title;
+          row.content = content;
+          setRows([...rows]);
+          props.registerContentChange(id, ChangeType.Edit);
+        }
+      }
+    }
     props.registerContentChange(id, ChangeType.Edit);
   };
 
-  const [rows, setRows] = useState<{ title: string; id: number }[]>([
-    ...props.rows,
-  ]);
+  const [rows, setRows] = useState<AccordionRowProps[]>([...props.rows]);
 
   return (
     <>
