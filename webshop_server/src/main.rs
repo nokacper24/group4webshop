@@ -22,12 +22,20 @@ use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
+const DEFALUT_LOG_LEVEL: &str = "info,sqlx=warn";
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info,sqlx=off");
+    dotenv().ok();
+    if let Ok(level) = std::env::var("RUST_LOG") {
+        if level.trim().is_empty() {
+            std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
+        }
+    } else {
+        std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
+    }
     env_logger::init();
 
-    dotenv().ok();
     let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("{}:{}", host, port);
