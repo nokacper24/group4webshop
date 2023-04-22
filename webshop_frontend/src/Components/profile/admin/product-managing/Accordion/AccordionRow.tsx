@@ -5,6 +5,15 @@ import { ToggleButton } from "../../../ToggleButton";
 export type AccordionRowProps = {
   title: string;
   id: number;
+  content: string;
+  image: boolean;
+};
+
+type PrivateAccordionRowProps = {
+  title: string;
+  id: number;
+  content: string;
+  image: boolean;
   editFunction: (id: number) => void;
   removeFunction: (id: number) => void;
 };
@@ -15,11 +24,11 @@ export type AccordionRowProps = {
  * @param props the props of the component, must be of AccordionRowProps type
  * @returns the React component for the Accordion row
  */
-export function AccordionRow(props: AccordionRowProps) {
   const [state, setState] = useState<String>(); //TODO: Update this when getting input
 
   if (props.title.length <= 0) {
     props.title = "Title";
+export function AccordionRow(props: PrivateAccordionRowProps) {
   }
   return (
     <div className="accordion-row">
