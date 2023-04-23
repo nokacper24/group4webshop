@@ -1,9 +1,12 @@
+//! Data access layer implementation for testimonials.
+//! This module contains all the functions that are used to access and manipulate the testimonial table in the database.
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query_as, {Pool, Postgres},
 };
 use utoipa::ToSchema;
 
+/// Testimonial struct
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct Testimonial {
     testimonial_id: i32,
@@ -14,6 +17,7 @@ pub struct Testimonial {
 }
 
 impl Testimonial {
+    /// Creates a new testimonial
     pub fn new(
         testimonial_id: i32,
         author: String,
@@ -29,23 +33,13 @@ impl Testimonial {
             product_id,
         }
     }
-    pub fn testimonial_id(&self) -> i32 {
-        self.testimonial_id
-    }
-    pub fn author(&self) -> &String {
-        &self.author
-    }
-    pub fn text(&self) -> &String {
-        &self.text
-    }
+    /// Returns the path to the author's picture
     pub fn author_pic(&self) -> &String {
         &self.author_pic
     }
-    pub fn product_id(&self) -> &String {
-        &self.product_id
-    }
 }
 
+/// Partial testimonial struct, same as testimonial but without the testimonial_id.
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PartialTestimonial {
     author: String,
@@ -54,6 +48,7 @@ pub struct PartialTestimonial {
     product_id: String,
 }
 impl PartialTestimonial {
+    /// Creates a new partial testimonial
     pub fn new(author: String, text: String, author_pic: String, product_id: String) -> Self {
         Self {
             author,
@@ -65,6 +60,15 @@ impl PartialTestimonial {
 }
 
 /// Returns all testimonials for a specific product
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product
+/// 
+/// # Returns
+/// 
+/// * `Result<Vec<Testimonial>, sqlx::Error>` - A vector of testimonials
 pub async fn get_testimonials_by_product(
     pool: &Pool<Postgres>,
     product_id: &String,
@@ -82,6 +86,12 @@ pub async fn get_testimonials_by_product(
 }
 
 /// Returns a specific testimonial for a specific product
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product
+/// * `testimonial_id` - The id of the testimonial
 pub async fn get_testimonial_by_prod_and_id(
     pool: &Pool<Postgres>,
     product_id: &String,
@@ -101,6 +111,11 @@ pub async fn get_testimonial_by_prod_and_id(
 }
 
 /// Creates a new testimonial for a specific product
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `testimonial` - The testimonial to be created
 pub async fn create_testimonial(
     pool: &Pool<Postgres>,
     testimonial: PartialTestimonial,
@@ -120,7 +135,13 @@ pub async fn create_testimonial(
     Ok(testimonial)
 }
 
-/// Update an existing testimonial
+/// Update an existing testimonial.
+/// Id is taken from the testimonial struct provided.
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `testimonial` - The testimonial to be updated
 pub async fn update_testimonial(
     pool: &Pool<Postgres>,
     testimonial: Testimonial,
@@ -143,6 +164,12 @@ pub async fn update_testimonial(
 }
 
 /// Delete an existing testimonial
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product the testimonial belongs to
+/// * `testimonial_id` - The id of the testimonial
 pub async fn delete_testimonial(
     pool: &Pool<Postgres>,
     product_id: &str,
