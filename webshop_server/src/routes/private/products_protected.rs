@@ -11,7 +11,7 @@ use utoipa::{OpenApi, ToSchema};
 pub mod descriptions_protected;
 
 use crate::{
-    data_access::{error_handling::PostgresDBError, user},
+    data_access::{error_handling::PostgresDBError, user, testimonial},
     {
         data_access::product::{self, Product},
         utils::{
@@ -550,35 +550,41 @@ pub async fn delete_product(
         Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 
-    let images = match product::description::get_all_image_paths(&pool, &product_id).await {
+    let all_images = match product::get_all_image_paths(&pool, &product_id).await {
         Ok(images) => images,
-        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        Err(e) => {
+            log::error!("Couldnt get all image paths: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error")},
     };
 
-    for image in images {
-        if let Err(e) = img_multipart::remove_image(&image) {
-            log::error!("Couldnt remove image from file system: {}", e);
-        };
-    }
-
     match product::delete_product(&pool, &product_id).await {
-        Ok(img_path) => {
-            if let Err(e) = img_multipart::remove_image(&img_path) {
-                log::error!("Couldnt remove main image from file system: {}", e);
-            };
+        Ok(_) => {
+            for image in all_images {
+                if let Err(e) = img_multipart::remove_image(&image) {
+                    match e.kind() {
+                        std::io::ErrorKind::NotFound => {} // Image already deleted
+                        _ => {
+                            error!("Couldnt remove image from file system: {}", e);
+                        }
+                    }
+                };
+            }
             if let Err(e) = fs::remove_dir(format!("{}/{}", IMAGES_DIR, product_id)) {
                 log::error!("Couldnt remove image folder from file system: {}", e);
             };
             HttpResponse::NoContent().finish()
         }
-        Err(e) => match e {
-            sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
-                PostgresDBError::ForeignKeyViolation => {
-                    HttpResponse::Conflict().json("Product is licensed to some user or company")
-                }
+        Err(e) => {
+            log::debug!("Couldnt delete product: {}", e);
+            match e {
+                sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
+                    PostgresDBError::ForeignKeyViolation => {
+                        HttpResponse::Conflict().json("Product is licensed to some user or company")
+                    }
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                },
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-            },
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+            }
+        }
     }
 }

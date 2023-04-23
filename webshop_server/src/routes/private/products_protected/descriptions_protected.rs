@@ -21,6 +21,7 @@ use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Respon
 use image::ImageError;
 use log::{error, warn};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
 
@@ -124,9 +125,12 @@ async fn delete_description_component(
     };
     if let Some(path) = img_path {
         if let Err(e) = img_multipart::remove_image(&path) {
-            error!("Error while deleting image: {}.", e);
-            warn!("Image file may be left in the file system.");
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+            match e.kind() {
+                std::io::ErrorKind::NotFound => {} // Image already deleted
+                _ => {
+                    error!("Couldnt remove image from file system: {}", e);
+                }
+            }
         }
     }
     HttpResponse::NoContent().finish()
