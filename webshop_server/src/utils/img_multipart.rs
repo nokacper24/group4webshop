@@ -71,8 +71,7 @@ pub async fn extract_image_and_texts_from_multipart(
             extracted_image = extract_image_from_field_function(field).await?;
         } else if expected_fields.iter().any(|field| field == &name) {
             let field_name = String::from(name);
-            let mut field_content = String::new();
-            extract_text_field(field, &mut field_content).await?;
+            let field_content = extract_text_field_function(field).await?;
             fields_found.insert(field_name, field_content);
         } else {
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
@@ -183,7 +182,7 @@ async fn extract_image_from_field_function(
 
 async fn extract_text_field_function(
     field: &mut actix_multipart::Field,
-) -> Result<Option<String>, ImageExtractorError> {
+) -> Result<String, ImageExtractorError> {
     let mut field_content = String::new();
     while let Some(chunk) = field.next().await {
         let data = match chunk {
@@ -196,7 +195,7 @@ async fn extract_text_field_function(
         };
         field_content.push_str(string);
     }
-    Ok(Some(field_content))
+    Ok(field_content)
 }
 
 /// Parses an image buffer into a `DynamicImage`.
