@@ -109,6 +109,7 @@ pub async fn extract_image_and_texts_from_multipart(
 /// # Arguments
 /// * `field` - The multipart field to extract the text from.
 /// * `text_field` - Mut string ref to write found text to.
+#[deprecated]
 async fn extract_text_field(
     field: &mut actix_multipart::Field,
     text_field: &mut String,
@@ -132,6 +133,7 @@ async fn extract_text_field(
 /// * `field` - The multipart field to extract the image from.
 /// * `image_buffer` - The buffer to write the image data to.
 /// * `file_name` - Mut string ref to write the file name to.
+#[deprecated]
 async fn extract_image_from_field(
     field: &mut actix_multipart::Field,
     image_buffer: &mut Vec<u8>,
@@ -158,6 +160,47 @@ async fn extract_image_from_field(
         }
     }
     Ok(())
+}
+
+async fn extract_image_from_field_function(
+    field: &mut actix_multipart::Field,
+) -> Result<Option<(Vec<u8>, String)>, ImageExtractorError> {
+    let mut file_name = String::new();
+    let mut image_buffer = Vec::new();
+    file_name.push_str(match field.content_disposition().get_filename() {
+        Some(name) => name,
+        None => return Ok(None), // no file name found, no image
+    });
+    while let Some(chunk) = field.next().await {
+        let data = match chunk {
+            Ok(data) => data,
+            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+        };
+        if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
+            return Err(ImageExtractorError::FileTooLarge);
+        } else {
+            image_buffer.extend_from_slice(&data);
+        }
+    }
+    Ok(Some((image_buffer, file_name)))
+}
+
+async fn extract_text_field_function(
+    field: &mut actix_multipart::Field,
+) -> Result<Option<String>, ImageExtractorError> {
+    let mut field_content = String::new();
+    while let Some(chunk) = field.next().await {
+        let data = match chunk {
+            Ok(data) => data,
+            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+        };
+        let string = match std::str::from_utf8(&data) {
+            Ok(s) => s,
+            Err(e) => return Err(ImageExtractorError::Utf8Error(e)),
+        };
+        field_content.push_str(string);
+    }
+    Ok(Some(field_content))
 }
 
 /// Parses an image buffer into a `DynamicImage`.
