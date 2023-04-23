@@ -190,12 +190,12 @@ pub async fn delete_testimonial(
 
 /// Returns all testimonial author image paths for a specific product.
 /// Useful for deleting the images from the file system when deleting a product.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `product_id` - The id of the product
-/// 
+///
 /// # Returns
 /// * `Result<Vec<String>, sqlx::Error>` - Vector of image paths.
 pub async fn get_all_image_paths(

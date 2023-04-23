@@ -11,7 +11,7 @@ use utoipa::{OpenApi, ToSchema};
 pub mod descriptions_protected;
 
 use crate::{
-    data_access::{error_handling::PostgresDBError, user, testimonial},
+    data_access::{error_handling::PostgresDBError, user},
     {
         data_access::product::{self, Product},
         utils::{
@@ -554,7 +554,8 @@ pub async fn delete_product(
         Ok(images) => images,
         Err(e) => {
             log::error!("Couldnt get all image paths: {}", e);
-            return HttpResponse::InternalServerError().json("Internal Server Error")},
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
     };
 
     match product::delete_product(&pool, &product_id).await {

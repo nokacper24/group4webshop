@@ -19,9 +19,9 @@ use crate::{
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageError;
-use log::{error, warn};
+use log::error;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+
 use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
 
