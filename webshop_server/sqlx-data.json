@@ -375,6 +375,26 @@
     },
     "query": "UPDATE description_component\n        SET priority = $1\n        WHERE component_id = $2;\n        "
   },
+  "2268fe884de195e26c1e13d58458c58cc7d0c205925f799fd838c5543a486381": {
+    "describe": {
+      "columns": [
+        {
+          "name": "main_image",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT main_image\n        FROM product\n        WHERE product_id = $1"
+  },
   "27e613e554e7728cee8fe9f1b4b8237622a24c9be9db23a8508a9bba3ba084da": {
     "describe": {
       "columns": [
@@ -469,80 +489,6 @@
       }
     },
     "query": "UPDATE app_user\n                SET role = $1\n                WHERE user_id = $2"
-  },
-  "2d85db5621b2fbb7a628622134463cca40a06e20a0205b9d901ef16584b1d03a": {
-    "describe": {
-      "columns": [
-        {
-          "name": "component_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "priority",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "full_width",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "product_id",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "text_id?",
-          "ordinal": 4,
-          "type_info": "Int4"
-        },
-        {
-          "name": "text_title?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "paragraph?",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "image_id",
-          "ordinal": 7,
-          "type_info": "Int4"
-        },
-        {
-          "name": "image_path?",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "alt_text?",
-          "ordinal": 9,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT component_id, priority, full_width, product_id,\n        description_component.text_id AS \"text_id?\",\n        text_title AS \"text_title?\", paragraph AS \"paragraph?\",\n        description_component.image_id, image_path AS \"image_path?\",\n        alt_text AS \"alt_text?\"\n        FROM description_component\n        FULL JOIN product_text ON  description_component.text_id = product_text.text_id\n        FULL JOIN product_image ON description_component.image_id = product_image.image_id\n        WHERE description_component.component_id = $1;"
   },
   "330a4127f3610346b0a10972bae6ea1e21a1f315440b65e2efe5a1f3facbf5f6": {
     "describe": {
@@ -696,6 +642,26 @@
     },
     "query": "INSERT INTO invite_user (id, user_id, company_user_id)\n        VALUES ($1, $2, $3)"
   },
+  "399d4b1603e685918d299ccf9e325d6635463b92823540ed0d8d47108a03cf7a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "author_pic",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT author_pic\n        FROM testimonial\n        WHERE product_id = $1"
+  },
   "39e7e0d733bf33d750a9cbfa0fa1658fc4cc69ce69f2ac31cb4c11ee29bc4579": {
     "describe": {
       "columns": [],
@@ -737,11 +703,25 @@
     },
     "query": "INSERT INTO user_license(license_id, user_id)\n                VALUES ($1, $2)"
   },
-  "4e858952ff4757e449c794c832ee28b25bb2bd78078669b13abf5f615cb4522a": {
+  "586c6bee80882b2f12c1f532d539f02ee324964a038769dfc0e14140d7575e88": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Int4"
+        ]
+      }
+    },
+    "query": "UPDATE product_text\n        SET text_title = $1, paragraph = $2\n        WHERE text_id = $3;"
+  },
+  "5a02794f3977e4c5d494665acf180b3b503da647074ee3e73202af714c6c47e2": {
     "describe": {
       "columns": [
         {
-          "name": "text_id",
+          "name": "text_id?",
           "ordinal": 0,
           "type_info": "Int4"
         },
@@ -768,21 +748,7 @@
         ]
       }
     },
-    "query": "INSERT INTO product_text (text_title, paragraph)\n        VALUES ($1, $2)\n        RETURNING *;"
-  },
-  "586c6bee80882b2f12c1f532d539f02ee324964a038769dfc0e14140d7575e88": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Int4"
-        ]
-      }
-    },
-    "query": "UPDATE product_text\n        SET text_title = $1, paragraph = $2\n        WHERE text_id = $3;"
+    "query": "INSERT INTO product_text (text_title, paragraph)\n        VALUES ($1, $2)\n        RETURNING text_id as \"text_id?\", text_title, paragraph;"
   },
   "5e2bee687d49ca943f2b4b291c2dea96851f84727c37870f14384b48475882cc": {
     "describe": {
@@ -1328,39 +1294,6 @@
     },
     "query": "DELETE FROM testimonial\n        WHERE product_id = $1 AND testimonial_id = $2\n        RETURNING *"
   },
-  "80a8788fbf7f9d1223b41ccd12b0d28dac461866d22689a828c4b432e4874d33": {
-    "describe": {
-      "columns": [
-        {
-          "name": "image_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "image_path",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "alt_text",
-          "ordinal": 2,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "INSERT INTO product_image (image_path, alt_text)\n        VALUES ($1, $2)\n        RETURNING *;"
-  },
   "816483c8101ec901c8ad07a7c426aa3cff8ae0d9d0b74b0bfc20f7cc74bdad42": {
     "describe": {
       "columns": [
@@ -1446,6 +1379,39 @@
       }
     },
     "query": "SELECT *\n        FROM license"
+  },
+  "8c1e4fdccea2ae56a317a2c785be049ea37c2e2dca2427601d8a2db74fb6c0a8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "image_id?",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "image_path",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "alt_text",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO product_image (image_path, alt_text)\n        VALUES ($1, $2)\n        RETURNING image_id as \"image_id?\", image_path, alt_text;"
   },
   "906f0705531ed0cbe32c621d36fd67faeb669cedef709164af052e3b25813cd5": {
     "describe": {
