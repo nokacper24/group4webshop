@@ -1,4 +1,4 @@
-import { RefObject, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 
 /**
  * Props for the RowEditPopup component.
@@ -18,21 +18,65 @@ let imageRef: RefObject<HTMLInputElement>;
 let titleRef: RefObject<HTMLInputElement>;
 let altTextRef: RefObject<HTMLTextAreaElement>;
 let contentRef: RefObject<HTMLTextAreaElement>;
-let props: RowEditPopupProps = {
-  image: false,
-  title: undefined,
-  content: undefined,
-  informationCallBack: () => {},
-};
+let updatePropsFunc: (newProps: RowEditPopupProps) => void;
 export default function RowEditPopup() {
   popupRef = useRef(null);
   imageRef = useRef(null);
   titleRef = useRef(null);
   contentRef = useRef(null);
 
+  let [props, setProps] = useState<RowEditPopupProps>({
+    image: false,
+    title: undefined,
+    content: undefined,
+    informationCallBack: () => {},
+  });
+
+  const updateProps = (newProps: RowEditPopupProps) => {
+    setProps(newProps);
+    imageRef.current && newProps.image
+      ? (imageRef.current.value = newProps.content ? newProps.content : "")
+      : undefined; //TODO: Implement "Something has gone wrong"
+    titleRef.current
+      ? (titleRef.current.value = newProps.title ? newProps.title : "")
+      : undefined; //TODO: Implement "Something has gone wrong"
+    contentRef.current
+      ? (contentRef.current.value = newProps.content ? newProps.content : "")
+      : undefined; //TODO: Implement "Something has gone wrong"
+  };
+
+  const save = () => {
+    let content: string = props.image
+      ? imageRef.current
+        ? imageRef.current.value
+        : ""
+      : contentRef.current?.value
+      ? contentRef.current.value
+      : "";
+    props.informationCallBack(
+      props.image,
+      titleRef.current?.value ? titleRef.current.value : "",
+      content
+    );
+    console.log(imageRef.current?.value);
+    hidePopup();
+  };
+
+  let changeStateButtonText = props.image
+    ? "Change to paragraph"
+    : "Change to image";
+
+  function changeImageState() {
+    setProps({ ...props, image: !props.image });
+  }
+
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
+
+  useEffect(() => {
+    updatePropsFunc = updateProps;
+  });
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>
@@ -86,7 +130,13 @@ export default function RowEditPopup() {
               />
             </>
           )}
-
+          <button
+            className="hero-button popup-button"
+            type="button"
+            onClick={() => changeImageState()}
+          >
+            {changeStateButtonText}
+          </button>
           <div>
             <button
               className="hero-button popup-button"
@@ -110,26 +160,9 @@ export default function RowEditPopup() {
 }
 
 export function showPopup(inProps: RowEditPopupProps) {
-  props = inProps;
+  console.log(inProps.content);
+  updatePropsFunc(inProps);
   popupRef.current?.classList.add("popup-visible");
-  imageRef.current
-    ? (imageRef.current.value = props.content ? props.content : "")
-    : undefined; //TODO: Implement "Something has gone wrong"
-  titleRef.current
-    ? (titleRef.current.value = props.title ? props.title : "")
-    : undefined; //TODO: Implement "Something has gone wrong"
-  contentRef.current
-    ? (contentRef.current.value = props.content ? props.content : "")
-    : undefined; //TODO: Implement "Something has gone wrong"
-}
-
-function save() {
-  props.informationCallBack(
-    props.image,
-    titleRef.current?.value ? titleRef.current.value : "",
-    contentRef.current?.value ? contentRef.current.value : ""
-  );
-  hidePopup();
 }
 
 function hidePopup() {
