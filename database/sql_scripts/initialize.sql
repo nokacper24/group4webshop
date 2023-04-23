@@ -99,7 +99,7 @@ CREATE TABLE testimonial (
     text TEXT NOT NULL,
     author_pic TEXT NOT NULL,
     product_id TEXT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES product(product_id)
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
 );
 
 CREATE TABLE product_image (
