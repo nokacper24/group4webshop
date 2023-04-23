@@ -19,5 +19,4 @@ pub fn private(cfg: &mut web::ServiceConfig) {
     cfg.configure(me::configure);
     cfg.configure(users_protected::configure);
     cfg.configure(testimonials_protected::configure);
-    cfg.default_service(web::route().to(super::api_not_found));
 }

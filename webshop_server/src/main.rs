@@ -84,7 +84,7 @@ async fn main() -> std::io::Result<()> {
             .configure(openapi_doc::configure_opanapi)
             .service(image_service)
             .service(static_files)
-            .default_service(web::route().to(routes::not_found))
+            .default_service(web::route().to(routes::resource_not_found))
     });
 
     match server.bind_rustls(address.clone(), tls_config) {

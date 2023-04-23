@@ -29,11 +29,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(delete_product);
     cfg.service(update_product);
     cfg.service(update_availability);
-    cfg.service(
-        web::scope("/products")
-            .configure(descriptions_protected::configure)
-            .default_service(web::route().to(crate::routes::api_not_found)),
-    );
+    cfg.service(web::scope("/products").configure(descriptions_protected::configure));
 }
 
 #[derive(OpenApi)]
