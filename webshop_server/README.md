@@ -27,6 +27,7 @@ RESOURCES_DIR="/resources/images"
 DATABASE_URL=postgresql://user:password@url/db_name
 HOST=localhost # optionbal, default 'localhost'
 PORT=8080 # optional, default '8080'
+RUST_LOG=info,sqlx=warn # optional, default 'info,sqlx=warn' - set log level
 ALLOWED_ORIGINS=https://group04.web-tek.ninja # list of allowed origins, separated with `,`
 CERT_PATH=certificate.pem # path to certificate
 PRIV_KEY_PATH=privatekey.pem # path to privatekey

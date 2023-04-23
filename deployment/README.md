@@ -24,6 +24,7 @@ The file should contain the following variables:
 DB_PASSWORD=password # database root password
 BACKEND_USR_PASS=password # backend user password
 IMG_TAG=main # which docker image tag should be used, either main or dev
+RUST_LOG=info,sqlx=warn # set the log level - optional, default is 'info,sqlx=warn
 ```
 
 **Note:** Cert path, port and other variables [required by Webshop Server](../webshop_server/README.md#environmental-variable-needed-to-run) are hardcoded in the [docker-compose.yml](docker-compose.yml) file, to simplify our deployment process.
