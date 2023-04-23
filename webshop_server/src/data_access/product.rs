@@ -9,6 +9,8 @@ use sqlx::{
 };
 use utoipa::ToSchema;
 
+use crate::data_access::testimonial;
+
 pub mod description;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -245,4 +247,34 @@ pub async fn product_exists(pool: &Pool<Postgres>, product_id: &str) -> Result<b
     .fetch_optional(pool)
     .await?;
     Ok(product.is_some())
+}
+
+/// Returns all image aths related to the product.
+/// Incluides the main image, testimonial author images and description component images.
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product
+/// 
+/// # Returns
+/// * `Result<Vec<String>, sqlx::Error>` - Vector of image paths.
+pub async fn get_all_image_paths(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<Vec<String>, sqlx::Error> {
+    // Get main image
+    let main_image = query!(
+        r#"SELECT main_image
+        FROM product
+        WHERE product_id = $1"#,
+        product_id
+    ).fetch_one(pool).await?.main_image;
+    let testimonil_images = testimonial::get_all_image_paths(pool, product_id).await?;
+    let description_images = description::get_all_image_paths(pool, product_id).await?;
+
+    let mut images = vec![main_image];
+    images.extend(testimonil_images);
+    images.extend(description_images);
+    Ok(images)
 }
