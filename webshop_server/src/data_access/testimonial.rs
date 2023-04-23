@@ -2,7 +2,7 @@
 //! This module contains all the functions that are used to access and manipulate the testimonial table in the database.
 use serde::{Deserialize, Serialize};
 use sqlx::{
-    query_as, {Pool, Postgres},
+    query, query_as, {Pool, Postgres},
 };
 use utoipa::ToSchema;
 
@@ -186,4 +186,31 @@ pub async fn delete_testimonial(
     .fetch_one(pool)
     .await?;
     Ok(testimonial)
+}
+
+/// Returns all testimonial author image paths for a specific product.
+/// Useful for deleting the images from the file system when deleting a product.
+/// 
+/// # Arguments
+/// 
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product
+/// 
+/// # Returns
+/// * `Result<Vec<String>, sqlx::Error>` - Vector of image paths.
+pub async fn get_all_image_paths(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<Vec<String>, sqlx::Error> {
+    let rows = query!(
+        r#"SELECT author_pic
+        FROM testimonial
+        WHERE product_id = $1"#,
+        product_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let paths = rows.iter().map(|row| row.author_pic.clone()).collect();
+    Ok(paths)
 }
