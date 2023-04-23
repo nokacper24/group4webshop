@@ -92,63 +92,11 @@ pub async fn extract_image_and_texts_from_multipart(
     Ok((extracted_image, fields_found))
 }
 
-/// Extracts a text field from a multipart field.
-/// # Arguments
-/// * `field` - The multipart field to extract the text from.
-/// * `text_field` - Mut string ref to write found text to.
-#[deprecated]
-async fn extract_text_field(
-    field: &mut actix_multipart::Field,
-    text_field: &mut String,
-) -> Result<(), ImageExtractorError> {
-    while let Some(chunk) = field.next().await {
-        let data = match chunk {
-            Ok(data) => data,
-            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-        };
-        let string = match std::str::from_utf8(&data) {
-            Ok(s) => s,
-            Err(e) => return Err(ImageExtractorError::Utf8Error(e)),
-        };
-        text_field.push_str(string);
-    }
-    Ok(())
-}
-
 /// Extracts an image from a multipart field.
 /// # Arguments
 /// * `field` - The multipart field to extract the image from.
-/// * `image_buffer` - The buffer to write the image data to.
-/// * `file_name` - Mut string ref to write the file name to.
-#[deprecated]
-async fn extract_image_from_field(
-    field: &mut actix_multipart::Field,
-    image_buffer: &mut Vec<u8>,
-    file_name: &mut String,
-) -> Result<(), ImageExtractorError> {
-    file_name.push_str(match field.content_disposition().get_filename() {
-        Some(name) => name,
-        None => {
-            return Err(ImageExtractorError::MissingContentDisposition(
-                "filename".to_string(),
-            ))
-        }
-    });
-
-    while let Some(chunk) = field.next().await {
-        let data = match chunk {
-            Ok(data) => data,
-            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-        };
-        if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
-            return Err(ImageExtractorError::FileTooLarge);
-        } else {
-            image_buffer.extend_from_slice(&data);
-        }
-    }
-    Ok(())
-}
-
+/// # Returns
+/// * 'Option<ExtractedImageData>' - The extracted image data, or 'None' if no image was found.
 async fn extract_image_from_field_function(
     field: &mut actix_multipart::Field,
 ) -> Result<Option<ExtractedImageData>, ImageExtractorError> {
@@ -180,6 +128,11 @@ async fn extract_image_from_field_function(
     }
 }
 
+/// Extracts a text field from a multipart field.
+/// # Arguments
+/// * `field` - The multipart field to extract the text from.
+/// # Returns
+/// A string containing the text found in the field.
 async fn extract_text_field_function(
     field: &mut actix_multipart::Field,
 ) -> Result<String, ImageExtractorError> {
