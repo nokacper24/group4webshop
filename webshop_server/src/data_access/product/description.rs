@@ -3,8 +3,8 @@
 //!
 //! Some of the functions in this module look a little messy, that's because of the complex model of description components.  
 //! DescriptionComponent is a wrapper for either TextComponent or ImageComponent. Data is divided into three tables in the database.  
-//! In order to retrieve this data in s usefull form, or alter it in some way, we cannot use sqlx's query_as! macros, which usually make things trivial.  
-//! We had to instead use query! macro and then manually map the rows returned into the structs.  
+//! In order to retrieve this data in a usefull form, or alter it in some way, we cannot use sqlx's query_as! macros, which usually makes things trivial.  
+//! We had to instead use query! macro and then map the rows returned into the structs.  
 //! Its implementation is a bit messy, but it works just fine. It is still type safe abd queries are parametrized, so there is no risk of sql injection.
 
 use serde::{Deserialize, Serialize};
