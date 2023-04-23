@@ -50,8 +50,7 @@ pub async fn extract_image_and_texts_from_multipart(
     mut payload: Multipart,
     expected_fields: Vec<&str>,
 ) -> Result<(Option<ExtractedImageData>, HashMap<String, String>), ImageExtractorError> {
-    let mut file_name = String::new();
-    let mut image_buffer = Vec::new();
+    let mut extracted_image: Option<ExtractedImageData> = None;
     // map of field name to field value, both strings
     let mut fields_found: HashMap<String, String> = HashMap::new();
 
@@ -68,9 +67,8 @@ pub async fn extract_image_and_texts_from_multipart(
                 ))
             }
         };
-
         if name == "image" {
-            extract_image_from_field(field, &mut image_buffer, &mut file_name).await?;
+            extracted_image = extract_image_from_field_function(field).await?;
         } else if expected_fields.iter().any(|field| field == &name) {
             let field_name = String::from(name);
             let mut field_content = String::new();
@@ -80,16 +78,6 @@ pub async fn extract_image_and_texts_from_multipart(
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
         }
     }
-
-    let extracted_img = if file_name.trim().is_empty() || image_buffer.is_empty() {
-        // no file_name or no data written to image_buffer - no image was found
-        None
-    } else {
-        Some(ExtractedImageData {
-            img_buffer: image_buffer,
-            file_name,
-        })
-    };
 
     // check if all expected text fields were found
     if fields_found.len() != expected_fields.len() {
@@ -102,7 +90,7 @@ pub async fn extract_image_and_texts_from_multipart(
         }
     }
 
-    Ok((extracted_img, fields_found))
+    Ok((extracted_image, fields_found))
 }
 
 /// Extracts a text field from a multipart field.
@@ -164,7 +152,7 @@ async fn extract_image_from_field(
 
 async fn extract_image_from_field_function(
     field: &mut actix_multipart::Field,
-) -> Result<Option<(Vec<u8>, String)>, ImageExtractorError> {
+) -> Result<Option<ExtractedImageData>, ImageExtractorError> {
     let mut file_name = String::new();
     let mut image_buffer = Vec::new();
     file_name.push_str(match field.content_disposition().get_filename() {
@@ -182,7 +170,15 @@ async fn extract_image_from_field_function(
             image_buffer.extend_from_slice(&data);
         }
     }
-    Ok(Some((image_buffer, file_name)))
+    if file_name.trim().is_empty() || image_buffer.is_empty() {
+        // no file_name or no data written to image_buffer - no image was found
+        Ok(None)
+    } else {
+        Ok(Some(ExtractedImageData {
+            img_buffer: image_buffer,
+            file_name,
+        }))
+    }
 }
 
 async fn extract_text_field_function(
