@@ -57,7 +57,7 @@ cargo run
 ```
 Regardless of the way you choose to run, you will need the following:
 - PostgreSQL database running, with the database schema created. Refer to [database README](../database/README.md) for more information.
-- SSL certificate and private key.
+- SSL certificate and private key - for development, you can use a self-signed certificate.
 - Environmental variables set. Refer to [environmental variables to run](#environmental-variable-needed-to-run).
 
 ### Build with no database
