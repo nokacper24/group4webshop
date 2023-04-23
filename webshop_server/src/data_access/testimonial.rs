@@ -60,14 +60,14 @@ impl PartialTestimonial {
 }
 
 /// Returns all testimonials for a specific product
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `product_id` - The id of the product
-/// 
+///
 /// # Returns
-/// 
+///
 /// * `Result<Vec<Testimonial>, sqlx::Error>` - A vector of testimonials
 pub async fn get_testimonials_by_product(
     pool: &Pool<Postgres>,
@@ -86,9 +86,9 @@ pub async fn get_testimonials_by_product(
 }
 
 /// Returns a specific testimonial for a specific product
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `product_id` - The id of the product
 /// * `testimonial_id` - The id of the testimonial
@@ -111,9 +111,9 @@ pub async fn get_testimonial_by_prod_and_id(
 }
 
 /// Creates a new testimonial for a specific product
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `testimonial` - The testimonial to be created
 pub async fn create_testimonial(
@@ -137,9 +137,9 @@ pub async fn create_testimonial(
 
 /// Update an existing testimonial.
 /// Id is taken from the testimonial struct provided.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `testimonial` - The testimonial to be updated
 pub async fn update_testimonial(
@@ -164,9 +164,9 @@ pub async fn update_testimonial(
 }
 
 /// Delete an existing testimonial
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `pool` - The database connection pool
 /// * `product_id` - The id of the product the testimonial belongs to
 /// * `testimonial_id` - The id of the testimonial
