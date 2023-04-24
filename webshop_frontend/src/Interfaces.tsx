@@ -9,14 +9,21 @@ export interface License {
   product_name: string;
 }
 
+/**
+ * All relevant info about License that might be stored in different table.
+ * Like company name and product name.
+ */
 export interface FullLicenseInfo {
   license_id: number;
-  company_id: number;
-  company_name: string;
-  product_id: string;
-  display_name: string;
   valid: boolean;
+  start_date: Date;
+  end_date: Date;
   amount: number;
+  company_id: number;
+  product_id: string;
+  product_name: string;
+  company_name: string;
+  display_name: string;
 }
 
 export interface User {
