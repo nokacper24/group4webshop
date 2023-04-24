@@ -29,6 +29,7 @@ fn admin_routes_docs() -> Vec<openapi::OpenApi> {
 }
 
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::redirect("/api-doc/swagger-ui", "/api-doc/swagger-ui/").permanent());
     cfg.service(SwaggerUi::new("/api-doc/swagger-ui/{_:.*}").urls(vec![
         (
             Url::new("Public", "/api-doc/public_endpoints.json"),
