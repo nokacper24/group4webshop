@@ -3,14 +3,14 @@ import { User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
   updateNewChanges,
   moveItemBetweenTables,
   moveItemsBetweenTables,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
 
 /**

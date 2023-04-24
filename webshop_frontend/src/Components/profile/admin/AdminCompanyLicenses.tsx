@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
-import { LicenseVital } from "../../../Interfaces";
+import { FullLicenseInfo } from "../../../Interfaces";
 import {
   createSelectTableProps,
   createRowProps,
   moveItemBetweenTables,
   moveItemsBetweenTables,
   updateNewChanges,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
 import { fetchLicensesVital } from "../../../ApiController";
 
@@ -73,7 +73,8 @@ export default function AdminCompanyLicenses() {
   };
 
   /**
-   *  Remove selected licenses from list of valid licenses.
+   * Remove selected licenses from list of valid licenses,
+   * and add to list of invalid licenses.
    *
    * @param indices The indices of the licenses in the list.
    */
@@ -89,6 +90,12 @@ export default function AdminCompanyLicenses() {
     );
   };
 
+  /**
+   * Remove selected licenses from list of invalid licenses,
+   * and add to list of valid licenses.
+   *
+   * @param indices The indices of the licenses in the list.
+   */
   const validateSelectedLicenses = (indices: number[]) => {
     moveItemsBetweenTables(
       indices,
@@ -138,13 +145,7 @@ export default function AdminCompanyLicenses() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
-            // Refresh
-            navigate(0);
-          } else {
-            alert("Something went wrong when saving licenses");
-          }
+          handlePatchLicenseResponse(response);
         })
         .catch(() => alert("Failed to save license validation status"));
     }
@@ -171,15 +172,23 @@ export default function AdminCompanyLicenses() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
-            // Refresh
-            navigate(0);
-          } else {
-            alert("Something went wrong when saving licenses");
-          }
+          handlePatchLicenseResponse(response);
         })
         .catch(() => alert("Failed to save license validation status"));
+    }
+  };
+
+  /**
+   * Handle the response from a PATCH request sent for patching (saving) licenses.
+   *
+   * @param response The response from the fetch request.
+   */
+  const handlePatchLicenseResponse = (response: Response) => {
+    if (response.status == 200) {
+      // Refresh
+      navigate(0);
+    } else {
+      alert("Something went wrong when saving licenses");
     }
   };
 
@@ -190,11 +199,11 @@ export default function AdminCompanyLicenses() {
 
   useEffect(() => {
     fetchLicensesVital()
-      .then((licenses: LicenseVital[]) => {
+      .then((licenses: FullLicenseInfo[]) => {
         let validLicenses: SelectTableRowProps[] = [];
         let invalidLicenses: SelectTableRowProps[] = [];
 
-        licenses.map((license: LicenseVital) => {
+        licenses.map((license: FullLicenseInfo) => {
           let newLicense = createRowProps(license.license_id.toString(), [
             license.license_id.toString(),
             license.company_name,

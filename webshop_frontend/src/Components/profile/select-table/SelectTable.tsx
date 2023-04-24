@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import SelectTableHeader from "./SelectTableHeader";
 import SelectTableRow from "./SelectTableRow";
 import SelectTableOutsideButton from "./SelectTableOutsideButton";
+import { Button, OutsideButton } from "../../../Interfaces";
 
 export type SelectTableProps = {
   header: {
@@ -15,11 +16,8 @@ export type SelectTableProps = {
       text: string;
     }[];
   }[];
-  button: {
-    text: string;
-    action: (index: number) => void;
-  };
-  outsideButtons: { text: string; action: (selectedIndex: number[]) => void }[];
+  button: Button;
+  outsideButtons: OutsideButton[];
 };
 
 export type SelectTableRowProps = {

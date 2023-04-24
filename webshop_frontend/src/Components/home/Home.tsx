@@ -25,12 +25,12 @@ export default function Home() {
       <section className="container">
         <h2>Our values</h2>
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Dignissim
-          enim sit amet venenatis urna cursus eget nunc scelerisque. A lacus
-          vestibulum sed arcu non odio euismod lacinia at. Odio ut sem nulla
-          pharetra diam. Ac tortor dignissim convallis aenean et tortor. Massa
-          eget egestas purus viverra accumsan in nisl nisi.
+          At Proflex Solutions, we are committed to providing businesses with
+          the best products and services to help them succeed. Our core values
+          are customer-centricity, innovation, and transparency. We strive to
+          provide excellent customer service and build lasting relationships
+          with our clients. We are always looking for new ways to innovate and
+          improve our products and services.
         </p>
       </section>
       <section className="container">

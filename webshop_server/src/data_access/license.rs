@@ -9,9 +9,7 @@ use utoipa::ToSchema;
 pub struct License {
     license_id: i32,
     valid: bool,
-    #[schema(value_type = String)]
     start_date: DateTime<Utc>,
-    #[schema(value_type = String)]
     end_date: DateTime<Utc>,
     amount: i32,
     company_id: i32,
@@ -29,13 +27,16 @@ pub struct PartialLicense {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct LicenseVitalInfo {
+pub struct FullLicenseInfo {
     license_id: i32,
-    company_id: i32,
-    company_name: String,
-    product_id: String,
-    display_name: String,
     valid: bool,
+    start_date: DateTime<Utc>,
+    end_date: DateTime<Utc>,
+    amount: i32,
+    company_id: i32,
+    product_id: String,
+    company_name: String,
+    display_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -59,10 +60,10 @@ pub async fn get_licenses(pool: &Pool<Postgres>) -> Result<Vec<License>, sqlx::E
 /// Returns vital info from all licenses
 pub async fn get_licenses_vital_info(
     pool: &Pool<Postgres>,
-) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
+) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
-        LicenseVitalInfo,
-        r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid
+        FullLicenseInfo,
+        r#"SELECT license_id, license.start_date, license.end_date, license.company_id, company_name, license.product_id, display_name, valid, amount
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)"#
@@ -143,4 +144,53 @@ pub async fn update_license_validations(
     transaction.commit().await?;
 
     Ok(())
+}
+
+/// Returns all licenses that a user has access to
+pub async fn get_licenses_for_user(
+    pool: &Pool<Postgres>,
+    user_id: &i32,
+) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
+    let licenses = query_as!(
+        FullLicenseInfo,
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        FROM license
+        JOIN user_license USING (license_id)
+        JOIN product USING (product_id)
+        JOIN company USING (company_id)
+        WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(licenses)
+}
+
+/// Returns all of a user's company's licenses that the user has no access to
+pub async fn get_licenses_for_user_no_access(
+    pool: &Pool<Postgres>,
+    company_id: &i32,
+    user_id: &i32,
+) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
+    let licenses = query_as!(
+        FullLicenseInfo,
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        FROM license
+        JOIN product USING (product_id)
+        JOIN company USING (company_id)
+        WHERE company_id = $1
+        AND license_id NOT IN(
+            SELECT license_id
+            FROM license
+            JOIN user_license USING (license_id)
+            WHERE user_id = $2)
+        "#,
+        company_id,
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(licenses)
 }

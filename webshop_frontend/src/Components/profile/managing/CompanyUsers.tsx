@@ -3,9 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "./SelectTable";
+} from "../select-table/SelectTable";
 import { User } from "../../../Interfaces";
-import { createSelectTableProps, createRowProps } from "./SelectTableFunctions";
+import {
+  createSelectTableProps,
+  createRowProps,
+} from "../select-table/SelectTableFunctions";
 import { fetchCompanyUsers } from "../../../ApiController";
 
 /**

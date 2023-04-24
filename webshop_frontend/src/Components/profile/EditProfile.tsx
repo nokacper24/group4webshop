@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MeUser, User } from "../../Interfaces";
-import {
-  fetchUser,
-  resetPassword,
-  patchPartialUser,
-} from "../../ApiController";
+import { MeUser } from "../../Interfaces";
+import { resetPassword, patchPartialUser } from "../../ApiController";
 
 interface Props {
   user: MeUser;

@@ -91,7 +91,7 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let user = user::get_user_by_id(&pool, id).await;
+    let user = user::get_user_by_id(&pool, &id).await;
 
     //parse to json
     match user {
@@ -508,7 +508,7 @@ struct LicenseUsers {
     context_path = "/api/priv",
     responses(
     (status = 201, description = "License user successfully added", body = Vec<User>),
-    (status = 400, description = "License user already existed"),
+    (status = 409, description = "License user already existed"),
     (status = 500, description = "Internal Server Error"),
     )
 )]

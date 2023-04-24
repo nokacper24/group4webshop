@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import SelectTableButton from "./SelectTableButton";
+import { Button } from "../../../Interfaces";
 
 /**
  * rowIndex: the row's index in the list, starts at 0.
@@ -15,10 +16,7 @@ export type RowProps = {
   }[];
   updateSelected: (checked: boolean, index: number) => void;
   selectAll: string;
-  button: {
-    text: string;
-    action: (index: number) => void;
-  };
+  button: Button;
 };
 
 /**
@@ -46,12 +44,8 @@ export default function SelectTableRow(props: RowProps) {
   return (
     <tr className={`${selected ? "selected-row" : ""}`}>
       <td>
-        <label>Select</label>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={() => toggleSelect()}
-        />
+        <label className="hidden-label">Select</label>
+        <input type="checkbox" checked={selected} onChange={toggleSelect} />
       </td>
       {props.columns.map((column, index) => (
         <td key={index}>{column.text}</td>

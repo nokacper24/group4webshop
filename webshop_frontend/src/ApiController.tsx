@@ -2,7 +2,7 @@ import {
   Company,
   Description,
   License,
-  LicenseVital,
+  FullLicenseInfo,
   MeUser,
   PartialUser,
   Product,
@@ -131,9 +131,37 @@ export const fetchLicense = async (licenseId: string) => {
  * @returns All licenses' vital information.
  */
 export const fetchLicensesVital = async () => {
-  const response = await fetch(`${baseUrl}/api/licenses_vital`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses_vital`);
   if (response.ok) {
-    const data: LicenseVital[] = await response.json();
+    const data: FullLicenseInfo[] = await response.json();
+  return data;
+};
+
+/**
+ * Get all licenses that a specific user has access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The user's licenses.
+ */
+export const fetchLicensesForUser = async (userId: string) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/user_licenses/user/${userId}`
+  );
+  const data: FullLicenseInfo[] = await response.json();
+  return data;
+};
+
+/**
+ * Get all company licenses for a specific user that they have no access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The company's licenses the user doesn't have.
+ */
+export const fetchLicensesForUserNoAccess = async (userId: string) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/user_licenses/user/${userId}/no_access`
+  );
+  const data: FullLicenseInfo[] = await response.json();
     return data;
   } else {
     throw new Error("Could not fetch licenses.");
@@ -162,7 +190,7 @@ export const postLicense = async (license: License) => {
  * @returns All companies.
  */
 export const fetchCompanies = async () => {
-  const response = await fetch(`${baseUrl}/api/companies`);
+  const response = await fetch(`${baseUrl}/api/priv/companies`);
   if (response.ok) {
     const data: Company[] = await response.json();
     return data;
@@ -179,7 +207,7 @@ export const fetchCompanies = async () => {
  */
 export const fetchCompanyLicenses = async (companyId: number) => {
   const response = await fetch(
-    `${baseUrl}/api/companies/${companyId}/licenses`
+    `${baseUrl}/api/priv/companies/${companyId}/licenses`
   );
   if (response.ok) {
     const data: License[] = await response.json();

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 /**
  * The props of the toggle button component.
- * The id is used to identify the button and should be unique.
+ * The ID is used to identify the button and should be unique.
  * The handleClick function is called when the button is clicked.
  */
 export type ToggleButtonProps = {
@@ -12,17 +12,17 @@ export type ToggleButtonProps = {
 };
 
 /**
- * A toggle button component. The button is a switch that can be toggled on or off.
- * The parameter handleClick is called when the button is clicked.
+ * A Toggle Button component.
+ * The button is a switch that can be toggled on or off.
  *
- * @param props the props of the component
- * @returns the toggle button component
+ * @param props The props of the component.
+ * @returns The toggle button component.
  */
-export function ToggleButton(props: ToggleButtonProps) {
+export default function ToggleButton(props: ToggleButtonProps) {
   const [checked, setChecked] = useState<boolean>(props.checked);
 
   return (
-    <label className="toggle-switch" htmlFor={props.id}>
+    <label className="toggle-button" htmlFor={props.id}>
       <input
         type="checkbox"
         id={props.id}

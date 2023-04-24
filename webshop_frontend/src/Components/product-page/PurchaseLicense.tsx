@@ -67,7 +67,7 @@ export default function PurchaseLicense() {
     if (validateForm()) {
       let license: License = {
         license_id: NaN,
-        company_id: 1 /* TODO: Get real company */,
+        company_id: NaN /* TODO: Get real company */,
         product_id: product.product_id,
         product_name: product.display_name,
         start_date: new Date(),

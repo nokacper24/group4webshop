@@ -9,6 +9,7 @@ import { MouseEvent as ReactMouseEvent } from "react";
 export default function RegisterUser() {
   return (
     <>
+    <>
       <p>Fill out all the fields to create your account.</p>
 
       <label htmlFor="create-account_email">E-mail</label>

@@ -9,64 +9,68 @@ import { MouseEvent as ReactMouseEvent } from "react";
 export default function RegisterCompany() {
   return (
     <>
-      <p>Fill out all the fields to create your account.</p>
+      <>
+        <p>Fill out all the fields to create your account.</p>
 
-      <label htmlFor="create-account_email">E-mail</label>
-      <input
-        id="create-account_email"
-        name="email"
-        value="user@company.com" /* TODO: Fill value from URL */
-        required
-        disabled
-      />
+        <label htmlFor="create-account_email">E-mail</label>
+        <input
+          id="create-account_email"
+          name="email"
+          value="user@company.com" /* TODO: Fill value from URL */
+          required
+          disabled
+        />
 
-      <label htmlFor="create-account_company-name">Company name</label>
-      <input
-        id="create-account_company-name"
-        name="company-name"
-        type="text"
-        required
-      />
+        <label htmlFor="create-account_company-name">Company name</label>
+        <input
+          id="create-account_company-name"
+          name="company-name"
+          type="text"
+          required
+        />
 
-      <label htmlFor="create-account_company-address">Company address</label>
-      <input
-        id="create-account_company-address"
-        name="company-address"
-        type="text"
-        required
-      />
+        <label htmlFor="create-account_company-address">Company address</label>
+        <input
+          id="create-account_company-address"
+          name="company-address"
+          type="text"
+          required
+        />
 
-      <label htmlFor="create-account_password">Password</label>
-      <input
-        id="create-account_password"
-        name="password"
-        type="password"
-        required
-      />
+        <label htmlFor="create-account_password">Password</label>
+        <input
+          id="create-account_password"
+          name="password"
+          type="password"
+          required
+        />
 
-      <label htmlFor="create-account_confirm-password">Confirm password</label>
-      <input
-        id="create-account_confirm-password"
-        name="confirm-password"
-        type="password"
-        required
-      />
-
-      <div className="checkbox-input">
-        <input id="accept-terms" type="checkbox" required />
-        <label htmlFor="accept-terms">
-          I have read and agree to the <a href="#!">terms of service</a>.
+        <label htmlFor="create-account_confirm-password">
+          Confirm password
         </label>
-      </div>
+        <input
+          id="create-account_confirm-password"
+          name="confirm-password"
+          type="password"
+          required
+        />
 
-      <button
-        className="default-button submit-button m-t-1"
-        type="submit"
-        onClick={(event) => validateForm(event)}
-      >
-        Register
-      </button>
-      <p className="form-alert"></p>
+        <div className="checkbox-input">
+          <input id="accept-terms" type="checkbox" required />
+          <label htmlFor="accept-terms">
+            I have read and agree to the <a href="#!">terms of service</a>.
+          </label>
+        </div>
+
+        <button
+          className="default-button submit-button m-t-1"
+          type="submit"
+          onClick={(event) => validateForm(event)}
+        >
+          Register
+        </button>
+        <p className="form-alert"></p>
+      </>
     </>
   );
 }
