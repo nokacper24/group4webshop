@@ -1346,7 +1346,7 @@ input:checked + .slider:before {
   z-index: 5;
   background-color: #3d3d3d7c;
   position: fixed;
-  top: 0;
+  inset: 0;
   display: none;
   justify-content: center;
   align-items: center;
@@ -1369,6 +1369,7 @@ input:checked + .slider:before {
 }
 
 .popup-button {
+  display: inline;
   margin-block: 0.3em;
   margin-inline: 0.5em;
 }
