@@ -36,7 +36,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   }
 
   return (
-    <React.Fragment>
+    <>
       <tr className="row-header">
         <td>{license.product_name}</td>
         <td>{0}</td>
@@ -70,6 +70,6 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
           </p>
         </td>
       </tr>
-    </React.Fragment>
+    </>
   );
 }

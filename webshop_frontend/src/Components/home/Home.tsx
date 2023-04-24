@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import Partners from "./Partners";
 
@@ -10,7 +9,7 @@ import Partners from "./Partners";
  */
 export default function Home() {
   return (
-    <React.Fragment>
+    <>
       <section className="hero">
         <div className="hero-inner">
           <h1 className="hero-title">ProFlex</h1>
@@ -38,6 +37,6 @@ export default function Home() {
         <h2>Our partners</h2>
         <Partners />
       </section>
-    </React.Fragment>
+    </>
   );
 }

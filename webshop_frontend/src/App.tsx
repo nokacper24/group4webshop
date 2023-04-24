@@ -9,7 +9,7 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import PageNotFound from "./Components/PageNotFound";
+import ManagePage from "./Components/profile/admin/product-managing/ManagePage";
 
 /**
  * Represents the website content.
@@ -33,7 +33,12 @@ export default function App() {
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
           <Route path="profile/*" element={<Profile />} />
-          <Route path="*" element={<PageNotFound />} />
+          <Route path="product/*" element={<ProductPage />} />
+          <Route
+            path="product/purchase-license"
+            element={<PurchaseLicense />}
+          />
+          <Route path="manage" element={<ManagePage />} />
         </Routes>
       </main>
 

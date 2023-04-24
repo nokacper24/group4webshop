@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Represents the About page.
  *
@@ -7,7 +5,7 @@ import React from "react";
  */
 export default function About() {
   return (
-    <React.Fragment>
+    <>
       <section className="about-us-banner">
         <div className="dark-overlay wrapper-bottom">
           <div className="container left-aligned">
@@ -64,6 +62,6 @@ export default function About() {
           Countryname
         </p>
       </section>
-    </React.Fragment>
+    </>
   );
 }

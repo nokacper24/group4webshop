@@ -20,6 +20,7 @@
   --text-gradient: -35deg, rgba(46, 116, 181, 1) 0%, rgba(95, 139, 5, 1) 100%;
 
   --clr-danger: #bc0000;
+  --clr-highlight-danger: red;
 
   /* Font family variables */
   --ff-primary: 'Open Sans', 'Arial', sans-serif;
@@ -150,6 +151,24 @@ button {
   display: block;
   color: var(--text-primary);
   margin-inline: auto;
+}
+
+.button-container {
+  display: flex;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+
+.bg-danger {
+  background-color: var(--clr-danger);
+}
+
+.bg-danger:is(:focus, :hover){
+  background-color: var(--clr-highlight-danger);
+}
+
+.text-danger {
+  color: var(--clr-danger);
 }
 
 table {
@@ -1104,11 +1123,6 @@ form a:hover {
   display: none;
 }
 
-.button-container {
-  display: flex;
-  gap: 1em;
-}
-
 /* || MANAGE/ADMIN PAGES */
 /* Select Table */
 .table-container {
@@ -1116,10 +1130,6 @@ form a:hover {
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
-}
-
-.button-container {
-  margin-bottom: 1em;
 }
 
 .table-container+.button-container {
@@ -1181,20 +1191,135 @@ form a:hover {
   background-color: hsl(195, 45%, 85%) !important;
 }
 
-.bg-danger {
-  background-color: var(--clr-danger);
-}
-
-.text-danger {
-  color: var(--clr-danger);
-}
-
 .table-text {
   margin-block: 0;
   margin-inline: 0.5em;
   font-weight: bold;
   border-bottom: 1px dotted currentColor;
 }
+
+/* || MANAGE PRODUCTS */
+
+.accordion-header-container {
+  position: relative;
+  --accordion-header-font-size: 1.5rem;
+  --header-icon-width: 2.25rem;
+  --header-button-distance: 1rem;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  font-size: var(--accordion-header-font-size);
+
+  width: 100%;
+  position: relative;
+  height: 3em;
+
+  border: none;
+  background: rgb(207, 207, 207);
+}
+
+.accordion-header > p {
+  margin-block: 0;
+}
+
+.accordion-header > :first-child {
+  margin-right: auto;
+}
+
+.header-icon {
+  width: var(--header-icon-width);
+  display: block;
+}
+
+.overlay-button {
+  position: absolute;
+  top: 0;
+  transform: translateY(25%);
+  border: none;
+  background: transparent;
+}
+
+.accordion-button-icon:hover{
+  fill: #6f6f6f;
+}
+
+.remove-button {
+  right: calc(var(--header-icon-width) + var(--header-button-distance));
+}
+
+.add-button {
+  right: calc(2 * calc(var(--header-icon-width) + var(--header-button-distance)));
+}
+
+.accordion-body {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid black;
+}
+
+.accordion-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+
+  min-height: 2.75rem; /* TODO: Check if this fits or not */
+
+  background-color: rgb(222, 222, 222);
+}
+
+.accordion-body > :not(:last-child) {
+  border-bottom: 1px solid black;
+}
+
+.accordion-row > :first-child {
+  margin-right: auto;
+  margin-left: 1em;
+  margin-block: 0;
+}
+
+.accordion-row > p {
+  width: 16em;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accordion-remove-button {
+  border: none;
+  background-color: transparent;
+  width: 3em;
+}
+
+.accordion-edit-button {
+  border: none;
+  background-color: transparent;
+  width: 3em;
+}
+
+.pencil {
+  margin-right: 0.5em;
+}
+
+.pencil-s0 {
+  fill: none;
+  stroke: #000000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 12.5 
+} 
+.pencil-s1 { 
+  fill: none;
+  stroke: #000000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5 
+} 
 
 /* Toggle switch */ 
 
@@ -1249,4 +1374,40 @@ input:checked + .slider:before {
   -webkit-transform: translateX(1.5em);
   -ms-transform: translateX(1.5em);
   transform: translateX(1.5em);
+}
+
+/* Popup */
+
+.popup-grey-zone {
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  background-color: #3d3d3d7c;
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-visible {
+  display: flex;
+}
+
+.popup-box {
+  min-width: 20rem;
+  min-height: 20rem;
+  background-color: white;
+}
+
+.popup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.popup-button {
+  display: inline;
+  margin-block: 0.3em;
+  margin-inline: 0.5em;
 }

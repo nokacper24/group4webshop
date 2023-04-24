@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SelectTableHeader from "./SelectTableHeader";
 import SelectTableRow from "./SelectTableRow";
 import SelectTableOutsideButton from "./SelectTableOutsideButton";
@@ -98,7 +98,7 @@ export default function SelectTable(props: SelectTableProps) {
   });
 
   return (
-    <React.Fragment>
+    <>
       <div className="table-container">
         <table className="select-table">
           <thead>
@@ -135,6 +135,6 @@ export default function SelectTable(props: SelectTableProps) {
           );
         })}
       </div>
-    </React.Fragment>
+    </>
   );
 }

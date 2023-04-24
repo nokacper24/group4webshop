@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
@@ -33,7 +33,7 @@ export default function PurchaseLicense() {
    *
    * @param event The user event.
    */
-  const updatePrice = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const updatePrice = (event: ChangeEvent<HTMLSelectElement>) => {
     setTotalPrice(parseInt(event.target.value));
   };
 
