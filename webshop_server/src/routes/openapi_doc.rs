@@ -10,7 +10,6 @@ fn public_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
         public::products::ProductsApiDoc::openapi(),
         public::products::descriptions::DescriptionApiDoc::openapi(),
-        public::licenses::LicensesOpenApi::openapi(),
         public::testimonials::TestimonialsOpenApi::openapi(),
     ]
 }
