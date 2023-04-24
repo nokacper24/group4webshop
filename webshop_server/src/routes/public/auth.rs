@@ -31,10 +31,19 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
     let db_user = get_user_by_username(&pool, &user.email).await;
     match db_user {
         Ok(v) => {
-            //check if password is correct TODO: use hash verify function
-            if v.pass_hash != user.password {
-                return HttpResponse::Unauthorized()
-                    .json(json!({"success": false, "message": "Incorrect username or password"}));
+            let hash = data_access::user::hash(&user.password);
+            match hash {
+                Ok(hash) => {
+                    if hash != v.pass_hash {
+                        return HttpResponse::Unauthorized().json(
+                            json!({"success": false, "message": "Incorrect username or password"}),
+                        );
+                    }
+                }
+                Err(e) => {
+                    log::error!("Error hashing password: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
             }
 
             let cookie_string = create_cookie(&pool, &v.user_id).await;
