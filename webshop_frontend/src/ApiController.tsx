@@ -104,7 +104,7 @@ export const fetchCompanyUsers = async (companyId: string) => {
  * @returns The license.
  */
 export const fetchLicense = async (licenseId: string) => {
-  const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses/${licenseId}`);
   const data: License = await response.json();
   return data;
 };
@@ -115,7 +115,7 @@ export const fetchLicense = async (licenseId: string) => {
  * @returns All licenses' vital information.
  */
 export const fetchLicensesVital = async () => {
-  const response = await fetch(`${baseUrl}/api/licenses_vital`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses_vital`);
   const data: FullLicenseInfo[] = await response.json();
   return data;
 };
@@ -127,7 +127,9 @@ export const fetchLicensesVital = async () => {
  * @returns The user's licenses.
  */
 export const fetchLicensesForUser = async (userId: string) => {
-  const response = await fetch(`${baseUrl}/api/user_licenses/user/${userId}`);
+  const response = await fetch(
+    `${baseUrl}/api/priv/user_licenses/user/${userId}`
+  );
   const data: License[] = await response.json();
   return data;
 };
@@ -140,7 +142,7 @@ export const fetchLicensesForUser = async (userId: string) => {
  */
 export const fetchLicensesForUserNoAccess = async (userId: string) => {
   const response = await fetch(
-    `${baseUrl}/api/user_licenses/user/${userId}/no_access`
+    `${baseUrl}/api/priv/user_licenses/user/${userId}/no_access`
   );
   const data: License[] = await response.json();
   return data;
@@ -168,7 +170,7 @@ export const postLicense = async (license: License) => {
  * @returns All companies.
  */
 export const fetchCompanies = async () => {
-  const response = await fetch(`${baseUrl}/api/companies`);
+  const response = await fetch(`${baseUrl}/api/priv/companies`);
   const data: Company[] = await response.json();
   return data;
 };
@@ -181,7 +183,7 @@ export const fetchCompanies = async () => {
  */
 export const fetchCompanyLicenses = async (companyId: number) => {
   const response = await fetch(
-    `${baseUrl}/api/companies/${companyId}/licenses`
+    `${baseUrl}/api/priv/companies/${companyId}/licenses`
   );
   const data: License[] = await response.json();
   return data;
