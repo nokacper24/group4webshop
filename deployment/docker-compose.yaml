@@ -32,7 +32,8 @@ services:
     depends_on:
       - db
     volumes:
-      - ./app/resources:/resources
+      - ./app/resources:/app/resources
+      - ./app/logs:/app/logs
       - /etc/letsencrypt/live/group04.web-tek.ninja:/certs/live/group04.web-tek.ninja
       - /etc/letsencrypt/archive/group04.web-tek.ninja:/certs/archive/group04.web-tek.ninja
     restart: always
