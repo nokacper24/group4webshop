@@ -2,7 +2,7 @@ import ToggleButton from "./ToggleButton";
 import { ToggleTableRowProps } from "./ToggleTable";
 
 type RowProps = {
-  rowIndex: number;
+  id: string;
   row: ToggleTableRowProps;
   handleClick: (checked: boolean, id: string) => void;
 };
@@ -18,7 +18,7 @@ export default function ToggleTableRow(props: RowProps) {
         })}
         <td style={{ width: "6em" }}>
           <ToggleButton
-            id={props.rowIndex.toString()}
+            id={props.id}
             handleClick={props.handleClick}
             checked={row.toggleOn}
           />

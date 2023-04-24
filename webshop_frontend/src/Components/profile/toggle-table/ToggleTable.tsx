@@ -6,7 +6,7 @@ export interface ToggleTableHeaderProps {
 }
 
 export interface ToggleTableRowProps {
-  row: { text: string[]; toggleOn: boolean };
+  row: { id: string; text: string[]; toggleOn: boolean };
 }
 
 export interface ToggleTableProps {
@@ -28,9 +28,9 @@ export default function ToggleTable(props: ToggleTableProps) {
       <table className="toggle-table">
         <ToggleTableHeader text={props.headers.text} />
         <tbody>
-          {props.rows.map((item: ToggleTableRowProps, index: number) => (
+          {props.rows.map((item: ToggleTableRowProps) => (
             <ToggleTableRow
-              rowIndex={index}
+              id={item.row.id}
               row={item}
               handleClick={props.handleClick}
             />
