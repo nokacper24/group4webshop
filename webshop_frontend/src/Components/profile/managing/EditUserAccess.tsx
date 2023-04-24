@@ -30,13 +30,18 @@ export default function EditUserAccess() {
   >([]);
 
   const headers: ToggleTableHeaderProps = {
-    text: ["License", "Start", "End", "Amount", "Active", ""],
+    text: ["License", "Start", "End", "Amount", "Access"],
   };
   const [rows, setRows] = useState<ToggleTableRowProps[]>([]);
   const handleClick = (checked: boolean, id: string) => {
     console.log("Checked: ", checked, "ID: ", id);
   };
 
+  /**
+   * Create rows for Toggle Table from the licenses.
+   *
+   * @returns Rows for the Toggle table.
+   */
   const createRowsFromLicenses = () => {
     let tempRows: ToggleTableRowProps[] = [];
 
@@ -48,7 +53,6 @@ export default function EditUserAccess() {
           new Date(lic.start_date).toLocaleDateString(),
           new Date(lic.end_date).toLocaleDateString(),
           lic.amount.toString(),
-          lic.valid.toString(),
         ],
         toggleOn: license.access,
       };
