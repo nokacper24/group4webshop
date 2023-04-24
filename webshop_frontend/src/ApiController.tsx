@@ -116,7 +116,7 @@ export const fetchCompanyUsers = async (companyId: string) => {
  * @returns The license.
  */
 export const fetchLicense = async (licenseId: string) => {
-  const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses/${licenseId}`);
   if (response.ok) {
     const data: License = await response.json();
     return data;
