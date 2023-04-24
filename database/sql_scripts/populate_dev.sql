@@ -6,7 +6,7 @@ VALUES ('Proflex', 'Sandbergvegen 98 6009 Ålesund'),
         ('Business Solutions LLC', 'Redmond, Washington');
 
 INSERT INTO app_user (email, pass_hash, company_id, role)
-VALUES ('admin_proflex@gmail.com', 'mmmsecurepass', 1, 'admin'),
+VALUES ('admin_proflex@gmail.com', '$argon2id$v=19$m=4096,t=3,p=1$zGDWbzz553WuAOr9wAscPw$scsw+3Q2pW19Jqz8uXQpzikahS3a8CNubaC1EQH3Fa4', 1, 'admin'),
         ('es_it_head@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('it_manager@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('it_manager_2@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
