@@ -89,8 +89,8 @@ CREATE TABLE product_category (
     product_id TEXT NOT NULL,
     category_id INT NOT NULL,
     PRIMARY KEY (product_id, category_id),
-    FOREIGN KEY (product_id) REFERENCES product(product_id),
-    FOREIGN KEY (category_id) REFERENCES category(category_id)
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(category_id) ON DELETE CASCADE
 );
 
 CREATE TABLE testimonial (
@@ -99,7 +99,7 @@ CREATE TABLE testimonial (
     text TEXT NOT NULL,
     author_pic TEXT NOT NULL,
     product_id TEXT NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES product(product_id)
+    FOREIGN KEY (product_id) REFERENCES product(product_id) ON DELETE CASCADE
 );
 
 CREATE TABLE product_image (
@@ -162,8 +162,4 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER delete_description_component_trigger
 AFTER DELETE ON description_component
 FOR EACH ROW EXECUTE FUNCTION delete_description_component();
-
-CREATE USER backend_user WITH PASSWORD 'password';
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO backend_user;
 COMMIT;

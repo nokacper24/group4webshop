@@ -1,4 +1,4 @@
-use crate::IMAGES_DIR;
+use crate::utils::img_multipart::IMAGES_DIR;
 use actix_files::NamedFile;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 

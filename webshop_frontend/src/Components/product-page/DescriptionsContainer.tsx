@@ -1,10 +1,5 @@
+import React from "react";
 import { Description } from "../../Interfaces";
-
-let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
-// check if we are in production mode
-if (import.meta.env.PROD) {
-  baseUrl = "";
-}
 
 export default function DescriptionsContainer(descriptions: Description[]) {
   let prev_item: undefined | Description = undefined as undefined | Description;
@@ -15,10 +10,10 @@ export default function DescriptionsContainer(descriptions: Description[]) {
           let temp = prev_item;
           prev_item = undefined;
           return (
-            <>
+            <React.Fragment key={`${temp.component_id}-${item.component_id}`}>
               <DescriptionRow descriptions={[temp]} key={temp.component_id} />
               <DescriptionRow descriptions={[item]} key={item.component_id} />
-            </>
+            </React.Fragment>
           );
         } else if (item.full_width && prev_item === undefined) {
           return (
@@ -86,7 +81,7 @@ function ImageDescription(props: ImageDescriptionProps) {
   return (
     <div className={classes}>
       <img
-        src={`${baseUrl}/${props.description.image?.image_path}`}
+        src={`${props.description.image?.image_path}`}
         alt={props.description.image?.alt_text}
       />
     </div>

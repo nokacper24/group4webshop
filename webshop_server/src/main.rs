@@ -22,19 +22,20 @@ use crate::routes::{openapi_doc, serving_images};
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-const IMAGES_DIR: &str = {
-    match option_env!("RESOURCES_DIR") {
-        Some(path) => path,
-        None => "resources/images",
-    }
-};
+const DEFALUT_LOG_LEVEL: &str = "info,sqlx=warn";
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info,sqlx=off");
+    dotenv().ok();
+    if let Ok(level) = std::env::var("RUST_LOG") {
+        if level.trim().is_empty() {
+            std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
+        }
+    } else {
+        std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
+    }
     env_logger::init();
 
-    dotenv().ok();
     let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("{}:{}", host, port);
@@ -83,7 +84,7 @@ async fn main() -> std::io::Result<()> {
             .configure(openapi_doc::configure_opanapi)
             .service(image_service)
             .service(static_files)
-            .default_service(web::route().to(routes::not_found))
+            .default_service(web::route().to(routes::resource_not_found))
     });
 
     match server.bind_rustls(address.clone(), tls_config) {

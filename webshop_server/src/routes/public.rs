@@ -24,5 +24,4 @@ pub fn public(cfg: &mut web::ServiceConfig) {
     cfg.configure(auth::configure);
     cfg.configure(companies::configure);
     cfg.configure(testimonials::configure);
-    cfg.default_service(web::route().to(super::api_not_found));
 }

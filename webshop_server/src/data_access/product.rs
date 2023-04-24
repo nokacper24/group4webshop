@@ -1,8 +1,15 @@
+//! This module is a data access implementation for products.  
+//! Allows for access and manipulation of products in the database.
+//!
+//! Its submodule `description` contains the data access implementation for product descriptions.
+
 use serde::{Deserialize, Serialize};
 use sqlx::{
     query, query_as, {Pool, Postgres},
 };
 use utoipa::ToSchema;
+
+use crate::data_access::testimonial;
 
 pub mod description;
 
@@ -36,15 +43,6 @@ impl Product {
     pub fn product_id(&self) -> &str {
         &self.product_id
     }
-    pub fn display_name(&self) -> &str {
-        &self.display_name
-    }
-    pub fn price_per_user(&self) -> f32 {
-        self.price_per_user
-    }
-    pub fn short_description(&self) -> &str {
-        &self.short_description
-    }
     pub fn main_image(&self) -> &str {
         &self.main_image
     }
@@ -53,48 +51,12 @@ impl Product {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PartialProduct {
-    display_name: String,
-    price_per_user: f32,
-    short_description: String,
-    main_image: String,
-    available: bool,
-}
-impl PartialProduct {
-    pub fn new(
-        display_name: String,
-        price_per_user: f32,
-        short_description: String,
-        main_image: String,
-        available: bool,
-    ) -> Self {
-        Self {
-            display_name,
-            price_per_user,
-            short_description,
-            main_image,
-            available,
-        }
-    }
-    fn generate_id(&self) -> String {
-        self.display_name
-            .to_lowercase()
-            .replace('.', "")
-            .replace(' ', "_")
-    }
-    fn into_product(self) -> Product {
-        Product {
-            product_id: self.generate_id(),
-            display_name: self.display_name,
-            price_per_user: self.price_per_user,
-            short_description: self.short_description,
-            main_image: self.main_image,
-            available: self.available,
-        }
-    }
-}
-
+/// Generates a product id from a display name.
+/// Lowercases the display name, removes dots (.) and replaces spaces with underscores (_).
+///
+/// # Arguments
+///
+/// * `display_name` - The product display name to generate the id from.
 pub fn generate_id(display_name: &str) -> String {
     display_name
         .to_lowercase()
@@ -102,8 +64,7 @@ pub fn generate_id(display_name: &str) -> String {
         .replace(' ', "_")
 }
 
-/// Returns all products.
-///
+/// Returns all products, optionally only available products.
 ///
 /// # Arguments
 ///
@@ -137,7 +98,12 @@ pub async fn get_products(
     Ok(products)
 }
 
-/// Returns a product.
+/// Returns a product by its id.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `product_id` - The id of the product to return
 pub async fn get_product_by_id(
     pool: &Pool<Postgres>,
     product_id: &str,
@@ -153,7 +119,12 @@ pub async fn get_product_by_id(
     Ok(product)
 }
 
-/// Create a new product.
+/// Create a new product in the database.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `product` - The product to insert into the database
 pub async fn create_product(
     pool: &Pool<Postgres>,
     product: Product,
@@ -176,6 +147,14 @@ pub async fn create_product(
 
 /// Delete a product.
 /// Returns path to the main image of the product, so it can be deleted.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `product_id` - The id of the product to delete
+///
+/// # Returns
+/// The path to the main image of the product.
 pub async fn delete_product(
     pool: &Pool<Postgres>,
     product_id: &str,
@@ -193,6 +172,14 @@ pub async fn delete_product(
 }
 
 /// Update a product.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `new_product` - The updated product
+///
+/// # Returns
+/// The updated product.
 pub async fn update_product(
     pool: &Pool<Postgres>,
     new_product: &Product,
@@ -215,6 +202,15 @@ pub async fn update_product(
 
 /// Update the availability of a product.
 /// Returns the updated product.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `product_id` - The id of the product to update
+/// * `available` - The new availability
+///
+/// # Returns
+/// The updated product.
 pub async fn update_product_available(
     pool: &Pool<Postgres>,
     product_id: &str,
@@ -234,6 +230,14 @@ pub async fn update_product_available(
 }
 
 /// Returns true if the product exists, false otherwise.
+///
+/// # Arguments
+///
+/// * `pool` - The database pool
+/// * `product_id` - The id of the product to check
+///
+/// # Returns
+/// true if the product exists, false otherwise.
 pub async fn product_exists(pool: &Pool<Postgres>, product_id: &str) -> Result<bool, sqlx::Error> {
     let product = query!(
         r#"SELECT product_id
@@ -243,4 +247,37 @@ pub async fn product_exists(pool: &Pool<Postgres>, product_id: &str) -> Result<b
     .fetch_optional(pool)
     .await?;
     Ok(product.is_some())
+}
+
+/// Returns all image aths related to the product.
+/// Incluides the main image, testimonial author images and description component images.
+///
+/// # Arguments
+///
+/// * `pool` - The database connection pool
+/// * `product_id` - The id of the product
+///
+/// # Returns
+/// * `Result<Vec<String>, sqlx::Error>` - Vector of image paths.
+pub async fn get_all_image_paths(
+    pool: &Pool<Postgres>,
+    product_id: &str,
+) -> Result<Vec<String>, sqlx::Error> {
+    // Get main image
+    let main_image = query!(
+        r#"SELECT main_image
+        FROM product
+        WHERE product_id = $1"#,
+        product_id
+    )
+    .fetch_one(pool)
+    .await?
+    .main_image;
+    let testimonil_images = testimonial::get_all_image_paths(pool, product_id).await?;
+    let description_images = description::get_all_image_paths(pool, product_id).await?;
+
+    let mut images = vec![main_image];
+    images.extend(testimonil_images);
+    images.extend(description_images);
+    Ok(images)
 }

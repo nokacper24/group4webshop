@@ -3,6 +3,17 @@ use futures::StreamExt;
 use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use std::{collections::HashMap, io::Cursor};
 
+pub const IMAGES_DIR: &str = {
+    match option_env!("RESOURCES_DIR") {
+        Some(path) => path,
+        None => "resources/images",
+    }
+};
+
+const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
+pub const ALLOWED_FORMATS: [ImageFormat; 3] =
+    [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
+
 pub enum ImageExtractorError {
     Utf8Error(std::str::Utf8Error),
     MultipartError(actix_multipart::MultipartError),
@@ -39,8 +50,7 @@ pub async fn extract_image_and_texts_from_multipart(
     mut payload: Multipart,
     expected_fields: Vec<&str>,
 ) -> Result<(Option<ExtractedImageData>, HashMap<String, String>), ImageExtractorError> {
-    let mut file_name = String::new();
-    let mut image_buffer = Vec::new();
+    let mut extracted_image: Option<ExtractedImageData> = None;
     // map of field name to field value, both strings
     let mut fields_found: HashMap<String, String> = HashMap::new();
 
@@ -57,28 +67,16 @@ pub async fn extract_image_and_texts_from_multipart(
                 ))
             }
         };
-
         if name == "image" {
-            extract_image_from_field(field, &mut image_buffer, &mut file_name).await?;
+            extracted_image = extract_image_from_field_function(field).await?;
         } else if expected_fields.iter().any(|field| field == &name) {
             let field_name = String::from(name);
-            let mut field_content = String::new();
-            extract_text_field(field, &mut field_content).await?;
+            let field_content = extract_text_field_function(field).await?;
             fields_found.insert(field_name, field_content);
         } else {
             return Err(ImageExtractorError::UnexpectedField(name.to_string()));
         }
     }
-
-    let extracted_img = if file_name.trim().is_empty() || image_buffer.is_empty() {
-        // no file_name or no data written to image_buffer - no image was found
-        None
-    } else {
-        Some(ExtractedImageData {
-            img_buffer: image_buffer,
-            file_name,
-        })
-    };
 
     // check if all expected text fields were found
     if fields_found.len() != expected_fields.len() {
@@ -91,17 +89,54 @@ pub async fn extract_image_and_texts_from_multipart(
         }
     }
 
-    Ok((extracted_img, fields_found))
+    Ok((extracted_image, fields_found))
+}
+
+/// Extracts an image from a multipart field.
+/// # Arguments
+/// * `field` - The multipart field to extract the image from.
+/// # Returns
+/// * 'Option<ExtractedImageData>' - The extracted image data, or 'None' if no image was found.
+async fn extract_image_from_field_function(
+    field: &mut actix_multipart::Field,
+) -> Result<Option<ExtractedImageData>, ImageExtractorError> {
+    let mut file_name = String::new();
+    let mut image_buffer = Vec::new();
+    file_name.push_str(match field.content_disposition().get_filename() {
+        Some(name) => name,
+        None => return Ok(None), // no file name found, no image
+    });
+    while let Some(chunk) = field.next().await {
+        let data = match chunk {
+            Ok(data) => data,
+            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
+        };
+        if image_buffer.len() + data.len() > MAX_IMAGE_SIZE {
+            return Err(ImageExtractorError::FileTooLarge);
+        } else {
+            image_buffer.extend_from_slice(&data);
+        }
+    }
+    if file_name.trim().is_empty() || image_buffer.is_empty() {
+        // no file_name or no data written to image_buffer - no image was found
+        Ok(None)
+    } else {
+        Ok(Some(ExtractedImageData {
+            img_buffer: image_buffer,
+            file_name,
+        }))
+    }
 }
 
 /// Extracts a text field from a multipart field.
 /// # Arguments
 /// * `field` - The multipart field to extract the text from.
-/// * `text_field` - Mut string ref to write found text to.
-async fn extract_text_field(
+/// # Returns
+/// A string containing the text found in the field.
+async fn extract_text_field_function(
     field: &mut actix_multipart::Field,
-    text_field: &mut String,
-) -> Result<(), ImageExtractorError> {
+) -> Result<String, ImageExtractorError> {
+    let mut field_content = String::new();
     while let Some(chunk) = field.next().await {
         let data = match chunk {
             Ok(data) => data,
@@ -111,42 +146,9 @@ async fn extract_text_field(
             Ok(s) => s,
             Err(e) => return Err(ImageExtractorError::Utf8Error(e)),
         };
-        text_field.push_str(string);
+        field_content.push_str(string);
     }
-    Ok(())
-}
-
-/// Extracts an image from a multipart field.
-/// # Arguments
-/// * `field` - The multipart field to extract the image from.
-/// * `image_buffer` - The buffer to write the image data to.
-/// * `file_name` - Mut string ref to write the file name to.
-async fn extract_image_from_field(
-    field: &mut actix_multipart::Field,
-    image_buffer: &mut Vec<u8>,
-    file_name: &mut String,
-) -> Result<(), ImageExtractorError> {
-    file_name.push_str(match field.content_disposition().get_filename() {
-        Some(name) => name,
-        None => {
-            return Err(ImageExtractorError::MissingContentDisposition(
-                "filename".to_string(),
-            ))
-        }
-    });
-
-    while let Some(chunk) = field.next().await {
-        let data = match chunk {
-            Ok(data) => data,
-            Err(e) => return Err(ImageExtractorError::MultipartError(e)),
-        };
-        if image_buffer.len() + data.len() > super::MAX_IMAGE_SIZE {
-            return Err(ImageExtractorError::FileTooLarge);
-        } else {
-            image_buffer.extend_from_slice(&data);
-        }
-    }
-    Ok(())
+    Ok(field_content)
 }
 
 /// Parses an image buffer into a `DynamicImage`.
@@ -176,7 +178,7 @@ pub fn parse_img(img_buffer: Vec<u8>) -> Result<DynamicImage, ImageParsingError>
 
     match image_format {
         Some(format) => {
-            if !super::ALLOWED_FORMATS.contains(&format) {
+            if !ALLOWED_FORMATS.contains(&format) {
                 return Err(ImageParsingError::UnsuppoertedFormat(format));
             }
         }
@@ -217,10 +219,22 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 
     image.save(&path)?;
 
+    if !path.starts_with('/') {
+        path = format!("/{}", path);
+    }
+
     Ok(path)
 }
 
 /// Removes a file from the file system.
 pub fn remove_image(path: &str) -> Result<(), std::io::Error> {
-    std::fs::remove_file(path)
+    let real_path = {
+        if !IMAGES_DIR.starts_with('/') {
+            &path[1..]
+        } else {
+            path
+        }
+    };
+
+    std::fs::remove_file(real_path)
 }
