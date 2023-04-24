@@ -2,7 +2,7 @@ import {
   Company,
   Description,
   License,
-  LicenseVital,
+  FullLicenseInfo,
   MeUser,
   PartialUser,
   Product,
@@ -116,7 +116,7 @@ export const fetchLicense = async (licenseId: string) => {
  */
 export const fetchLicensesVital = async () => {
   const response = await fetch(`${baseUrl}/api/licenses_vital`);
-  const data: LicenseVital[] = await response.json();
+  const data: FullLicenseInfo[] = await response.json();
   return data;
 };
 

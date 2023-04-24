@@ -29,7 +29,7 @@ pub struct PartialLicense {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct LicenseVitalInfo {
+pub struct FullLicenseInfo {
     license_id: i32,
     company_id: i32,
     company_name: String,
@@ -60,9 +60,9 @@ pub async fn get_licenses(pool: &Pool<Postgres>) -> Result<Vec<License>, sqlx::E
 /// Returns vital info from all licenses
 pub async fn get_licenses_vital_info(
     pool: &Pool<Postgres>,
-) -> Result<Vec<LicenseVitalInfo>, sqlx::Error> {
+) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
-        LicenseVitalInfo,
+        FullLicenseInfo,
         r#"SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid, amount
         FROM license
         JOIN product USING (product_id)

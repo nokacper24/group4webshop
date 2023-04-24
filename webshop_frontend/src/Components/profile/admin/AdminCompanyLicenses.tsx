@@ -4,7 +4,7 @@ import SelectTable, {
   SelectTableRowProps,
 } from "../select-table/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
-import { LicenseVital } from "../../../Interfaces";
+import { FullLicenseInfo } from "../../../Interfaces";
 import {
   createSelectTableProps,
   createRowProps,
@@ -199,11 +199,11 @@ export default function AdminCompanyLicenses() {
 
   useEffect(() => {
     fetchLicensesVital()
-      .then((licenses: LicenseVital[]) => {
+      .then((licenses: FullLicenseInfo[]) => {
         let validLicenses: SelectTableRowProps[] = [];
         let invalidLicenses: SelectTableRowProps[] = [];
 
-        licenses.map((license: LicenseVital) => {
+        licenses.map((license: FullLicenseInfo) => {
           let newLicense = createRowProps(license.license_id.toString(), [
             license.license_id.toString(),
             license.company_name,

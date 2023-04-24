@@ -9,7 +9,7 @@ export interface License {
   product_name: string;
 }
 
-export interface LicenseVital {
+export interface FullLicenseInfo {
   license_id: number;
   company_id: number;
   company_name: string;
