@@ -181,18 +181,22 @@ pub fn hash(pass: &str) -> Result<String, argon2::password_hash::Error> {
     }
 }
 
-fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
+pub fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
     //pass to bytes
     let pass = pass.as_bytes();
 
-    // Parse the hash string
-    let parsed_hash = PasswordHash::new(hash)?;
+    // Hash to verify against
+    let hash = PasswordHash::new(&hash);
+    let hash = match hash {
+        Ok(hash) => hash,
+        Err(e) => return Err(e),
+    };
 
     // Argon2 with default params (Argon2id v19)
     let argon2 = Argon2::default();
 
-    // Verify password
-    match argon2.verify_password(pass, &parsed_hash) {
+    // Verify password against the hash
+    match argon2.verify_password(pass, &hash) {
         Ok(_) => Ok(true),
         Err(e) => Err(e),
     }

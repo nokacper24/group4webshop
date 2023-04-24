@@ -31,10 +31,10 @@ async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl 
     let db_user = get_user_by_username(&pool, &user.email).await;
     match db_user {
         Ok(v) => {
-            let hash = data_access::user::hash(&user.password);
+            let hash = data_access::user::verify(&user.password, &v.pass_hash);
             match hash {
                 Ok(hash) => {
-                    if hash != v.pass_hash {
+                    if hash == false {
                         return HttpResponse::Unauthorized().json(
                             json!({"success": false, "message": "Incorrect username or password"}),
                         );
@@ -163,36 +163,25 @@ async fn verify(
 
                         match company {
                             Ok(c) => {
-                                let hash = data_access::user::hash(&data.password);
-                                match hash {
-                                    Ok(hash) => {
-                                        //create user with company
-                                        let user = data_access::user::create_user(
-                                            &v.email,
-                                            &hash,
-                                            c.company_id,
-                                            data_access::user::Role::Default,
-                                            &pool,
-                                        )
-                                        .await;
+                                //create user with company
+                                let user = data_access::user::create_user(
+                                    &v.email,
+                                    &data.password,
+                                    c.company_id,
+                                    data_access::user::Role::Default,
+                                    &pool,
+                                )
+                                .await;
 
-                                        match user {
-                                            Ok(_v) => {
-                                                // delete invite
-                                                let delete = data_access::user::delete_invite(
-                                                    &invite_id, &pool,
-                                                )
+                                match user {
+                                    Ok(_v) => {
+                                        // delete invite
+                                        let delete =
+                                            data_access::user::delete_invite(&invite_id, &pool)
                                                 .await;
-                                                match delete {
-                                                    Ok(_v) => {
-                                                        return HttpResponse::Ok()
-                                                            .json("User created");
-                                                    }
-                                                    Err(_e) => {
-                                                        return HttpResponse::InternalServerError()
-                                                            .json("Internal Server Error")
-                                                    }
-                                                }
+                                        match delete {
+                                            Ok(_v) => {
+                                                return HttpResponse::Ok().json("User created");
                                             }
                                             Err(_e) => {
                                                 return HttpResponse::InternalServerError()
@@ -205,7 +194,7 @@ async fn verify(
                                             .json("Internal Server Error")
                                     }
                                 }
-                            } //yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+                            }
                             Err(_e) => {
                                 return HttpResponse::InternalServerError()
                                     .json("Internal Server Error")
@@ -217,6 +206,7 @@ async fn verify(
                     }
                 }
             }
+
             // since no company is set, create a new company
             match (&data.company_name, &data.company_address) {
                 (Some(name), Some(address)) => {
@@ -230,18 +220,10 @@ async fn verify(
                                     data_access::user::get_partial_user(&id, &pool).await;
                                 match partial_user {
                                     Ok(v) => {
-                                        let hash = match data_access::user::hash(&data.password) {
-                                            Ok(hash) => hash,
-                                            Err(_e) => {
-                                                return HttpResponse::InternalServerError()
-                                                    .json("Internal Server Error")
-                                            }
-                                        };
-
                                         // create user with company
                                         let user = data_access::user::create_user(
                                             &v.email,
-                                            &hash,
+                                            &data.password,
                                             c.company_id,
                                             data_access::user::Role::CompanyItHead,
                                             &pool,
