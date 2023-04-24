@@ -1488,6 +1488,74 @@
     },
     "query": "SELECT component_id, priority, full_width, product_id,\n    description_component.text_id AS \"text_id?\",\n    text_title AS \"text_title?\", paragraph AS \"paragraph?\",\n    description_component.image_id, image_path AS \"image_path?\",\n    alt_text AS \"alt_text?\"\n    FROM description_component\n    FULL JOIN product_text ON  description_component.text_id = product_text.text_id\n    FULL JOIN product_image ON description_component.image_id = product_image.image_id\n    WHERE description_component.component_id = $1\n    AND description_component.product_id = $2\n    ;"
   },
+  "92b4494a38435fc923320313f69f6afe19748213d78cf2e3a90e72871cd113d8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "valid",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name\n        FROM license\n        JOIN user_license USING (license_id)\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        WHERE user_id = $1"
+  },
   "949a34d9222edb8145438ecbce7867c3f29d2c6295bbc672322e3c015600ab7c": {
     "describe": {
       "columns": [],
@@ -1612,6 +1680,72 @@
     },
     "query": "UPDATE app_user \n        SET email = $1\n        WHERE user_id = $2\n        RETURNING app_user.user_id, email, company_id, role as \"role: _\";"
   },
+  "ad05ee9299a69b783721e5ffe1bfef37c3f16f43c04575e0a83da3d8981b7aa0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 1,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 3,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_name",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "valid",
+          "ordinal": 7,
+          "type_info": "Bool"
+        },
+        {
+          "name": "amount",
+          "ordinal": 8,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT license_id, license.start_date, license.end_date, license.company_id, company_name, license.product_id, display_name, valid, amount\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)"
+  },
   "b145fc3ab8dc880cace8ab5bd27258a857ce0f2ab0779485f91b841c2e19c4cb": {
     "describe": {
       "columns": [
@@ -1720,54 +1854,6 @@
       }
     },
     "query": "INSERT INTO license\n        (valid, start_date, end_date, amount, company_id, product_id)\n        VALUES ($1, $2, $3, $4, $5, $6)"
-  },
-  "c38366bfbabc7a0d6825fff9b94e445a4529af6abb430f8c3cd44d8430ef9239": {
-    "describe": {
-      "columns": [
-        {
-          "name": "license_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 1,
-          "type_info": "Int4"
-        },
-        {
-          "name": "company_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "product_id",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "valid",
-          "ordinal": 5,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT license_id, license.company_id, company_name, license.product_id, display_name, valid\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)"
   },
   "c423dff564c8ef2008e3155227a1b4954fd0da532391826cd7343b0380d1a97a": {
     "describe": {
@@ -2249,6 +2335,75 @@
       }
     },
     "query": "SELECT user_id FROM app_user WHERE email = $1"
+  },
+  "eb373b2295ec006737e8dfc2e96ea244ac063ba913d1a738afd2e98d565e783b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "valid",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4",
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        WHERE company_id = $1\n        AND license_id NOT IN(\n            SELECT license_id\n            FROM license\n            JOIN user_license USING (license_id)\n            WHERE user_id = $2)\n        "
   },
   "f03ec16afb02f9f1357ac254b60ca483c0d171606feacbb7c0950881963594c2": {
     "describe": {
