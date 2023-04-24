@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Description, Product, Testimonial } from "../../Interfaces";
 import DescriptionsContainer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import PurchaseLicenseButton from "./PurchaseLicenseButton";
+import Spinner from "../utils/utils";
 import {
   fetchDescriptionComponents,
   fetchProduct,
+  ProductError,
   fetchTestimonials,
 } from "../../ApiController";
 
@@ -18,26 +20,48 @@ import {
 export default function ProductPage() {
   const { productId } = useParams();
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
   const [product, setProduct] = useState<Product>();
   const [descriptions, setDescriptions] = useState<Description[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    fetchProduct(productId!).then((product: Product) => {
-      if (product.product_id) {
+    fetchProduct(productId!)
+      .then((product: Product) => {
         setProduct(product);
+        setLoading(false);
+
         fetchTestimonials(product.product_id).then(
           (testimonials: Testimonial[]) => setTestimonials(testimonials)
         );
         fetchDescriptionComponents(product.product_id).then(
           (descriptions: Description[]) => setDescriptions(descriptions)
         );
-      }
-    });
+      })
+      .catch((error: unknown) => {
+        if (error instanceof ProductError) {
+          if (error.status === 404) {
+            setError(
+              new Error(`We could not find the product you are looking for.`)
+            );
+          } else {
+            setError(
+              new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+            );
+          }
+        } else {
+          setError(new Error(`We are sorry: ${error}`));
+        }
+        setLoading(false);
+      });
   }, []);
 
   return (
     <>
+      {loading && <Spinner />}
+      {error && <ErrorMessage message={error.message} />}
       {product && (
         <>
           <section
@@ -77,12 +101,6 @@ export default function ProductPage() {
           </section>
         </>
       )}
-      {!product && (
-        <section className="container">
-          <h1>Product not found</h1>
-          <p>Sorry, could not find the product you were looking for!</p>
-        </section>
-      )}
     </>
   );
 }
@@ -92,5 +110,25 @@ function UnavailableTag() {
     <div className="unavailable-tag">
       <p>Product is currently unavailable</p>
     </div>
+  );
+}
+
+interface ErrorMessageProps {
+  message: string;
+}
+function ErrorMessage(props: ErrorMessageProps) {
+  const { message } = props;
+  return (
+    <>
+      <section className="container">
+        <h1>Something went wrong</h1>
+        <p>{message}</p>
+        <Link to="/products">
+          <button className="banner-element hero-button">
+            Back to products
+          </button>
+        </Link>
+      </section>
+    </>
   );
 }
