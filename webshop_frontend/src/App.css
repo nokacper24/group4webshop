@@ -16,6 +16,7 @@
   --text-gradient: -35deg, rgba(46, 116, 181, 1) 0%, rgba(95, 139, 5, 1) 100%;
 
   --clr-danger: #bc0000;
+  --clr-highlight-danger: red;
 
   /* Font family variables */
   --ff-primary: 'Open Sans', 'Arial', sans-serif;
