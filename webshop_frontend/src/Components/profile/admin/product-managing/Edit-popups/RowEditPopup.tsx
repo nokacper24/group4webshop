@@ -35,14 +35,14 @@ export default function RowEditPopup() {
 
   const updateProps = (newProps: RowEditPopupProps) => {
     setProps(newProps);
-    imageRef.current && newProps.image
-      ? (imageRef.current.value = newProps.content ? newProps.content : "")
-      : undefined; //TODO: Implement "Something has gone wrong"
     titleRef.current
       ? (titleRef.current.value = newProps.title ? newProps.title : "")
       : undefined; //TODO: Implement "Something has gone wrong"
-    contentRef.current
-      ? (contentRef.current.value = newProps.content ? newProps.content : "")
+    paragraphRef.current
+      ? (paragraphRef.current.value = newProps.content ? newProps.content : "")
+      : undefined; //TODO: Implement "Something has gone wrong"
+    altTextRef.current
+      ? (altTextRef.current.value = newProps.title ? newProps.title : "")
       : undefined; //TODO: Implement "Something has gone wrong"
   };
 
@@ -51,14 +51,16 @@ export default function RowEditPopup() {
       ? imageRef.current
         ? imageRef.current.value
         : ""
-      : contentRef.current?.value
-      ? contentRef.current.value
+      : paragraphRef.current?.value
+      ? paragraphRef.current.value
       : "";
-    props.informationCallBack(
-      props.image,
-      titleRef.current?.value ? titleRef.current.value : "",
-      content
-    );
+    let title: string;
+    if (props.image) {
+      title = altTextRef.current?.value ? altTextRef.current.value : "";
+    } else {
+      title = titleRef.current?.value ? titleRef.current.value : "";
+    }
+    props.informationCallBack(props.image, title, content);
     console.log(imageRef.current?.value);
     hidePopup();
   };
@@ -97,9 +99,13 @@ export default function RowEditPopup() {
                 id="image"
                 name="image"
                 accept="image/png, image/jpeg, image/webp"
+                onChange={() =>
+                  setProps({ ...props, content: imageRef.current?.value })
+                }
                 ref={imageRef}
                 defaultValue={props.content ? props.content : ""}
               />
+              <p>Current image: {props.content}</p>
               <label htmlFor="alt-text">Alt-text:</label>
               <textarea
                 name="alt-text"
@@ -127,7 +133,7 @@ export default function RowEditPopup() {
                 defaultValue={props.content ? props.content : ""}
                 cols={40}
                 rows={10}
-                ref={contentRef}
+                ref={paragraphRef}
               />
             </>
           )}
@@ -162,6 +168,8 @@ export default function RowEditPopup() {
 
 export function showPopup(inProps: RowEditPopupProps) {
   console.log(inProps.content);
+  console.log("Image: ");
+  console.log(imageRef.current);
   updatePropsFunc(inProps);
   popupRef.current?.classList.add("popup-visible");
 }
