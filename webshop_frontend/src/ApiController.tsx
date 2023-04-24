@@ -130,7 +130,7 @@ export const fetchLicensesForUser = async (userId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/user_licenses/user/${userId}`
   );
-  const data: License[] = await response.json();
+  const data: FullLicenseInfo[] = await response.json();
   return data;
 };
 
@@ -144,7 +144,7 @@ export const fetchLicensesForUserNoAccess = async (userId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/user_licenses/user/${userId}/no_access`
   );
-  const data: License[] = await response.json();
+  const data: FullLicenseInfo[] = await response.json();
   return data;
 };
 

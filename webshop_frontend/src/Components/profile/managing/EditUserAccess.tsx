@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { License, User } from "../../../Interfaces";
+import { FullLicenseInfo, User } from "../../../Interfaces";
 import {
   fetchLicensesForUser,
   fetchLicensesForUserNoAccess,
-  fetchProduct,
   fetchUser,
 } from "../../../ApiController";
 import ToggleTable, {
@@ -13,7 +12,7 @@ import ToggleTable, {
 } from "../toggle-table/ToggleTable";
 
 type LicenseAccessProps = {
-  license: License;
+  license: FullLicenseInfo;
   access: boolean;
 };
 
@@ -31,11 +30,32 @@ export default function EditUserAccess() {
   >([]);
 
   const headers: ToggleTableHeaderProps = {
-    text: ["License", "Start", "End", "Amount", "Active"],
+    text: ["License", "Start", "End", "Amount", "Active", ""],
   };
   const [rows, setRows] = useState<ToggleTableRowProps[]>([]);
   const handleClick = (checked: boolean, id: string) => {
     console.log("Checked: ", checked, "ID: ", id);
+  };
+
+  const createRowsFromLicenses = () => {
+    let tempRows: ToggleTableRowProps[] = [];
+
+    licenses.forEach((license) => {
+      let lic = license.license;
+      let tempRow: ToggleTableRowProps["row"] = {
+        text: [
+          lic.display_name,
+          new Date(lic.start_date).toLocaleDateString(),
+          new Date(lic.end_date).toLocaleDateString(),
+          lic.amount.toString(),
+          lic.valid.toString(),
+        ],
+        toggleOn: license.access,
+      };
+      tempRows.push({ row: tempRow });
+    });
+
+    return tempRows;
   };
 
   useEffect(() => {
@@ -52,6 +72,7 @@ export default function EditUserAccess() {
 
               // Add licenses with access to temporary list and set access to true
               licensesWithAccess.forEach((license) => {
+                // TODO: Possible to SetLicenses for every single license instead of pushing to a temp array?
                 tempLicenses.push({
                   license: license,
                   access: true,
@@ -74,45 +95,8 @@ export default function EditUserAccess() {
     });
   }, []);
 
-  const fetchProductNames = async () => {
-    let tempLicenses: LicenseAccessProps[] = licenses;
-
-    let names: { id: string; name: string }[] = [];
-    tempLicenses.map((license) => {
-      fetchProduct(license.license.product_id).then((product) => {
-        names.push({ id: product.product_id, name: product.display_name });
-      });
-    });
-
-    // return tempLicenses;
-    console.log("Names: ", names);
-    return names;
-  };
-
   useEffect(() => {
-    console.log("Licenses have been updated");
-
-    // Update all licenses to include license's product name
-    fetchProductNames().then((licenses) => {
-      // Fill table rows
-      /* let tempRows: ToggleTableRowProps[] = [];
-      licenses.forEach((license) => {
-        let lic = license.license;
-        tempRows.push({
-          row: {
-            text: [
-              lic.product_name,
-              new Date(lic.start_date).toLocaleDateString(),
-              new Date(lic.end_date).toLocaleDateString(),
-              lic.amount.toString(),
-            ],
-            toggleOn: license.access,
-          },
-        });
-      });
-
-      setRows(tempRows); */
-    });
+    setRows(createRowsFromLicenses());
   }, [licenses]);
 
   return (
