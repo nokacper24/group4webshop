@@ -126,15 +126,16 @@ export const fetchLicense = async (licenseId: string) => {
 };
 
 /**
- * Get all licenses' vital information.
+ * Get all licenses' information.
  *
- * @returns All licenses' vital information.
+ * @returns All licenses' information.
  */
-export const fetchLicensesVital = async () => {
+export const fetchLicensesFullInfo = async () => {
   const response = await fetch(`${baseUrl}/api/priv/licenses_vital`);
   if (response.ok) {
     const data: FullLicenseInfo[] = await response.json();
-  return data;
+    return data;
+  }
 };
 
 /**
@@ -161,7 +162,9 @@ export const fetchLicensesForUserNoAccess = async (userId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/user_licenses/user/${userId}/no_access`
   );
-  const data: FullLicenseInfo[] = await response.json();
+
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
     return data;
   } else {
     throw new Error("Could not fetch licenses.");

@@ -13,7 +13,7 @@ import {
   updateNewChanges,
 } from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
-import { fetchLicensesVital } from "../../../ApiController";
+import { fetchLicensesFullInfo } from "../../../ApiController";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // Check if we are in production mode
@@ -198,7 +198,7 @@ export default function AdminCompanyLicenses() {
   };
 
   useEffect(() => {
-    fetchLicensesVital()
+    fetchLicensesFullInfo()
       .then((licenses: FullLicenseInfo[]) => {
         let validLicenses: SelectTableRowProps[] = [];
         let invalidLicenses: SelectTableRowProps[] = [];
