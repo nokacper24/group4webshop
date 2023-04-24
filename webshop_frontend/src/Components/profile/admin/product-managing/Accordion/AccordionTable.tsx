@@ -75,10 +75,14 @@ export default function AccordionTable() {
         {
           title: "Test",
           id: 1,
+          content: "Content!",
+          image: false,
         },
         {
           title: "Test2",
           id: 2,
+          content: "Content2!",
+          image: false,
         },
       ],
       sectionID: 0,
