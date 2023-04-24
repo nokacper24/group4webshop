@@ -15,7 +15,6 @@ actix-web-httpauth = "0.8.0"
 chrono = { version = "0.4.23", features = ["serde"] }
 actix-web-static-files = "4.0.0"
 dotenvy = "0.15.6"
-env_logger = "0.10"
 futures = "0.3.26"
 futures-util = "0.3"
 image = "0.24.5"
@@ -32,6 +31,7 @@ argon2 = "0.4.1"
 sanitize-filename = "0.4.0"
 rustls = "0.20.8"
 rustls-pemfile = "1.0.2"
+flexi_logger = { version = "0.25.3", features = ["async", "compress"] }
 
 [build-dependencies]
 static-files = "0.2.3"

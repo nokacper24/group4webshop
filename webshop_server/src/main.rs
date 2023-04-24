@@ -1,3 +1,4 @@
+use core::panic;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -6,6 +7,7 @@ use actix_web::{http, middleware::Logger, web, App, HttpServer};
 
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
+use flexi_logger::{Duplicate, FileSpec};
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -34,7 +36,13 @@ async fn main() -> std::io::Result<()> {
     } else {
         std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
     }
-    env_logger::init();
+    let _logger = match setup_logger().start() {
+        Ok(logger) => Some(logger),
+        Err(e) => {
+            eprintln!("Could not start logger: {}", e);
+            None
+        }
+    };
 
     let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
@@ -132,4 +140,29 @@ fn load_rustls_config() -> rustls::ServerConfig {
     }
 
     config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
+}
+
+fn setup_logger() -> flexi_logger::Logger {
+    let logger = match flexi_logger::Logger::try_with_env() {
+        Ok(logger) => logger,
+        Err(e) => {
+            panic!("Could not parse RUST_LOG: {}", e);
+        }
+    };
+    logger
+        .log_to_file(FileSpec::default().directory("logs"))
+        .write_mode(flexi_logger::WriteMode::Async)
+        .rotate(
+            flexi_logger::Criterion::Age(flexi_logger::Age::Day),
+            flexi_logger::Naming::Timestamps,
+            flexi_logger::Cleanup::KeepCompressedFiles(30),
+        )
+        .create_symlink("latest.log")
+        .duplicate_to_stdout(Duplicate::All)
+        .append()
+        .format_for_files(flexi_logger::detailed_format)
+        .format_for_stdout(flexi_logger::colored_default_format)
+        .set_palette(
+            "196;208;10;6;8".to_owned()
+        )
 }
