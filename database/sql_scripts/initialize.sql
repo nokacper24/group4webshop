@@ -79,6 +79,48 @@ CREATE TABLE user_license (
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
+CREATE OR REPLACE FUNCTION enforce_license_max_users()
+RETURNS trigger AS $$
+DECLARE
+    max_users INTEGER := 0;
+    current_user_count INTEGER := 0;
+    must_check BOOLEAN := false;
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        must_check := true;
+    END IF;
+
+    IF (TG_OP = 'UPDATE') THEN
+        IF (NEW.user_id != OLD.user_id) THEN
+            must_check := true;
+        END IF;
+    END IF;
+
+    IF must_check THEN
+        -- prevent concurrent inserts from multiple transactions
+        LOCK TABLE user_license IN EXCLUSIVE MODE;
+		
+		SELECT INTO max_users amount
+		FROM license
+		WHERE license_id = NEW.license_id;
+
+        SELECT INTO current_user_count COUNT(*) 
+        FROM user_license 
+        WHERE license_id = NEW.license_id;
+
+        IF current_user_count >= max_users THEN
+            RAISE EXCEPTION 'Cannot insert more than % users for each license.', max_users;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_license_max_users 
+    BEFORE INSERT OR UPDATE ON user_license
+    FOR EACH ROW EXECUTE PROCEDURE enforce_license_max_users();
+
 CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
