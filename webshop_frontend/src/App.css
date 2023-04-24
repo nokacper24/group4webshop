@@ -149,6 +149,23 @@ button {
   margin-inline: auto;
 }
 
+.button-container {
+  display: flex;
+  gap: 1em;
+}
+
+.bg-danger {
+  background-color: var(--clr-danger);
+}
+
+.bg-danger:is(:focus, :hover){
+  background-color: var(--clr-highlight-danger);
+}
+
+.text-danger {
+  color: var(--clr-danger);
+}
+
 table {
   border-spacing: 0;
   border-collapse: separate;
