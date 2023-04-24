@@ -9,6 +9,7 @@ services:
     ports:
       - '5432:5432'
     environment:
+      POSTGRES_DB: proflex
       POSTGRES_PASSWORD: password
     volumes:
       - ./sql_scripts:/sql_scripts

@@ -40,11 +40,18 @@ export default function ProductPage() {
     <>
       {product && (
         <>
-          <section className="banner">
+          <section
+            className="banner"
+            style={{ backgroundImage: `url(${product.main_image})` }}
+          >
             <div className="banner-inner">
               <div className="banner-highlight">
                 <h1 className="banner-title">{product.display_name}</h1>
-                <PurchaseLicenseButton />
+                <p className="banner-description">
+                  {product.short_description}
+                </p>
+                <PurchaseLicenseButton active={product.available} />
+                {product.available === false && <UnavailableTag />}
               </div>
             </div>
           </section>
@@ -66,7 +73,7 @@ export default function ProductPage() {
           <section className="container">
             <h2>Purchase</h2>
             <p>Purchase licenses for this product for your enterprise today!</p>
-            <PurchaseLicenseButton />
+            <PurchaseLicenseButton active={product.available} />
           </section>
         </>
       )}
@@ -77,5 +84,13 @@ export default function ProductPage() {
         </section>
       )}
     </>
+  );
+}
+
+function UnavailableTag() {
+  return (
+    <div className="unavailable-tag">
+      <p>Product is currently unavailable</p>
+    </div>
   );
 }

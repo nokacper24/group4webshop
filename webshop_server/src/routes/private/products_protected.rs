@@ -11,14 +11,15 @@ use utoipa::{OpenApi, ToSchema};
 pub mod descriptions_protected;
 
 use crate::{
-    IMAGES_DIR,
     data_access::{error_handling::PostgresDBError, user},
-    routes::private::products_protected::descriptions_protected::description_utils::{
-        self, ImageExtractorError, ImageParsingError,
-    },
     {
         data_access::product::{self, Product},
-        utils::auth,
+        utils::{
+            auth,
+            img_multipart::{
+                self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
+            },
+        },
     },
 };
 
@@ -28,11 +29,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(delete_product);
     cfg.service(update_product);
     cfg.service(update_availability);
-    cfg.service(
-        web::scope("/products")
-            .configure(descriptions_protected::configure)
-            .default_service(web::route().to(crate::routes::api_not_found)),
-    );
+    cfg.service(web::scope("/products").configure(descriptions_protected::configure));
 }
 
 #[derive(OpenApi)]
@@ -154,7 +151,7 @@ pub async fn create_product(
     };
 
     let (extracted_image, text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(
+        match img_multipart::extract_image_and_texts_from_multipart(
             payload,
             vec!["product_name", "price_per_unit", "short_description"],
         )
@@ -174,7 +171,7 @@ pub async fn create_product(
         Some(extracted_image) => extracted_image,
         None => return HttpResponse::BadRequest().json("Missing image"),
     };
-    let image = match description_utils::parse_img(extracted_img.img_buffer) {
+    let image = match img_multipart::parse_img(extracted_img.img_buffer) {
         Ok(image) => image,
         Err(e) => {
             return match e {
@@ -183,13 +180,12 @@ pub async fn create_product(
                 }
                 ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(format!(
                     "No format found. Supported formats: {:?}",
-                    descriptions_protected::ALLOWED_FORMATS
+                    ALLOWED_FORMATS
                 )),
                 ImageParsingError::UnsuppoertedFormat(e) => HttpResponse::UnsupportedMediaType()
                     .json(format!(
                         "Unsupported format, found {:?}. Supported formats: {:?}",
-                        e,
-                        descriptions_protected::ALLOWED_FORMATS
+                        e, ALLOWED_FORMATS
                     )),
                 ImageParsingError::IoError(e) => {
                     HttpResponse::InternalServerError().json(format!("Image reader error: {}", e))
@@ -216,11 +212,15 @@ pub async fn create_product(
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if short_description.len() > 256 {
+        return HttpResponse::BadRequest()
+            .body("Short description must be less than 256 characters.");
+    }
 
     let product_id = product::generate_id(prod_name);
 
     let path = format!("{}/{}", IMAGES_DIR, product_id);
-    let file_name = match description_utils::save_image(image, &path, &extracted_img.file_name) {
+    let file_name = match img_multipart::save_image(image, &path, &extracted_img.file_name) {
         Ok(file_name) => file_name,
         Err(e) => match e {
             ImageError::Unsupported(e) => {
@@ -245,7 +245,7 @@ pub async fn create_product(
     match product::create_product(&pool, new_product).await {
         Ok(product) => HttpResponse::Created().json(product),
         Err(e) => {
-            if let Err(io_e) = description_utils::remove_image(&file_name) {
+            if let Err(io_e) = img_multipart::remove_image(&file_name) {
                 log::error!("Couldnt remove image from file system: {}", io_e);
                 return HttpResponse::InternalServerError().json("Internal Server Error");
             };
@@ -328,7 +328,7 @@ pub async fn update_product(
     };
 
     let (extracted_image, text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(
+        match img_multipart::extract_image_and_texts_from_multipart(
             payload,
             vec!["product_name", "price_per_unit", "short_description"],
         )
@@ -348,23 +348,19 @@ pub async fn update_product(
     let new_image_path = match extracted_image {
         Some(extracted_image) => {
             // new image was provided, remove old one and save new one
-            let new_img = match description_utils::parse_img(extracted_image.img_buffer) {
+            let new_img = match img_multipart::parse_img(extracted_image.img_buffer) {
                 Ok(image) => image,
                 Err(e) => {
                     return match e {
                         ImageParsingError::DecodeError(e) => HttpResponse::UnsupportedMediaType()
                             .json(format!("Decode error: {}", e)),
-                        ImageParsingError::NoFormatFound => {
-                            HttpResponse::BadRequest().json(format!(
-                                "No format found. Supported formats: {:?}",
-                                descriptions_protected::ALLOWED_FORMATS
-                            ))
-                        }
+                        ImageParsingError::NoFormatFound => HttpResponse::BadRequest().json(
+                            format!("No format found. Supported formats: {:?}", ALLOWED_FORMATS),
+                        ),
                         ImageParsingError::UnsuppoertedFormat(e) => {
                             HttpResponse::UnsupportedMediaType().json(format!(
                                 "Unsupported format, found {:?}. Supported formats: {:?}",
-                                e,
-                                descriptions_protected::ALLOWED_FORMATS
+                                e, ALLOWED_FORMATS
                             ))
                         }
                         ImageParsingError::IoError(e) => HttpResponse::InternalServerError()
@@ -374,7 +370,7 @@ pub async fn update_product(
             };
             let path = format!("{}/{}", IMAGES_DIR, product_id);
             let new_path =
-                match description_utils::save_image(new_img, &path, &extracted_image.file_name) {
+                match img_multipart::save_image(new_img, &path, &extracted_image.file_name) {
                     Ok(file_name) => file_name,
                     Err(e) => match e {
                         ImageError::Unsupported(e) => {
@@ -388,7 +384,7 @@ pub async fn update_product(
                         }
                     },
                 };
-            if let Err(e) = description_utils::remove_image(unupadted_product.main_image()) {
+            if let Err(e) = img_multipart::remove_image(unupadted_product.main_image()) {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {
@@ -422,6 +418,10 @@ pub async fn update_product(
         Some(short_description) => short_description,
         None => return HttpResponse::InternalServerError().finish(),
     };
+    if short_description.len() > 256 {
+        return HttpResponse::BadRequest()
+            .body("Short description must be less than 256 characters.");
+    }
 
     let product_to_update = Product::new(
         unupadted_product.product_id(),
@@ -550,39 +550,42 @@ pub async fn delete_product(
         Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 
-    let images = match product::description::get_all_image_paths(&pool, &product_id).await {
+    let all_images = match product::get_all_image_paths(&pool, &product_id).await {
         Ok(images) => images,
-        Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        Err(e) => {
+            log::error!("Couldnt get all image paths: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
     };
 
-    for image in images {
-        if let Err(e) = description_utils::remove_image(&image) {
-            log::error!("Couldnt remove image from file system: {}", e);
-        };
-    }
-
     match product::delete_product(&pool, &product_id).await {
-        Ok(img_path) => {
-            if let Err(e) = description_utils::remove_image(&img_path) {
-                log::error!("Couldnt remove main image from file system: {}", e);
-            };
-            if let Err(e) = fs::remove_dir(format!(
-                "{}/{}",
-                IMAGES_DIR,
-                product_id
-            )) {
+        Ok(_) => {
+            for image in all_images {
+                if let Err(e) = img_multipart::remove_image(&image) {
+                    match e.kind() {
+                        std::io::ErrorKind::NotFound => {} // Image already deleted
+                        _ => {
+                            error!("Couldnt remove image from file system: {}", e);
+                        }
+                    }
+                };
+            }
+            if let Err(e) = fs::remove_dir(format!("{}/{}", IMAGES_DIR, product_id)) {
                 log::error!("Couldnt remove image folder from file system: {}", e);
             };
             HttpResponse::NoContent().finish()
         }
-        Err(e) => match e {
-            sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
-                PostgresDBError::ForeignKeyViolation => {
-                    HttpResponse::Conflict().json("Product is licensed to some user or company")
-                }
+        Err(e) => {
+            log::debug!("Couldnt delete product: {}", e);
+            match e {
+                sqlx::Error::Database(db_e) => match PostgresDBError::from_str(db_e) {
+                    PostgresDBError::ForeignKeyViolation => {
+                        HttpResponse::Conflict().json("Product is licensed to some user or company")
+                    }
+                    _ => HttpResponse::InternalServerError().json("Internal Server Error"),
+                },
                 _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-            },
-            _ => HttpResponse::InternalServerError().json("Internal Server Error"),
-        },
+            }
+        }
     }
 }

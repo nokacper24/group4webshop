@@ -1,6 +1,7 @@
 use crate::data_access::testimonial::{self, Testimonial};
 
 use actix_web::{get, web, HttpResponse, Responder};
+use log::error;
 use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
@@ -30,7 +31,10 @@ pub struct TestimonialsOpenApi;
   responses(
   (status = 200, description = "List of all testimonials for a product", body = Vec<Testimonial>),
   (status = 500, description = "Internal Server Error"),
-)
+),
+  params(
+    ("product_id", description = "The id of the product"),
+  ),
 )]
 #[get("/testimonials/{product_id}")]
 pub async fn get_testimonials_by_product(
@@ -38,16 +42,11 @@ pub async fn get_testimonials_by_product(
     product_id: web::Path<String>,
 ) -> impl Responder {
     let testimonials = testimonial::get_testimonials_by_product(&pool, &product_id).await;
-
-    // Error check
-    if testimonials.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+    match testimonials {
+        Ok(testimonials) => HttpResponse::Ok().json(testimonials),
+        Err(e) => {
+            error!("Error getting testimonials: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
-
-    // Parse to JSON
-    if let Ok(testimonials) = testimonials {
-        return HttpResponse::Ok().json(testimonials);
-    }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
