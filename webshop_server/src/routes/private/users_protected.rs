@@ -508,7 +508,7 @@ struct LicenseUsers {
     context_path = "/api/priv",
     responses(
     (status = 201, description = "License user successfully added", body = Vec<User>),
-    (status = 400, description = "License user already existed"),
+    (status = 409, description = "License user already existed"),
     (status = 500, description = "Internal Server Error"),
     )
 )]
