@@ -152,6 +152,7 @@ button {
 .button-container {
   display: flex;
   gap: 1em;
+  margin-bottom: 1em;
 }
 
 .bg-danger {
@@ -1084,11 +1085,6 @@ form a:hover {
   display: none;
 }
 
-.button-container {
-  display: flex;
-  gap: 1em;
-}
-
 /* || MANAGE/ADMIN PAGES */
 /* Select Table */
 .table-container {
@@ -1096,10 +1092,6 @@ form a:hover {
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
-}
-
-.button-container {
-  margin-bottom: 1em;
 }
 
 .table-container+.button-container {
@@ -1159,14 +1151,6 @@ form a:hover {
 
 .selected-row {
   background-color: hsl(195, 45%, 85%) !important;
-}
-
-.bg-danger {
-  background-color: var(--clr-danger);
-}
-
-.text-danger {
-  color: var(--clr-danger);
 }
 
 .table-text {
@@ -1258,6 +1242,14 @@ form a:hover {
   margin-right: auto;
   margin-left: 1em;
   margin-block: 0;
+}
+
+.accordion-row > p {
+  width: 16em;
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .accordion-remove-button {
