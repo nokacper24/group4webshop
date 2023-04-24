@@ -39,14 +39,14 @@ export default function RowEditPopup() {
 
           <div>
             <button
-              className="hero-button popup-button"
+              className="default-button small-button popup-button"
               type="button"
               onClick={() => save()}
             >
               Add
             </button>
             <button
-              className="hero-button popup-button"
+              className="default-button small-button popup-button"
               type="button"
               onClick={() => hidePopup()}
             >

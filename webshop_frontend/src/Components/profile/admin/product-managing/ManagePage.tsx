@@ -39,9 +39,9 @@ export default function ManagePage() {
       <section className="container">
         <iframe src=""></iframe>
       </section>
-      <section className="container">
-        <button>Delete product permanently</button>
-        <button>Save</button>
+      <section className="button-container">
+        <button className="default-button small-button bg-danger">Delete product permanently</button>
+        <button className="default-button small-button">Save</button>
       </section>
     </>
   );

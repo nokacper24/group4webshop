@@ -113,7 +113,12 @@ export default function AccordionTable() {
 
   return (
     <div className="accordion-table">
-      <button onClick={() => newSection()}>New section</button>
+      <button
+        className="default-button small-button popup-button"
+        onClick={() => newSection()}
+      >
+        New section
+      </button>
       {sectionList.map((section) => {
         return (
           <AccordionSection

@@ -131,7 +131,7 @@ export default function RowEditPopup() {
             </>
           )}
           <button
-            className="hero-button popup-button"
+            className="default-button small-button popup-button"
             type="button"
             onClick={() => changeImageState()}
           >
@@ -139,14 +139,14 @@ export default function RowEditPopup() {
           </button>
           <div>
             <button
-              className="hero-button popup-button"
+              className="default-button small-button popup-button"
               type="button"
               onClick={() => save()}
             >
               Save
             </button>
             <button
-              className="hero-button popup-button"
+              className="default-button small-button popup-button"
               type="button"
               onClick={() => hidePopup()}
             >
