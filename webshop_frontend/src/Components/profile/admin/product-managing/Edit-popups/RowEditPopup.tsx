@@ -17,13 +17,14 @@ let popupRef: RefObject<HTMLDivElement>;
 let imageRef: RefObject<HTMLInputElement>;
 let titleRef: RefObject<HTMLInputElement>;
 let altTextRef: RefObject<HTMLTextAreaElement>;
-let contentRef: RefObject<HTMLTextAreaElement>;
+let paragraphRef: RefObject<HTMLTextAreaElement>;
 let updatePropsFunc: (newProps: RowEditPopupProps) => void;
 export default function RowEditPopup() {
   popupRef = useRef(null);
   imageRef = useRef(null);
   titleRef = useRef(null);
-  contentRef = useRef(null);
+  altTextRef = useRef(null);
+  paragraphRef = useRef(null);
 
   let [props, setProps] = useState<RowEditPopupProps>({
     image: false,
