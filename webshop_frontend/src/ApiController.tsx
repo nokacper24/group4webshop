@@ -135,6 +135,8 @@ export const fetchLicensesFullInfo = async () => {
   if (response.ok) {
     const data: FullLicenseInfo[] = await response.json();
     return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
   }
 };
 
@@ -148,8 +150,12 @@ export const fetchLicensesForUser = async (userId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/user_licenses/user/${userId}`
   );
-  const data: FullLicenseInfo[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
 };
 
 /**

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ToggleButton } from "../../../ToggleButton";
+import ToggleButton from "../../../toggle-table/ToggleButton";
 /* import { Description } from "../../product-page/ProductPage"; */
 
 export type AccordionRowProps = {
