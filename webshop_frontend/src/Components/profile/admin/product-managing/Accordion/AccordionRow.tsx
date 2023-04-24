@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToggleButton } from "../../../ToggleButton";
 /* import { Description } from "../../product-page/ProductPage"; */
 
@@ -30,14 +30,24 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
   if (state.title.length <= 0) {
     setState({ ...state, title: "Untitled" });
   }
+  let visibleTitle: string;
+  if (state.image) {
+    visibleTitle = "Image: " + state.content;
+  } else {
+    visibleTitle = state.title;
+  }
 
   const changeVisibility = (checked: boolean, id: string) => {
     setVisible(checked);
   };
 
+  useEffect(() => {
+    setState(props);
+  });
+
   return (
     <div className="accordion-row">
-      <p>{state.title}</p>
+      <p>{visibleTitle}</p>
       <button
         className="accordion-edit-button"
         onClick={() => props.editFunction(props.id)}
