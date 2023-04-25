@@ -6,8 +6,8 @@ import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
 
 /**
- * Renders a table consisting of the header and a body with rows connected to the header through
- * this component.
+ * Renders a table consisting of the header and a body with rows
+ * connected to the header through this component.
  *
  * @returns The React component for the Accordion table
  */
