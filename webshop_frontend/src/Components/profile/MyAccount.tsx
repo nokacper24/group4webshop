@@ -73,8 +73,8 @@ export default function MyAccount(props: Props) {
           </Link>
           <button
             className="default-button small-button"
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               window.location.href = "/profile";
             }}
           >
