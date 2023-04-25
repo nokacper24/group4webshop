@@ -1,8 +1,23 @@
+import { useParams } from "react-router-dom";
 import AccordionTable from "./Accordion/AccordionTable";
 import HeaderEditPopup from "./Edit-popups/HeaderEditPopup";
 import RowEditPopup from "./Edit-popups/RowEditPopup";
+import { useEffect, useRef } from "react";
 
-export default function ManagePage() {
+export default function ManageProductPage() {
+  const { productId } = useParams();
+
+  const productName = useRef(null);
+  const productPrice = useRef(null);
+  const productImage = useRef(null);
+  const productDescription = useRef(null);
+
+  let createState = productId !== undefined;
+
+  useEffect(() => {
+    if (!createState) {
+    }
+  });
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
@@ -11,10 +26,20 @@ export default function ManagePage() {
         <h2>Manage product</h2>
         <form>
           <label htmlFor="product-name">Product name:</label>
-          <input type="text" id="product-name" name="product-name" />
+          <input
+            type="text"
+            id="product-name"
+            name="product-name"
+            ref={productName}
+          />
           <label htmlFor="product-price">Product price:</label>
           <div>
-            <input type="number" id="product-price" name="product-price" />
+            <input
+              type="number"
+              id="product-price"
+              name="product-price"
+              ref={productPrice}
+            />
             <p>kr</p>
           </div>
           <label htmlFor="product-image">Upload header image</label>
@@ -23,6 +48,7 @@ export default function ManagePage() {
             id="product-image"
             name="product-image"
             accept="image/png, image/jpeg, image/webp"
+            ref={productImage}
           />
           <label htmlFor="product-description">Description:</label>
           <textarea
@@ -30,6 +56,7 @@ export default function ManagePage() {
             name="product-description"
             rows={10}
             cols={50}
+            ref={productDescription}
           />
         </form>
       </section>
@@ -40,7 +67,9 @@ export default function ManagePage() {
         <iframe src=""></iframe>
       </section>
       <section className="button-container">
-        <button className="default-button small-button bg-danger">Delete product permanently</button>
+        <button className="default-button small-button bg-danger">
+          Delete product permanently
+        </button>
         <button className="default-button small-button">Save</button>
       </section>
     </>
