@@ -11,6 +11,7 @@ use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Respon
 
 use futures::StreamExt;
 
+use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::str;
@@ -568,28 +569,42 @@ async fn remove_license_users(
 #[utoipa::path(
     context_path = "/api/priv",
     responses(
-    (status = 200, description = "List of all users with a specific role", body = Vec<User>),
-    (status = 500, description = "Internal Server Error"),
+        (status = 200, description = "List of all users with a specific role", body = Vec<UserNoPass>),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 500, description = "Internal Server Error"),
     )
 )]
 #[get("/users/role/{role}")]
 async fn get_users_by_role(
     pool: web::Data<Pool<Postgres>>,
     role: web::Path<Role>,
+    request: HttpRequest,
 ) -> impl Responder {
-    let other_users = user::get_users_by_role(&pool, &role).await;
-
-    // Error check
-    if other_users.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+    match auth::validate_user(request, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
     }
-
-    // Parse to JSON
-    if let Ok(other_users) = other_users {
-        return HttpResponse::Ok().json(other_users);
+    let found_users = user::get_users_by_role(&pool, &role).await;
+    match found_users {
+        Ok(found_users) => HttpResponse::Ok().json(found_users),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
 #[derive(Deserialize, Serialize)]
