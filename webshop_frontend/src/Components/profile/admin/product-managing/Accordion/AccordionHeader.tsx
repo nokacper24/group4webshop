@@ -1,5 +1,3 @@
-import { AccordionRow, AccordionRowProps } from "./AccordionRow";
-
 export type AccordionHeaderProps = {
   title: string;
   addRow: () => void;

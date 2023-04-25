@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../Interfaces";
-import { ProductCard, ProductCardProps } from "./ProductCard";
+import { ProductCard } from "./ProductCard";
 import { fetchProducts } from "../../ApiController";
 import Spinner from "../utils/utils";
 

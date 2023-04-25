@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
-import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";

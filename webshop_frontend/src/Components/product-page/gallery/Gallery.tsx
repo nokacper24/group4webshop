@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Testimonial } from "../../../Interfaces";
 import { ParagraphSlide } from "./ParagraphSlide";
-import { SlideType } from "./SlideTypes";
 
 /**
  * The props of the gallery component.

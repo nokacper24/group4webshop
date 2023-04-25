@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Company, License, Product } from "../../../Interfaces";
+import { Company, Product } from "../../../Interfaces";
 import { useNavigate } from "react-router-dom";
 import { fetchCompanies, fetchProducts } from "../../../ApiController";
 
