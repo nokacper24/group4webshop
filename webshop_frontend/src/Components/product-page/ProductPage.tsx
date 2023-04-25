@@ -8,7 +8,7 @@ import Spinner from "../utils/utils";
 import {
   fetchDescriptionComponents,
   fetchProduct,
-  ProductError,
+  FetchError,
   fetchTestimonials,
 } from "../../ApiController";
 
@@ -41,7 +41,7 @@ export default function ProductPage() {
         );
       })
       .catch((error: unknown) => {
-        if (error instanceof ProductError) {
+        if (error instanceof FetchError) {
           if (error.status === 404) {
             setError(
               new Error(`We could not find the product you are looking for.`)

@@ -17,6 +17,30 @@ if (import.meta.env.PROD) {
 }
 
 /**
+ * Error for failed fetches.
+ * Throw it if response is not as expected.  
+ * This error contains the status code as well as the status as text.
+ * Status code can be used to determine what went wrong, and act accordingly.
+ * @extends Error
+ */
+export class FetchError extends Error {
+  status: number;
+  statusText: string;
+  /**
+   * Create a new product error.
+   * @param message The error message.
+   * @param status The HTTP status code.
+   * @param statusText The HTTP status text.
+   */
+  constructor(message: string, status: number, statusText: string) {
+    super(message);
+    this.name = "FetchError";
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
+/**
  * Get a specific user.
  *
  * @param userId The ID of the user.
@@ -238,33 +262,13 @@ export const fetchProduct = async (productId: string) => {
     const data: Product = await response.json();
     return data;
   } else {
-    throw new ProductError(
+    throw new FetchError(
       "Could not fetch product.",
       response.status,
       response.statusText
     );
   }
 };
-
-/**
- * Error for product fetches.
- */
-export class ProductError extends Error {
-  status: number;
-  statusText: string;
-  /**
-   * Create a new product error.
-   * @param message The error message.
-   * @param status The HTTP status code.
-   * @param statusText The HTTP status text.
-   */
-  constructor(message: string, status: number, statusText: string) {
-    super(message);
-    this.name = "ProductError";
-    this.status = status;
-    this.statusText = statusText;
-  }
-}
 
 /**
  * Get all products.
