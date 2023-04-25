@@ -349,3 +349,14 @@ export const verifySignInInfo = async (email: string, password: string) => {
     },
   });
 };
+
+/**
+ * Sign out the user.
+ * @returns The response from the fetch request.
+ * */
+export const logout = async () => {
+  return await fetch(`${baseUrl}/api/priv/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+};
