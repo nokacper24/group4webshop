@@ -12,8 +12,8 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts()
-      .then((data) => {
-        setProducts(data);
+      .then((products: Product[]) => {
+        setProducts(products);
         setLoading(false);
       })
       .catch((error) => {
