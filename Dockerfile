@@ -34,18 +34,14 @@ RUN cargo build --release
 # Remove dummy src/main.rs
 RUN rm -r src
 
-# Copy the rest of the application code to the container, src, build.rs and sqls-data.json
-COPY webshop_server/src ./src
-COPY webshop_server/build.rs webshop_server/sqlx-data.json ./
+# Copy the rest of the files
+COPY webshop_server/ ./
 
 # Copy the frontend build to the container
 COPY --from=react-build /app/dist ./webshop_frontend/dist/
 
 # Set the environment variable for the frontend directory
 ENV FRONT_DIST_DIR=webshop_frontend/dist
-
-# Set the environment variable for the resources/images directory
-ENV RESOURCES_DIR=/resources/images
 
 # Set env var to use offline db
 ENV SQLX_OFFLINE=true

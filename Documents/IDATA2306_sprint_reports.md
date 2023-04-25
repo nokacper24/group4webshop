@@ -1,5 +1,8 @@
 # Sprint reports for IDATA2306 App Dev
 
+## Delegation of work for each sprint 
+On [the issue board](https://github.com/nokacper24/group4webshop/issues) we have all the issues for each sprint, where each issue has a milestone that corresponds to a sprint. If an issue is marked “sprint 2” it means the goal was to finish it within the end of sprint 2. The user the issue is assigned to is the group member that worked on and finished it.  
+
 ## Sprint 1
 Period: 12. January - 12. February
 ### Goals and outcomes: 
@@ -43,5 +46,29 @@ Period: 13. February – 12. March
 -   We finished most of the goals, only https left and serving from a server (rather than locally). As mentioned above, we need to figure out building docker images and host it on a server. 
 -   We finished unfinished goals from sprint 1. Additionally, we implemented serving of images from filesystem, along with image upload and deletion routes.
 ## Sprint 3
+Period 13. March - 9. April  
+### Goals: 
+- Proper hashing of passwords
+- Proper user registration via e-mail
+- Public and private routes for API endpoints
+- Unfinished from previous sprint:
+  - Setup HTTPS
+  - Figure out docker and host on a server
+
+### Finished:
+- Hashing function implemented
+- Registration with invites works using the email util
+- Public and private routes for API endpoints
+  - All product related endpoints are finished and documented
+- HTTPS with a self-signed certificate
+
+### Unfinished:
+- Because of developer ergonomics hashing is not yet used for verification of passwords
+- The email util is not currently connected to an email server, so it logs information to the log instead
+- Docker, hosting on a server, certificate from letsencrypt
+  - Worked on heavily at the end of sprint3/start of sprint4, should be done early in in sprint 4. At the time of this report Docker image is prepared. 
+
+### Retrospective:  
+Crucial functionality is in place, and this was generally a succesfull sprint. All product related endpoints are finished, and documented. The only thing left is to finish the docker image and host it on a server, which should be done early in sprint 4.
 
 ## Sprint 4

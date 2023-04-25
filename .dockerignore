@@ -5,3 +5,4 @@ webshop_frontend/node_modules
 **/.key
 webshop_server/target
 webshop_server/resources
+webshop_server/logs

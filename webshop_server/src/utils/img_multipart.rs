@@ -3,12 +3,7 @@ use futures::StreamExt;
 use image::{io::Reader as ImageReader, DynamicImage, ImageError, ImageFormat};
 use std::{collections::HashMap, io::Cursor};
 
-pub const IMAGES_DIR: &str = {
-    match option_env!("RESOURCES_DIR") {
-        Some(path) => path,
-        None => "resources/images",
-    }
-};
+pub const IMAGES_DIR: &str = "resources/images";
 
 const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
 pub const ALLOWED_FORMATS: [ImageFormat; 3] =
@@ -204,7 +199,7 @@ pub enum ImageParsingError {
 ///
 /// # Returns
 ///
-/// The path to the saved image.
+/// The path to the saved image, formatted with a leading '/'. This makes it easier to use in frontend.
 pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<String, ImageError> {
     std::fs::create_dir_all(dir)?;
 
@@ -230,6 +225,7 @@ pub fn save_image(image: DynamicImage, dir: &str, file_name: &str) -> Result<Str
 pub fn remove_image(path: &str) -> Result<(), std::io::Error> {
     let real_path = {
         if !IMAGES_DIR.starts_with('/') {
+            // if actual path does not start with a '/', remove the leading '/'
             &path[1..]
         } else {
             path

@@ -17,11 +17,7 @@ You can put all environmental variables inside a `.env` file at the root of the 
 DATABASE_URL=postgresql://user:password@url/db_name
 # Or if you have no live database
 SQLX_OFFLINE=true
-
-# Optional, default is `resources/images` (relative path)
-RESOURCES_DIR="/resources/images"
 ```
-**Note:** `RESOURCES_DIR` env variable is useful if you need to specify an absolute path to the resources directory. We use it when building the Docker image.
 #### Environmental variable needed to run
 ```bash
 DATABASE_URL=postgresql://user:password@url/db_name

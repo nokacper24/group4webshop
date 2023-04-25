@@ -1,3 +1,4 @@
+use core::panic;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -6,6 +7,7 @@ use actix_web::{http, middleware::Logger, web, App, HttpServer};
 
 use actix_web_static_files::ResourceFiles;
 use dotenvy::dotenv;
+use flexi_logger::{Duplicate, FileSpec};
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -34,30 +36,34 @@ async fn main() -> std::io::Result<()> {
     } else {
         std::env::set_var("RUST_LOG", DEFALUT_LOG_LEVEL);
     }
-    env_logger::init();
+    let _logger = match setup_logger().start() {
+        Ok(logger) => Some(logger),
+        Err(e) => {
+            eprintln!("Could not start logger: {}", e);
+            None // continue without logging
+        }
+    };
 
     let host = std::env::var("HOST").unwrap_or_else(|_| "localhost".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
     let address = format!("{}:{}", host, port);
-
     info!("Starting server at https://{}", address);
 
-    //create new pool
     let dburl = std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable not set");
-
     let pool = web::Data::new(
         create_pool(dburl.as_str())
             .await
             .expect("Cannot connect to database"),
     );
     let tls_config = load_rustls_config();
-
-    let server = HttpServer::new(move || {
-        let allowed_origins = std::env::var("ALLOWED_ORIGINS")
-        .expect("ALLOWED_ORIGINS environment variable not set. Ex: http://localhost:8080,http://localhost:8081")
+    let allowed_origins = std::env::var("ALLOWED_ORIGINS")
+        .expect("ALLOWED_ORIGINS environment variable not set. Ex: ALLOWED_ORIGINS=http://localhost:8080,http://localhost:8083")
         .split(',')
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
+
+    let server = HttpServer::new(move || {
+        let allowed_origins = allowed_origins.clone();
         let cors = Cors::default()
             .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allowed_headers(vec![
@@ -96,24 +102,30 @@ async fn main() -> std::io::Result<()> {
     }
 }
 
+/// Loads the TLS configuration.
+/// Paths to the certificate and private key are read from the environment variables `CERT_PATH` and `PRIV_KEY_PATH`.
+/// 
+/// # Panics
+/// Panics if the environment variables are not set or if the certificate or private key could not be loaded.
 fn load_rustls_config() -> rustls::ServerConfig {
-    // init server config builder with safe defaults
     let config = ServerConfig::builder()
         .with_safe_defaults()
         .with_no_client_auth();
-
-    // CERT_PATH=certificate.pem
-    // PRIV_KEY_PATH=privatekey.pem
 
     let cert_path = std::env::var("CERT_PATH").expect("CERT_PATH environment variable not set");
     let priv_key_path =
         std::env::var("PRIV_KEY_PATH").expect("PRIV_KEY_PATH environment variable not set");
 
-    // load TLS key/cert files
-    let cert_file = &mut BufReader::new(File::open(cert_path).unwrap());
-    let key_file = &mut BufReader::new(File::open(priv_key_path).unwrap());
+    let cert_file = &mut BufReader::new(match File::open(cert_path) {
+        Ok(file) => file,
+        Err(e) => panic!("Could not open certificate file: {}", e),
+    });
+    let key_file = &mut BufReader::new(match File::open(priv_key_path) {
+        Ok(file) => file,
+        Err(e) => panic!("Could not open private key file: {}", e),
+    });
 
-    // convert files to key/cert objects
+    
     let cert_chain = certs(cert_file)
         .unwrap()
         .into_iter()
@@ -132,4 +144,29 @@ fn load_rustls_config() -> rustls::ServerConfig {
     }
 
     config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
+}
+
+/// Sets up the logger.
+/// When calling .start(), assign the returned logger to a variable, otherwise it will be dropped and will error out.
+fn setup_logger() -> flexi_logger::Logger {
+    let logger = match flexi_logger::Logger::try_with_env() {
+        Ok(logger) => logger,
+        Err(e) => {
+            panic!("Could not parse RUST_LOG: {}", e);
+        }
+    };
+    logger
+        .log_to_file(FileSpec::default().directory("logs"))
+        .write_mode(flexi_logger::WriteMode::Async)
+        .rotate(
+            flexi_logger::Criterion::Age(flexi_logger::Age::Day),
+            flexi_logger::Naming::Timestamps,
+            flexi_logger::Cleanup::KeepCompressedFiles(30),
+        )
+        .create_symlink("latest.log")
+        .duplicate_to_stdout(Duplicate::All)
+        .append()
+        .format_for_files(flexi_logger::detailed_format)
+        .format_for_stdout(flexi_logger::colored_default_format)
+        .set_palette("196;208;10;6;8".to_owned())
 }

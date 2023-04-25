@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MeUser } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
+import { logout } from "../../ApiController";
 
 interface Props {
   user: MeUser;
@@ -70,6 +71,23 @@ export default function MyAccount(props: Props) {
           <Link className="default-button small-button" to="edit">
             Edit profile
           </Link>
+          <button
+            className="default-button small-button"
+            onClick={async () => {
+              let result = await logout();
+              if (result) {
+                if (result.ok) {
+                  window.location.href = "/profile";
+                } else {
+                  alert("Could not log out.");
+                }
+              } else {
+                alert("Could not log out.");
+              }
+            }}
+          >
+            Logout
+          </button>
         </div>
       </section>
       <section className="container left-aligned">{userRoleSection}</section>

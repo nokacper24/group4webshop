@@ -238,9 +238,33 @@ export const fetchProduct = async (productId: string) => {
     const data: Product = await response.json();
     return data;
   } else {
-    throw new Error("Could not fetch product.");
+    throw new ProductError(
+      "Could not fetch product.",
+      response.status,
+      response.statusText
+    );
   }
 };
+
+/**
+ * Error for product fetches.
+ */
+export class ProductError extends Error {
+  status: number;
+  statusText: string;
+  /**
+   * Create a new product error.
+   * @param message The error message.
+   * @param status The HTTP status code.
+   * @param statusText The HTTP status text.
+   */
+  constructor(message: string, status: number, statusText: string) {
+    super(message);
+    this.name = "ProductError";
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
 
 /**
  * Get all products.
@@ -323,5 +347,16 @@ export const verifySignInInfo = async (email: string, password: string) => {
       "Content-Type": "application/json",
       credentials: "include",
     },
+  });
+};
+
+/**
+ * Sign out the user.
+ * @returns The response from the fetch request.
+ * */
+export const logout = async () => {
+  return await fetch(`${baseUrl}/api/priv/logout`, {
+    method: "POST",
+    credentials: "include",
   });
 };
