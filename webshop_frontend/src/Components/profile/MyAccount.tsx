@@ -74,8 +74,16 @@ export default function MyAccount(props: Props) {
           <button
             className="default-button small-button"
             onClick={async () => {
-              await logout();
-              window.location.href = "/profile";
+              let result = await logout();
+              if (result) {
+                if (result.ok) {
+                  window.location.href = "/profile";
+                } else {
+                  alert("Could not log out.");
+                }
+              } else {
+                alert("Could not log out.");
+              }
             }}
           >
             Logout
