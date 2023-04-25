@@ -11,6 +11,7 @@ import {
   FetchError,
   fetchTestimonials,
 } from "../../ApiController";
+import { ErrorMessage } from "../ErrorMessage";
 
 /**
  * The product page component.
@@ -61,7 +62,16 @@ export default function ProductPage() {
   return (
     <>
       {loading && <Spinner />}
-      {error && <ErrorMessage message={error.message} />}
+      {error && (
+        <>
+          <ErrorMessage message={error.message} />
+          <Link to="/products">
+            <button className="banner-element hero-button">
+              Back to products
+            </button>
+          </Link>
+        </>
+      )}
       {product && (
         <>
           <section
@@ -110,25 +120,5 @@ function UnavailableTag() {
     <div className="unavailable-tag">
       <p>Product is currently unavailable</p>
     </div>
-  );
-}
-
-interface ErrorMessageProps {
-  message: string;
-}
-function ErrorMessage(props: ErrorMessageProps) {
-  const { message } = props;
-  return (
-    <>
-      <section className="container">
-        <h1>Something went wrong</h1>
-        <p>{message}</p>
-        <Link to="/products">
-          <button className="banner-element hero-button">
-            Back to products
-          </button>
-        </Link>
-      </section>
-    </>
   );
 }
