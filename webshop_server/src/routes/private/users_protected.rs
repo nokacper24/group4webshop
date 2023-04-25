@@ -564,11 +564,11 @@ async fn remove_license_users(
     }
 }
 
-/// Get all users that are the IT responsible for their company.
+/// Get all users with a specific role.
 #[utoipa::path(
     context_path = "/api/priv",
     responses(
-    (status = 200, description = "List of all users who's IT responsible for their company", body = Vec<User>),
+    (status = 200, description = "List of all users with a specific role", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
     )
 )]

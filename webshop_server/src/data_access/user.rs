@@ -513,7 +513,7 @@ pub async fn create_user(
     }
 }
 
-/// Get all users that are IT responsible for a company
+/// Get all users with a specific role
 pub async fn get_users_by_role(
     pool: &Pool<Postgres>,
     role: &Role,
