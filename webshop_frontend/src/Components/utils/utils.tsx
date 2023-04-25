@@ -5,6 +5,6 @@ import "./utils.css";
  *
  * @returns {HTMLDivElement} div containing a loading spinner
  */
-export default function loadingSpinner() {
+export default function LoadingSpinner() {
   return <div className="loading-spinner" />;
 }
