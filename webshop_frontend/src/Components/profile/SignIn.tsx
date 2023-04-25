@@ -12,7 +12,20 @@ export default function SignIn() {
 
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
+  const errorMessage = useRef<HTMLParagraphElement>(null);
 
+  /**
+   * Set the error message for the sign in form.
+   *
+   * @param text The text to set into the error message.
+   */
+  const setErrorMessage = (text: string) => {
+    errorMessage.current!.innerHTML = text;
+  };
+
+  /**
+   * Verify the user's credentials to sign in to their account.
+   */
   const handleSignIn = () => {
     verifySignInInfo(email.current!.value, password.current!.value).then(
       (response: Response) => {
@@ -21,6 +34,7 @@ export default function SignIn() {
           navigate(0);
         } else {
           password.current!.value = "";
+          setErrorMessage("The e-mail or password is wrong.");
         }
       }
     );
@@ -35,7 +49,7 @@ export default function SignIn() {
         <h1>Sign in</h1>
         <p>
           Not a customer yet?
-          <Link to="create-account"> Register here!</Link>
+          <Link to="/register"> Register here!</Link>
         </p>
 
         <label htmlFor="sign-in-email">E-mail</label>
@@ -57,6 +71,8 @@ export default function SignIn() {
           placeholder="password"
           required
         ></input>
+
+        <p ref={errorMessage} className="error-message text-danger"></p>
 
         <button
           onClick={handleSignIn}
