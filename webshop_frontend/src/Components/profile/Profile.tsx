@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router-dom";
 import ManageLicenseAccess from "./managing/ManageLicenseAccess";
 import MyAccount from "./MyAccount";
 import SignIn from "./SignIn";
-import CreateCompanyAccount from "./register/CreateCompanyAccount";
 import AdminCompanyLicenses from "./admin/AdminCompanyLicenses";
 import ManageProducts from "./admin/ManageProducts";
 import ManageUsers from "./admin/ManageUsers";
@@ -41,7 +40,7 @@ export default function Profile() {
           path="/"
           element={signedIn && user ? <MyAccount user={user} /> : <SignIn />}
         />
-        <Route path="/create-account/*" element={<CreateCompanyAccount />} />
+
         <Route
           path="/edit"
           element={
