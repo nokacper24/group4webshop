@@ -9,7 +9,7 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import ManagePage from "./Components/profile/admin/product-managing/ManagePage";
+import ManageProductPage from "./Components/profile/admin/product-managing/ManageProductPage";
 
 /**
  * Represents the website content.
@@ -38,7 +38,11 @@ export default function App() {
             path="product/purchase-license"
             element={<PurchaseLicense />}
           />
-          <Route path="manage" element={<ManagePage />} />
+          <Route
+            path="product/manage/:productId"
+            element={<ManageProductPage />}
+          />
+          <Route path="product/create" element={<ManageProductPage />} />
         </Routes>
       </main>
 
