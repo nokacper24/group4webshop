@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { License, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
 import { fetchProduct, postLicense } from "../../ApiController";
+import TermsOfService from "../profile/register/TermsOfService";
 
 /**
  * Represents a Purchase License page.
@@ -116,19 +117,14 @@ export default function PurchaseLicense() {
             updatePrice={(event) => updatePrice(event)}
             refs={{ price }}
           />
-
           <p className="total-price">TOTAL: ${totalPrice}</p>
+
+          <TermsOfService />
+          <p className="form-alert" ref={formAlert}></p>
 
           <button type="submit" className="default-button submit-button">
             Buy
           </button>
-          <div className="checkbox-input">
-            <input id="accept-terms" type="checkbox" required />
-            <label htmlFor="accept-terms">
-              I have read and agree to the <a href="#!">terms of service</a>.
-            </label>
-          </div>
-          <p className="form-alert" ref={formAlert}></p>
         </form>
       </section>
     </>
