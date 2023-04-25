@@ -34,13 +34,15 @@ export default function ManagePage() {
         </form>
       </section>
       <section className="accordion-wrapper container">
-        <AccordionTable></AccordionTable>
+        <AccordionTable />
       </section>
       <section className="container">
         <iframe src=""></iframe>
       </section>
       <section className="button-container">
-        <button className="default-button small-button bg-danger">Delete product permanently</button>
+        <button className="default-button small-button bg-danger">
+          Delete product permanently
+        </button>
         <button className="default-button small-button">Save</button>
       </section>
     </>

@@ -61,7 +61,6 @@ export default function RowEditPopup() {
       title = titleRef.current?.value ? titleRef.current.value : "";
     }
     props.informationCallBack(props.image, title, content);
-    console.log(imageRef.current?.value);
     hidePopup();
   };
 
@@ -167,9 +166,6 @@ export default function RowEditPopup() {
 }
 
 export function showPopup(inProps: RowEditPopupProps) {
-  console.log(inProps.content);
-  console.log("Image: ");
-  console.log(imageRef.current);
   updatePropsFunc(inProps);
   popupRef.current?.classList.add("popup-visible");
 }

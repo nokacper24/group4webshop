@@ -18,5 +18,4 @@ export default function PurchaseLicenseButton(props: Props) {
       </button>
     );
   }
-
 }

@@ -53,14 +53,10 @@ export default function AccordionTable() {
    */
   const deleteSection = (id: number) => {
     const index = sectionList.findIndex((section) => section.sectionID === id);
-    /* delete sectionList[index];
-    setSectionList([ ...sectionList ]);
-    console.log(sectionList); */
 
     const newSections = sectionList.filter(
       (section) => section.sectionID !== id
     );
-    console.log(newSections);
     setSectionList(newSections);
   };
 
@@ -110,7 +106,6 @@ export default function AccordionTable() {
       });
       setSectionList([...sectionList]);
     }
-    console.log(sectionList);
   };
 
   return (

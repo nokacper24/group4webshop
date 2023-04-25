@@ -20,6 +20,7 @@ export type AccordionSectionProps = {
 };
 
 let latestID = 100;
+
 /**
  * The main component for managing a header and its body.
  *
@@ -31,8 +32,6 @@ export function AccordionSection(props: AccordionSectionProps) {
    * Calls the deleteSection function in the parent component. Deleting itself in the process.
    */
   const deleteSelf = () => {
-    console.log("Delete self");
-    console.log(props);
     props.deleteSection(props.sectionID);
   };
 
@@ -47,7 +46,7 @@ export function AccordionSection(props: AccordionSectionProps) {
    * @param title title of the row to be added
    */
   const addRow = () => {
-    //Temporary debug solution
+    // Temporary debug solution
     if (rows.length < 2) {
       showPopup({
         image: false,
@@ -89,7 +88,6 @@ export function AccordionSection(props: AccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    console.log("edit: " + id);
     let row = rows.find((row) => row.id === id);
     if (row) {
       showPopup({
