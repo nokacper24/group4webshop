@@ -9,7 +9,8 @@ use crate::{
         auth::create_cookie,
         user::{create_invite, get_by_username_with_pass},
     },
-    utils::auth::COOKIE_KEY_SECRET, SharedData,
+    utils::{self, auth::COOKIE_KEY_SECRET},
+    SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -84,8 +85,12 @@ struct Email {
 }
 
 #[post("/create-user")]
-async fn create_user(email: web::Json<Email>, shared_data: web::Data<SharedData>) -> impl Responder {
+async fn create_user(
+    email: web::Json<Email>,
+    shared_data: web::Data<SharedData>,
+) -> impl Responder {
     let pool = &shared_data.db_pool;
+    let mailer = &shared_data.mailer;
     // check if user exists
     let db_user = get_by_username_with_pass(&pool, &email.email).await;
     match db_user {
@@ -100,9 +105,23 @@ async fn create_user(email: web::Json<Email>, shared_data: web::Data<SharedData>
                     match invite {
                         Ok(_v) => {
                             //print invite temporarely TODO: send email
-                            println!("Invite: {}", v.id);
+                            let email = utils::email::Email {
+                                recipient_email: email.email.clone(),
+                                subject: "Invite to webshop".to_string(),
+                                body: _v.id,
+                            };
+                            let outcome = utils::email::send_email(email, mailer).await;
 
-                            HttpResponse::Ok().json("Invite created, check your email")
+                            match outcome {
+                                Ok(_v) => {
+                                    HttpResponse::Ok().json("Invite created, check your email")
+                                }
+                                Err(e) => {
+                                    log::error!("Error sending email: {}", e);
+                                    HttpResponse::InternalServerError()
+                                        .json("Internal Server Error")
+                                }
+                            }
                         }
                         Err(_e) => {
                             HttpResponse::InternalServerError().json("Internal Server Error")
@@ -129,7 +148,7 @@ async fn valid_verify(
     shared_data: web::Data<SharedData>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let invite = data_access::user::get_invite(&invite_id, &pool).await;
+    let invite = data_access::user::get_invite_by_id(&invite_id, &pool).await;
     match invite {
         Ok(v) => HttpResponse::Ok().json(v),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
@@ -143,7 +162,7 @@ async fn verify(
     shared_data: web::Data<SharedData>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let invite = data_access::user::get_invite(&invite_id, &pool).await;
+    let invite = data_access::user::get_invite_by_id(&invite_id, &pool).await;
     match invite {
         Ok(v) => {
             // check if invite has company

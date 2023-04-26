@@ -1,4 +1,9 @@
-use lettre::{Message,SmtpTransport, message::header::ContentType, Transport};
+use lettre::{
+    message::{header::ContentType, Mailbox},
+    Message, SmtpTransport, Transport,
+};
+
+use crate::data_access;
 
 pub struct Email {
     pub recipient_email: String,
@@ -38,14 +43,17 @@ impl std::fmt::Display for MailError {
     }
 }
 
-pub async fn send_email(email: Email,mailer: &SmtpTransport) -> Result<(), MailError> {
+pub async fn send_email(email: Email, mailer: &SmtpTransport) -> Result<(), MailError> {
     // log::info!(
     //     "Sending email to {}\n with content {}",
     //     email.recipient_email,
     //     email.body
     // );
     // Err(MailError::NotImplemented)
-    let email = generate_email(email.recipient_email);
+    let email = match generate_email(email) {
+        Ok(email) => email,
+        Err(e) => return Err(e),
+    };
 
     match mailer.send(&email) {
         Ok(_) => println!("Email sent successfully!"),
@@ -54,15 +62,55 @@ pub async fn send_email(email: Email,mailer: &SmtpTransport) -> Result<(), MailE
     Ok(())
 }
 
+fn generate_email(email: Email) -> Result<Message, MailError> {
+    let from: Mailbox = match "ProFlex <group04webshop@gmail.com>".parse() {
+        Ok(mailbox) => mailbox,
+        Err(_) => return Err(MailError::SendError),
+    };
 
-fn generate_email(to: String) -> Message
-{
+    let to: Mailbox = match email.recipient_email.parse() {
+        Ok(mailbox) => mailbox,
+        Err(_) => return Err(MailError::InvalidRecipient),
+    };
+
     let email = Message::builder()
-    .from("ProFlex <group04webshop@gmail.com>".parse().unwrap())
-    .to(to.parse().unwrap())
-    .subject("test email")
-    .header(ContentType::TEXT_PLAIN)
-    .body(String::from("It works!!!"))
-    .unwrap();
-    email
+        .from(from)
+        .to(to)
+        .subject("Confirm Your User Account on ProFlex")
+        .header(ContentType::TEXT_HTML)
+        .body(register_user_template(&email.body));
+
+    match email {
+        Ok(email) => Ok(email),
+        Err(_) => Err(MailError::SendError),
+    }
+}
+
+fn register_user_template(invite_code: &str) -> String {
+    let email_template = format!(
+        r#"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Confirm Your User Account on ProFlex</title>
+    </head>
+    <body>
+        <p>Dear Customer,</p>
+        <p>Thank you for accepting our invitation to create a user account on ProFlex. We're thrilled to have you on board!</p>
+        <p>To complete your registration, please click the following link:</p>
+        <a href="https://group04.web-tek.ninja/verify/{invite_code}">Click Here</a>
+        <p>You'll be asked to set up your account and create a password. Once you've completed this step, you'll be able to access all of ProFlex's features.</p>
+        <p>If you did not request this invitation, please ignore this email or contact us at <a href="group04webshop@gmail.com">group04webshop@gmail.com</a> for further assistance.</p>
+        <p>If you have any questions or encounter any issues during the registration process, please don't hesitate to reach out to us. We're here to help!</p>
+        <p>Thank you for choosing ProFlex. We look forward to working with you.</p>
+        <p>Best regards,</p>
+        <p>The ProFlex Team</p>
+    </body>
+    </html>
+    "#,
+        invite_code = invite_code
+    );
+
+    email_template
 }

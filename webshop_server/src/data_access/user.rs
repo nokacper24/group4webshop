@@ -69,9 +69,13 @@ pub async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Err
 }
 
 pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: &i32) -> Result<User, sqlx::Error> {
-    let user = query_as!(User, r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#, user_id)
-        .fetch_one(pool)
-        .await?;
+    let user = query_as!(
+        User,
+        r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(user)
 }
 
@@ -452,7 +456,7 @@ pub async fn create_invite(
     }
 }
 
-pub async fn get_invite(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
+pub async fn get_invite_by_id(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
     let invite = query_as!(
         Invite,
         r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
