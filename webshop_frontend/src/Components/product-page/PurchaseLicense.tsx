@@ -21,9 +21,8 @@ export default function PurchaseLicense() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<MeUser>();
-  const [signedIn, setSignedIn] = useState<boolean>(false);
   const [loadingUsr, setLoadingUsr] = useState(true);
-  const [loadingProd, setLoading] = useState(true);
+  const [loadingProd, setLoadingProd] = useState(true);
 
   const [error, setError] = useState<Error | null>(null);
 
@@ -109,29 +108,25 @@ export default function PurchaseLicense() {
     fetchProduct(productId!)
       .then((product: Product) => {
         setProduct(product);
-        setLoading(false);
+        setLoadingProd(false);
       })
       .catch((error: FetchError) => {
         if (error.status === 404) {
           setError(new Error("No such product"));
-          setLoading(false);
+          setLoadingProd(false);
         } else {
           setError(error);
-          setLoadingUsr(false);
+          setLoadingProd(false);
         }
       });
     fetchMe()
       .then((user: MeUser) => {
         setUser(user);
-        setSignedIn(true);
         setLoadingUsr(false);
       })
       .catch((error: FetchError) => {
-        if (error.status === 401) {
-          setSignedIn(false);
-        } else {
+        if (error.status !== 401) {
           setError(error);
-          setLoadingUsr(false);
         }
         setLoadingUsr(false);
       });
@@ -148,11 +143,9 @@ export default function PurchaseLicense() {
             {error && <p>{error.message}</p>}
             {!error && (
               <>
-                {!signedIn && <MustBeSignedIn />}
-                {signedIn && user && user.role === "Default" && (
-                  <NoPermisionToBuy />
-                )}
-                {signedIn && user && user.role !== "Default" && (
+                {!user && <MustBeSignedIn />}
+                {user && user.role === "Default" && <NoPermisionToBuy />}
+                {user && user.role !== "Default" && (
                   <form
                     className="left-aligned"
                     onSubmit={(event) => handleSubmit(event)}
