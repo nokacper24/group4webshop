@@ -25,7 +25,11 @@ DB_PASSWORD=password # database root password
 BACKEND_USR_PASS=password # backend user password
 IMG_TAG=main # which docker image tag should be used, either main or dev
 RUST_LOG=info,sqlx=warn # set the log level - optional, default is 'info,sqlx=warn
+EMAIL_USR=myuser@gmai.com # gmail address used to send emails
+EMAIL_PWD=googleapppassword # email password, use google's app password
 ```
+
+See Google's [Sign in with App Passwords](https://support.google.com/accounts/answer/185833?hl=en) for more information on how to generate app password to use with Gmail.
 
 **Note:** Cert path, port and other variables [required by Webshop Server](../webshop_server/README.md#environmental-variable-needed-to-run) are hardcoded in the [docker-compose.yml](docker-compose.yml) file, to simplify our deployment process.
 
