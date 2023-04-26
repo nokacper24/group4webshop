@@ -27,14 +27,7 @@ export default function PurchaseLicense() {
   const [error, setError] = useState<Error | null>(null);
 
   const { productId } = useParams();
-  const [product, setProduct] = useState<Product>({
-    product_id: "",
-    display_name: "",
-    price_per_user: 0,
-    short_description: "",
-    main_image: "",
-    available: false,
-  });
+  const [product, setProduct] = useState<Product>();
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const price = useRef<HTMLSelectElement>(null);
@@ -76,10 +69,10 @@ export default function PurchaseLicense() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (validateForm()) {
+    if (validateForm() && user && product) {
       let license: License = {
         license_id: NaN,
-        company_id: user?.company_id ?? NaN,
+        company_id: user.company_id,
         product_id: product.product_id,
         product_name: product.display_name,
         start_date: new Date(),
@@ -141,7 +134,7 @@ export default function PurchaseLicense() {
         {!loadingProd && !loadingUsr && (
           <>
             {error && <p>{error.message}</p>}
-            {!error && (
+            {!error && product && (
               <>
                 {!user && <MustBeSignedIn />}
                 {user && user.role === "Default" && <NoPermisionToBuy />}
