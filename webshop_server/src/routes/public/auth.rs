@@ -9,7 +9,7 @@ use crate::{
         auth::create_cookie,
         user::{create_invite, get_by_username_with_pass},
     },
-    utils::auth::COOKIE_KEY_SECRET,
+    utils::auth::COOKIE_KEY_SECRET, SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -26,7 +26,8 @@ struct Login {
 }
 
 #[post("/login")]
-async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn login(user: web::Json<Login>, shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     // check if user exists
     let db_user = get_by_username_with_pass(&pool, &user.email).await;
     match db_user {
@@ -83,7 +84,8 @@ struct Email {
 }
 
 #[post("/create-user")]
-async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn create_user(email: web::Json<Email>, shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     // check if user exists
     let db_user = get_by_username_with_pass(&pool, &email.email).await;
     match db_user {
@@ -124,8 +126,9 @@ struct AddUserData {
 #[get("/verify/{invite_id}")]
 async fn valid_verify(
     invite_id: web::Path<String>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let invite = data_access::user::get_invite(&invite_id, &pool).await;
     match invite {
         Ok(v) => HttpResponse::Ok().json(v),
@@ -137,8 +140,9 @@ async fn valid_verify(
 async fn verify(
     invite_id: web::Path<String>,
     data: web::Json<AddUserData>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let invite = data_access::user::get_invite(&invite_id, &pool).await;
     match invite {
         Ok(v) => {

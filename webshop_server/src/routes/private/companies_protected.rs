@@ -1,7 +1,7 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use sqlx::{Pool, Postgres};
 
-use crate::data_access::{company, error_handling};
+use crate::{data_access::{company, error_handling}, SharedData};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(companies);
@@ -10,7 +10,8 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 /// Get all companies from the database.
 /// returns a json array of all companies.
 #[get("/companies")]
-async fn companies(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn companies(shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let companies = company::get_all_companies(&pool).await;
 
     match companies {

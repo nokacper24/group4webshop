@@ -268,7 +268,8 @@ impl PostgresDBError {
     /// * `Self` - The error code as a readable error as a enum variant from PostgresDBError
     /// # Example
     /// ```rust
-    /// async fn companies(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+    /// async fn companies(shared_data: web::Data<SharedData>) -> impl Responder {
+    ///     let pool = &shared_data.pool;
     ///     let companies = company::get_all_companies(&pool).await;
     ///     match companies {
     ///         Ok(companies) => HttpResponse::Ok().json(companies),
