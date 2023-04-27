@@ -1,8 +1,14 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { License, Product } from "../../Interfaces";
+import Spinner from "../utils/utils";
+import { License, MeUser, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
-import { fetchProduct, postLicense } from "../../ApiController";
+import {
+  FetchError,
+  fetchMe,
+  fetchProduct,
+  postLicense,
+} from "../../ApiController";
 
 /**
  * Represents a Purchase License page.
@@ -14,15 +20,14 @@ import { fetchProduct, postLicense } from "../../ApiController";
 export default function PurchaseLicense() {
   const navigate = useNavigate();
 
+  const [user, setUser] = useState<MeUser>();
+  const [loadingUsr, setLoadingUsr] = useState(true);
+  const [loadingProd, setLoadingProd] = useState(true);
+
+  const [error, setError] = useState<Error | null>(null);
+
   const { productId } = useParams();
-  const [product, setProduct] = useState<Product>({
-    product_id: "",
-    display_name: "",
-    price_per_user: 0,
-    short_description: "",
-    main_image: "",
-    available: false,
-  });
+  const [product, setProduct] = useState<Product>();
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const price = useRef<HTMLSelectElement>(null);
@@ -64,10 +69,10 @@ export default function PurchaseLicense() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (validateForm()) {
+    if (validateForm() && user && product) {
       let license: License = {
         license_id: NaN,
-        company_id: NaN /* TODO: Get real company */,
+        company_id: user.company_id,
         product_id: product.product_id,
         product_name: product.display_name,
         start_date: new Date(),
@@ -93,44 +98,121 @@ export default function PurchaseLicense() {
   };
 
   useEffect(() => {
-    fetchProduct(productId!).then((product: Product) => setProduct(product));
+    fetchProduct(productId!)
+      .then((product: Product) => {
+        if (product.available) {
+          setProduct(product);
+        } else {
+          setError(new Error("It looks like this product is not available"));
+        }
+        setLoadingProd(false);
+      })
+      .catch((error: FetchError) => {
+        if (error.status === 404) {
+          setError(new Error("No such product"));
+          setLoadingProd(false);
+        } else {
+          setError(error);
+          setLoadingProd(false);
+        }
+      });
+    fetchMe()
+      .then((user: MeUser) => {
+        setUser(user);
+        setLoadingUsr(false);
+      })
+      .catch((error: FetchError) => {
+        if (error.status !== 401) {
+          setError(error);
+        }
+        setLoadingUsr(false);
+      });
   }, []);
 
   return (
     <>
       <section className="container">
         <h1>Purchase License</h1>
-        <form
-          className="left-aligned"
-          onSubmit={(event) => handleSubmit(event)}
-        >
-          <h2>{product.display_name}</h2>
-          <p>
-            {product.short_description}
-            <br></br>
-            Purchase a license for your company. Licenses are valid for a year,
-            and will automatically be renewed unless you cancel it.
-          </p>
-          <LicensePrices
-            price={product.price_per_user}
-            updatePrice={(event) => updatePrice(event)}
-            refs={{ price }}
-          />
+        <br />
+        {(loadingProd || loadingUsr) && <Spinner />}
+        {!loadingProd && !loadingUsr && (
+          <>
+            {error && <p>{error.message}</p>}
+            {!error && product && (
+              <>
+                {!user && <MustBeSignedIn />}
+                {user && user.role === "Default" && <NoPermisionToBuy />}
+                {user && user.role !== "Default" && (
+                  <form
+                    className="left-aligned"
+                    onSubmit={(event) => handleSubmit(event)}
+                  >
+                    <h2>{product.display_name}</h2>
+                    <p>
+                      {product.short_description}
+                      <br></br>
+                      Purchase a license for your company. Licenses are valid
+                      for a year, and will automatically be renewed unless you
+                      cancel it.
+                    </p>
+                    <LicensePrices
+                      price={product.price_per_user}
+                      updatePrice={(event) => updatePrice(event)}
+                      refs={{ price }}
+                    />
 
-          <p className="total-price">TOTAL: ${totalPrice}</p>
+                    <p className="total-price">TOTAL: ${totalPrice}</p>
 
-          <button type="submit" className="default-button submit-button">
-            Buy
-          </button>
-          <div className="checkbox-input">
-            <input id="accept-terms" type="checkbox" required />
-            <label htmlFor="accept-terms">
-              I have read and agree to the <a href="#!">terms of service</a>.
-            </label>
-          </div>
-          <p className="form-alert" ref={formAlert}></p>
-        </form>
+                    <button
+                      type="submit"
+                      className="default-button submit-button"
+                    >
+                      Buy
+                    </button>
+                    <div className="checkbox-input">
+                      <input id="accept-terms" type="checkbox" required />
+                      <label htmlFor="accept-terms">
+                        I have read and agree to the{" "}
+                        <a href="#!">terms of service</a>.
+                      </label>
+                    </div>
+                    <p className="form-alert" ref={formAlert}></p>
+                  </form>
+                )}
+              </>
+            )}
+          </>
+        )}
       </section>
     </>
+  );
+}
+
+function MustBeSignedIn() {
+  const navigate = useNavigate();
+
+  return (
+    <p>
+      You need to be{" "}
+      <a href="#!" onClick={() => navigate("/profile")}>
+        signed in
+      </a>{" "}
+      to purchase a license.
+      <br />
+      Remember that only IT administrators of your company can purchase a
+      license!
+      <br />
+      Contact your IT administrator if you need access to any of our products.
+    </p>
+  );
+}
+
+function NoPermisionToBuy() {
+  return (
+    <p>
+      You need to be an IT administrator to purchase a license.
+      <br />
+      Contact your IT administrator if you need access to any of our products.
+    </p>
   );
 }
