@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AccordionBody } from "./AccordionBody";
-import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
+import { AccordionHeader } from "./AccordionHeader";
 import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 import { showPopup } from "../Edit-popups/RowEditPopup";

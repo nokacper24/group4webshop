@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { TestimonialRow, TestimonialRowProps } from "./TestimonialRow";
+import { TestimonialRow} from "./TestimonialRow";
 import { Testimonial } from "../../../../../Interfaces";
 type TestimonialBodyProps = {
   testimonials: Testimonial[];

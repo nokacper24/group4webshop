@@ -7,7 +7,7 @@ import TestimonialPopup from "./Edit-popups/TestimonialPopup";
 
 /**
  * Page for creating or editing a product page.
- * 
+ *
  * @returns the React component for the ManageProductPage
  */
 export default function ManageProductPage() {

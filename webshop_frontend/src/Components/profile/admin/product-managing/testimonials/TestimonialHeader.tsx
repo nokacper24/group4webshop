@@ -1,5 +1,3 @@
-import { Testimonial } from "../../../../../Interfaces";
-
 export type TestimonialHeaderProps = {
   addTestimonial: () => void;
 };

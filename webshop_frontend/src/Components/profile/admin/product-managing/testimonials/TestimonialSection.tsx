@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { ChangeType } from "../Accordion/ChangeTypes";
-import { TestimonialRowProps } from "./TestimonialRow";
+import { useState } from "react";
 import { TestimonialHeader } from "./TestimonialHeader";
 import { TestimonialBody } from "./TestimonialBody";
 import { showTestimonialPopup } from "../Edit-popups/TestimonialPopup";

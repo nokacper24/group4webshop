@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { AccordionRow, AccordionRowProps } from "./AccordionRow";
-import { ChangeType } from "./ChangeTypes";
 
 export type AccordionBodyProps = {
   rows: AccordionRowProps[];
