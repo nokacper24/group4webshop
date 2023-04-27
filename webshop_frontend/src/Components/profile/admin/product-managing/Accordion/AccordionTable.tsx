@@ -112,8 +112,8 @@ export default function AccordionTable(props: AccordionTableProps) {
       >
         New section
       </button>
-      {sectionList.map((section) => {
-        return (
+      {sectionList.map((section) => 
+        (
           <AccordionSection
             key={section.sectionID}
             header={section.header}
