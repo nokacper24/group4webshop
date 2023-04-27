@@ -17,6 +17,8 @@ export default function ManageProductPage() {
 
   useEffect(() => {
     if (!createState) {
+    } else {
+      productId = "placeholder_id";
     }
   });
   return (
