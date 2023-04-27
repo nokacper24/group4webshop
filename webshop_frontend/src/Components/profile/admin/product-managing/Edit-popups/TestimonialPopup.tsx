@@ -1,4 +1,45 @@
+import { RefObject, useRef } from "react";
+import { Testimonial } from "../../../../../Interfaces";
+
+/**
+ * Props for the HeaderEditPopup component.
+ * The title can be undefined if a new header is being created.
+ * The informationCallBack is the function that should be called with the information from the form.
+ */
+type TestimonialPopupProps = {
+  testimonial: Testimonial | undefined;
+  informationCallBack: (testimonial: Testimonial) => void;
+};
+
+type TestimonialPopupInitializationProps = {
+  product_id: string;
+};
+
+let popupRef: RefObject<HTMLDivElement>;
+let authorNameRef: RefObject<HTMLInputElement>;
+let authorPicRef: RefObject<HTMLInputElement>;
+let testimonialText: RefObject<HTMLTextAreaElement>;
+
+let props: TestimonialPopupProps = {
+  testimonial: undefined,
+  informationCallBack: () => {},
+};
+
+let product_id: string;
 export default function TestimonialPopup(
+  initializationProps: TestimonialPopupInitializationProps
+) {
+  popupRef = useRef(null);
+  authorNameRef = useRef(null);
+  authorPicRef = useRef(null);
+  testimonialText = useRef(null);
+  
+  product_id = initializationProps.product_id;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
