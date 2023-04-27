@@ -3,9 +3,10 @@ import AccordionTable from "./Accordion/AccordionTable";
 import HeaderEditPopup from "./Edit-popups/HeaderEditPopup";
 import RowEditPopup from "./Edit-popups/RowEditPopup";
 import { useEffect, useRef } from "react";
+import TestimonialPopup from "./Edit-popups/TestimonialPopup";
 
 export default function ManageProductPage() {
-  const { productId } = useParams();
+  let { productId } = useParams();
 
   const productName = useRef(null);
   const productPrice = useRef(null);
@@ -22,6 +23,7 @@ export default function ManageProductPage() {
     <>
       <HeaderEditPopup></HeaderEditPopup>
       <RowEditPopup></RowEditPopup>
+      <TestimonialPopup product_id={productId!}></TestimonialPopup>
       <section className="container">
         <h2>Manage product</h2>
         <form>
