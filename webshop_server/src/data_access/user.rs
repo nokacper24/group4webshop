@@ -6,15 +6,24 @@ use sqlx::{
     query, query_as, Executor, {Pool, Postgres},
 };
 use std::fmt::Display;
-use std::{string, sync::Arc};
 use utoipa::ToSchema;
 use uuid::Uuid;
+
+/// User struct with their password hash
+/// Use this only if you **need** the password hash.
+#[derive(Debug)]
+pub struct UserWithPass {
+    pub user_id: i32,
+    pub email: String,
+    pub pass_hash: String,
+    pub company_id: i32,
+    pub role: Role,
+}
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct User {
     pub user_id: i32,
     pub email: String,
-    pub pass_hash: String,
     pub company_id: i32,
     pub role: Role,
 }
@@ -52,7 +61,7 @@ pub struct RoleStruct {
 pub async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user"#
+        r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user"#
     )
     .fetch_all(pool)
     .await?;
@@ -60,17 +69,21 @@ pub async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Err
 }
 
 pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: &i32) -> Result<User, sqlx::Error> {
-    let user = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#, user_id)
-        .fetch_one(pool)
-        .await?;
+    let user = query_as!(
+        User,
+        r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(user)
 }
 
-pub async fn get_user_by_username(
+pub async fn get_by_username_with_pass(
     pool: &Pool<Postgres>,
     username: &str,
-) -> Result<User, sqlx::Error> {
-    let user = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE email = $1"#, username)
+) -> Result<UserWithPass, sqlx::Error> {
+    let user = query_as!(UserWithPass, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE email = $1"#, username)
         .fetch_one(pool)
         .await?;
     Ok(user)
@@ -83,7 +96,7 @@ pub async fn get_users_by_company(
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" 
+        r#"SELECT user_id, email, company_id, role as "role: _" 
         FROM app_user 
         WHERE company_id = $1"#,
         company_id
@@ -100,7 +113,7 @@ pub async fn get_users_by_license(
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT app_user.user_id, email, pass_hash, company_id, role as "role: _"
+        r#"SELECT app_user.user_id, email, company_id, role as "role: _"
         FROM app_user
         INNER JOIN user_license USING (user_id)
         WHERE license_id = $1"#,
@@ -443,7 +456,7 @@ pub async fn create_invite(
     }
 }
 
-pub async fn get_invite(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
+pub async fn get_invite_by_id(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
     let invite = query_as!(
         Invite,
         r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
@@ -497,7 +510,7 @@ pub async fn create_user(
         Ok(_) => {
             let user = query_as!(
                 User,
-                r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+                r#"SELECT user_id, email, company_id, role as "role: _"
                 FROM app_user
                 WHERE email = $1"#,
                 email
@@ -513,14 +526,14 @@ pub async fn create_user(
     }
 }
 
-/// Get all users that are IT responsible for a company
+/// Get all users with a specific role
 pub async fn get_users_by_role(
     pool: &Pool<Postgres>,
     role: &Role,
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+        r#"SELECT user_id, email, company_id, role as "role: _"
         FROM app_user
         WHERE role = $1"#,
         role as _

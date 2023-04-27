@@ -3,6 +3,7 @@ import { Product } from "../../Interfaces";
 import { ProductCard, ProductCardProps } from "./ProductCard";
 import { fetchProducts } from "../../ApiController";
 import Spinner from "../utils/utils";
+import { ErrorMessage } from "../ErrorMessage";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,8 +27,8 @@ export default function Products() {
     <>
       <section className="container">
         {loading && <Spinner />}
-        {error && <p>{error.message}</p>}
-        {products.length === 0 && !loading && <p>No products found.</p>}
+        {error && <ErrorMessage message={error.message} />}
+        {!error && products.length === 0 && !loading && <NoProductsYet />}
         {products.length > 0 && !loading && (
           <>
             <h1>Our solutions</h1>
@@ -39,6 +40,19 @@ export default function Products() {
           </>
         )}
       </section>
+    </>
+  );
+}
+
+function NoProductsYet() {
+  return (
+    <>
+      <h1>Oops!</h1>
+      <p>
+        It seems like we don't have any products yet!
+        <br />
+        Come backlater...
+      </p>
     </>
   );
 }

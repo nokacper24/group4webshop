@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use actix_cors::Cors;
+use actix_web::web::Data;
 use actix_web::{http, middleware::Logger, web, App, HttpServer};
 
 use actix_web_static_files::ResourceFiles;
@@ -11,6 +12,9 @@ use flexi_logger::{Duplicate, FileSpec};
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
+use lettre::message::header::ContentType;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::{Message, SmtpTransport, Transport};
 
 mod data_access;
 mod routes;
@@ -25,6 +29,15 @@ use crate::routes::{openapi_doc, serving_images};
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 const DEFALUT_LOG_LEVEL: &str = "info,sqlx=warn";
+
+/// Data shared between actix-web threads.
+#[derive(Clone)]
+struct SharedData {
+    /// The database pool.
+    db_pool: sqlx::PgPool,
+    /// The mailer for sending emails.
+    mailer: SmtpTransport,
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -55,6 +68,19 @@ async fn main() -> std::io::Result<()> {
             .await
             .expect("Cannot connect to database"),
     );
+    let email_usr = std::env::var("EMAIL_USR").expect("EMAIL_USR environment variable not set");
+    let email_wpd = std::env::var("EMAIL_PWD").expect("EMAIL_PWD environment variable not set");
+    let gmail_creds = Credentials::new(email_usr, email_wpd);
+    let mailer = SmtpTransport::relay("smtp.gmail.com")
+        .expect("Could not connect to gmail!")
+        .credentials(gmail_creds)
+        .build();
+
+    let shared_data = Data::new(SharedData {
+        db_pool: pool.get_ref().clone(),
+        mailer: mailer.clone(),
+    });
+
     let tls_config = load_rustls_config();
     let allowed_origins = std::env::var("ALLOWED_ORIGINS")
         .expect("ALLOWED_ORIGINS environment variable not set. Ex: ALLOWED_ORIGINS=http://localhost:8080,http://localhost:8083")
@@ -83,7 +109,7 @@ async fn main() -> std::io::Result<()> {
         let image_service = web::scope("/resources/images").configure(serving_images::config);
         let static_files = ResourceFiles::new("/", generate()).resolve_not_found_to_root();
         App::new()
-            .app_data(pool.clone())
+            .app_data(shared_data.clone())
             .wrap(cors)
             .wrap(Logger::default())
             .service(api_endpoints)

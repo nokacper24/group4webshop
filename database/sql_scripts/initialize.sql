@@ -79,6 +79,72 @@ CREATE TABLE user_license (
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
+CREATE OR REPLACE FUNCTION enforce_license_max_users()
+RETURNS TRIGGER AS $$
+DECLARE
+    max_users INTEGER := 0;
+    current_user_count INTEGER := 0;
+BEGIN
+    LOCK TABLE user_license IN EXCLUSIVE MODE;
+		
+	SELECT amount INTO max_users 
+	FROM license
+	WHERE license_id = NEW.license_id;
+
+    SELECT COUNT(*) INTO current_user_count
+    FROM user_license 
+    WHERE license_id = NEW.license_id;
+
+    IF (TG_OP = 'INSERT') THEN
+        IF (current_user_count >= max_users) THEN
+            RAISE EXCEPTION 'Cannot insert more than % user(s) for the license.', max_users;
+        END IF;
+    END IF;
+
+    IF (TG_OP = 'UPDATE') THEN
+        IF (OLD.license_id != NEW.license_id) THEN
+            IF (current_user_count >= max_users) THEN
+                RAISE EXCEPTION 'Cannot insert more than % user(s) for the license.', max_users;
+            END IF;
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_license_max_users 
+    BEFORE INSERT OR UPDATE ON user_license
+    FOR EACH ROW EXECUTE PROCEDURE enforce_license_max_users();
+
+CREATE OR REPLACE FUNCTION enforce_valid_user_license()
+RETURNS TRIGGER AS $$
+DECLARE
+    license_company_id INTEGER;
+    user_company_id INTEGER;
+BEGIN
+    LOCK TABLE user_license IN EXCLUSIVE MODE;
+		
+    SELECT INTO license_company_id company_id
+	FROM license
+	WHERE license_id = NEW.license_id;
+
+    SELECT INTO user_company_id company_id 
+    FROM app_user
+    WHERE user_id = NEW.user_id;
+
+    IF (license_company_id != user_company_id) THEN
+        RAISE EXCEPTION 'Cannot insert user license if license is not owned by their company.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER enforce_valid_user_license
+    BEFORE INSERT OR UPDATE ON user_license
+    FOR EACH ROW EXECUTE PROCEDURE enforce_valid_user_license();
+
 CREATE TABLE category (
     category_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -131,21 +197,24 @@ CREATE TABLE description_component (
 CREATE OR REPLACE FUNCTION set_description_component_priority()
 RETURNS TRIGGER AS $$
 DECLARE
-  max_priority INTEGER;
+    max_priority INTEGER;
 BEGIN
-  SELECT MAX(priority) INTO max_priority FROM description_component WHERE product_id = NEW.product_id;
-  IF max_priority IS NULL THEN
-    max_priority := 0;
-  END IF;
-  NEW.priority := max_priority + 1;
-  RETURN NEW;
+    SELECT MAX(priority) INTO max_priority
+    FROM description_component
+    WHERE product_id = NEW.product_id;
+
+    IF max_priority IS NULL THEN
+        max_priority := 0;
+    END IF;
+    NEW.priority := max_priority + 1;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER set_description_component_priority_trigger
-  BEFORE INSERT ON description_component
-  FOR EACH ROW
-  EXECUTE FUNCTION set_description_component_priority();
+    BEFORE INSERT ON description_component
+    FOR EACH ROW
+    EXECUTE FUNCTION set_description_component_priority();
 
 CREATE OR REPLACE FUNCTION delete_description_component()
 RETURNS TRIGGER AS $$
@@ -160,6 +229,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER delete_description_component_trigger
-AFTER DELETE ON description_component
-FOR EACH ROW EXECUTE FUNCTION delete_description_component();
+    AFTER DELETE ON description_component
+    FOR EACH ROW EXECUTE FUNCTION delete_description_component();
+
 COMMIT;

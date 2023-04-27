@@ -29,7 +29,6 @@ export interface FullLicenseInfo {
 export interface User {
   user_id: string;
   email: string;
-  pass_hash: string;
   company_id: number;
   role: string;
 }

@@ -17,6 +17,30 @@ if (import.meta.env.PROD) {
 }
 
 /**
+ * Error for failed fetches.
+ * Throw it if response is not as expected.  
+ * This error contains the status code as well as the status as text.
+ * Status code can be used to determine what went wrong, and act accordingly.
+ * @extends Error
+ */
+export class FetchError extends Error {
+  status: number;
+  statusText: string;
+  /**
+   * Create a new product error.
+   * @param message The error message.
+   * @param status The HTTP status code.
+   * @param statusText The HTTP status text.
+   */
+  constructor(message: string, status: number, statusText: string) {
+    super(message);
+    this.name = "FetchError";
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
+/**
  * Get a specific user.
  *
  * @param userId The ID of the user.
@@ -116,7 +140,7 @@ export const fetchCompanyUsers = async (companyId: string) => {
  * @returns The license.
  */
 export const fetchLicense = async (licenseId: string) => {
-  const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses/${licenseId}`);
   if (response.ok) {
     const data: License = await response.json();
     return data;
@@ -238,7 +262,11 @@ export const fetchProduct = async (productId: string) => {
     const data: Product = await response.json();
     return data;
   } else {
-    throw new Error("Could not fetch product.");
+    throw new FetchError(
+      "Could not fetch product.",
+      response.status,
+      response.statusText
+    );
   }
 };
 
@@ -323,5 +351,16 @@ export const verifySignInInfo = async (email: string, password: string) => {
       "Content-Type": "application/json",
       credentials: "include",
     },
+  });
+};
+
+/**
+ * Sign out the user.
+ * @returns The response from the fetch request.
+ * */
+export const logout = async () => {
+  return await fetch(`${baseUrl}/api/priv/logout`, {
+    method: "POST",
+    credentials: "include",
   });
 };

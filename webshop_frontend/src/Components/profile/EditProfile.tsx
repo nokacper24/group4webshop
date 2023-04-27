@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MeUser } from "../../Interfaces";
 import { resetPassword, patchPartialUser } from "../../ApiController";
@@ -8,12 +8,12 @@ interface Props {
 }
 
 export default function EditProfile(props: Props) {
-  const [user, setUser] = useState<MeUser>();
-  const [email, setEmail] = useState<string>("");
+  const [user, setUser] = useState<MeUser>(props.user);
+  const [email, setEmail] = useState<string>(props.user.email);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (email != user?.email) {
@@ -42,15 +42,11 @@ export default function EditProfile(props: Props) {
     });
   };
 
-  useEffect(() => {
-    setUser(props.user);
-  }, []);
-
   return (
     <>
       <section className="container left-aligned">
         <h1>Edit Profile</h1>
-        <form onSubmit={(event) => handleSubmit(event)}>
+        <form onSubmit={(event) => handleSave(event)}>
           {/* Prevent implicit submission of the form */}
           <button
             type="submit"

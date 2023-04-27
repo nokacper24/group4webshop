@@ -27,7 +27,10 @@ RUST_LOG=info,sqlx=warn # optional, default 'info,sqlx=warn' - set log level
 ALLOWED_ORIGINS=https://group04.web-tek.ninja # list of allowed origins, separated with `,`
 CERT_PATH=certificate.pem # path to certificate
 PRIV_KEY_PATH=privatekey.pem # path to privatekey
+EMAIL_USR=myuser@gmai.com # gmail address used to send emails
+EMAIL_PWD=googleapppassword # email password, use google's app password
 ```
+See Google's [Sign in with App Passwords](https://support.google.com/accounts/answer/185833?hl=en) for more information on how to generate app password to use with Gmail.
 
 ### Building
 To build the project, run the following command:

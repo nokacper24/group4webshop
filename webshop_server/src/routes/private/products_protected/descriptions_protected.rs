@@ -14,7 +14,7 @@ use crate::{
         img_multipart::{
             self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
         },
-    },
+    }, SharedData,
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
@@ -87,10 +87,11 @@ pub struct DescriptionApiDoc;
 )]
 #[delete("/{product_id}/descriptions/{component_id}")]
 async fn delete_description_component(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -164,11 +165,12 @@ async fn delete_description_component(
 )]
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
     new_priority: web::Json<i32>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -237,11 +239,12 @@ async fn update_priority(
 )]
 #[patch("/{product_id}/descriptions/{component_id}/full-width")]
 async fn set_full_width(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
     full_width: web::Json<bool>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -305,11 +308,12 @@ async fn set_full_width(
 )]
 #[patch("/{product_id}/descriptions/all/priorities")]
 async fn update_priorities(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     ids_and_priotities: web::Json<Vec<(i32, i32)>>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -400,11 +404,12 @@ async fn update_priorities(
 )]
 #[patch("/{product_id}/descriptions/priorityswap")]
 async fn swap_priorities(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     description_ids: web::Json<(i32, i32)>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let description_ids = description_ids.into_inner();
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
@@ -483,11 +488,12 @@ async fn swap_priorities(
 )]
 #[post("/{product_id}/descriptions/text")]
 async fn create_text_component(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     description: web::Json<TextComponent>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -575,9 +581,10 @@ struct NewImageComponentForm {
 async fn create_image_component(
     payload: Multipart,
     product_id: web::Path<String>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -752,9 +759,10 @@ async fn create_image_component(
 async fn update_text_component(
     path_parms: web::Path<(String, i32)>,
     description: web::Json<TextComponent>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 
@@ -849,9 +857,10 @@ struct UpdateImageComponentForm {
 async fn update_image_component(
     payload: Multipart,
     path_parms: web::Path<(String, i32)>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 

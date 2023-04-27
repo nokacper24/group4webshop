@@ -9,7 +9,7 @@ use crate::{
         img_multipart::{
             self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
         },
-    },
+    }, SharedData,
 };
 
 use actix_multipart::Multipart;
@@ -82,12 +82,13 @@ struct UpdateTestimonialForm {
     ),
 )]
 #[post("/testimonials/{product_id}")]
-pub async fn create_testimonial(
-    pool: web::Data<Pool<Postgres>>,
+async fn create_testimonial(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     req: HttpRequest,
     payload: Multipart,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -238,12 +239,13 @@ pub async fn create_testimonial(
     ),
 )]
 #[put("/testimonials/{product_id}/{testimonial_id}")]
-pub async fn update_testimonial(
-    pool: web::Data<Pool<Postgres>>,
+async fn update_testimonial(
+    shared_data: web::Data<SharedData>,
     params: web::Path<(String, i32)>,
     req: HttpRequest,
     payload: Multipart,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = &params.0;
     let testimonial_id = params.1;
     match auth::validate_user(req, &pool).await {
@@ -406,11 +408,12 @@ pub async fn update_testimonial(
     ),
 )]
 #[delete("/testimonials/{product_id}/{testimonial_id}")]
-pub async fn delete_testimonial(
+async fn delete_testimonial(
     req: HttpRequest,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     paramas: web::Path<(String, i32)>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = &paramas.0;
     let testimonial_id = paramas.1;
     match auth::validate_user(req, &pool).await {

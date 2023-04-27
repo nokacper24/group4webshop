@@ -1,7 +1,7 @@
-use crate::data_access::{
+use crate::{data_access::{
     license::{self, License, LicenseValidation, PartialLicense},
     user,
-};
+}, SharedData};
 
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
@@ -51,7 +51,8 @@ pub struct ProtectedLicensesOpenApi;
 )
 )]
 #[get("/licenses")]
-pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn licenses(shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let licenses = license::get_licenses(&pool).await;
 
     // Error check
@@ -78,7 +79,8 @@ pub async fn licenses(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 )
 )]
 #[get("/licenses_vital")]
-pub async fn licenses_vital(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn licenses_vital(shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_licenses = license::get_licenses_vital_info(&pool).await;
 
     // Error check
@@ -111,9 +113,10 @@ pub async fn licenses_vital(pool: web::Data<Pool<Postgres>>) -> impl Responder {
 ]
 #[get("/licenses/{license_id}")]
 async fn license_by_id(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     license_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let license_id = match license_id.parse::<i32>() {
         Ok(license_id) => license_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
@@ -150,9 +153,10 @@ async fn license_by_id(
 ]
 #[get("/companies/{company_id}/licenses")]
 async fn licenses_by_company(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     company_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let company_id = match company_id.parse::<i32>() {
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
@@ -189,9 +193,10 @@ async fn licenses_by_company(
 ]
 #[get("/user_licenses/user/{user_id}")]
 async fn licenses_for_user(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     user_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let user_id = match user_id.parse::<i32>() {
         Ok(user_id) => user_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
@@ -228,9 +233,10 @@ async fn licenses_for_user(
 ]
 #[get("/user_licenses/user/{user_id}/no_access")]
 async fn licenses_for_user_no_access(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     user_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let user_id = match user_id.parse::<i32>() {
         Ok(user_id) => user_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
@@ -269,9 +275,10 @@ async fn licenses_for_user_no_access(
 ]
 #[post("/licenses")]
 async fn create_license(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     license: web::Json<PartialLicense>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match license::create_license(&pool, &license).await {
         Ok(_) => HttpResponse::Created().json(license),
         Err(_) => HttpResponse::InternalServerError().json("Internal Server Error"),
@@ -295,9 +302,10 @@ struct LicenseValidations {
 ]
 #[patch("/licenses")]
 async fn update_license_validations(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     other_licenses: web::Json<LicenseValidations>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_licenses = &other_licenses.licenses;
     match license::update_license_validations(&pool, other_licenses).await {
         Ok(_) => HttpResponse::Ok().json(other_licenses),

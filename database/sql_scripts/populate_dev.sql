@@ -27,14 +27,14 @@ VALUES ('time_management_software', 'Time Management System', 999.99, 'A compreh
 
 INSERT INTO license (valid, start_date, end_date, amount, company_id, product_id)
 VALUES (false, '2022-01-01', '2022-12-31', 100, 2, 'time_management_software'),
-       (true, '2023-07-01', '2023-06-30', 50, 3, 'tax_and_accounting_software'),
+       (true, '2023-07-01', '2023-06-30', 50, 2, 'tax_and_accounting_software'),
        (true, '2023-01-01', '2023-12-31', 50, 2, 'tax_and_accounting_software'),
        (true, '2023-01-01', '2023-12-31', 15, 2, '3d_modelling_software');
 
 INSERT INTO user_license (license_id, user_id)
 VALUES (1, 2),
-       (2, 2),
-       (2, 3);
+       (2, 3),
+       (3, 4);
 
 INSERT INTO category (name, description)
 VALUES ('Enterprise Software', 'Software solutions for enterprises'),
