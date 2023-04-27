@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { AccordionHeader, AccordionHeaderProps } from "./AccordionHeader";
-import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
-import { TestimonialHeader } from "../testimonials/TestimonialHeader";
 import { Testimonial } from "../../../../../Interfaces";
-import { showTestimonialPopup } from "../Edit-popups/TestimonialPopup";
 import { TestimonialSection } from "../testimonials/TestimonialSection";
 
 export type AccordionTableProps = {
@@ -22,7 +18,7 @@ export type AccordionTableProps = {
  * @returns The React component for the Accordion table
  */
 export default function AccordionTable(props: AccordionTableProps) {
-  const [priorityChanges, setPriorityChanges] = useState<Map<number, number>>(
+  const [priorityChanges] = useState<Map<number, number>>(
     new Map()
   ); //ID as key, priority as value
   const [contentChanges, setContentChanges] = useState<
@@ -65,9 +61,6 @@ export default function AccordionTable(props: AccordionTableProps) {
    */
   const deleteSection = (id: number) => {
     const index = sectionList.findIndex((section) => section.sectionID === id);
-    /* delete sectionList[index];
-    setSectionList([ ...sectionList ]);
-    console.log(sectionList); */
 
     const newSections = sectionList.filter(
       (section) => section.sectionID !== id
