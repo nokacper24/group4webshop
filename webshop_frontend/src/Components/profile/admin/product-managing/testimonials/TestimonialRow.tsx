@@ -9,10 +9,10 @@ export type TestimonialRowProps = {
 };
 
 /**
- * The component for a single row in the accordion body.
+ * Component that represents a testimonial row in the table.
  *
- * @param props the props of the component, must be of AccordionRowProps type
- * @returns the React component for the Accordion row
+ * @param props the props of the component, must be of type TestimonialRowProps
+ * @returns the React component for the Testimonial row
  */
 export function TestimonialRow(props: TestimonialRowProps) {
   const [state, setState] = useState<TestimonialRowProps>(props);

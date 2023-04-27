@@ -5,10 +5,10 @@ export type TestimonialHeaderProps = {
 };
 
 /**
- * The header of the accordion section.
+ * The header of the Testimonial section. This component is responsible for rendering the header of the section.
  *
- * @param props the props of the component, must be of AccordionHeaderProps type
- * @returns the React component for the Accordion header
+ * @param props the props of the component
+ * @returns the React component for the Testimonial section header
  */
 export function TestimonialHeader(props: TestimonialHeaderProps) {
   return (

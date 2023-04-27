@@ -8,10 +8,10 @@ type TestimonialBodyProps = {
 };
 
 /**
- * Simple component that keeps the rows of the accordion body.
+ * Component that manages and stores the testimonials for a product.
  *
- * @param props the props of the component, must be of AccordionBodyProps type
- * @returns the React component for the Accordion body
+ * @param props the props of the component, must be of type TestimonialBodyProps
+ * @returns the React component for the Testimonial body
  */
 export function TestimonialBody(props: TestimonialBodyProps) {
   return (

@@ -2,9 +2,9 @@ import { RefObject, useRef } from "react";
 import { Testimonial } from "../../../../../Interfaces";
 
 /**
- * Props for the HeaderEditPopup component.
- * The title can be undefined if a new header is being created.
- * The informationCallBack is the function that should be called with the information from the form.
+ * Props for the TestimonialPopup component.
+ * @param testimonial The testimonial to be edited. If undefined, a new testimonial will be created.
+ * @param informationCallBack A callback function that will be called when the popup is closed. The testimonial that was edited will be passed as a parameter.
  */
 type TestimonialPopupProps = {
   testimonial: Testimonial | undefined;
@@ -33,9 +33,14 @@ export default function TestimonialPopup(
   authorNameRef = useRef(null);
   authorPicRef = useRef(null);
   testimonialText = useRef(null);
-  
+
   product_id = initializationProps.product_id;
 
+  /**
+   * Stops people from just pressing enter to submit the form.
+   *
+   * @param event The event that triggered the function.
+   */
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
@@ -114,12 +119,21 @@ export default function TestimonialPopup(
   );
 }
 
+/**
+ * Shows the testimonial popup.
+ *
+ * @param inProps The props for the testimonial popup.
+ */
 export function showTestimonialPopup(inProps: TestimonialPopupProps) {
   props = inProps;
   popupRef.current?.classList.add("popup-visible");
 }
 
+/**
+ * Saves the testimonial and closes the popup.
+ */
 function save() {
+  //Uses the callback function to return the values of the testimonial.
   props.informationCallBack({
     testimonial_id: 0,
     author: authorNameRef.current?.value!,
@@ -130,6 +144,9 @@ function save() {
   hidePopup();
 }
 
+/**
+ * Hides the testimonial popup by removing the popup-visible class from the popup.
+ */
 function hidePopup() {
   popupRef.current?.classList.remove("popup-visible");
 }

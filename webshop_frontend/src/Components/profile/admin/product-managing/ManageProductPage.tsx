@@ -5,6 +5,11 @@ import RowEditPopup from "./Edit-popups/RowEditPopup";
 import { useEffect, useRef } from "react";
 import TestimonialPopup from "./Edit-popups/TestimonialPopup";
 
+/**
+ * Page for creating or editing a product page.
+ * 
+ * @returns the React component for the ManageProductPage
+ */
 export default function ManageProductPage() {
   let { productId } = useParams();
 
