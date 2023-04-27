@@ -65,7 +65,6 @@ export default function AccordionTable(props: AccordionTableProps) {
     const newSections = sectionList.filter(
       (section) => section.sectionID !== id
     );
-    console.log(newSections);
     setSectionList(newSections);
   };
 
@@ -94,7 +93,6 @@ export default function AccordionTable(props: AccordionTableProps) {
       });
       setSectionList([...sectionList]);
     }
-    console.log(sectionList);
   };
 
   return (

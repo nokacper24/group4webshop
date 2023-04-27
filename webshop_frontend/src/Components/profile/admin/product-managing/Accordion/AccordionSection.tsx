@@ -31,8 +31,6 @@ export function AccordionSection(props: AccordionSectionProps) {
    * Calls the deleteSection function in the parent component. Deleting itself in the process.
    */
   const deleteSelf = () => {
-    console.log("Delete self");
-    console.log(props);
     props.deleteSection(props.sectionID);
   };
 
@@ -89,7 +87,6 @@ export function AccordionSection(props: AccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    console.log("edit: " + id);
     let row = rows.find((row) => row.id === id);
     if (row) {
       showPopup({

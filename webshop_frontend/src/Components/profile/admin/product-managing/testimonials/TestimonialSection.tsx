@@ -64,7 +64,6 @@ export function TestimonialSection(props: TestimonialSectionProps) {
    * @param id the ID of the testimonial to be edited
    */
   const editTestimonial = (id: number) => {
-    console.log("edit: " + id);
     let testimonial = testimonials.find(
       (testimonial) => testimonial.testimonial_id === id
     );
