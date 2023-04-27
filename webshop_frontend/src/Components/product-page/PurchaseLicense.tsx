@@ -100,7 +100,11 @@ export default function PurchaseLicense() {
   useEffect(() => {
     fetchProduct(productId!)
       .then((product: Product) => {
-        setProduct(product);
+        if (product.available) {
+          setProduct(product);
+        } else {
+          setError(new Error("It looks like this product is not available"));
+        }
         setLoadingProd(false);
       })
       .catch((error: FetchError) => {
