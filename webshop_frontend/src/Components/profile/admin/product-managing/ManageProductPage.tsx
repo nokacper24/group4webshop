@@ -65,7 +65,11 @@ export default function ManageProductPage() {
         </form>
       </section>
       <section className="accordion-wrapper container">
-        <AccordionTable></AccordionTable>
+        <AccordionTable
+          sections={[]}
+          testimonials={[]}
+          productID={productId!}
+        ></AccordionTable>
       </section>
       <section className="container">
         <iframe src=""></iframe>
