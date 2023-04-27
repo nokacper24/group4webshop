@@ -4,6 +4,16 @@ import { AccordionRowProps } from "./AccordionRow";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
+import { TestimonialHeader } from "../testimonials/TestimonialHeader";
+import { Testimonial } from "../../../../../Interfaces";
+import { showTestimonialPopup } from "../Edit-popups/TestimonialPopup";
+import { TestimonialSection } from "../testimonials/TestimonialSection";
+
+export type AccordionTableProps = {
+  sections: AccordionSectionProps[];
+  testimonials: Testimonial[];
+  productID: string;
+};
 
 /**
  * Renders a table consisting of the header and a body with rows connected to the header through
@@ -11,7 +21,7 @@ import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
  *
  * @returns The React component for the Accordion table
  */
-export default function AccordionTable() {
+export default function AccordionTable(props: AccordionTableProps) {
   const [priorityChanges, setPriorityChanges] = useState<Map<number, number>>(
     new Map()
   ); //ID as key, priority as value
@@ -111,9 +121,14 @@ export default function AccordionTable() {
             sectionID={section.sectionID}
             registerContentChange={registerContentChange}
             deleteSection={deleteSection}
-          ></AccordionSection>
-        );
-      })}
+          />
+        )
+      )}
+      <TestimonialSection
+        testimonials={props.testimonials}
+        sectionId={0}
+        productId={props.productID}
+      />
     </div>
   );
 }
