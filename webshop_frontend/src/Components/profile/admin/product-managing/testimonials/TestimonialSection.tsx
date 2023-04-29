@@ -12,6 +12,7 @@ export type TestimonialSectionProps = {
 
   sectionId: number;
   productId: string;
+  setTestimonials: (testimonials: Testimonial[]) => void;
 };
 
 let latestID = 100;
@@ -37,8 +38,8 @@ export function TestimonialSection(props: TestimonialSectionProps) {
         product_id: props.productId,
         testimonial_id: createID(),
       };
-      testimonials.push(testimonial);
-      setTestimonials([...testimonials]);
+      props.testimonials.push(testimonial);
+      props.setTestimonials([...props.testimonials]);
     }
   };
 
@@ -52,10 +53,10 @@ export function TestimonialSection(props: TestimonialSectionProps) {
    * @param id the ID of the testimonial to be deleted
    */
   const deleteTestimonial = (id: number) => {
-    let newTestimonials = testimonials.filter(
+    let newTestimonials = props.testimonials.filter(
       (testimonial) => testimonial.testimonial_id !== id
     );
-    setTestimonials(newTestimonials);
+    props.setTestimonials(newTestimonials);
   };
 
   /**
@@ -64,7 +65,7 @@ export function TestimonialSection(props: TestimonialSectionProps) {
    * @param id the ID of the testimonial to be edited
    */
   const editTestimonial = (id: number) => {
-    let testimonial = testimonials.find(
+    let testimonial = props.testimonials.find(
       (testimonial) => testimonial.testimonial_id === id
     );
     if (testimonial) {
@@ -74,21 +75,18 @@ export function TestimonialSection(props: TestimonialSectionProps) {
       });
       //Function that is called when the user presses save on the popup.
       function finishEdit(testimonial: Testimonial) {
-        testimonials[testimonials.indexOf(testimonial)] = testimonial;
-        setTestimonials([...testimonials]);
+        props.testimonials[props.testimonials.indexOf(testimonial)] =
+          testimonial;
+        props.setTestimonials([...props.testimonials]);
       }
     }
   };
-
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([
-    ...props.testimonials,
-  ]);
 
   return (
     <>
       <TestimonialHeader addTestimonial={newTestimonial}></TestimonialHeader>
       <TestimonialBody
-        testimonials={testimonials}
+        testimonials={props.testimonials}
         editTestimonial={editTestimonial}
         deletTestimonial={deleteTestimonial}
       ></TestimonialBody>
