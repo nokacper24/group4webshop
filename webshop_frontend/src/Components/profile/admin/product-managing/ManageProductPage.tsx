@@ -25,13 +25,16 @@ import { AccordionSectionProps } from "./Accordion/AccordionSection";
 export default function ManageProductPage() {
   let { productId } = useParams();
 
-  const productName = useRef(null);
-  const productPrice = useRef(null);
-  const productImage = useRef(null);
-  const productDescription = useRef(null);
+  const productName = useRef<HTMLInputElement>(null);
+  const productPrice = useRef<HTMLInputElement>(null);
+  const productImage = useRef<HTMLInputElement>(null);
+  const productDescription = useRef<HTMLTextAreaElement>(null);
 
-  let createState = productId !== undefined;
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [sections, setSections] = useState<AccordionSectionProps[]>([]);
+  const [productInfo, setProductInfo] = useState<Product>();
+
+  let createState = productId === undefined;
 
   useEffect(() => {
     if (!createState) {
@@ -39,12 +42,49 @@ export default function ManageProductPage() {
     } else {
       productId = "placeholder_id";
     }
-  });
+  }, []);
+
   const initializeData = () => {
     fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
       setTestimonials(testimonials)
     );
   };
+  /**
+   * Sorts the descriptions in order by their priority property. Then
+   * takes each pair of descriptions and creates a section from them.
+   *
+   * @param descriptions
+   */
+  const initializeSections = (descriptions: Description[]) => {
+    descriptions.sort((a, b) => a.priority - b.priority);
+    let sections: AccordionSectionProps[] = [];
+    let k = 0;
+    for (let i = 0; i < descriptions.length; i += 2) {
+      k += 1;
+      let newSection: AccordionSectionProps = {
+        header: { title: "section " + k },
+        rows: [],
+        sectionID: k,
+      };
+      for (let j = 0; j < 2; j += 1) {
+        if (descriptions[i + j]) {
+          newSection.rows.push({
+            component_id: descriptions[i + j].component_id,
+            text: descriptions[i + j].is_text_not_image
+              ? descriptions[i + j].text
+              : undefined,
+            image: descriptions[i + j].is_text_not_image
+              ? undefined
+              : descriptions[i + j].image,
+            is_text_not_image: descriptions[i + j].is_text_not_image,
+          });
+        }
+      }
+      sections.push(newSection);
+    }
+    setSections(sections);
+  };
+
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
