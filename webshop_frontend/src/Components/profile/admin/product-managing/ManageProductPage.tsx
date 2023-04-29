@@ -48,6 +48,9 @@ export default function ManageProductPage() {
     fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
       setTestimonials(testimonials)
     );
+    fetchDescriptionComponents(productId!).then((descriptions: Description[]) =>
+      initializeSections(assignImageState(descriptions))
+    );
   const assignImageState = (descriptions: Description[]): Description[] => {
     for (let i = 0; i < descriptions.length; i += 1) {
       if (descriptions[i].text) {
@@ -134,6 +137,7 @@ export default function ManageProductPage() {
             accept="image/png, image/jpeg, image/webp"
             ref={productImage}
           />
+          <p>Image: {productInfo?.main_image}</p>
           <label htmlFor="product-description">Description:</label>
           <textarea
             id="product-description"
