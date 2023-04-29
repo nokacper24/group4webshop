@@ -71,9 +71,9 @@ export default function ManageProductPage() {
       </section>
       <section className="accordion-wrapper container">
         <AccordionTable
-          sections={[]}
-          testimonials={[]}
+          sections={sections}
           productID={productId!}
+          setSections={setSections}
         ></AccordionTable>
       </section>
       <section className="container">

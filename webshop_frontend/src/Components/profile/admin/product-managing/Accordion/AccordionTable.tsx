@@ -9,6 +9,8 @@ export type AccordionTableProps = {
   sections: AccordionSectionProps[];
   testimonials: Testimonial[];
   productID: string;
+  setTestimonials: (testimonials: Testimonial[]) => void;
+  setSections: (sections: AccordionSectionProps[]) => void;
 };
 
 /**
@@ -60,17 +62,13 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param id The ID of the section that has changed
    */
   const deleteSection = (id: number) => {
-    const index = sectionList.findIndex((section) => section.sectionID === id);
+    const index = props.sections.findIndex((section) => section.sectionID === id);
 
-    const newSections = sectionList.filter(
+    const newSections = props.sections.filter(
       (section) => section.sectionID !== id
     );
-    setSectionList(newSections);
+    props.setSections(newSections);
   };
-
-  const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
-    ...props.sections,
-  ]);
 
   /**
    * Creates a new section in the table.
@@ -79,19 +77,17 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param title The title of the new section
    */
   const newSection = () => {
-    const id = sectionList.length;
+    const id = props.sections.length;
     showHeaderPopup({ title: undefined, informationCallBack: finishCreation });
     function finishCreation(title: string) {
-      sectionList.push({
+      props.sections.push({
         header: {
           title: title,
         },
         rows: [],
         sectionID: id,
-        registerContentChange: registerContentChange,
-        deleteSection: deleteSection,
       });
-      setSectionList([...sectionList]);
+      props.setSections([...props.sections]);
     }
   };
 
@@ -103,7 +99,7 @@ export default function AccordionTable(props: AccordionTableProps) {
       >
         New section
       </button>
-      {sectionList.map((section) => 
+      {props.sections.map((section) => 
         (
           <AccordionSection
             key={section.sectionID}
@@ -118,8 +114,7 @@ export default function AccordionTable(props: AccordionTableProps) {
       <TestimonialSection
         testimonials={props.testimonials}
         sectionId={0}
-        productId={props.productID}
-      />
+        productId={props.productID} setTestimonials={props.setTestimonials}      />
     </div>
   );
 }
