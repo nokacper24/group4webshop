@@ -79,6 +79,13 @@ export interface Description {
   full_width: boolean;
 }
 
+export interface SimpleDescription {
+  component_id: number;
+  text: Text | undefined;
+  image: Image | undefined;
+  is_text_not_image: boolean;
+}
+
 export interface Testimonial {
   testimonial_id: number;
   author: string;
