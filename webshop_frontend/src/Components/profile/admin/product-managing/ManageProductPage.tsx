@@ -51,6 +51,12 @@ export default function ManageProductPage() {
     fetchDescriptionComponents(productId!).then((descriptions: Description[]) =>
       initializeSections(assignImageState(descriptions))
     );
+    fetchProduct(productId!).then((product: Product) => {
+      setProductInfo(product);
+      assignProductInfo();
+    });
+  };
+
   const assignImageState = (descriptions: Description[]): Description[] => {
     for (let i = 0; i < descriptions.length; i += 1) {
       if (descriptions[i].text) {
