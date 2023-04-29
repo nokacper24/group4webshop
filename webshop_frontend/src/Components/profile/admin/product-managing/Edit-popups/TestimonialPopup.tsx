@@ -45,6 +45,20 @@ export default function TestimonialPopup(
     event.preventDefault();
   }
 
+  /**
+   * Saves the testimonial and closes the popup.
+   */
+  const save = () => {
+    //Uses the callback function to return the values of the testimonial.
+    props.informationCallBack({
+      testimonial_id: 0,
+      author: authorNameRef.current?.value!,
+      text: testimonialText.current?.value!,
+      author_pic: authorPicRef.current?.value!,
+      product_id: product_id,
+    });
+    hidePopup();
+  };
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div className="popup-box">
@@ -127,21 +141,6 @@ export default function TestimonialPopup(
 export function showTestimonialPopup(inProps: TestimonialPopupProps) {
   props = inProps;
   popupRef.current?.classList.add("popup-visible");
-}
-
-/**
- * Saves the testimonial and closes the popup.
- */
-function save() {
-  //Uses the callback function to return the values of the testimonial.
-  props.informationCallBack({
-    testimonial_id: 0,
-    author: authorNameRef.current?.value!,
-    text: testimonialText.current?.value!,
-    author_pic: authorPicRef.current?.value!,
-    product_id: product_id,
-  });
-  hidePopup();
 }
 
 /**
