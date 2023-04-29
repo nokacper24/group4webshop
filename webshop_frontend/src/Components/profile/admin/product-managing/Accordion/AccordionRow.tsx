@@ -1,18 +1,9 @@
 import { useEffect, useState } from "react";
 import ToggleButton from "../../../toggle-table/ToggleButton";
-
-export type AccordionRowProps = {
-  title: string;
-  id: number;
-  content: string;
-  image: boolean;
-};
+import { SimpleDescription } from "../../../../../Interfaces";
 
 type PrivateAccordionRowProps = {
-  title: string;
-  id: number;
-  content: string;
-  image: boolean;
+  description: SimpleDescription;
   editFunction: (id: number) => void;
   removeFunction: (id: number) => void;
 };
@@ -24,32 +15,32 @@ type PrivateAccordionRowProps = {
  * @returns the React component for the Accordion row
  */
 export function AccordionRow(props: PrivateAccordionRowProps) {
-  const [state, setState] = useState<AccordionRowProps>(props);
+  const [state, setState] = useState<SimpleDescription>(props.description);
   const [visible, setVisible] = useState<boolean>(true);
-  if (state.title.length <= 0) {
-    setState({ ...state, title: "Untitled" });
+  if (state.text && state.text.text_title.length <= 0) {
+    setState({
+      //setState with arrow function and spread operator gives error if i dont want to set all values of text, just text_title
+      ...state,
+      text: { text_title: "Undefined Title", paragraph: state.text.paragraph },
+    });
   }
   let visibleTitle: string;
   if (state.image) {
-    visibleTitle = "Image: " + state.content;
+    visibleTitle = "Image: " + state.image.alt_text;
   } else {
-    visibleTitle = state.title;
+    visibleTitle = state.text!.text_title;
   }
 
   const changeVisibility = (checked: boolean, id: string) => {
     setVisible(checked);
   };
 
-  useEffect(() => {
-    setState(props);
-  });
-
   return (
     <div className="accordion-row">
       <p>{visibleTitle}</p>
       <button
         className="accordion-edit-button"
-        onClick={() => props.editFunction(props.id)}
+        onClick={() => props.editFunction(props.description.component_id)}
       >
         <svg
           className="accordion-button-icon"
@@ -76,13 +67,13 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
         </svg>
       </button>
       <ToggleButton
-        id={state.title + props.id}
+        id={"Row:" + props.description.component_id}
         checked={visible}
         handleClick={changeVisibility}
       ></ToggleButton>
       <button
         className="accordion-remove-button"
-        onClick={() => props.removeFunction(props.id)}
+        onClick={() => props.removeFunction(props.description.component_id)}
       >
         <svg
           className="accordion-button-icon"

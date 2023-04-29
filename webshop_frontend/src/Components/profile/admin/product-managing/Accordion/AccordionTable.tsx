@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
-import { Testimonial } from "../../../../../Interfaces";
+import { Description, Testimonial } from "../../../../../Interfaces";
 import { TestimonialSection } from "../testimonials/TestimonialSection";
 
 export type AccordionTableProps = {
