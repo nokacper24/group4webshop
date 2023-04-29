@@ -48,6 +48,16 @@ export default function ManageProductPage() {
     fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
       setTestimonials(testimonials)
     );
+  const assignImageState = (descriptions: Description[]): Description[] => {
+    for (let i = 0; i < descriptions.length; i += 1) {
+      if (descriptions[i].text) {
+        descriptions[i].is_text_not_image = true;
+      } else {
+        descriptions[i].is_text_not_image = false;
+      }
+    }
+    return descriptions;
+  };
   };
   /**
    * Sorts the descriptions in order by their priority property. Then
