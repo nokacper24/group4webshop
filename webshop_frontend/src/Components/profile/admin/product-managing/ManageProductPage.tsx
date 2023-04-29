@@ -58,7 +58,13 @@ export default function ManageProductPage() {
     }
     return descriptions;
   };
+
+  const assignProductInfo = () => {
+    productName.current!.value = productInfo!.display_name;
+    productPrice.current!.value = productInfo!.price_per_user.toString();
+    productDescription.current!.value = productInfo!.short_description;
   };
+
   /**
    * Sorts the descriptions in order by their priority property. Then
    * takes each pair of descriptions and creates a section from them.
