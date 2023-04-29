@@ -2,8 +2,20 @@ import { useParams } from "react-router-dom";
 import AccordionTable from "./Accordion/AccordionTable";
 import HeaderEditPopup from "./Edit-popups/HeaderEditPopup";
 import RowEditPopup from "./Edit-popups/RowEditPopup";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import TestimonialPopup from "./Edit-popups/TestimonialPopup";
+import {
+  Description,
+  Product,
+  SimpleDescription,
+  Testimonial,
+} from "../../../../Interfaces";
+import {
+  fetchDescriptionComponents,
+  fetchProduct,
+  fetchTestimonials,
+} from "../../../../ApiController";
+import { AccordionSectionProps } from "./Accordion/AccordionSection";
 
 /**
  * Page for creating or editing a product page.
@@ -19,13 +31,20 @@ export default function ManageProductPage() {
   const productDescription = useRef(null);
 
   let createState = productId !== undefined;
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
     if (!createState) {
+      initializeData();
     } else {
       productId = "placeholder_id";
     }
   });
+  const initializeData = () => {
+    fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
+      setTestimonials(testimonials)
+    );
+  };
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
@@ -72,7 +91,9 @@ export default function ManageProductPage() {
       <section className="accordion-wrapper container">
         <AccordionTable
           sections={sections}
+          testimonials={testimonials}
           productID={productId!}
+          setTestimonials={setTestimonials}
           setSections={setSections}
         ></AccordionTable>
       </section>
