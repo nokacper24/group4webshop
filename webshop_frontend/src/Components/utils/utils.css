@@ -1,9 +1,10 @@
 .loading-spinner {
-  height: 48px;
-  width: 48px;
-  color: #5a5a5a;
   position: relative;
   display: inline-block;
+  height: 48px;
+  width: 48px;
+  margin: 18px;
+  color: #5a5a5a;
   border: 5px solid;
   border-radius: 50%;
   border-top-color: transparent;
@@ -14,6 +15,7 @@
   0% {
     transform: rotate(0);
   }
+
   100% {
     transform: rotate(360deg);
   }
