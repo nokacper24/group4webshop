@@ -9,12 +9,15 @@ import {
   createRowProps,
 } from "../select-table/SelectTableFunctions";
 import { fetchProducts } from "../../../ApiController";
+import { useNavigate } from "react-router";
 
 export default function ManageProducts() {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
   const editProduct = (index: number) => {
-    console.log("Editing: ", index); // TODO: Reroute to product page
+    navigate(`/product/manage/${products[index].id}`);
   };
 
   const productsTable: SelectTableProps = createSelectTableProps(

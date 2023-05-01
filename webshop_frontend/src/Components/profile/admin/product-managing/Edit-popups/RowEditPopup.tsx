@@ -34,7 +34,7 @@ export default function RowEditPopup() {
   });
 
   const updateProps = (newProps: RowEditPopupProps) => {
-    setProps(newProps);
+    setProps(newProps); //TODO: Remove nested ternary operators
     titleRef.current
       ? (titleRef.current.value = newProps.title ? newProps.title : "")
       : undefined; //TODO: Implement "Something has gone wrong"

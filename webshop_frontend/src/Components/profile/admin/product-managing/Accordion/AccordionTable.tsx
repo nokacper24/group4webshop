@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
+import { Testimonial } from "../../../../../Interfaces";
+import { TestimonialSection } from "../testimonials/TestimonialSection";
+
+export type AccordionTableProps = {
+  sections: AccordionSectionProps[];
+  testimonials: Testimonial[];
+  productID: string;
+};
 
 /**
  * Renders a table consisting of the header and a body with rows
@@ -9,8 +17,8 @@ import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
  *
  * @returns The React component for the Accordion table
  */
-export default function AccordionTable() {
-  const [priorityChanges, setPriorityChanges] = useState<Map<number, number>>(
+export default function AccordionTable(props: AccordionTableProps) {
+  const [priorityChanges] = useState<Map<number, number>>(
     new Map()
   ); //ID as key, priority as value
   const [contentChanges, setContentChanges] = useState<
@@ -61,28 +69,7 @@ export default function AccordionTable() {
   };
 
   const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
-    {
-      header: {
-        title: "Test",
-      },
-      rows: [
-        {
-          title: "Test",
-          id: 1,
-          content: "Content!",
-          image: false,
-        },
-        {
-          title: "Test2",
-          id: 2,
-          content: "Content2!",
-          image: false,
-        },
-      ],
-      sectionID: 0,
-      registerContentChange: registerContentChange,
-      deleteSection: deleteSection,
-    },
+    ...props.sections,
   ]);
 
   /**
@@ -116,8 +103,8 @@ export default function AccordionTable() {
       >
         New section
       </button>
-      {sectionList.map((section) => {
-        return (
+      {sectionList.map((section) => 
+        (
           <AccordionSection
             key={section.sectionID}
             header={section.header}
@@ -125,9 +112,14 @@ export default function AccordionTable() {
             sectionID={section.sectionID}
             registerContentChange={registerContentChange}
             deleteSection={deleteSection}
-          ></AccordionSection>
-        );
-      })}
+          />
+        )
+      )}
+      <TestimonialSection
+        testimonials={props.testimonials}
+        sectionId={0}
+        productId={props.productID}
+      />
     </div>
   );
 }

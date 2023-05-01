@@ -31,7 +31,7 @@ pub struct DescriptionApiDoc;
 
 /// Get all description components for a specific product
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/products",
     get,
     tag = "Product Descriptions",
     responses(
@@ -79,7 +79,7 @@ async fn get_product_descriptions(
 
 /// Get a specific description component for a specific product
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/products",
     get,
     tag = "Product Descriptions",
     responses(
