@@ -4,13 +4,14 @@ use crate::{
         company, error_handling,
         user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::{self, auth},
+    utils::{self, auth}, SharedData,
 };
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
 
 use futures::StreamExt;
 
+use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::str;
@@ -61,7 +62,8 @@ pub struct UserApiDoc;
     )
 )]
 #[get("/users")]
-async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn users(shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let users = user::get_all_users(&pool).await;
 
     //error check
@@ -86,7 +88,8 @@ async fn users(pool: web::Data<Pool<Postgres>>) -> impl Responder {
     )
 )]
 #[get("/users/{id}")]
-async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> impl Responder {
+async fn user_by_id(shared_data: web::Data<SharedData>, id: web::Path<String>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let id = match id.parse::<i32>() {
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
@@ -114,9 +117,10 @@ async fn user_by_id(pool: web::Data<Pool<Postgres>>, id: web::Path<String>) -> i
 )]
 #[get("/companies/{company_id}/users")]
 async fn users_by_company(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     company_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let company_id = match company_id.parse::<i32>() {
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
@@ -147,9 +151,10 @@ async fn users_by_company(
 )]
 #[get("/licenses/{license_id}/users")]
 async fn users_by_license(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     license_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let license_id = match license_id.parse::<i32>() {
         Ok(license_id) => license_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
@@ -177,10 +182,12 @@ struct Invite {
 
 #[post("/generate_invite")]
 async fn generate_invite(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     invite: web::Json<Invite>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    let mailer = &shared_data.mailer;
     let company = match invite.company_id {
         Some(company_id) => match company::get_company_by_id(&pool, &company_id).await {
             Ok(company) => Ok(company),
@@ -222,7 +229,7 @@ async fn generate_invite(
                                     "Invite to Proflex".to_string(),
                                     invite.id,
                                 );
-                                let res = utils::email::send_email(email).await;
+                                let res = utils::email::send_email(email,mailer).await;
                                 match res {
                                     Ok(_) => {
                                         HttpResponse::Ok().json("Invite sent")
@@ -275,7 +282,7 @@ async fn generate_invite(
                                             "Invite to Proflex".to_string(),
                                             invite.id,
                                         );
-                                        let res = utils::email::send_email(email).await;
+                                        let res = utils::email::send_email(email,mailer).await;
                                         match res {
                                             Ok(_) => {
                                                 HttpResponse::Ok().json("Invite sent")
@@ -321,7 +328,7 @@ async fn generate_invite(
                                         "Invite to Proflex".to_string(),
                                         invite.id,
                                     );
-                                    let res = utils::email::send_email(email).await;
+                                    let res = utils::email::send_email(email,mailer).await;
                                     match res {
                                         Ok(_) => {
                                             HttpResponse::Ok().json("Invite sent")
@@ -358,10 +365,11 @@ async fn generate_invite(
 /// Generate invites for a CSV list of users.
 #[post("/generate_invites")]
 async fn generate_invites(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     payload: Multipart,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let user = match auth::validate_user(req, &pool).await {
         Ok(user) => user,
         Err(e) => {
@@ -458,7 +466,8 @@ fn csv_string_to_list(text: String) -> Vec<String> {
 }
 
 #[post("/register")]
-async fn register(pool: web::Data<Pool<Postgres>>, invite: web::Json<Invite>) -> impl Responder {
+async fn register(shared_data: web::Data<SharedData>, invite: web::Json<Invite>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match user::user_exists(&invite.email, &pool).await {
         Ok(true) => HttpResponse::BadRequest().json("User already exists"),
         Ok(false) => {
@@ -514,9 +523,10 @@ struct LicenseUsers {
 )]
 #[post("/license_users")]
 async fn add_license_users(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
     match user::add_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Created().json(other_users),
@@ -554,9 +564,10 @@ async fn add_license_users(
 )]
 #[delete("/license_users")]
 async fn remove_license_users(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     other_users: web::Json<LicenseUsers>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
     match user::remove_license_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
@@ -568,28 +579,43 @@ async fn remove_license_users(
 #[utoipa::path(
     context_path = "/api/priv",
     responses(
-    (status = 200, description = "List of all users with a specific role", body = Vec<User>),
-    (status = 500, description = "Internal Server Error"),
+        (status = 200, description = "List of all users with a specific role", body = Vec<UserNoPass>),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 500, description = "Internal Server Error"),
     )
 )]
 #[get("/users/role/{role}")]
 async fn get_users_by_role(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     role: web::Path<Role>,
+    request: HttpRequest,
 ) -> impl Responder {
-    let other_users = user::get_users_by_role(&pool, &role).await;
-
-    // Error check
-    if other_users.is_err() {
-        return HttpResponse::InternalServerError().json("Internal Server Error");
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(request, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
     }
-
-    // Parse to JSON
-    if let Ok(other_users) = other_users {
-        return HttpResponse::Ok().json(other_users);
+    let found_users = user::get_users_by_role(&pool, &role).await;
+    match found_users {
+        Ok(found_users) => HttpResponse::Ok().json(found_users),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
-
-    HttpResponse::InternalServerError().json("Internal Server Error")
 }
 
 #[derive(Deserialize, Serialize)]
@@ -609,9 +635,10 @@ struct UserRoles {
   ]
 #[patch("/user_roles")]
 async fn update_user_roles(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     other_users: web::Json<UserRoles>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
     match user::update_user_roles(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
@@ -646,9 +673,10 @@ struct UserIDs {
   ]
 #[delete("/users")]
 async fn delete_users(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     other_users: web::Json<UserIDs>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
     match user::delete_users(&pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
@@ -670,10 +698,11 @@ struct PartialUser {
 /// ```
 #[patch("/users/{id}")]
 async fn update_user(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     id: web::Path<String>,
     body: web::Json<PartialUser>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let mail = &body.email;
     let id: i32 = match id.parse::<i32>() {
         Ok(id) => id,

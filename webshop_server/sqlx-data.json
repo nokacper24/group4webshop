@@ -102,60 +102,6 @@
     },
     "query": "\n        UPDATE description_component\n        SET priority = $1\n        WHERE component_id = $2;\n        "
   },
-  "0b0608a99868530c1894508cfedbc6d59f2c9e77722999e7faa0e35c659327ea": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "email",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        },
-        {
-          "name": "role: _",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\" FROM app_user"
-  },
   "0ee09620816dab098264dd8a01dd35dc9f08fe60a24678c76551e555bcfc0140": {
     "describe": {
       "columns": [
@@ -243,6 +189,56 @@
       }
     },
     "query": "SELECT * FROM company WHERE company_id = $1"
+  },
+  "1181b479bb70174ac626ba1e446d676cd28c89319e718ef5568c706d0e3c0245": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT user_id, email, company_id, role as \"role: _\" \n        FROM app_user \n        WHERE company_id = $1"
   },
   "156d7f3cc82ed48d82c0dcf7b1952125858ca9cab1c6084262c407b4797d7f3d": {
     "describe": {
@@ -394,6 +390,68 @@
       }
     },
     "query": "SELECT main_image\n        FROM product\n        WHERE product_id = $1"
+  },
+  "2363e0844f97761f1fe3c2f3e13cd11a5e6e3c02afe38973ba412e0241dc5d8f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        ]
+      }
+    },
+    "query": "SELECT user_id, email, company_id, role as \"role: _\"\n        FROM app_user\n        WHERE role = $1"
   },
   "27e613e554e7728cee8fe9f1b4b8237622a24c9be9db23a8508a9bba3ba084da": {
     "describe": {
@@ -903,7 +961,7 @@
     },
     "query": "INSERT INTO description_component (product_id, text_id)\n            VALUES ($1, $2)\n            RETURNING *;"
   },
-  "6728fa73029902c1bc2926d8fdf5104039d942df4ccea892c0818bb39e35c912": {
+  "633a2e8bb801c53f4b603e37bc12a51038a9cbeee3fd76b0dc3990e42263657e": {
     "describe": {
       "columns": [
         {
@@ -917,18 +975,13 @@
           "type_info": "Text"
         },
         {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
           "name": "company_id",
-          "ordinal": 3,
+          "ordinal": 2,
           "type_info": "Int4"
         },
         {
           "name": "role: _",
-          "ordinal": 4,
+          "ordinal": 3,
           "type_info": {
             "Custom": {
               "kind": {
@@ -948,72 +1001,13 @@
         false,
         false,
         false,
-        false,
         false
       ],
       "parameters": {
-        "Left": [
-          "Int4"
-        ]
+        "Left": []
       }
     },
-    "query": "SELECT app_user.user_id, email, pass_hash, company_id, role as \"role: _\"\n        FROM app_user\n        INNER JOIN user_license USING (user_id)\n        WHERE license_id = $1"
-  },
-  "6deac307775cddce44e599b02c2fd93213487bd17840e9e0e198e018839496ab": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "email",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        },
-        {
-          "name": "role: _",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\" FROM app_user WHERE user_id = $1"
+    "query": "SELECT user_id, email, company_id, role as \"role: _\" FROM app_user"
   },
   "7508e92d2c508189e697ad45d0884ec45f7e9c84b0d9d327942c4c62230d6025": {
     "describe": {
@@ -1125,130 +1119,6 @@
     },
     "query": "SELECT $2 <@ (\n            SELECT array_agg(component_id)\n            FROM description_component\n            WHERE product_id = $1\n        ) as is_contained;"
   },
-  "7e46038386ebcd03b1fb4aead93287b46b1a3cf2574eabe1cc74fe8c12dc80dc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "email",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        },
-        {
-          "name": "role: _",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\" \n        FROM app_user \n        WHERE company_id = $1"
-  },
-  "7ed526f1d6ce07173cf9205a02a3976499ee431e9142c216b340d69a6bb12bbe": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "email",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        },
-        {
-          "name": "role: _",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        ]
-      }
-    },
-    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\"\n        FROM app_user\n        WHERE role = $1"
-  },
   "7ef940de8af38a90fc409e636578e79b4eaa76f0fc3ac0e6fd4f26f2339cfb3a": {
     "describe": {
       "columns": [
@@ -1293,6 +1163,56 @@
       }
     },
     "query": "DELETE FROM testimonial\n        WHERE product_id = $1 AND testimonial_id = $2\n        RETURNING *"
+  },
+  "7f989315baa0761ebfdafe53fecdca528f7dbb9727a3504c54fbbbf33635fd74": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT app_user.user_id, email, company_id, role as \"role: _\"\n        FROM app_user\n        INNER JOIN user_license USING (user_id)\n        WHERE license_id = $1"
   },
   "816483c8101ec901c8ad07a7c426aa3cff8ae0d9d0b74b0bfc20f7cc74bdad42": {
     "describe": {
@@ -1791,6 +1711,56 @@
     },
     "query": "SELECT * \n        FROM testimonial \n        WHERE product_id = $1 AND testimonial_id = $2"
   },
+  "b1974e82dd714d410fa7322f8d5dc1a291dcef56d76201c27aa05c3c7c0c44e8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT user_id, email, company_id, role as \"role: _\" FROM app_user WHERE user_id = $1"
+  },
   "b6866e254f562a1bb239abe465363296c6021b89cdcc8d654aeff0d4b6be3d23": {
     "describe": {
       "columns": [],
@@ -2217,62 +2187,6 @@
     },
     "query": "SELECT role as \"role: _\" FROM app_user WHERE user_id = $1"
   },
-  "e31f939f5e47ccd9b670fe104337cc15a6a6e0e7982a1481aff43b6eeadfda98": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "email",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "pass_hash",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        },
-        {
-          "name": "role: _",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Enum": [
-                  "admin",
-                  "company_it_head",
-                  "company_it",
-                  "default"
-                ]
-              },
-              "name": "role_enum"
-            }
-          }
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "SELECT user_id, email, pass_hash, company_id, role as \"role: _\"\n                FROM app_user\n                WHERE email = $1"
-  },
   "e370cd97ffa2865a445e43b584b238803fd0a20fc822d64be056401943298c7e": {
     "describe": {
       "columns": [
@@ -2492,6 +2406,56 @@
       }
     },
     "query": "SELECT * FROM cookies WHERE cookie = $1"
+  },
+  "f4d8fdab9b3ed05d142ad96ecace8329c3c87eda364a33656bc311451b978da9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "email",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        },
+        {
+          "name": "role: _",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "admin",
+                  "company_it_head",
+                  "company_it",
+                  "default"
+                ]
+              },
+              "name": "role_enum"
+            }
+          }
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT user_id, email, company_id, role as \"role: _\"\n                FROM app_user\n                WHERE email = $1"
   },
   "fcf564faae55eedfa4e28128291729f1ccc570e196231d1f852768d8e064abc7": {
     "describe": {

@@ -20,7 +20,7 @@ use crate::{
                 self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
             },
         },
-    },
+    }, SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -70,7 +70,8 @@ pub struct ProductsApiDoc;
 )
 )]
 #[get("/products")]
-pub async fn get_all_products(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
+async fn get_all_products(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -128,11 +129,12 @@ struct NewProductForm {
     ),
 )]
 #[post("/products")]
-pub async fn create_product(
+async fn create_product(
     payload: Multipart,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -296,12 +298,13 @@ struct UpdateProductForm {
     ),
 )]
 #[put("/products/{product_id}")]
-pub async fn update_product(
+async fn update_product(
     payload: Multipart,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
     product_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -464,12 +467,13 @@ pub async fn update_product(
     ),
 )]
 #[patch("/products/{product_id}/available")]
-pub async fn update_availability(
-    pool: web::Data<Pool<Postgres>>,
+async fn update_availability(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     available: web::Json<bool>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
@@ -517,11 +521,12 @@ pub async fn update_availability(
     )
 )]
 #[delete("/products/{product_id}")]
-pub async fn delete_product(
-    pool: web::Data<Pool<Postgres>>,
+async fn delete_product(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     match auth::validate_user(req, &pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {

@@ -1,4 +1,4 @@
-use crate::data_access::testimonial::{self, Testimonial};
+use crate::{data_access::testimonial::{self, Testimonial}, SharedData};
 
 use actix_web::{get, web, HttpResponse, Responder};
 use log::error;
@@ -37,10 +37,11 @@ pub struct TestimonialsOpenApi;
   ),
 )]
 #[get("/testimonials/{product_id}")]
-pub async fn get_testimonials_by_product(
-    pool: web::Data<Pool<Postgres>>,
+async fn get_testimonials_by_product(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let testimonials = testimonial::get_testimonials_by_product(&pool, &product_id).await;
     match testimonials {
         Ok(testimonials) => HttpResponse::Ok().json(testimonials),

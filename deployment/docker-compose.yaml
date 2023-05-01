@@ -25,6 +25,8 @@ services:
       HOST: 0.0.0.0
       PORT: 8080
       RUST_LOG: ${RUST_LOG:-info,sqlx=warn}
+      EMAIL_USR: ${EMAIL_USR}
+      EMAIL_PWD: ${EMAIL_PWD}
       ALLOWED_ORIGINS: https://group04.web-tek.ninja
       DATABASE_URL: postgresql://backend_user:${BACKEND_USR_PASS}@db:5432/proflex
       CERT_PATH: /certs/live/group04.web-tek.ninja/cert.pem

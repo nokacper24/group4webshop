@@ -1,4 +1,4 @@
-use crate::data_access::product;
+use crate::{data_access::product, SharedData};
 use actix_web::{get, web, HttpResponse, Responder};
 
 use log::error;
@@ -45,10 +45,11 @@ pub struct DescriptionApiDoc;
     )
 ]
 #[get("/{product_id}/descriptions")]
-pub async fn get_product_descriptions(
-    pool: web::Data<Pool<Postgres>>,
+async fn get_product_descriptions(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let descriptions =
         product::description::get_product_description_components(&pool, product_id.as_str()).await;
 
@@ -93,10 +94,11 @@ pub async fn get_product_descriptions(
     )
 ]
 #[get("/{product_id}/descriptions/{component_id}")]
-pub async fn get_product_description_component_by_id(
-    pool: web::Data<Pool<Postgres>>,
+async fn get_product_description_component_by_id(
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let (product_id, component_id) = path.into_inner();
     let description = product::description::get_description_component_checked(
         &pool,
