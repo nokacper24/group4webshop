@@ -26,8 +26,10 @@ if (import.meta.env.PROD) {
 export class FetchError extends Error {
   status: number;
   statusText: string;
+
   /**
-   * Create a new product error.
+   * Create a new fetch error.
+   *
    * @param message The error message.
    * @param status The HTTP status code.
    * @param statusText The HTTP status text.
