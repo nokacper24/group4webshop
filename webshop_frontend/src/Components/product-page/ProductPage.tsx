@@ -78,21 +78,19 @@ export default function ProductPage() {
             className="banner"
             style={{ backgroundImage: `url(${product.main_image})` }}
           >
-            <div className="banner-inner">
-              <div className="banner-highlight">
-                <h1 className="banner-title">{product.display_name}</h1>
-                <p className="banner-description">
-                  {product.short_description}
-                </p>
-                <PurchaseLicenseButton active={product.available} />
-                {product.available === false && <UnavailableTag />}
-              </div>
+            <div className="banner-highlight">
+              <h1 className="banner-title">{product.display_name}</h1>
+              <p className="banner-description">{product.short_description}</p>
+              <PurchaseLicenseButton active={product.available} />
+              {product.available === false && <UnavailableTag />}
             </div>
           </section>
           <hr></hr>
-          <section className="product-description-container container">
-            {DescriptionsContainer(descriptions)}
-          </section>
+          {descriptions.length != 0 && (
+            <section style={{ marginTop: "2em" }} className="container">
+              {DescriptionsContainer(descriptions)}
+            </section>
+          )}
           {testimonials.length > 0 && (
             <section className="gallery-wrapper">
               <div className="container">
@@ -104,6 +102,7 @@ export default function ProductPage() {
               </div>
             </section>
           )}
+          {testimonials.length == 0 && <hr />}
           <section className="container">
             <h2>Purchase</h2>
             <p>Purchase licenses for this product for your enterprise today!</p>
