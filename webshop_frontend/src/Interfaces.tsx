@@ -21,7 +21,6 @@ export interface FullLicenseInfo {
   amount: number;
   company_id: number;
   product_id: string;
-  product_name: string;
   company_name: string;
   display_name: string;
 }
