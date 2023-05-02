@@ -44,6 +44,10 @@ export default function ManageProductPage() {
     }
   }, []);
 
+  useEffect(() => {
+    assignProductInfo();
+  }, [productInfo]);
+
   const initializeData = () => {
     fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
       setTestimonials(testimonials)
@@ -53,7 +57,6 @@ export default function ManageProductPage() {
     );
     fetchProduct(productId!).then((product: Product) => {
       setProductInfo(product);
-      assignProductInfo();
     });
   };
 
@@ -69,9 +72,10 @@ export default function ManageProductPage() {
   };
 
   const assignProductInfo = () => {
-    productName.current!.value = productInfo!.display_name;
-    productPrice.current!.value = productInfo!.price_per_user.toString();
-    productDescription.current!.value = productInfo!.short_description;
+    if (!productInfo) return;
+    productName.current!.value = productInfo.display_name;
+    productPrice.current!.value = productInfo.price_per_user.toString();
+    productDescription.current!.value = productInfo.short_description;
   };
 
   /**
