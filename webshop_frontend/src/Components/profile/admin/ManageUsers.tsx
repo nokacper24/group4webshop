@@ -194,8 +194,7 @@ export default function ManageUsers() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {
@@ -227,8 +226,7 @@ export default function ManageUsers() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {

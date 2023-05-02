@@ -48,8 +48,7 @@ export default function CreateLicenseForm() {
       },
       body: license,
     }).then((response) => {
-      const status = response.status;
-      if (status == 201) {
+      if (response.ok) {
         alert("License created.");
         // Refresh
         navigate(0);

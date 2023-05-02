@@ -29,7 +29,7 @@ export default function SignIn() {
   const handleSignIn = () => {
     verifySignInInfo(email.current!.value, password.current!.value).then(
       (response: Response) => {
-        if (response.status === 200) {
+        if (response.ok) {
           // Refresh
           navigate(0);
         } else {

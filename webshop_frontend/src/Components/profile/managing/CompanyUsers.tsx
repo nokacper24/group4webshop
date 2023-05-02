@@ -97,8 +97,7 @@ export default function CompanyUsers() {
       }),
     })
       .then((response) => {
-        const status = response.status;
-        if (status == 200) {
+        if (response.ok) {
           // Refresh
           navigate(0);
         } else {
@@ -162,8 +161,7 @@ export default function CompanyUsers() {
       }),
     })
       .then((response) => {
-        const status = response.status;
-        if (status == 200) {
+        if (response.ok) {
           resetSingleEmailInput();
         } else {
           alert("Something went wrong when inviting user");
@@ -191,8 +189,7 @@ export default function CompanyUsers() {
       body: formData,
     })
       .then((response) => {
-        const status = response.status;
-        if (status == 200) {
+        if (response.ok) {
           resetCsvEmailInput();
           alert("Users invited");
         } else {

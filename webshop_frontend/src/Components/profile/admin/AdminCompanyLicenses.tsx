@@ -184,7 +184,7 @@ export default function AdminCompanyLicenses() {
    * @param response The response from the fetch request.
    */
   const handlePatchLicenseResponse = (response: Response) => {
-    if (response.status == 200) {
+    if (response.ok) {
       // Refresh
       navigate(0);
     } else {
