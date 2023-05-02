@@ -56,9 +56,11 @@ export default function About() {
           <a href="mailto:contact@proflex.com">contact@proflex.com</a>
         </p>
         <p>
-          <b>Address:</b> <br></br>
-          Streetname 04<br></br>
-          0404 Cityname<br></br>
+          <b>Address:</b> <br />
+          Streetname 04
+          <br />
+          0404 Cityname
+          <br />
           Countryname
         </p>
       </section>

@@ -68,7 +68,7 @@ export default function MyAccount(props: Props) {
         <h1>My account</h1>
         <div className="user-details">
           <p>
-            E-mail: {props.user?.email} <br></br>
+            E-mail: {props.user?.email} <br />
           </p>
           <Link className="default-button small-button" to="edit">
             Edit profile

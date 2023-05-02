@@ -286,17 +286,17 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           Product: {license.product_name}
-          <br></br>
+          <br />
           Active users: {usersWithAccess.length - newUsersWithAccess.size}
-          <br></br>
+          <br />
           Total allowed: {license.amount}
-          <br></br>
+          <br />
           Start date: {new Date(license.start_date).toDateString()}
-          <br></br>
+          <br />
           End date: {new Date(license.end_date).toDateString()}
-          <br></br>
+          <br />
           Status: {license.valid ? "Valid" : "Invalid"}
-          <br></br>
+          <br />
         </p>
       </section>
 

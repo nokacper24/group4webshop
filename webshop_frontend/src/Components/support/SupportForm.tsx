@@ -21,7 +21,8 @@ export default function SupportForm() {
     <form className="container form-container">
       <h2>Contact support</h2>
       <p>
-        You are signed in as:<br></br>
+        You are signed in as:
+        <br />
         <span className="user-email">
           {/* TODO: Add user e-mail */}email@company.com
         </span>

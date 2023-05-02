@@ -151,7 +151,7 @@ export default function PurchaseLicense() {
                     <h2>{product.display_name}</h2>
                     <p>
                       {product.short_description}
-                      <br></br>
+                      <br />
                       Purchase a license for your company. Licenses are valid
                       for a year, and will automatically be renewed unless you
                       cancel it.
