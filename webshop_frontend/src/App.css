@@ -988,8 +988,8 @@ form a:hover {
 
 .gallery {
   display: grid;
+  justify-content: center;
   grid-template-columns: repeat(3, auto);
-  max-width: 70em;
   overflow: hidden;
 }
 
@@ -1022,7 +1022,7 @@ form a:hover {
 }
 
 .slides-view {
-  --slides-width: min(70vw, 900px);
+  --slides-width: min(calc(70vw - 3em), 900px);
 
   overflow: hidden;
   width: var(--slides-width);
@@ -1031,8 +1031,6 @@ form a:hover {
 
 .slides-container {
   width: max-content;
-  position: static;
-  left: 50px;
 }
 
 .slide {
