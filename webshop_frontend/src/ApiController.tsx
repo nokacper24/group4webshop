@@ -218,6 +218,7 @@ export const postLicense = async (license: License) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(license),
+    credentials: "include",
   });
 };
 
