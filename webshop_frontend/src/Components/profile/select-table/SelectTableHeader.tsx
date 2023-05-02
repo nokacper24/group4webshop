@@ -6,6 +6,12 @@ export type SelectTableHeaderProps = {
   selectAll: string;
 };
 
+/**
+ * The header in the Select Table.
+ *
+ * @param props The props for the header.
+ * @returns The table header component.
+ */
 export default function SelectTableHeader(props: SelectTableHeaderProps) {
   return (
     <tr>

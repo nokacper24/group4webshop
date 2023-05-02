@@ -9,6 +9,7 @@ import {
   fetchProduct,
   postLicense,
 } from "../../ApiController";
+import TermsOfService from "../profile/register/TermsOfService";
 
 /**
  * Represents a Purchase License page.
@@ -21,7 +22,7 @@ export default function PurchaseLicense() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<MeUser>();
-  const [loadingUsr, setLoadingUsr] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [loadingProd, setLoadingProd] = useState(true);
 
   const [error, setError] = useState<Error | null>(null);
@@ -119,13 +120,13 @@ export default function PurchaseLicense() {
     fetchMe()
       .then((user: MeUser) => {
         setUser(user);
-        setLoadingUsr(false);
+        setLoadingUser(false);
       })
       .catch((error: FetchError) => {
         if (error.status !== 401) {
           setError(error);
         }
-        setLoadingUsr(false);
+        setLoadingUser(false);
       });
   }, []);
 
@@ -134,14 +135,14 @@ export default function PurchaseLicense() {
       <section className="container">
         <h1>Purchase License</h1>
         <br />
-        {(loadingProd || loadingUsr) && <Spinner />}
-        {!loadingProd && !loadingUsr && (
+        {(loadingProd || loadingUser) && <Spinner />}
+        {!loadingProd && !loadingUser && (
           <>
             {error && <p>{error.message}</p>}
             {!error && product && (
               <>
                 {!user && <MustBeSignedIn />}
-                {user && user.role === "Default" && <NoPermisionToBuy />}
+                {user && user.role === "Default" && <NoPermissionToBuy />}
                 {user && user.role !== "Default" && (
                   <form
                     className="left-aligned"
@@ -163,19 +164,12 @@ export default function PurchaseLicense() {
 
                     <p className="total-price">TOTAL: ${totalPrice}</p>
 
-                    <button
-                      type="submit"
-                      className="default-button submit-button"
-                    >
+                    <TermsOfService />
+
+                    <button type="submit" className="default-button">
                       Buy
                     </button>
-                    <div className="checkbox-input">
-                      <input id="accept-terms" type="checkbox" required />
-                      <label htmlFor="accept-terms">
-                        I have read and agree to the{" "}
-                        <a href="#!">terms of service</a>.
-                      </label>
-                    </div>
+
                     <p className="form-alert" ref={formAlert}></p>
                   </form>
                 )}
@@ -207,7 +201,7 @@ function MustBeSignedIn() {
   );
 }
 
-function NoPermisionToBuy() {
+function NoPermissionToBuy() {
   return (
     <p>
       You need to be an IT administrator to purchase a license.

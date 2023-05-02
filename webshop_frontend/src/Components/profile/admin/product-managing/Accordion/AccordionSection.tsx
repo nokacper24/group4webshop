@@ -29,6 +29,7 @@ type PrivateAccordionSectionProps = {
 };
 
 let latestID = 100;
+
 /**
  * The main component for managing a header and its body.
  *
@@ -54,7 +55,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param title title of the row to be added
    */
   const addRow = () => {
-    //Temporary debug solution
+    // Temporary debug solution
     if (rows.length < 2) {
       showPopup({
         image: false,

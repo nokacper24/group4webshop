@@ -1,4 +1,5 @@
 import { MouseEvent as ReactMouseEvent } from "react";
+import TermsOfService from "./TermsOfService";
 
 /**
  * Represents the Register Company component on the Create Account page.
@@ -6,70 +7,70 @@ import { MouseEvent as ReactMouseEvent } from "react";
  *
  * @returns A Register Company component.
  */
-export default function RegisterCompany() {
+export default function RegisterCompanyAccount() {
   return (
     <>
       <>
         <p>Fill out all the fields to create your account.</p>
 
-        <label htmlFor="create-account_email">E-mail</label>
-        <input
-          id="create-account_email"
-          name="email"
-          value="user@company.com" /* TODO: Fill value from URL */
-          required
-          disabled
-        />
+        <form>
+          <label htmlFor="create-account_email">E-mail</label>
+          <input
+            id="create-account_email"
+            name="email"
+            value="user@company.com" /* TODO: Fill value from URL */
+            required
+            disabled
+          />
 
-        <label htmlFor="create-account_company-name">Company name</label>
-        <input
-          id="create-account_company-name"
-          name="company-name"
-          type="text"
-          required
-        />
+          <label htmlFor="create-account_company-name">Company name</label>
+          <input
+            id="create-account_company-name"
+            name="company-name"
+            type="text"
+            required
+          />
 
-        <label htmlFor="create-account_company-address">Company address</label>
-        <input
-          id="create-account_company-address"
-          name="company-address"
-          type="text"
-          required
-        />
-
-        <label htmlFor="create-account_password">Password</label>
-        <input
-          id="create-account_password"
-          name="password"
-          type="password"
-          required
-        />
-
-        <label htmlFor="create-account_confirm-password">
-          Confirm password
-        </label>
-        <input
-          id="create-account_confirm-password"
-          name="confirm-password"
-          type="password"
-          required
-        />
-
-        <div className="checkbox-input">
-          <input id="accept-terms" type="checkbox" required />
-          <label htmlFor="accept-terms">
-            I have read and agree to the <a href="#!">terms of service</a>.
+          <label htmlFor="create-account_company-address">
+            Company address
           </label>
-        </div>
+          <input
+            id="create-account_company-address"
+            name="company-address"
+            type="text"
+            required
+          />
 
-        <button
-          className="default-button submit-button m-t-1"
-          type="submit"
-          onClick={(event) => validateForm(event)}
-        >
-          Register
-        </button>
-        <p className="form-alert"></p>
+          <label htmlFor="create-account_password">Password</label>
+          <input
+            id="create-account_password"
+            name="password"
+            type="password"
+            required
+          />
+
+          <label htmlFor="create-account_confirm-password">
+            Confirm password
+          </label>
+          <input
+            id="create-account_confirm-password"
+            name="confirm-password"
+            type="password"
+            required
+          />
+
+          <TermsOfService />
+
+          <p className="form-alert"></p>
+
+          <button
+            className="default-button submit-button m-t-1"
+            type="submit"
+            onClick={(event) => validateForm(event)}
+          >
+            Register
+          </button>
+        </form>
       </>
     </>
   );

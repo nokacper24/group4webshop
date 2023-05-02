@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Product } from "../../Interfaces";
-import { ProductCard, ProductCardProps } from "./ProductCard";
+import { ProductCard } from "./ProductCard";
 import { fetchProducts } from "../../ApiController";
 import Spinner from "../utils/utils";
 import { ErrorMessage } from "../ErrorMessage";
@@ -13,8 +13,8 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts()
-      .then((data) => {
-        setProducts(data);
+      .then((products: Product[]) => {
+        setProducts(products);
         setLoading(false);
       })
       .catch((error) => {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Description } from "../../Interfaces";
 
 export default function DescriptionsContainer(descriptions: Description[]) {
@@ -10,10 +9,10 @@ export default function DescriptionsContainer(descriptions: Description[]) {
           let temp = prev_item;
           prev_item = undefined;
           return (
-            <React.Fragment key={`${temp.component_id}-${item.component_id}`}>
+            <>
               <DescriptionRow descriptions={[temp]} key={temp.component_id} />
               <DescriptionRow descriptions={[item]} key={item.component_id} />
-            </React.Fragment>
+            </>
           );
         } else if (item.full_width && prev_item === undefined) {
           return (

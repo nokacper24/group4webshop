@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MeUser } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
 import { logout } from "../../ApiController";
@@ -14,6 +14,8 @@ interface Props {
  * @returns The My Account page component.
  */
 export default function MyAccount(props: Props) {
+  const navigate = useNavigate();
+
   const companyLicenses = (
     <>
       <h2>Company users</h2>
@@ -71,26 +73,24 @@ export default function MyAccount(props: Props) {
           <Link className="default-button small-button" to="edit">
             Edit profile
           </Link>
-          <button
-            className="default-button small-button"
-            onClick={async () => {
-              let result = await logout();
-              if (result) {
-                if (result.ok) {
-                  window.location.href = "/profile";
-                } else {
-                  alert("Could not log out.");
-                }
-              } else {
-                alert("Could not log out.");
-              }
-            }}
-          >
-            Logout
-          </button>
         </div>
       </section>
       <section className="container left-aligned">{userRoleSection}</section>
+      <section className="container left-aligned">
+        <button
+          className="default-button small-button"
+          onClick={async () => {
+            let result = await logout();
+            if (result && result.ok) {
+              navigate(0);
+            } else {
+              alert("Could not log out.");
+            }
+          }}
+        >
+          Log out
+        </button>
+      </section>
     </>
   );
 }
