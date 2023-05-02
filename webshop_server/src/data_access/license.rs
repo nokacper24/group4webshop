@@ -57,13 +57,11 @@ pub async fn get_licenses(pool: &Pool<Postgres>) -> Result<Vec<License>, sqlx::E
     Ok(licenses)
 }
 
-/// Returns vital info from all licenses
-pub async fn get_licenses_vital_info(
-    pool: &Pool<Postgres>,
-) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
+/// Returns full info from all licenses
+pub async fn get_licenses_full(pool: &Pool<Postgres>) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
         FullLicenseInfo,
-        r#"SELECT license_id, license.start_date, license.end_date, license.company_id, company_name, license.product_id, display_name, valid, amount
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)"#
@@ -89,17 +87,22 @@ pub async fn get_license_by_id(
 }
 
 /// Returns all licenses for a company
-pub async fn get_licenses_by_company(
+pub async fn get_licenses_full_by_company(
     pool: &Pool<Postgres>,
     company_id: &i32,
-) -> Result<Vec<License>, sqlx::Error> {
+) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
-        License,
-        r#"SELECT * FROM license WHERE company_id = $1"#,
+        FullLicenseInfo,
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        FROM license
+        JOIN product USING (product_id)
+        JOIN company USING (company_id)
+        WHERE company_id = $1"#,
         company_id
     )
     .fetch_all(pool)
     .await?;
+
     Ok(licenses)
 }
 

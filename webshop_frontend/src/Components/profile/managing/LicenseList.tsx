@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { License, Product } from "../../../Interfaces";
+import { FullLicenseInfo } from "../../../Interfaces";
 import LicenseListRow from "./LicenseListRow";
-import { fetchCompanyLicenses, fetchProduct } from "../../../ApiController";
+import { fetchCompanyLicenses } from "../../../ApiController";
 
 type LicenseListProps = {
   companyId: number;
@@ -13,24 +13,11 @@ type LicenseListProps = {
  * @returns A License List component as a JSX element.
  */
 export default function LicenseList(props: LicenseListProps) {
-  const [licenses, setLicenses] = useState<License[]>([]);
+  const [licenses, setLicenses] = useState<FullLicenseInfo[]>([]);
 
   useEffect(() => {
     fetchCompanyLicenses(props.companyId).then((licenses) => {
-      licenses.map((license: License) => {
-        fetchProduct(license.product_id).then((product: Product) => {
-          setLicenses((list) => {
-            let newList = list.slice();
-
-            newList.push({
-              ...license,
-              product_name: product.display_name,
-            });
-
-            return newList;
-          });
-        });
-      });
+      setLicenses(licenses);
     });
   }, []);
 
