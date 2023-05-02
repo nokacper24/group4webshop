@@ -35,25 +35,24 @@ export default function RowEditPopup() {
 
   const updateProps = (newProps: RowEditPopupProps) => {
     setProps(newProps); //TODO: Remove nested ternary operators
-    titleRef.current
-      ? (titleRef.current.value = newProps.title ? newProps.title : "")
-      : undefined; //TODO: Implement "Something has gone wrong"
-    paragraphRef.current
-      ? (paragraphRef.current.value = newProps.content ? newProps.content : "")
-      : undefined; //TODO: Implement "Something has gone wrong"
-    altTextRef.current
-      ? (altTextRef.current.value = newProps.title ? newProps.title : "")
-      : undefined; //TODO: Implement "Something has gone wrong"
+    if (titleRef.current) {
+      titleRef.current.value = newProps.title ? newProps.title : "";
+    }
+    if (paragraphRef.current) {
+      paragraphRef.current.value = newProps.content ? newProps.content : "";
+    }
+    if (altTextRef.current) {
+      altTextRef.current.value = newProps.title ? newProps.title : "";
+    }
   };
 
   const save = () => {
-    let content: string = props.image
-      ? imageRef.current
-        ? imageRef.current.value
-        : ""
-      : paragraphRef.current?.value
-      ? paragraphRef.current.value
-      : "";
+    let content: string;
+    if (props.image) {
+      content = imageRef.current ? imageRef.current.value : "";
+    } else {
+      content = paragraphRef.current?.value ? paragraphRef.current.value : "";
+    }
     let title: string;
     if (props.image) {
       title = altTextRef.current?.value ? altTextRef.current.value : "";
