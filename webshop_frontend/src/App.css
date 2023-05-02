@@ -130,6 +130,7 @@ button {
   border: none;
   outline: 1px solid transparent;
   text-decoration: none;
+  text-align: center;
   transition: background var(--transition-speed);
 }
 
@@ -161,6 +162,7 @@ button {
 
 .button-container {
   display: flex;
+  align-items: flex-start;
   gap: 1em;
   margin-bottom: 1em;
 }
@@ -205,7 +207,7 @@ label {
   width: 100%;
   max-width: var(--max-width);
   margin-inline: auto;
-  padding: 1em 2em;
+  padding: 1em;
   text-align: center;
 }
 
@@ -593,13 +595,11 @@ form input {
 }
 
 .form-container :is(label, select, input, textarea) {
-  display: block;
   text-align: left;
 }
 
 .form-container input {
   margin: initial;
-  margin-inline: auto;
   font-size: 1.1rem;
 }
 
@@ -1143,7 +1143,7 @@ form a:hover {
 /* || MANAGER/ADMIN PAGES */
 /* Select Table */
 .table-container {
-  max-height: 20em;
+  max-height: 30em;
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
