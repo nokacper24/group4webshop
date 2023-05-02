@@ -16,7 +16,7 @@ export type TestimonialRowProps = {
  */
 export function TestimonialRow(props: TestimonialRowProps) {
   const [visible, setVisible] = useState<boolean>(true);
-  let title = "Testimonial by :" + props.testimonial.author;
+  let title = "Testimonial by: " + props.testimonial.author;
 
   const changeVisibility = (checked: boolean, id: string) => {
     setVisible(checked);
