@@ -1075,10 +1075,6 @@ form a:hover {
   cursor: pointer;
 }
 
-#prices {
-  min-width: 20em;
-}
-
 #prices,
 .form-container>select {
   padding: 0.5em;
