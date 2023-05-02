@@ -143,6 +143,13 @@ button {
   outline: 3px solid var(--text-primary);
 }
 
+.default-button:disabled {
+  color: var(--text-primary) !important;
+  background-color: #ccc !important;
+  outline-color: #aaa !important;
+  cursor: not-allowed !important;
+}
+
 .small-button {
   display: block;
   padding: 0.5em 1em !important;
