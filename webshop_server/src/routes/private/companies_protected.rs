@@ -1,7 +1,9 @@
 use actix_web::{get, web, HttpResponse, Responder};
-use sqlx::{Pool, Postgres};
 
-use crate::{data_access::{company, error_handling}, SharedData};
+use crate::{
+    data_access::{company, error_handling},
+    SharedData,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(companies);

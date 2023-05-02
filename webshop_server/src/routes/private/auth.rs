@@ -1,11 +1,10 @@
 use actix_web::{cookie::time::Duration, get, post, web, HttpRequest, HttpResponse, Responder};
 use log::error;
 
-use sqlx::{Pool, Postgres};
-
 use crate::{
     data_access::auth::delete_cookie,
-    utils::auth::{self, AuthError, COOKIE_KEY_SECRET}, SharedData,
+    utils::auth::{self, AuthError, COOKIE_KEY_SECRET},
+    SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {

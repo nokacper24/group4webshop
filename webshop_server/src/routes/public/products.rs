@@ -1,11 +1,13 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use log::error;
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub mod descriptions;
 
-use crate::{data_access::product::{self, Product}, SharedData};
+use crate::{
+    data_access::product::{self, Product},
+    SharedData,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(all_available_products);

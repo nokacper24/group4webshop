@@ -1,11 +1,13 @@
-use crate::{data_access::{
-    license::{self, License, LicenseValidation, PartialLicense},
-    user,
-}, SharedData};
+use crate::{
+    data_access::{
+        license::{self, License, LicenseValidation, PartialLicense},
+        user,
+    },
+    SharedData,
+};
 
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
