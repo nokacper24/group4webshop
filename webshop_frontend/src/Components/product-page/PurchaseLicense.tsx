@@ -85,7 +85,7 @@ export default function PurchaseLicense() {
       };
 
       postLicense(license).then((response: Response) => {
-        if (response.status == 201) {
+        if (response.ok) {
           alert("License successfully purchased");
           // Refresh
           navigate(0);

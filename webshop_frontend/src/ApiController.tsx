@@ -18,7 +18,7 @@ if (import.meta.env.PROD) {
 
 /**
  * Error for failed fetches.
- * Throw it if response is not as expected.  
+ * Throw it if response is not as expected.
  * This error contains the status code as well as the status as text.
  * Status code can be used to determine what went wrong, and act accordingly.
  * @extends Error
@@ -333,7 +333,7 @@ export const checkSignInStatus = async () => {
     method: "GET",
     credentials: "include",
   });
-  return response.status === 200;
+  return response.ok;
 };
 
 /**

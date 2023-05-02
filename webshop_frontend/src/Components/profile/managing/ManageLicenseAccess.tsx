@@ -181,12 +181,11 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 201) {
+          if (response.ok) {
             alert("User access successfully added");
             // Refresh
             navigate(0);
-          } else if (status == 409) {
+          } else if (response.status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
             alert("Something went wrong when adding users");
@@ -217,8 +216,7 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             alert("User access successfully removed");
             // Refresh
             navigate(0);
