@@ -14,9 +14,9 @@ use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(licenses);
-    cfg.service(licenses_vital);
+    cfg.service(licenses_full);
     cfg.service(license_by_id);
-    cfg.service(licenses_by_company);
+    cfg.service(licenses_full_by_company);
     cfg.service(licenses_for_user);
     cfg.service(licenses_for_user_no_access);
     cfg.service(create_license);
@@ -27,9 +27,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[openapi(
     paths(
         licenses,
-        licenses_vital,
+        licenses_full,
         license_by_id,
-        licenses_by_company,
+        licenses_full_by_company,
         licenses_for_user,
         licenses_for_user_no_access,
         create_license,
@@ -82,10 +82,10 @@ async fn licenses(shared_data: web::Data<SharedData>) -> impl Responder {
     (status = 500, description = "Internal Server Error"),
 )
 )]
-#[get("/licenses_vital")]
-async fn licenses_vital(shared_data: web::Data<SharedData>) -> impl Responder {
+#[get("/licenses_full")]
+async fn licenses_full(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let other_licenses = license::get_licenses_vital_info(&pool).await;
+    let other_licenses = license::get_licenses_full(&pool).await;
 
     // Error check
     if other_licenses.is_err() {
@@ -155,8 +155,8 @@ async fn license_by_id(
         )
     )
 ]
-#[get("/companies/{company_id}/licenses")]
-async fn licenses_by_company(
+#[get("/companies/{company_id}/licenses_full")]
+async fn licenses_full_by_company(
     shared_data: web::Data<SharedData>,
     company_id: web::Path<String>,
 ) -> impl Responder {
@@ -165,7 +165,7 @@ async fn licenses_by_company(
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
-    let license = license::get_licenses_by_company(&pool, &company_id).await;
+    let license = license::get_licenses_full_by_company(&pool, &company_id).await;
 
     // Error check
     if license.is_err() {

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { License } from "../../../Interfaces";
+import { FullLicenseInfo } from "../../../Interfaces";
 
 type LicenseRowProps = {
-  license: License;
+  license: FullLicenseInfo;
 };
 
 /**
@@ -38,7 +38,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
   return (
     <>
       <tr className="row-header">
-        <td>{license.product_name}</td>
+        <td>{license.display_name}</td>
         <td>{0}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>

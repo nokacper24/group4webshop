@@ -4,7 +4,8 @@ use crate::{
         company, error_handling,
         user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::{self, auth}, SharedData,
+    utils::{self, auth},
+    SharedData,
 };
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
@@ -13,7 +14,6 @@ use futures::StreamExt;
 
 use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use std::str;
 use utoipa::OpenApi;
 

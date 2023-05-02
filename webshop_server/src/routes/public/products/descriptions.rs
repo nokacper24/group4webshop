@@ -2,7 +2,6 @@ use crate::{data_access::product, SharedData};
 use actix_web::{get, web, HttpResponse, Responder};
 
 use log::error;
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {

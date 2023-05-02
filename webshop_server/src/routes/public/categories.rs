@@ -1,7 +1,9 @@
 use actix_web::{get, web, HttpResponse, Responder};
-use sqlx::{Pool, Postgres};
 
-use crate::{data_access::category::{get_categories, get_category_by_id}, SharedData};
+use crate::{
+    data_access::category::{get_categories, get_category_by_id},
+    SharedData,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(categories);

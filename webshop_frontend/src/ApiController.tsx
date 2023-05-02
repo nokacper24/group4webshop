@@ -161,7 +161,25 @@ export const fetchLicense = async (licenseId: string) => {
  * @returns All licenses' information.
  */
 export const fetchLicensesFullInfo = async () => {
-  const response = await fetch(`${baseUrl}/api/priv/licenses_vital`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses_full`);
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
+};
+
+/**
+ * Get all licenses for a company.
+ *
+ * @param companyId The ID of the company.
+ * @returns The licenses for the company.
+ */
+export const fetchCompanyLicenses = async (companyId: number) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/companies/${companyId}/licenses_full`
+  );
   if (response.ok) {
     const data: FullLicenseInfo[] = await response.json();
     return data;
@@ -236,24 +254,6 @@ export const fetchCompanies = async () => {
     return data;
   } else {
     throw new Error("Could not fetch companies.");
-  }
-};
-
-/**
- * Get all licenses for a company.
- *
- * @param companyId The ID of the company.
- * @returns The licenses for the company.
- */
-export const fetchCompanyLicenses = async (companyId: number) => {
-  const response = await fetch(
-    `${baseUrl}/api/priv/companies/${companyId}/licenses`
-  );
-  if (response.ok) {
-    const data: License[] = await response.json();
-    return data;
-  } else {
-    throw new Error("Could not fetch licenses.");
   }
 };
 
