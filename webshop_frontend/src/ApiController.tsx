@@ -70,7 +70,11 @@ export const fetchMe = async () => {
     const data: MeUser = await response.json();
     return data;
   } else {
-    throw new Error("Could not fetch user.");
+    throw new FetchError(
+      "Could not fetch current user.",
+      response.status,
+      response.statusText
+    );
   }
 };
 
