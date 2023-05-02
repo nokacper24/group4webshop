@@ -1,11 +1,15 @@
-use crate::{data_access::{
-    license::{self, License, LicenseValidation, PartialLicense},
-    user,
-}, SharedData};
+use crate::{
+    data_access::{
+        license::{self, License, LicenseValidation, PartialLicense},
+        user::{self, Role},
+    },
+    utils::auth,
+    SharedData,
+};
 
-use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use actix_web::{get, patch, post, web, HttpRequest, HttpResponse, Responder};
+use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -264,24 +268,65 @@ async fn licenses_for_user_no_access(
 }
 
 /// Create a license.
+///
+/// An admin can create a license for any company.
+/// Default user cannot create a license.
+/// CompanyIt or CompanyItHead can create a license for their company.
 #[utoipa::path (
-  context_path = "/api/priv",
-  post,
-  responses(
-      (status = 201, description = "License has been created", body = License),
-      (status = 500, description = "Internal Server Error"),
+    context_path = "/api/priv",
+    post,
+    responses (
+        (status = 201, description = "License created", body = License),
+        (status = 400, description = "Bad Request"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 500, description = "Internal Server Error"),
       ),
+    request_body(
+        description = "The license to create",
+        content = PartialLicense,
+    ),
   )
 ]
 #[post("/licenses")]
 async fn create_license(
     shared_data: web::Data<SharedData>,
     license: web::Json<PartialLicense>,
+    req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
+    let license = license.into_inner();
+    let user = match auth::validate_user(req, &pool).await {
+        Ok(user) => user,
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+    match user.role {
+        Role::Default => {
+            return HttpResponse::Forbidden().body("Cannot create licenses as a default user")
+        }
+        Role::CompanyIt | Role::CompanyItHead => {
+            if user.company_id != license.company_id() {
+                return HttpResponse::Forbidden()
+                    .body("Cannot create licenses for other companies");
+            }
+        }
+        Role::Admin => (),
+    }
+
     match license::create_license(&pool, &license).await {
-        Ok(_) => HttpResponse::Created().json(license),
-        Err(_) => HttpResponse::InternalServerError().json("Internal Server Error"),
+        Ok(new_license) => HttpResponse::Created().json(new_license),
+        Err(e) => {
+            error!("{}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
     }
 }
 
