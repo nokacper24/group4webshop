@@ -800,7 +800,7 @@ form a:hover {
   transition: transform 100ms;
 }
 
-.product-card:hover {
+.product-card:is(:hover, :focus) {
   -webkit-box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 0 0 20px -5px rgba(0, 0, 0, 0.75);
   transform: scale(1.1, 1.1);
