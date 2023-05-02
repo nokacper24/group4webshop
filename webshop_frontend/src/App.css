@@ -178,7 +178,7 @@ button {
   background-color: var(--clr-danger);
 }
 
-.bg-danger:is(:focus, :hover) {
+.bg-danger:is(:hover) {
   background-color: var(--clr-highlight-danger);
 }
 
