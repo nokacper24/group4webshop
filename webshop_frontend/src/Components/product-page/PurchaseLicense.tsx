@@ -193,10 +193,7 @@ function MustBeSignedIn() {
       </a>{" "}
       to purchase a license.
       <br />
-      Remember that only IT administrators of your company can purchase a
-      license!
-      <br />
-      Contact your IT administrator if you need access to any of our products.
+      <NoPermissionToBuy />
     </p>
   );
 }
@@ -204,7 +201,7 @@ function MustBeSignedIn() {
 function NoPermissionToBuy() {
   return (
     <p>
-      You need to be an IT administrator to purchase a license.
+      Only IT administrators of your company can purchase a license.
       <br />
       Contact your IT administrator if you need access to any of our products.
     </p>
