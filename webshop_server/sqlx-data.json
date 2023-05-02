@@ -1098,6 +1098,67 @@
     },
     "query": "INSERT INTO register_company_user (email, company_id, exp_date)\n                VALUES ($1, $2, $3)"
   },
+  "7c724c5aa7179cd53752965e20984bb0b21de20170011d208dc5b657687a19ff": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "valid",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Bool",
+          "Timestamptz",
+          "Timestamptz",
+          "Int4",
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO license\n        (valid, start_date, end_date, amount, company_id, product_id)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING *"
+  },
   "7e10de5a8fa03bd9da8c8e413f175c864fe79573e3355d7e59acb2ba0e05ade8": {
     "describe": {
       "columns": [
@@ -1807,23 +1868,6 @@
       }
     },
     "query": "SELECT * FROM category"
-  },
-  "bf9015a18fd2fd6b2bb6ad2b12bc442ab1c411390c24b41da6487ffb4e4cbdf0": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Bool",
-          "Timestamptz",
-          "Timestamptz",
-          "Int4",
-          "Int4",
-          "Text"
-        ]
-      }
-    },
-    "query": "INSERT INTO license\n        (valid, start_date, end_date, amount, company_id, product_id)\n        VALUES ($1, $2, $3, $4, $5, $6)"
   },
   "c423dff564c8ef2008e3155227a1b4954fd0da532391826cd7343b0380d1a97a": {
     "describe": {
