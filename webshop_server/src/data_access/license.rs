@@ -25,6 +25,11 @@ pub struct PartialLicense {
     company_id: i32,
     product_id: String,
 }
+impl PartialLicense {
+    pub fn company_id(&self) -> i32 {
+        self.company_id
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FullLicenseInfo {
@@ -107,11 +112,12 @@ pub async fn get_licenses_by_company(
 pub async fn create_license(
     pool: &Pool<Postgres>,
     license: &PartialLicense,
-) -> Result<(), sqlx::Error> {
-    query!(
+) -> Result<License, sqlx::Error> {
+    query_as!(License,
         r#"INSERT INTO license
         (valid, start_date, end_date, amount, company_id, product_id)
-        VALUES ($1, $2, $3, $4, $5, $6)"#,
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *"#,
         license.valid,
         license.start_date,
         license.end_date,
@@ -119,9 +125,8 @@ pub async fn create_license(
         license.company_id,
         license.product_id,
     )
-    .execute(pool)
-    .await?;
-    Ok(())
+    .fetch_one(pool)
+    .await
 }
 
 /// Update the validation of licenses

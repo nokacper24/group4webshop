@@ -188,7 +188,7 @@ function MustBeSignedIn() {
   return (
     <p>
       You need to be{" "}
-      <a href="#!" onClick={() => navigate("/profile")}>
+      <a href="" onClick={() => navigate("/profile")}>
         signed in
       </a>{" "}
       to purchase a license.
