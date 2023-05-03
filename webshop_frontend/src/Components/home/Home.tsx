@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <section className="hero">
-        <div className="hero-inner">
+        <div className="hero-inner dark-overlay">
           <h1 className="hero-title">ProFlex</h1>
           <p className="hero-text">
             Software for <span className="vibrate">your</span> enterprise
