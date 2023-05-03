@@ -101,11 +101,14 @@ export default function ProductPage() {
               </div>
             </section>
           )}
-          {testimonials.length == 0 && <hr />}
-          <section className="container">
-            <h2>Purchase</h2>
-            <p>Purchase licenses for this product for your enterprise today!</p>
-            <PurchaseLicenseButton active={product.available} />
+          <section className="highlight-section">
+            <div className="container">
+              <h2>Purchase</h2>
+              <p>
+                Purchase licenses for this product for your enterprise today!
+              </p>
+              <PurchaseLicenseButton active={product.available} />
+            </div>
           </section>
         </>
       )}
