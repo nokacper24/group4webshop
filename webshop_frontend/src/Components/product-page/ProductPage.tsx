@@ -85,7 +85,6 @@ export default function ProductPage() {
               {product.available === false && <UnavailableTag />}
             </div>
           </section>
-          <hr></hr>
           {descriptions.length != 0 && (
             <section style={{ marginTop: "2em" }} className="container">
               {DescriptionsContainer(descriptions)}

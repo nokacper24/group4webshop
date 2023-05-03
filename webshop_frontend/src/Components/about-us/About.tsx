@@ -19,7 +19,6 @@ export default function About() {
           </div>
         </div>
       </section>
-      <hr></hr>
       <section className="container left-aligned">
         <h2>About our solutions</h2>
         <p>

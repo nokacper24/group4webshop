@@ -21,7 +21,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-      <hr></hr>
       <section className="container">
         <h2>Our values</h2>
         <p>
