@@ -707,7 +707,7 @@ async fn create_image_component(
     .await;
 
     match created_component {
-        Ok(created_component) => HttpResponse::Ok().json(created_component),
+        Ok(created_component) => HttpResponse::Created().json(created_component),
         Err(e) => {
             error!("Error wgile creating image component: {}", e);
             HttpResponse::InternalServerError().finish()
