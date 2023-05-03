@@ -20,9 +20,7 @@ export type AccordionTableProps = {
  * @returns The React component for the Accordion table
  */
 export default function AccordionTable(props: AccordionTableProps) {
-  const [priorityChanges] = useState<Map<number, number>>(
-    new Map()
-  ); //ID as key, priority as value
+  const [priorityChanges] = useState<Map<number, number>>(new Map()); //ID as key, priority as value
   const [contentChanges, setContentChanges] = useState<
     Map<ChangeType, number[]>
   >(new Map()); //The type of change as key, list of IDs that has had that change as value
@@ -62,8 +60,6 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param id The ID of the section that has changed
    */
   const deleteSection = (id: number) => {
-    const index = props.sections.findIndex((section) => section.sectionID === id);
-
     const newSections = props.sections.filter(
       (section) => section.sectionID !== id
     );
@@ -99,22 +95,22 @@ export default function AccordionTable(props: AccordionTableProps) {
       >
         New section
       </button>
-      {props.sections.map((section) => 
-        (
-          <AccordionSection
-            key={section.sectionID}
-            header={section.header}
-            rows={section.rows}
-            sectionID={section.sectionID}
-            registerContentChange={registerContentChange}
-            deleteSection={deleteSection}
-          />
-        )
-      )}
+      {props.sections.map((section) => (
+        <AccordionSection
+          key={section.sectionID}
+          header={section.header}
+          rows={section.rows}
+          sectionID={section.sectionID}
+          registerContentChange={registerContentChange}
+          deleteSection={deleteSection}
+        />
+      ))}
       <TestimonialSection
         testimonials={props.testimonials}
         sectionId={0}
-        productId={props.productID} setTestimonials={props.setTestimonials}      />
+        productId={props.productID}
+        setTestimonials={props.setTestimonials}
+      />
     </div>
   );
 }

@@ -220,6 +220,16 @@ label {
   text-align: left !important;
 }
 
+.wide-section>* {
+  width: 75%;
+  margin-inline: 0;
+}
+
+.wide-section > :is(label, p) {
+  display: inline-block;
+}
+
+
 /* Header */
 header {
   height: var(--header-height);
@@ -1211,6 +1221,9 @@ form a:hover {
 
 /* || MANAGE PRODUCTS */
 
+.accordion-table {
+  width: 75%;
+  display: inline-block;
 }
 
 .accordion-header-container {
@@ -1229,7 +1242,7 @@ form a:hover {
 
   width: 100%;
   position: relative;
-  height: 3em;
+  height: 2.5em;
 
   border: none;
   background: rgb(207, 207, 207);
@@ -1414,6 +1427,10 @@ input:checked+.slider:before {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.popup-form >* {
+  padding-inline: 1em;
 }
 
 .popup-button {

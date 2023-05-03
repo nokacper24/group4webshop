@@ -122,21 +122,27 @@ export default function ManageProductPage() {
       <section className="container">
         <h2> Manage product</h2>
         <form className="wide-section">
-          <label className="no-inline-margin" htmlFor="product-name"><b>Product name:</b></label>
+          <label className="no-inline-margin" htmlFor="product-name">
+            <b>Product name:</b>
+          </label>
           <input
             type="text"
             id="product-name"
             name="product-name"
             ref={productName}
           />
-          <label htmlFor="product-price"><b>Product price &#40;NOK&#41;:</b></label>
+          <label htmlFor="product-price">
+            <b>Product price &#40;NOK&#41;:</b>
+          </label>
           <input
             type="number"
             id="product-price"
             name="product-price"
             ref={productPrice}
           />
-          <label htmlFor="product-image"><b>Upload header image</b></label>
+          <label htmlFor="product-image">
+            <b>Upload header image</b>
+          </label>
           <input
             type="file"
             id="product-image"
@@ -145,10 +151,17 @@ export default function ManageProductPage() {
             ref={productImage}
           />
           <p>Image: {productInfo?.main_image}</p>
-          <label htmlFor="product-description"><b>Description:</b></label>
+          <label htmlFor="product-description">
+            <b>Description:</b>
+          </label>
           <textarea
             id="product-description"
             name="product-description"
+            style={{
+              fontSize: "1rem",
+              fontFamily: "var(--ff-primary)",
+              padding: "0.5em",
+            }}
             rows={10}
             cols={50}
             ref={productDescription}
