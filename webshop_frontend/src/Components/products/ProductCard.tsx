@@ -10,7 +10,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     <li>
       <Link className="product-card" to={`/products/${product.product_id}`}>
         <img
-          height={200}
           width={300}
           src={product.main_image}
           alt={product.display_name}
