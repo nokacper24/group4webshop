@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 /**
  * Represents the header and navbar.
- * Contains ProFlex' logo, a search form, and links to navigate the website.
+ * Contains ProFlex' logo, and links to navigate the website.
  * When the hamburger icon is clicked, toggle between open and closed menu.
  *
  * @returns A Header component.
@@ -79,10 +79,6 @@ export default function Header() {
   return (
     <header>
       <div className="header-container">
-        <a href="#main" id="skip-navigation">
-          Skip Navigation
-        </a>
-
         {/* ProFlex Logo */}
         <NavLink onClick={handleNavClick} className="logo-link" to="/">
           <svg
@@ -96,6 +92,10 @@ export default function Header() {
             <path d="m398.7 257.4l21.5-121.9h83.5l-4 22.6h-44.9l-4.6 26h39.4l-4.4 24.9h-39.3l-8.6 48.4zm103.5 0l21.5-121.9h38.6l-17.1 97.1h41.4l-4.4 24.8zm99.3 0l21.5-121.9h85.6l-4 22.6h-46.9l-4.6 25.8h41.4l-3.9 22h-41.4l-4.7 26.7h47l-4.4 24.8zm242.4-121.9l-41.1 61.2 19.6 60.7h-46.9l-7.4-45.9-29 45.9h-35.4l41.1-60.7-19.6-61.2h47l11 43.2 27.6-43.2z" />
           </svg>
         </NavLink>
+
+        <a href="#main" id="skip-navigation">
+          Skip Navigation
+        </a>
 
         <nav ref={nav}>
           {/* Hamburger menu toggle */}
