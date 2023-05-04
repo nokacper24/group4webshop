@@ -12,7 +12,7 @@ pub struct License {
     start_date: DateTime<Utc>,
     end_date: DateTime<Utc>,
     amount: i32,
-    company_id: i32,
+    pub company_id: i32,
     product_id: String,
 }
 
@@ -116,7 +116,8 @@ pub async fn create_license(
     pool: &Pool<Postgres>,
     license: &PartialLicense,
 ) -> Result<License, sqlx::Error> {
-    query_as!(License,
+    query_as!(
+        License,
         r#"INSERT INTO license
         (valid, start_date, end_date, amount, company_id, product_id)
         VALUES ($1, $2, $3, $4, $5, $6)
