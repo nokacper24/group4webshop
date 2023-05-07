@@ -314,22 +314,23 @@ nav {
 .logo,
 .nav-icon {
   display: block;
-  fill: var(--clr-neutral-1000);
-  transition: fill var(--transition-speed);
+  fill: currentColor;
 }
 
 .logo {
-  height: 2.5em;
+  color: var(--clr-neutral-1000);
+  height: calc(var(--header-height) - 1em);
+}
+
+@media (forced-colors: active) {
+  .logo {
+    color: currentColor;
+  }
 }
 
 .nav-icon {
   height: 2em;
-  display: block;
   margin-block: auto;
-}
-
-.icon-button:is(:hover, :focus)>.nav-icon {
-  fill: var(--clr-secondary);
 }
 
 .icon-button {
