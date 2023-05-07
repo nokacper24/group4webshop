@@ -79,7 +79,8 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
   };
 
   const createID = (): number => {
-    return latestID++;
+    latestID = latestID + Math.floor(Math.random() * 13);
+    return props.sectionID + latestID;
   };
 
   /**

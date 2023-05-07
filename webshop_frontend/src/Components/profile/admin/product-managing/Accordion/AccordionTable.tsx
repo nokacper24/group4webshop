@@ -45,7 +45,7 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param title The title of the new section
    */
   const newSection = () => {
-    const id = props.sections.length;
+    const id = createUniqueID();
     showHeaderPopup({ title: undefined, informationCallBack: finishCreation });
     function finishCreation(title: string) {
       props.sections.push({
@@ -59,6 +59,11 @@ export default function AccordionTable(props: AccordionTableProps) {
     }
   };
 
+  const createUniqueID = () => {
+    //While in theory it is possible to generate the same ID, the chance is so small that it is not worth worrying about.
+    //It also requires them to create multiple sections in the same millisecond, which should be impossible for a human, maybe even a computer.
+    return Date.now() + Math.floor(Math.random() * 1000);
+  };
 
   return (
     <div className="accordion-table">
