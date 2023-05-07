@@ -16,6 +16,7 @@ import {
   fetchTestimonials,
 } from "../../../../ApiController";
 import { AccordionSectionProps } from "./Accordion/AccordionSection";
+import { ChangeType } from "./Accordion/ChangeTypes";
 
 /**
  * Page for creating or editing a product page.
@@ -58,6 +59,49 @@ export default function ManageProductPage() {
     fetchProduct(productId!).then((product: Product) => {
       setProductInfo(product);
     });
+  };
+
+  const [priorityChanges, setPriorityChanges] = useState<number[]>(); //Section IDs that has had a swap change as value
+  const [contentChanges, setContentChanges] = useState<
+    Map<ChangeType, number[]>
+  >(new Map()); //The type of change as key, list of IDs that has had that change as value
+
+  useEffect(() => {
+    // Sets up the map so that it can register changes
+    setContentChanges((changes) => {
+      for (let type in ChangeType) {
+        changes.set(ChangeType[type as keyof typeof ChangeType], []);
+      }
+      return changes;
+    });
+  });
+
+  /**
+   * Registers changes to the content of the table. This is used to keep track of what has changed and what needs to be saved.
+   *
+   * @param id The ID of the section that has changed
+   * @param change The type of change that has been made
+   */
+  const registerContentChange = (id: number, change: ChangeType) => {
+    if (!contentChanges.get(change)?.includes(id)) {
+      contentChanges.get(change)?.push(id);
+    }
+    if (change === ChangeType.Delete) {
+      contentChanges
+        .get(ChangeType.Edit)
+        ?.filter((changeId) => changeId !== id);
+      priorityChanges?.filter((changeId) => changeId !== id);
+      setPriorityChanges(priorityChanges);
+    } else if (change === ChangeType.Swap) {
+      if (!priorityChanges?.includes(id)) {
+        priorityChanges?.push(id);
+        setPriorityChanges(priorityChanges);
+      } else {
+        //Since a section only can have two rows at a time, we can assume that if the section already is on the list, the rows are swapped back to their original positions
+        priorityChanges?.filter((changeId) => changeId !== id);
+        setPriorityChanges(priorityChanges);
+      }
+    }
   };
 
   const assignImageState = (descriptions: Description[]): Description[] => {
