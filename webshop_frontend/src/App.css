@@ -228,6 +228,7 @@ label {
   position: relative;
   width: 100%;
   margin-block: 4em;
+  outline: 2px solid transparent;
 }
 
 .highlight-section:before,
