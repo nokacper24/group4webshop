@@ -1,5 +1,6 @@
 export type TestimonialHeaderProps = {
   addTestimonial: () => void;
+  toggleCollapse: () => void;
 };
 
 /**
@@ -12,7 +13,7 @@ export function TestimonialHeader(props: TestimonialHeaderProps) {
   return (
     <>
       <div className="accordion-header-container">
-        <button className="accordion-header">
+        <button className="accordion-header" onClick={() => props.toggleCollapse()}>
           <p>Testimonials</p>
           <svg
             className="header-icon accordion-button-icon"

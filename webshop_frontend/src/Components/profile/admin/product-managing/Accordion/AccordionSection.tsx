@@ -37,6 +37,8 @@ let latestID = 100;
  * @returns the React component for the Accordion section
  */
 export function AccordionSection(props: PrivateAccordionSectionProps) {
+  const [collapse, setCollapse] = useState<boolean>(false);
+
   /**
    * Calls the deleteSection function in the parent component. Deleting itself in the process.
    */
@@ -130,15 +132,22 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
 
   const [rows, setRows] = useState<SimpleDescription[]>([...props.rows]);
 
+  const collapseBody = () => {
+    setCollapse(!collapse);
+  };
+
   return (
     <>
       <AccordionHeader
         title={props.header.title}
+        collapseFunction={collapseBody}
         deleteSelf={deleteSelf}
         addRow={addRow}
       ></AccordionHeader>
       <AccordionBody
         rows={rows}
+        collapsed={collapse}
+        swapRows={swapRows}
         editRow={editRow}
         deleteRow={deleteRow}
       ></AccordionBody>

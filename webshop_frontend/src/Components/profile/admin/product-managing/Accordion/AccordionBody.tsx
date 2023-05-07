@@ -3,6 +3,7 @@ import { AccordionRow } from "./AccordionRow";
 
 type AccordionBodyProps = {
   rows: SimpleDescription[];
+  collapsed: boolean;
   editRow: (id: number) => void;
   deleteRow: (id: number) => void;
 };
@@ -15,7 +16,9 @@ type AccordionBodyProps = {
  */
 export function AccordionBody(props: AccordionBodyProps) {
   return (
-    <div className="accordion-body">
+    <div
+      className={`accordion-body ${props.collapsed ? "hidden-element" : ""}`}
+    >
       {props.rows.map((row) => {
         return (
           <AccordionRow

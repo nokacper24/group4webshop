@@ -82,11 +82,21 @@ export function TestimonialSection(props: TestimonialSectionProps) {
     }
   };
 
+  const [collapsed, setCollapsed] = useState<boolean>(false);
+
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <>
-      <TestimonialHeader addTestimonial={newTestimonial}></TestimonialHeader>
+      <TestimonialHeader
+        addTestimonial={newTestimonial}
+        toggleCollapse={toggleCollapse}
+      ></TestimonialHeader>
       <TestimonialBody
         testimonials={props.testimonials}
+        collapsed={collapsed}
         editTestimonial={editTestimonial}
         deletTestimonial={deleteTestimonial}
       ></TestimonialBody>
