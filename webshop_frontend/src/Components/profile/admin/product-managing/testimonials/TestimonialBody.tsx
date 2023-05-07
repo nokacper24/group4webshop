@@ -2,6 +2,7 @@ import { TestimonialRow} from "./TestimonialRow";
 import { Testimonial } from "../../../../../Interfaces";
 type TestimonialBodyProps = {
   testimonials: Testimonial[];
+  collapsed: boolean;
   editTestimonial: (id: number) => void;
   deletTestimonial: (id: number) => void;
 };
@@ -14,7 +15,7 @@ type TestimonialBodyProps = {
  */
 export function TestimonialBody(props: TestimonialBodyProps) {
   return (
-    <div className="accordion-body">
+    <div className={`accordion-body ${props.collapsed ? "hidden-element" : ""}`}>
       {props.testimonials.map((testimonial) => {
         return (
           <TestimonialRow

@@ -15,17 +15,12 @@ export type TestimonialRowProps = {
  * @returns the React component for the Testimonial row
  */
 export function TestimonialRow(props: TestimonialRowProps) {
-  const [state, setState] = useState<TestimonialRowProps>(props);
   const [visible, setVisible] = useState<boolean>(true);
-  let title = "Testimonial by :" + state.testimonial.author;
+  let title = "Testimonial by: " + props.testimonial.author;
 
   const changeVisibility = (checked: boolean, id: string) => {
     setVisible(checked);
   };
-
-  useEffect(() => {
-    setState(props);
-  });
 
   return (
     <div className="accordion-row">
@@ -59,7 +54,7 @@ export function TestimonialRow(props: TestimonialRowProps) {
         </svg>
       </button>
       <ToggleButton
-        id={state.testimonial.author + props.testimonial.testimonial_id}
+        id={props.testimonial.author + props.testimonial.testimonial_id}
         checked={visible}
         handleClick={changeVisibility}
       ></ToggleButton>

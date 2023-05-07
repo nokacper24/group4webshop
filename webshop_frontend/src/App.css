@@ -1198,7 +1198,7 @@ form a:hover {
 
   width: 100%;
   position: relative;
-  height: 3em;
+  height: 2.5em;
 
   border: none;
   background: var(--clr-neutral-700);
@@ -1206,6 +1206,7 @@ form a:hover {
 
 .accordion-header>p {
   margin-block: 0;
+  margin-left: 0.5em;
 }
 
 .accordion-header> :first-child {
@@ -1243,6 +1244,10 @@ form a:hover {
   border-bottom: 1px solid var(--clr-neutral-0);
 }
 
+.hidden-element {
+  display: none;
+}
+
 .accordion-row {
   display: flex;
   flex-direction: row;
@@ -1250,7 +1255,6 @@ form a:hover {
   justify-content: flex-end;
 
   min-height: 2.75rem;
-  /* TODO: Check if this fits or not */
 
   background-color: var(--clr-neutral-900);
 }
@@ -1261,7 +1265,7 @@ form a:hover {
 
 .accordion-row> :first-child {
   margin-right: auto;
-  margin-left: 1em;
+  margin-left: 1.45em;
   margin-block: 0;
 }
 
@@ -1285,7 +1289,7 @@ form a:hover {
   width: 3em;
 }
 
-.pencil {
+.pencil-icon {
   fill: none;
   stroke: var(--clr-neutral-0);
   stroke-linecap: round;
@@ -1375,14 +1379,17 @@ input:checked+.slider:before {
   background-color: var(--clr-neutral-1000);
 }
 
-.popup-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.popup-form>* {
+  padding-inline: 1em;
+}
+
+.popup-button-container {
+  margin-top: 0.5em;
+  justify-content: center;
 }
 
 .popup-button {
   display: inline;
   margin-block: 0.3em;
-  margin-inline: 0.5em;
+  margin-inline: 0.5em !important;
 }

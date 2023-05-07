@@ -1,4 +1,4 @@
-import { RefObject, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Testimonial } from "../../../../../Interfaces";
 
 /**
@@ -19,11 +19,7 @@ let popupRef: RefObject<HTMLDivElement>;
 let authorNameRef: RefObject<HTMLInputElement>;
 let authorPicRef: RefObject<HTMLInputElement>;
 let testimonialText: RefObject<HTMLTextAreaElement>;
-
-let props: TestimonialPopupProps = {
-  testimonial: undefined,
-  informationCallBack: () => {},
-};
+let updatePropsFunc: (newProps: TestimonialPopupProps) => void;
 
 let product_id: string;
 export default function TestimonialPopup(
@@ -36,6 +32,11 @@ export default function TestimonialPopup(
 
   product_id = initializationProps.product_id;
 
+  const [props, setProps] = useState<TestimonialPopupProps>({
+    testimonial: undefined,
+    informationCallBack: () => {},
+  });
+
   /**
    * Stops people from just pressing enter to submit the form.
    *
@@ -45,11 +46,34 @@ export default function TestimonialPopup(
     event.preventDefault();
   }
 
+  const updateProps = (newProps: TestimonialPopupProps) => {
+    setProps(newProps);
+  };
+
+  /**
+   * Saves the testimonial and closes the popup.
+   */
+  const save = () => {
+    //Uses the callback function to return the values of the testimonial.
+    props.informationCallBack({
+      testimonial_id: 0,
+      author: authorNameRef.current?.value!,
+      text: testimonialText.current?.value!,
+      author_pic: authorPicRef.current?.value!,
+      product_id: product_id,
+    });
+    hidePopup();
+  };
+
+  useEffect(() => {
+    updatePropsFunc = updateProps;
+  });
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
-      <div className="popup-box">
+      <div>
         <form
-          className="popup-form"
+          className="form-container container"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -71,13 +95,13 @@ export default function TestimonialPopup(
             alt="Author picture"
             accept="image/png, image/jpeg, image/webp"
             onChange={() => {
-              props = {
+              setProps({
                 ...props,
                 testimonial: {
                   ...props.testimonial!,
                   author_pic: authorPicRef.current?.value!,
                 },
-              };
+              });
             }}
             ref={authorPicRef}
           />
@@ -97,7 +121,7 @@ export default function TestimonialPopup(
             defaultValue={props.testimonial ? props.testimonial.text : ""}
           ></textarea>
 
-          <div>
+          <div className="button-container popup-button-container">
             <button
               className="default-button small-button popup-button"
               type="button"
@@ -125,23 +149,8 @@ export default function TestimonialPopup(
  * @param inProps The props for the testimonial popup.
  */
 export function showTestimonialPopup(inProps: TestimonialPopupProps) {
-  props = inProps;
+  updatePropsFunc(inProps);
   popupRef.current?.classList.add("popup-visible");
-}
-
-/**
- * Saves the testimonial and closes the popup.
- */
-function save() {
-  //Uses the callback function to return the values of the testimonial.
-  props.informationCallBack({
-    testimonial_id: 0,
-    author: authorNameRef.current?.value!,
-    text: testimonialText.current?.value!,
-    author_pic: authorPicRef.current?.value!,
-    product_id: product_id,
-  });
-  hidePopup();
 }
 
 /**
