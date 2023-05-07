@@ -81,9 +81,9 @@ export default function RowEditPopup() {
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>
-      <div className="popup-box">
+      <div>
         <form
-          className="popup-form"
+          className="form-container container"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -142,7 +142,7 @@ export default function RowEditPopup() {
           >
             {changeStateButtonText}
           </button>
-          <div>
+          <div className="button-container popup-button-container">
             <button
               className="default-button small-button popup-button"
               type="button"

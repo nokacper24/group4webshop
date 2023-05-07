@@ -71,9 +71,9 @@ export default function TestimonialPopup(
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>
-      <div className="popup-box">
+      <div>
         <form
-          className="popup-form"
+          className="form-container container"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -121,7 +121,7 @@ export default function TestimonialPopup(
             defaultValue={props.testimonial ? props.testimonial.text : ""}
           ></textarea>
 
-          <div>
+          <div className="button-container popup-button-container">
             <button
               className="default-button small-button popup-button"
               type="button"

@@ -1287,7 +1287,7 @@ form a:hover {
   width: 3em;
 }
 
-.pencil {
+.pencil-icon {
   fill: none;
   stroke: var(--clr-neutral-0);
   stroke-linecap: round;
@@ -1377,18 +1377,17 @@ input:checked+.slider:before {
   background-color: var(--clr-neutral-1000);
 }
 
-.popup-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .popup-form>* {
   padding-inline: 1em;
+}
+
+.popup-button-container {
+  margin-top: 0.5em;
+  justify-content: center;
 }
 
 .popup-button {
   display: inline;
   margin-block: 0.3em;
-  margin-inline: 0.5em;
+  margin-inline: 0.5em !important;
 }
