@@ -132,6 +132,12 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
 
   const [rows, setRows] = useState<SimpleDescription[]>([...props.rows]);
 
+  const swapRows = () => {
+    let newRows = [...rows];
+    newRows.reverse();
+    setRows(newRows);
+  };
+
   const collapseBody = () => {
     setCollapse(!collapse);
   };

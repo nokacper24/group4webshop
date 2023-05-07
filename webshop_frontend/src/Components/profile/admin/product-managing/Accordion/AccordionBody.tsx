@@ -4,6 +4,7 @@ import { AccordionRow } from "./AccordionRow";
 type AccordionBodyProps = {
   rows: SimpleDescription[];
   collapsed: boolean;
+  swapRows: () => void;
   editRow: (id: number) => void;
   deleteRow: (id: number) => void;
 };
@@ -24,8 +25,10 @@ export function AccordionBody(props: AccordionBodyProps) {
           <AccordionRow
             key={"row" + row.component_id}
             description={row}
+            swapFunction={props.swapRows}
             editFunction={props.editRow}
             removeFunction={props.deleteRow}
+            isTop={row.component_id === 0}
           ></AccordionRow>
         );
       })}
