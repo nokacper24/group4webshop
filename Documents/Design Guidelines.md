@@ -6,11 +6,9 @@ Our website is for selling software to enterprises, so the theme should be serio
 
 ## Colours
 
-- Primary colour: #473372 (purple)
-- Secondary colour: #2E74B5 (blue)
-- Tertiary colour: #5F8B05 (green)
-
-- Neutral colours: #D9D9D9 (lightgrey)
+- Primary colour: #2f1565 (blue)
+- Secondary colour: #5a1b5b (purple)
+- Tertiary colour: #058b65 (green)
 
 ## Hierarchy and layout
 
@@ -39,8 +37,12 @@ Our website is for selling software to enterprises, so the theme should be serio
 ## Border rounding
 
 - Buttons should have slightly rounded corners
+- Some images should have round borders
+- Forms will have round borders
 
 ## Shadows
 
 - The product cards should have a dropshadow, which increases on hover
 - Text that needs better contrast with the background, should have a dropshadow
+- Forms should have box shadow
+- Header should have box shadow
