@@ -1,8 +1,10 @@
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use log::error;
-use sqlx::{Pool, Postgres};
 
-use crate::{utils::auth::{validate_user, AuthError}, SharedData};
+use crate::{
+    utils::auth::{validate_user, AuthError},
+    SharedData,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(me);

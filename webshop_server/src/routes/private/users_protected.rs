@@ -1,10 +1,11 @@
 //TODO: Make all endpoints private
 use crate::{
     data_access::{
-        company, error_handling,
+        company, error_handling, license,
         user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::{self, auth}, SharedData,
+    utils::{self, auth},
+    SharedData,
 };
 use actix_multipart::{Multipart, MultipartError};
 use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
@@ -13,7 +14,6 @@ use futures::StreamExt;
 
 use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use std::str;
 use utoipa::OpenApi;
 
@@ -62,8 +62,25 @@ pub struct UserApiDoc;
     )
 )]
 #[get("/users")]
-async fn users(shared_data: web::Data<SharedData>) -> impl Responder {
+async fn users(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
+    match auth::validate_user(req, &pool).await {
+        Ok(user) => {
+            if user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
+            }
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
     let users = user::get_all_users(&pool).await;
 
     //error check
@@ -88,17 +105,50 @@ async fn users(shared_data: web::Data<SharedData>) -> impl Responder {
     )
 )]
 #[get("/users/{id}")]
-async fn user_by_id(shared_data: web::Data<SharedData>, id: web::Path<String>) -> impl Responder {
+async fn user_by_id(
+    shared_data: web::Data<SharedData>,
+    id: web::Path<String>,
+    req: HttpRequest,
+) -> impl Responder {
     let pool = &shared_data.db_pool;
+
     let id = match id.parse::<i32>() {
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
     let user = user::get_user_by_id(&pool, &id).await;
 
+    let auth_user = match auth::validate_user(req, &pool).await {
+        Ok(auth_user) => {
+            if auth_user.role != user::Role::Admin
+                && auth_user.role != user::Role::CompanyItHead
+                && auth_user.role != user::Role::CompanyIt
+            {
+                return HttpResponse::Forbidden().finish();
+            }
+            auth_user
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
     //parse to json
     match user {
-        Ok(user) => HttpResponse::Ok().json(user),
+        Ok(user) => {
+            if auth_user.company_id != user.company_id {
+                if auth_user.role != user::Role::Admin {
+                    return HttpResponse::Forbidden().finish();
+                }
+            }
+            HttpResponse::Ok().json(user)
+        }
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("User not found"),
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
@@ -119,12 +169,40 @@ async fn user_by_id(shared_data: web::Data<SharedData>, id: web::Path<String>) -
 async fn users_by_company(
     shared_data: web::Data<SharedData>,
     company_id: web::Path<String>,
+    req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
+    let auth_user = match auth::validate_user(req, &pool).await {
+        Ok(auth_user) => {
+            if auth_user.role != user::Role::Admin
+                && auth_user.role != user::Role::CompanyItHead
+                && auth_user.role != user::Role::CompanyIt
+            {
+                return HttpResponse::Forbidden().finish();
+            }
+            auth_user
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
     let company_id = match company_id.parse::<i32>() {
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
+
+    if auth_user.company_id != company_id {
+        if auth_user.role != user::Role::Admin {
+            return HttpResponse::Forbidden().finish();
+        }
+    }
+
     let other_users = user::get_users_by_company(&pool, &company_id).await;
 
     // Error check
@@ -153,12 +231,51 @@ async fn users_by_company(
 async fn users_by_license(
     shared_data: web::Data<SharedData>,
     license_id: web::Path<String>,
+    req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let license_id = match license_id.parse::<i32>() {
         Ok(license_id) => license_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
+
+    let auth_user = match auth::validate_user(req, &pool).await {
+        Ok(auth_user) => {
+            if auth_user.role != user::Role::Admin
+                && auth_user.role != user::Role::CompanyItHead
+                && auth_user.role != user::Role::CompanyIt
+            {
+                return HttpResponse::Forbidden().finish();
+            }
+            auth_user
+        }
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+    let license = license::get_license_by_id(&pool, &license_id).await;
+
+    match license {
+        Ok(license) => {
+            if auth_user.company_id != license.company_id {
+                if auth_user.role != user::Role::Admin {
+                    return HttpResponse::Forbidden().finish();
+                }
+            }
+        }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("License not found"),
+            _ => return HttpResponse::InternalServerError().json("Internal Server Error"),
+        },
+    }
+
     let other_users = user::get_users_by_license(&pool, &license_id).await;
 
     // Error check

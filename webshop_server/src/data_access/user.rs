@@ -216,6 +216,7 @@ pub fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Err
 }
 
 /// A struct to represent a user that is registering themselves and a company.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterUser {
     pub id: i32,
     pub email: String,

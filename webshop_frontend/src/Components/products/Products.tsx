@@ -34,7 +34,7 @@ export default function Products() {
             <h1>Our solutions</h1>
             <ul className="product-list grid-container">
               {products.map((product) => (
-                <ProductCard key={product.display_name} product={product} />
+                <ProductCard key={product.product_id} product={product} />
               ))}
             </ul>
           </>

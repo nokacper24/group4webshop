@@ -14,15 +14,14 @@ use crate::{
         img_multipart::{
             self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
         },
-    }, SharedData,
+    },
+    SharedData,
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
 use image::ImageError;
 use log::error;
 use serde::{Deserialize, Serialize};
-
-use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -708,7 +707,7 @@ async fn create_image_component(
     .await;
 
     match created_component {
-        Ok(created_component) => HttpResponse::Ok().json(created_component),
+        Ok(created_component) => HttpResponse::Created().json(created_component),
         Err(e) => {
             error!("Error wgile creating image component: {}", e);
             HttpResponse::InternalServerError().finish()

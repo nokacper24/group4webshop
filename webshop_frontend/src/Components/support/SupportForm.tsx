@@ -1,8 +1,9 @@
 import { MouseEvent as ReactMouseEvent } from "react";
 import { useEffect, useState } from "react";
-import { Product } from "../../Interfaces";
+import { MeUser, Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
-import { fetchProducts } from "../../ApiController";
+import { fetchMe, fetchProducts } from "../../ApiController";
+import { Link } from "react-router-dom";
 
 /**
  * Represents a Support Form component.
@@ -11,21 +12,38 @@ import { fetchProducts } from "../../ApiController";
  * @returns A Support Form component.
  */
 export default function SupportForm() {
+  const [user, setUser] = useState<MeUser>();
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     fetchProducts().then((products: Product[]) => setProducts(products));
+    fetchMe().then((user: MeUser) => {
+      setUser(user);
+    });
   }, []);
+
+  let userEmail;
+  if (user && user.email) {
+    userEmail = (
+      <p>
+        You are signed in as:
+        <br />
+        <span className="user-email">{user.email}</span>
+      </p>
+    );
+  } else {
+    userEmail = (
+      <p>
+        You are not signed in. Please <Link to="/profile">sign in</Link> to use
+        the form.
+      </p>
+    );
+  }
 
   return (
     <form className="container form-container">
       <h2>Contact support</h2>
-      <p>
-        You are signed in as:<br></br>
-        <span className="user-email">
-          {/* TODO: Add user e-mail */}email@company.com
-        </span>
-      </p>
+      {userEmail}
 
       <ProductSelect products={products} />
 
@@ -50,6 +68,7 @@ export default function SupportForm() {
         className="default-button submit-button m-t-1"
         type="submit"
         onClick={(event) => validateForm(event)}
+        disabled={user ? false : true}
       >
         Send
       </button>

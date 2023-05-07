@@ -1,7 +1,6 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{Pool, Postgres};
 
 use crate::{
     data_access::{
@@ -150,7 +149,40 @@ async fn valid_verify(
     let pool = &shared_data.db_pool;
     let invite = data_access::user::get_invite_by_id(&invite_id, &pool).await;
     match invite {
-        Ok(v) => HttpResponse::Ok().json(v),
+        Ok(v) => match v.company_user_id {
+            Some(v) => {
+                let partial_comp_user =
+                    data_access::user::get_partial_company_user(&v, &pool).await;
+                match partial_comp_user {
+                    Ok(u) => {
+                        //return both partial company user and info about company
+                        let company =
+                            data_access::company::get_company_by_id(&pool, &u.company_id).await;
+                        match company {
+                            Ok(c) => {
+                                let data = json!({
+                                    "partial_company_user": u,
+                                    "company": c
+                                });
+                                HttpResponse::Found().json(data)
+                            }
+                            Err(_e) => HttpResponse::NotFound().json("No company found"),
+                        }
+                    }
+                    Err(_e) => HttpResponse::NotFound().json("No Partial user found"),
+                }
+            }
+            None => match v.user_id {
+                Some(v) => {
+                    let partial_user = data_access::user::get_partial_user(&v, &pool).await;
+                    match partial_user {
+                        Ok(u) => HttpResponse::Found().json(u),
+                        Err(_e) => HttpResponse::NotFound().json("No Partial user found"),
+                    }
+                }
+                None => HttpResponse::NotFound().json("No Partial user found"),
+            },
+        },
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }

@@ -171,9 +171,7 @@ export default function EditUserAccess() {
    * @param response
    */
   const handleUpdateLicenseAccess = (response: Response) => {
-    let status = response.status;
-
-    if (status == 200 || status == 201) {
+    if (response.ok) {
       navigate(0);
     } else {
       alert("Something went wrong when updating license access.");

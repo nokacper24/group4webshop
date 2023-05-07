@@ -85,7 +85,7 @@ export default function PurchaseLicense() {
       };
 
       postLicense(license).then((response: Response) => {
-        if (response.status == 201) {
+        if (response.ok) {
           alert("License successfully purchased");
           // Refresh
           navigate(0);
@@ -151,7 +151,7 @@ export default function PurchaseLicense() {
                     <h2>{product.display_name}</h2>
                     <p>
                       {product.short_description}
-                      <br></br>
+                      <br />
                       Purchase a license for your company. Licenses are valid
                       for a year, and will automatically be renewed unless you
                       cancel it.
@@ -188,15 +188,12 @@ function MustBeSignedIn() {
   return (
     <p>
       You need to be{" "}
-      <a href="#!" onClick={() => navigate("/profile")}>
+      <a href="" onClick={() => navigate("/profile")}>
         signed in
       </a>{" "}
       to purchase a license.
       <br />
-      Remember that only IT administrators of your company can purchase a
-      license!
-      <br />
-      Contact your IT administrator if you need access to any of our products.
+      <NoPermissionToBuy />
     </p>
   );
 }
@@ -204,7 +201,7 @@ function MustBeSignedIn() {
 function NoPermissionToBuy() {
   return (
     <p>
-      You need to be an IT administrator to purchase a license.
+      Only IT administrators of your company can purchase a license.
       <br />
       Contact your IT administrator if you need access to any of our products.
     </p>

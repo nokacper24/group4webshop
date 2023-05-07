@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { MeUser } from "../../Interfaces";
 import LicenseList from "./managing/LicenseList";
 import { logout } from "../../ApiController";
+import UserLicenses from "./UserLicenses";
 
 interface Props {
   user: MeUser;
@@ -16,7 +17,14 @@ interface Props {
 export default function MyAccount(props: Props) {
   const navigate = useNavigate();
 
-  const companyLicenses = (
+  const userLicenses = (
+    <>
+      <h2>My Licenses</h2>
+      <UserLicenses userId={props.user.user_id} />
+    </>
+  );
+
+  const companyInfo = (
     <>
       <h2>Company users</h2>
       <div className="button-container">
@@ -56,10 +64,10 @@ export default function MyAccount(props: Props) {
       userRoleSection = adminButtons;
       break;
     case "CompanyItHead" || "CompanyIt":
-      userRoleSection = companyLicenses;
+      userRoleSection = companyInfo;
       break;
     default:
-      userRoleSection = <p>Placeholder</p>;
+      userRoleSection = userLicenses;
   }
 
   return (
@@ -68,7 +76,7 @@ export default function MyAccount(props: Props) {
         <h1>My account</h1>
         <div className="user-details">
           <p>
-            E-mail: {props.user?.email} <br></br>
+            E-mail: {props.user?.email} <br />
           </p>
           <Link className="default-button small-button" to="edit">
             Edit profile

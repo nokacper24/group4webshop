@@ -181,12 +181,11 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 201) {
+          if (response.ok) {
             alert("User access successfully added");
             // Refresh
             navigate(0);
-          } else if (status == 409) {
+          } else if (response.status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
             alert("Something went wrong when adding users");
@@ -217,8 +216,7 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             alert("User access successfully removed");
             // Refresh
             navigate(0);
@@ -288,17 +286,17 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           Product: {license.product_name}
-          <br></br>
+          <br />
           Active users: {usersWithAccess.length - newUsersWithAccess.size}
-          <br></br>
+          <br />
           Total allowed: {license.amount}
-          <br></br>
+          <br />
           Start date: {new Date(license.start_date).toDateString()}
-          <br></br>
+          <br />
           End date: {new Date(license.end_date).toDateString()}
-          <br></br>
+          <br />
           Status: {license.valid ? "Valid" : "Invalid"}
-          <br></br>
+          <br />
         </p>
       </section>
 

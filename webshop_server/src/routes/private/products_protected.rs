@@ -5,13 +5,13 @@ use actix_web::{delete, get, patch, post, put, web, HttpRequest, HttpResponse, R
 use image::ImageError;
 use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
 
 pub mod descriptions_protected;
 
 use crate::{
     data_access::{error_handling::PostgresDBError, user},
+    SharedData,
     {
         data_access::product::{self, Product},
         utils::{
@@ -20,7 +20,7 @@ use crate::{
                 self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
             },
         },
-    }, SharedData,
+    },
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {

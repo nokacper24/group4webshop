@@ -19,7 +19,7 @@ export default function EditProfile(props: Props) {
     if (email != user?.email) {
       patchPartialUser(user!.user_id.toString(), email).then(
         (response: Response) => {
-          if (response.status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {
@@ -32,7 +32,7 @@ export default function EditProfile(props: Props) {
 
   const handlePasswordReset = () => {
     resetPassword(user!.email).then((response) => {
-      if (response.status === 200) {
+      if (response.ok) {
         alert(
           "We have sent you an e-mail with a link to reset password. It may take a few minutes. Check the spam folder if you do not see it."
         );

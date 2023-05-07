@@ -18,7 +18,7 @@ if (import.meta.env.PROD) {
 
 /**
  * Error for failed fetches.
- * Throw it if response is not as expected.  
+ * Throw it if response is not as expected.
  * This error contains the status code as well as the status as text.
  * Status code can be used to determine what went wrong, and act accordingly.
  * @extends Error
@@ -26,8 +26,10 @@ if (import.meta.env.PROD) {
 export class FetchError extends Error {
   status: number;
   statusText: string;
+
   /**
-   * Create a new product error.
+   * Create a new fetch error.
+   *
    * @param message The error message.
    * @param status The HTTP status code.
    * @param statusText The HTTP status text.
@@ -159,7 +161,25 @@ export const fetchLicense = async (licenseId: string) => {
  * @returns All licenses' information.
  */
 export const fetchLicensesFullInfo = async () => {
-  const response = await fetch(`${baseUrl}/api/priv/licenses_vital`);
+  const response = await fetch(`${baseUrl}/api/priv/licenses_full`);
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
+};
+
+/**
+ * Get all licenses for a company.
+ *
+ * @param companyId The ID of the company.
+ * @returns The licenses for the company.
+ */
+export const fetchCompanyLicenses = async (companyId: number) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/companies/${companyId}/licenses_full`
+  );
   if (response.ok) {
     const data: FullLicenseInfo[] = await response.json();
     return data;
@@ -218,6 +238,7 @@ export const postLicense = async (license: License) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(license),
+    credentials: "include",
   });
 };
 
@@ -233,24 +254,6 @@ export const fetchCompanies = async () => {
     return data;
   } else {
     throw new Error("Could not fetch companies.");
-  }
-};
-
-/**
- * Get all licenses for a company.
- *
- * @param companyId The ID of the company.
- * @returns The licenses for the company.
- */
-export const fetchCompanyLicenses = async (companyId: number) => {
-  const response = await fetch(
-    `${baseUrl}/api/priv/companies/${companyId}/licenses`
-  );
-  if (response.ok) {
-    const data: License[] = await response.json();
-    return data;
-  } else {
-    throw new Error("Could not fetch licenses.");
   }
 };
 
@@ -333,7 +336,7 @@ export const checkSignInStatus = async () => {
     method: "GET",
     credentials: "include",
   });
-  return response.status === 200;
+  return response.ok;
 };
 
 /**

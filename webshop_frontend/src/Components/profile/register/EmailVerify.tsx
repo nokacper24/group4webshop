@@ -12,7 +12,8 @@ export function EmailVerify() {
         minutes to appear in your inbox.
       </p>
       <p>
-        Do not see the e-mail? Check your spam folder.<br></br>
+        Do not see the e-mail? Check your spam folder.
+        <br />
         If you did not receive it, <a href="#">resend e-mail</a>.
       </p>
     </>
