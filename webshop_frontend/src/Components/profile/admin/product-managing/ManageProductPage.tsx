@@ -158,6 +158,18 @@ export default function ManageProductPage() {
     setSections(sections);
   };
 
+  const [hidden, setHidden] = useState<boolean>(false);
+
+  const initializeAvailabilityChangeProtocol = () => {
+    let confirmChange = confirm(
+      hidden
+        ? "Do you want to unhide this product? \n This will make this product visible on the webshop."
+        : "Do you want to hide this product? \n This will make this product hidden from the webshop."
+    );
+    if (confirmChange) {
+      setHidden(!hidden);
+    }
+  };
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
