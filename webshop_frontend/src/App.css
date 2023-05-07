@@ -225,7 +225,7 @@ label {
   margin-inline: 0;
 }
 
-.wide-section > :is(label, p) {
+.wide-section> :is(label, p) {
   display: inline-block;
 }
 
@@ -1250,6 +1250,7 @@ form a:hover {
 
 .accordion-header>p {
   margin-block: 0;
+  margin-left: 0.5em;
 }
 
 .accordion-header> :first-child {
@@ -1287,6 +1288,10 @@ form a:hover {
   border-bottom: 1px solid black;
 }
 
+.hidden-element {
+  display: none;
+}
+
 .accordion-row {
   display: flex;
   flex-direction: row;
@@ -1294,7 +1299,6 @@ form a:hover {
   justify-content: flex-end;
 
   min-height: 2.75rem;
-  /* TODO: Check if this fits or not */
 
   background-color: rgb(222, 222, 222);
 }
@@ -1305,7 +1309,7 @@ form a:hover {
 
 .accordion-row> :first-child {
   margin-right: auto;
-  margin-left: 1em;
+  margin-left: 1.45em;
   margin-block: 0;
 }
 
@@ -1429,7 +1433,7 @@ input:checked+.slider:before {
   align-items: center;
 }
 
-.popup-form >* {
+.popup-form>* {
   padding-inline: 1em;
 }
 
