@@ -18,6 +18,12 @@ import {
 import { AccordionSectionProps } from "./Accordion/AccordionSection";
 import { ChangeType } from "./Accordion/ChangeTypes";
 
+let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
+// Check if we are in production mode
+if (import.meta.env.PROD) {
+  baseUrl = "";
+}
+
 /**
  * Page for creating or editing a product page.
  *
@@ -170,6 +176,153 @@ export default function ManageProductPage() {
       setHidden(!hidden);
     }
   };
+
+  /**
+   * Starts the process of saving the product. This includes saving the product itself, the sections and the testimonials.
+   */
+  const initializeSaveProtocol = () => {
+    sendDeleteDescriptions();
+    sendNewDescriptions();
+    sendPriorityChanges();
+    sendEdits();
+
+    //TODO: Send testimonials
+  };
+
+  const sendDeleteDescriptions = async () => {
+    contentChanges?.get(ChangeType.Delete)?.forEach((id) => {
+      let response = fetch(
+        `${baseUrl}/api/priv/products/${productId}/descriptions/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+  };
+
+  const findRow = (
+    id: number
+  ): { description: SimpleDescription | undefined; foundAt: number } => {
+    for (let i = 0; i < sections.length; i += 1) {
+      for (let j = 0; j < sections[i].rows.length; j += 1) {
+        if (sections[i].rows[j].component_id === id) {
+          return { description: sections[i].rows[j], foundAt: i + j + 2 };
+        }
+      }
+    }
+    return { description: undefined, foundAt: -1 };
+  };
+
+  const sendNewDescriptions = async () => {
+    let found = false;
+    contentChanges?.get(ChangeType.Add)?.forEach((id) => {
+      let { description, foundAt } = findRow(id);
+      if (description) {
+        if (description.is_text_not_image) {
+          let respone = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/text`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                component_id: id,
+                full_width: false,
+                image: null,
+                priority: foundAt,
+                product_id: productId,
+                text: description.text,
+              }),
+            }
+          );
+        } else {
+          let response = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/image`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                component_id: id,
+                full_width: false,
+                image: description.image,
+                priority: foundAt,
+                product_id: productId,
+                text: null,
+              }),
+            }
+          );
+        }
+      }
+    });
+  };
+
+  const sendPriorityChanges = async () => {
+    priorityChanges?.forEach((id) => {
+      let section = sections.find((section) => section.sectionID === id);
+      let rows = section?.rows;
+      let response = fetch(
+        `${baseUrl}/api/priv/products/${productId}/descriptions/priorityswap`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([rows![0].component_id, rows![1].component_id]),
+        }
+      );
+    });
+  };
+
+  const sendEdits = async () => {
+    contentChanges?.get(ChangeType.Edit)?.forEach((id) => {
+      let { description, foundAt } = findRow(id);
+      if (description) {
+        if (description.is_text_not_image) {
+          let respone = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/text/${id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                component_id: id,
+                full_width: false,
+                image: null,
+                priority: foundAt,
+                product_id: productId,
+                text: description.text,
+              }),
+            }
+          );
+        } else {
+          let response = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/image/${id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                component_id: id,
+                full_width: false,
+                image: description.image,
+                priority: foundAt,
+                product_id: productId,
+                text: null,
+              }),
+            }
+          );
+        }
+      }
+    });
+  };
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
@@ -229,6 +382,7 @@ export default function ManageProductPage() {
           sections={sections}
           testimonials={testimonials}
           productID={productId!}
+          registerContentChange={registerContentChange}
           setTestimonials={setTestimonials}
           setSections={setSections}
         ></AccordionTable>
@@ -237,10 +391,18 @@ export default function ManageProductPage() {
         <iframe src=""></iframe>
       </section>
       <section className="button-container">
-        <button className="default-button small-button bg-danger">
-          Delete product permanently
+        <button
+          className="default-button small-button bg-danger"
+          onClick={() => initializeAvailabilityChangeProtocol()}
+        >
+          {hidden ? "Unhide" : "Hide"}
         </button>
-        <button className="default-button small-button">Save</button>
+        <button
+          className="default-button small-button"
+          onClick={() => initializeSaveProtocol()}
+        >
+          Save
+        </button>
       </section>
     </>
   );
