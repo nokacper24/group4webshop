@@ -7,7 +7,7 @@
   color: #5a5a5a;
   border: 5px solid;
   border-radius: 50%;
-  border-top-color: transparent;
+  border-top-color: Canvas;
   animation: rotate 1s linear infinite;
 }
 
