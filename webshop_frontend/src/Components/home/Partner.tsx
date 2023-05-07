@@ -16,9 +16,8 @@ export type PartnerProps = {
 export default function Partner(props: PartnerProps) {
   return (
     <li>
-      <Link target="_blank" to={props.link}>
+      <Link className="partner-logo" target="_blank" to={props.link}>
         <img
-          className="partner-logo"
           src={props.imageSource}
           width={props.imageSize[0]}
           height={props.imageSize[1]}

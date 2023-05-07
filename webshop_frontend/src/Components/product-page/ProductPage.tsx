@@ -85,7 +85,6 @@ export default function ProductPage() {
               {product.available === false && <UnavailableTag />}
             </div>
           </section>
-          <hr></hr>
           {descriptions.length != 0 && (
             <section style={{ marginTop: "2em" }} className="container">
               {DescriptionsContainer(descriptions)}
@@ -102,11 +101,14 @@ export default function ProductPage() {
               </div>
             </section>
           )}
-          {testimonials.length == 0 && <hr />}
-          <section className="container">
-            <h2>Purchase</h2>
-            <p>Purchase licenses for this product for your enterprise today!</p>
-            <PurchaseLicenseButton active={product.available} />
+          <section className="highlight-section">
+            <div className="container">
+              <h2>Purchase</h2>
+              <p>
+                Purchase licenses for this product for your enterprise today!
+              </p>
+              <PurchaseLicenseButton active={product.available} />
+            </div>
           </section>
         </>
       )}
