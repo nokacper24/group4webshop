@@ -2,12 +2,9 @@
  * The props of the ParagraphSlide component.
  */
 export type ParagraphSlideProps = {
-  id: string;
   paragraph: string;
-  reviewerProfile: {
-    picturePath: string;
-    name: string;
-  };
+  imagePath: string;
+  name: string;
 };
 
 /**
@@ -19,18 +16,18 @@ export type ParagraphSlideProps = {
  */
 export const ParagraphSlide = (props: ParagraphSlideProps) => {
   return (
-    <div className="slide" id={props.id}>
+    <div className="slide">
       <p>{props.paragraph}</p>
       <div className="reviewer-profile">
         <img
-          src={props.reviewerProfile.picturePath}
-          alt={props.reviewerProfile.name + "'s face"}
+          src={props.imagePath}
+          alt={props.name}
           height="80"
           width="80"
           className="reviewer-picture"
         />
         <div className="reviewer-details">
-          <p>{props.reviewerProfile.name}</p>
+          <p>{props.name}</p>
         </div>
       </div>
     </div>

@@ -973,33 +973,28 @@ form a:hover {
 
 .gallery {
   display: grid;
+  grid-template-columns: 4em auto 4em;
   justify-content: center;
-  grid-template-columns: repeat(3, auto);
+  justify-items: center;
+  align-items: center;
   overflow: hidden;
 }
 
-.gallery a:first-child {
-  margin-right: 0.5em;
-}
-
-.gallery a:last-child {
-  margin-left: 0.5em;
-}
-
 .slide-button {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 1.5rem;
-  color: var(--clr-neutral-1000);
-  font-size: var(--gallery-button-size);
-  line-height: var(--gallery-button-size);
   height: 1em;
   width: 1em;
-  padding: 0.2em;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
+
+  color: var(--clr-neutral-1000);
+  background-color: rgba(0, 0, 0, 0.3);
+  font-size: var(--gallery-button-size);
+  border-radius: 50%;
   outline: 1px solid transparent;
+
+  transition-duration: var(--transition-speed);
 }
 
 .slide-button:hover {
@@ -1007,15 +1002,18 @@ form a:hover {
 }
 
 .slides-view {
-  --slides-width: min(calc(70vw - 3em), 900px);
+  --slides-width: min(calc(70vw - 8em), 900px);
 
-  overflow: hidden;
-  width: var(--slides-width);
   position: relative;
+  width: var(--slides-width);
+  overflow: hidden;
 }
 
 .slides-container {
+  display: flex;
+  align-items: center;
   width: max-content;
+  transition-duration: calc(var(--transition-speed)*3);
 }
 
 .slide {
@@ -1250,10 +1248,6 @@ form a:hover {
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid var(--clr-neutral-0);
-}
-
-.hidden-element {
-  display: none;
 }
 
 .accordion-row {
