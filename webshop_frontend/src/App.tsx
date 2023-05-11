@@ -11,6 +11,7 @@ import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
 import ManageProductPage from "./Components/profile/admin/product-managing/ManageProductPage";
 import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
+import Credits from "./Components/credits/Credits";
 
 /**
  * Represents the website content.
@@ -33,6 +34,7 @@ export default function App() {
           />
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
+          <Route path="credits" element={<Credits />} />
           <Route path="profile/*" element={<Profile />} />
           <Route path="register/*" element={<CreateCompanyAccount />} />
 

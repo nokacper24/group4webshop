@@ -567,6 +567,14 @@ footer>p {
   margin-inline: auto;
 }
 
+footer a {
+  color: var(--clr-neutral-1000);
+}
+footer a:is(:hover, :focus) {
+  color: var(--clr-tertiary);
+
+}
+
 /* Form */
 form>h1 {
   font-size: 2rem;
