@@ -58,6 +58,11 @@
   background-color: rgb(0, 0, 0);
 }
 
+/* Display classes */
+.display-none {
+  display: none !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -1113,11 +1118,6 @@ form a:hover {
 
 .row-image {
   display: block;
-}
-
-.collapsed {
-  visibility: collapse;
-  display: none;
 }
 
 /* || MANAGER/ADMIN PAGES */

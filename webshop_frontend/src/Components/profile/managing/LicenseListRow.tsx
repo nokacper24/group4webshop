@@ -14,7 +14,7 @@ type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState<boolean>(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
   };
@@ -27,13 +27,6 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
       Manage access
     </Link>
   );
-
-  let buttons;
-  if (license.valid == true) {
-    buttons = <span className="button-container">{manageButton}</span>;
-  } else {
-    buttons = <span className="button-container">{manageButton}</span>;
-  }
 
   return (
     <>
@@ -61,12 +54,12 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
           </button>
         </td>
       </tr>
-      <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
+      <tr className={`row-details ${collapsed ? "display-none" : ""}`}>
         <td colSpan={5}>
           <p>
             Active period: {new Date(license.start_date).toLocaleDateString()}{" "}
             to {new Date(license.end_date).toLocaleDateString()}
-            {buttons}
+            <span className="button-container">{manageButton}</span>
           </p>
         </td>
       </tr>
