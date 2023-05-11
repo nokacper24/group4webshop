@@ -63,7 +63,8 @@ export default function MyAccount(props: Props) {
     case "Admin":
       userRoleSection = adminButtons;
       break;
-    case "CompanyItHead" || "CompanyIt":
+    case "CompanyIt":
+    case "CompanyItHead":
       userRoleSection = companyInfo;
       break;
     default:
