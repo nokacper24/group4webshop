@@ -66,20 +66,37 @@ export default function Profile() {
           />
 
           {/* License manager */}
-          <Route
-            path="/manage-license/:licenseId"
-            element={<ManageLicenseAccess />}
-          />
-          <Route path="/company-users/:companyId" element={<CompanyUsers />} />
-          <Route path="/:userId/license-access" element={<EditUserAccess />} />
+          {(user?.role == "CompanyItHead" || user?.role == "CompanyIt") && (
+            <>
+              <Route
+                path="/manage-license/:licenseId"
+                element={<ManageLicenseAccess />}
+              />
+              <Route
+                path="/company-users/:companyId"
+                element={<CompanyUsers />}
+              />
+              <Route
+                path="/:userId/license-access"
+                element={<EditUserAccess />}
+              />
+            </>
+          )}
 
           {/* Admin */}
-          <Route
-            path="/admin-company-licenses"
-            element={<AdminCompanyLicenses />}
-          ></Route>
-          <Route path="/admin-products" element={<ManageProducts />}></Route>
-          <Route path="/admin-users" element={<ManageUsers />}></Route>
+          {user?.role == "Admin" && (
+            <>
+              <Route
+                path="/admin-company-licenses"
+                element={<AdminCompanyLicenses />}
+              ></Route>
+              <Route
+                path="/admin-products"
+                element={<ManageProducts />}
+              ></Route>
+              <Route path="/admin-users" element={<ManageUsers />}></Route>
+            </>
+          )}
 
           <Route path="*" element={<PageNotFound />} />
         </Routes>
