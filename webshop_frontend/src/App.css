@@ -570,9 +570,9 @@ footer>p {
 footer a {
   color: var(--clr-neutral-1000);
 }
+
 footer a:is(:hover, :focus) {
   color: var(--clr-tertiary);
-
 }
 
 /* Form */
@@ -779,7 +779,7 @@ form a:hover {
 
 .product-card {
   position: relative;
-  height: 25em;
+  height: 28em;
   width: min(18em, 75vw);
   padding: 1em;
 
@@ -813,20 +813,22 @@ form a:hover {
 
 .card-image {
   display: block;
-  width: calc(100% - 1em);
+  width: auto;
+  max-width: calc(100% - 1em);
+  max-height: 10em;
   margin-inline: auto;
   object-fit: contain;
-  border-radius: 0.2em;
+  border-radius: 0.4em;
 }
 
 .product-card>h2 {
   line-height: 1.2em;
-  margin-bottom: 0.5em;
+  margin-top: 0.2em;
 }
 
 .card-description {
   max-height: 8em;
-  margin-top: 0;
+  margin-block: 0.2em;
   color: var(--clr-neutral-0);
   text-overflow: ellipsis;
   line-height: 1em;
