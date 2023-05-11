@@ -17,9 +17,11 @@ export default function SupportForm() {
 
   useEffect(() => {
     fetchProducts().then((products: Product[]) => setProducts(products));
-    fetchMe().then((user: MeUser) => {
-      setUser(user);
-    });
+    fetchMe()
+      .then((user: MeUser) => {
+        setUser(user);
+      })
+      .catch((error) => {});
   }, []);
 
   let userEmail;
