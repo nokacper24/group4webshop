@@ -65,10 +65,8 @@ export default function ProductPage() {
       {error && (
         <>
           <ErrorMessage message={error.message} />
-          <Link to="/products">
-            <button className="banner-element hero-button">
-              Back to products
-            </button>
+          <Link className="hero-button" to="/products">
+            Back to products
           </Link>
         </>
       )}
