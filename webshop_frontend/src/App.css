@@ -75,6 +75,7 @@ body {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
+  align-items: center;
 }
 
 h1,
@@ -561,6 +562,7 @@ footer>p {
 
 footer a {
   color: var(--clr-neutral-1000);
+  transition-duration: var(--transition-speed);
 }
 
 footer a:is(:hover, :focus) {
