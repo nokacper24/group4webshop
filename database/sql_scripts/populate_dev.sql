@@ -12,65 +12,52 @@ VALUES ('admin_proflex@gmail.com', '$argon2id$v=19$m=4096,t=3,p=1$zGDWbzz553WuAO
         ('it_manager_2@enterprisesolutions.com', 'pass', 2, 'company_it_head'),
         ('bs_it_head@businesssolutions.com', 'pass', 3, 'company_it_head');
 
-INSERT INTO cookies (cookie, exp, user_id)
-VALUES ('cookie1', '2026-12-31', 2),
-       ('cookie2', '2027-06-30', 3),
-       ('admin_cookie', '4000-06-30', 1);
+INSERT INTO product ("product_id", "display_name", "price_per_user", "short_description", "main_image", "available") VALUES
+('online_scheduling_software',	'Online Scheduling Software',	2000,	'Streamline your scheduling process with Proflex Solutions'' Online Scheduling Software. Automate appointments, manage resources, and track performance effortlessly. Boost productivity and save time today!',	'/resources/images/online_scheduling_software/Oransj_calender_software_on_monitor_ab65cb91-6bb0-4891-896b-1e52813dfd49.png',	'1'),
+('proflex_bpa_solutions',	'Proflex BPA Solutions',	5000,	'Automate and optimize your business processes with ProFlex BPA Solutions. Streamline operations, save time and money, and focus on business growth with our secure and efficient software.',	'/resources/images/proflex_bpa_solutions/Oransj_automation_software_on_monitor_f69ffed8-f8db-4aa3-b416-57c66d238db9.png',	'1'),
+('proflex_tax_solutions',	'ProFlex Tax Solutions',	2000,	'Streamline your tax preparation and filing process with ProFlex Tax Solutions. Enter data quickly and accurately, automate workflows, and focus on your business while ensuring the security and efficiency of your tax-related data.',	'/resources/images/proflex_tax_solutions/Product-4.jpg',	'1');
 
-INSERT INTO product (product_id, display_name, price_per_user, short_description, main_image, available)
-VALUES ('time_management_software', 'Time Management System', 999.99, 'A comprehensive time management solution for enterprises.', '/time_management.jpg', true),
-       ('3d_modelling_software', '3D Modelling', 29.99, 'A fast and easy-to-learn software for 3D modelling, with extensive tools for perfecting details.', '/3d_modelling.jpg', true),
-       ('tax_and_accounting_software', 'Tax and Accounting Software', 899.99, 'A software solution for tax and accounting needs of enterprises.', '/tax_accounting.jpg', true),
-       ('online_scheduling_software', 'Online Scheduling Software', 200, 'Our software is designed to help you effectively manage and streamline the scheduling process. It helps you automate the scheduling process, allowing you to save time and reduce errors.', '/online_scheduling.jpg', true),
-       ('bpa_solutions', 'BPA Solutions', 500, 'Automation of processes. It has an intuitive user interface, and automates workflows.', '/bpa.jpg', true),
-       ('statistics_software',	'Statistics software',	1000,	'Enterprise oriented statistics software for your compoany.',	'/resources/images/statistics_software/Kacpernt_enterprise_managment_software_e231d881-8b93-43d9-a42c-2cad1cc5d3be.png',	true);
 
 INSERT INTO license (valid, start_date, end_date, amount, company_id, product_id)
-VALUES (false, '2022-01-01', '2022-12-31', 100, 2, 'time_management_software'),
-       (true, '2023-07-01', '2023-06-30', 50, 2, 'tax_and_accounting_software'),
-       (true, '2023-01-01', '2023-12-31', 50, 2, 'tax_and_accounting_software'),
-       (true, '2023-01-01', '2023-12-31', 15, 2, '3d_modelling_software');
+VALUES (false, '2022-01-01', '2022-12-31', 100, 2, 'online_scheduling_software'),
+       (true, '2023-07-01', '2023-06-30', 50, 2, 'proflex_tax_solutions'),
+       (true, '2023-01-01', '2023-12-31', 50, 2, 'proflex_tax_solutions'),
+       (true, '2023-01-01', '2023-12-31', 15, 2, 'proflex_tax_solutions');
 
 INSERT INTO user_license (license_id, user_id)
 VALUES (1, 2),
        (2, 3),
        (3, 4);
 
-INSERT INTO category (name, description)
-VALUES ('Enterprise Software', 'Software solutions for enterprises'),
-       ('Financial Software', 'Financial software solutions for enterprises');
+INSERT INTO testimonial ("author", "text", "author_pic", "product_id") VALUES
+('Sarah Thompson',	'ProFlex BPA Solutions transformed our business processes! With its intuitive interface and automated workflows, we saved time and optimized operations. Highly recommended!',	'/resources/images/proflex_bpa_solutions/sarahthompson.jpg',	'proflex_bpa_solutions'),
+('John Anderson',	'ProFlex Tax Solutions made tax season a breeze! Quick data entry, automated workflows, and top-notch security. It simplified our process and maximized our tax success.',	'/resources/images/proflex_tax_solutions/JohnAnderson.jpg',	'proflex_tax_solutions');
 
-INSERT INTO product_category (product_id, category_id)
-VALUES ('time_management_software', 1),
-       ('tax_and_accounting_software', 2);
+INSERT INTO product_image ("image_path", "alt_text") VALUES
+('/resources/images/online_scheduling_software/Product-1.jpg',	'mobile calender interface'),
+('/resources/images/proflex_bpa_solutions/Product-2.png',	'workflow planner interface'),
+('/resources/images/proflex_tax_solutions/PRoduct-6.jpg',	'tax prediction interface');
 
-INSERT INTO testimonial (author, text, author_pic, product_id)
-VALUES ('Jane Doe', 'I am extremely impressed with the time management software provided by the company. It has greatly improved the efficiency of my team.', 'jane.jpg', 'time_management_software'),
-       ('John Smith', 'The tax software is a lifesaver. The software makes tax season a breeze and saves me so much time.', 'john.jpg', 'tax_and_accounting_software'),
-       ('Stephanie Smith', 'This has enabled us to streamline our operations and save time. The product is easy to use and the customer service is top-notch.', 'stephanie_smith.jpg', 'time_management_software');
+INSERT INTO product_text ("text_title", "paragraph") VALUES
+('Efficient Scheduling Made Simple',	'Introducing Proflex Solutions'' Online Scheduling Software! Automate appointments, manage resources, and boost productivity effortlessly. Save time and streamline your scheduling process today.'),
+('Powerful Calendar Management and Reporting',	'Take control of your team''s schedule with Proflex Solutions'' Online Scheduling Software. Track performance, analyze data, and optimize efficiency with our robust calendar management and reporting capabilities.'),
+('Streamline Your Business Operations',	'Discover the best scheduling software on the market! Proflex Solutions'' Online Scheduling Software is designed for businesses of all sizes. Say goodbye to errors and time-consuming tasks, and hello to a streamlined and productive workflow. Try it out today!'),
+('Streamline and Optimize Operations',	'ProFlex BPA Solutions empowers businesses with streamlined and optimized operations. Design and implement automated workflows effortlessly, saving time and maximizing efficiency.'),
+('Secure, Reliable, and Efficient',	'Take control of your business processes with ProFlex BPA Solutions. Our secure and reliable software ensures data safety, allowing you to focus on business growth and success.'),
+('Streamline Tax Preparation and Filing',	'ProFlex Tax Solutions simplifies and optimizes the tax preparation and filing process. Enter data accurately, automate workflows, and maximize efficiency to achieve tax success effortlessly.'),
+('Secure, Reliable, and Efficient Tax Solution',	'Take charge of your tax preparation with ProFlex Tax Solutions. Our secure and reliable software ensures data protection, allowing you to focus on your business while maximizing tax-related efficiency and success.');
 
-INSERT INTO product_image (image_path, alt_text)
-VALUES ('/time_management_software.jpg', 'Time Management Software Interface'),
-       ('/tax_software.jpg', 'Tax Software Interface'),
-       ('/resources/images/statistics_software/Ifky_exploding_battery_90043413-fc3e-4064-b3df-b759a2939771.png',	'Solid block exploading, flames and sparks are visible.'),
-       ('/resources/images/statistics_software/Oransj_automation_software_on_monitor_877a0f15-b70e-4134-b815-c88471661f42.png',	'A display with charts and graphs.');
+INSERT INTO description_component ("priority", "product_id", "full_width", "image_id", "text_id") VALUES
+(1,	'online_scheduling_software',	'0',	NULL,	1),
+(2,	'online_scheduling_software',	'0',	NULL,	2),
+(3,	'online_scheduling_software',	'0',	1,	NULL),
+(4,	'online_scheduling_software',	'0',	NULL,	3),
+(1,	'proflex_bpa_solutions',	'1',	NULL,	4),
+(2,	'proflex_bpa_solutions',	'0',	2,	NULL),
+(3,	'proflex_bpa_solutions',	'0',	NULL,	5),
+(1,	'proflex_tax_solutions',	'1',	NULL,	6),
+(2,	'proflex_tax_solutions',	'0',	NULL,	7),
+(3,	'proflex_tax_solutions',	'0',	3,	NULL);
 
-INSERT INTO product_text (text_title, paragraph)
-VALUES ('Time Management Software Features', 'Our time management software offers a range of features such as task scheduling, time tracking, and reporting. These features help organizations streamline their work processes and improve productivity.'),
-       ('Tax Software Benefits', 'Our tax software is designed to simplify the tax preparation process for businesses. The software eliminates the need for manual calculations and reduces the risk of errors. It also saves time and reduces the stress associated with tax season.'),
-       ('Profesional lying', 'Use statistics to lie about data! Just as everyone is doing. Easy to use tools for automated data manipulation.'),
-        ('Easy to use',	'Simple user interface makes this perfect for anyone to use, no matter how much experience they had with the software. Statiscics knowledge may be necesary*'),
-        ('Revolutionary', 'This software is absolutely revolutionary in the statiscics feild. Vast amount of tools and mechanizms will allow you to make any calculations and predictions. This software will change your approach to logistics.');
-
-INSERT INTO description_component (product_id, full_width, image_id, text_id)
-VALUES ('time_management_software', false, 1, null),
-       ('time_management_software', false, null, 1),
-       ('tax_and_accounting_software', false, 2, null),
-       ('tax_and_accounting_software', false, null, 2),
-       ('statistics_software',	false,	NULL, 3),
-        ('statistics_software',	false,	NULL, 4),
-        ('statistics_software',	true,	NULL, 5),
-        ('statistics_software',	false,	4, NULL),
-        ('statistics_software',	false,	3, NULL);
 
 COMMIT;
