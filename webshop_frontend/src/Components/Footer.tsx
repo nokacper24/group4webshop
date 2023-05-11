@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 /**
  * Represents the footer.
  *
@@ -10,7 +12,9 @@ export default function Footer() {
         <b>Disclaimer:</b> This website is a result of a university group
         project, performed in the course IDATA2301 Web technologies, at NTNU.
         All the information provided here is a result of imagination. Any
-        resemblance with real companies or products is a coincidence.
+        resemblance with real companies or products is a coincidence. Credits to
+        all images used can be found under <Link to="/credits">credits</Link>{" "}
+        page.
       </p>
     </footer>
   );

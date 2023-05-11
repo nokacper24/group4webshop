@@ -1,5 +1,6 @@
 export type AccordionHeaderProps = {
   title: string;
+  collapseFunction: () => void;
   addRow: () => void;
   deleteSelf: () => void;
 };
@@ -14,7 +15,10 @@ export function AccordionHeader(props: AccordionHeaderProps) {
   return (
     <>
       <div className="accordion-header-container">
-        <button className="accordion-header">
+        <button
+          className="accordion-header"
+          onClick={() => props.collapseFunction()}
+        >
           <p>{props.title}</p>
           <svg
             className="header-icon accordion-button-icon"

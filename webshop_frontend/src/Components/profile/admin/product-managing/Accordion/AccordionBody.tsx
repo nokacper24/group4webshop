@@ -1,7 +1,10 @@
-import { AccordionRow, AccordionRowProps } from "./AccordionRow";
+import { SimpleDescription } from "../../../../../Interfaces";
+import { AccordionRow } from "./AccordionRow";
 
-export type AccordionBodyProps = {
-  rows: AccordionRowProps[];
+type AccordionBodyProps = {
+  rows: SimpleDescription[];
+  collapsed: boolean;
+  swapRows: () => void;
   editRow: (id: number) => void;
   deleteRow: (id: number) => void;
 };
@@ -14,17 +17,18 @@ export type AccordionBodyProps = {
  */
 export function AccordionBody(props: AccordionBodyProps) {
   return (
-    <div className="accordion-body">
+    <div
+      className={`accordion-body ${props.collapsed ? "hidden-element" : ""}`}
+    >
       {props.rows.map((row) => {
         return (
           <AccordionRow
-            key={"row" + row.id}
-            title={row.title}
-            id={row.id}
-            content={row.content}
-            image={row.image}
+            key={"row" + row.component_id}
+            description={row}
+            swapFunction={props.swapRows}
             editFunction={props.editRow}
             removeFunction={props.deleteRow}
+            isTop={row.component_id === 0}
           ></AccordionRow>
         );
       })}

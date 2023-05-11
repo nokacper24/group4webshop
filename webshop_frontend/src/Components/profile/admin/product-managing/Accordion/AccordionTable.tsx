@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
-import { Testimonial } from "../../../../../Interfaces";
+import { Description, Testimonial } from "../../../../../Interfaces";
 import { TestimonialSection } from "../testimonials/TestimonialSection";
 
 export type AccordionTableProps = {
   sections: AccordionSectionProps[];
   testimonials: Testimonial[];
   productID: string;
+  registerContentChange: (id: number, type: ChangeType) => void;
+  setTestimonials: (testimonials: Testimonial[]) => void;
+  setSections: (sections: AccordionSectionProps[]) => void;
 };
 
 /**
@@ -18,41 +21,6 @@ export type AccordionTableProps = {
  * @returns The React component for the Accordion table
  */
 export default function AccordionTable(props: AccordionTableProps) {
-  const [priorityChanges] = useState<Map<number, number>>(
-    new Map()
-  ); //ID as key, priority as value
-  const [contentChanges, setContentChanges] = useState<
-    Map<ChangeType, number[]>
-  >(new Map()); //The type of change as key, list of IDs that has had that change as value
-
-  useEffect(() => {
-    // Sets up the map so that it can register changes
-    setContentChanges((changes) => {
-      for (let type in ChangeType) {
-        changes.set(ChangeType[type as keyof typeof ChangeType], []);
-      }
-      return changes;
-    });
-  });
-
-  /**
-   * Registers changes to the content of the table. This is used to keep track of what has changed and what needs to be saved.
-   *
-   * @param id The ID of the section that has changed
-   * @param change The type of change that has been made
-   */
-  const registerContentChange = (id: number, change: ChangeType) => {
-    if (!contentChanges.get(change)?.includes(id)) {
-      contentChanges.get(change)?.push(id);
-    }
-    if (change === ChangeType.Delete) {
-      contentChanges
-        .get(ChangeType.Edit)
-        ?.filter((changeId) => changeId !== id);
-      priorityChanges.delete(id);
-    }
-  };
-
   /**
    * Deletes a section, including its header and rows in the body, from the table.
    * Makes react re-render.
@@ -60,17 +28,15 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param id The ID of the section that has changed
    */
   const deleteSection = (id: number) => {
-    const index = sectionList.findIndex((section) => section.sectionID === id);
-
-    const newSections = sectionList.filter(
+    const section = props.sections.find((section) => section.sectionID === id);
+    section?.rows.forEach((row) => {
+      props.registerContentChange(row.component_id, ChangeType.Delete);
+    });
+    const newSections = props.sections.filter(
       (section) => section.sectionID !== id
     );
-    setSectionList(newSections);
+    props.setSections(newSections);
   };
-
-  const [sectionList, setSectionList] = useState<AccordionSectionProps[]>([
-    ...props.sections,
-  ]);
 
   /**
    * Creates a new section in the table.
@@ -79,20 +45,24 @@ export default function AccordionTable(props: AccordionTableProps) {
    * @param title The title of the new section
    */
   const newSection = () => {
-    const id = sectionList.length;
+    const id = createUniqueID();
     showHeaderPopup({ title: undefined, informationCallBack: finishCreation });
     function finishCreation(title: string) {
-      sectionList.push({
+      props.sections.push({
         header: {
           title: title,
         },
         rows: [],
         sectionID: id,
-        registerContentChange: registerContentChange,
-        deleteSection: deleteSection,
       });
-      setSectionList([...sectionList]);
+      props.setSections([...props.sections]);
     }
+  };
+
+  const createUniqueID = () => {
+    //While in theory it is possible to generate the same ID, the chance is so small that it is not worth worrying about.
+    //It also requires them to create multiple sections in the same millisecond, which should be impossible for a human, maybe even a computer.
+    return Date.now() + Math.floor(Math.random() * 1000);
   };
 
   return (
@@ -103,22 +73,21 @@ export default function AccordionTable(props: AccordionTableProps) {
       >
         New section
       </button>
-      {sectionList.map((section) => 
-        (
-          <AccordionSection
-            key={section.sectionID}
-            header={section.header}
-            rows={section.rows}
-            sectionID={section.sectionID}
-            registerContentChange={registerContentChange}
-            deleteSection={deleteSection}
-          />
-        )
-      )}
+      {props.sections.map((section) => (
+        <AccordionSection
+          key={section.sectionID}
+          header={section.header}
+          rows={section.rows}
+          sectionID={section.sectionID}
+          registerContentChange={props.registerContentChange}
+          deleteSection={deleteSection}
+        />
+      ))}
       <TestimonialSection
         testimonials={props.testimonials}
         sectionId={0}
         productId={props.productID}
+        setTestimonials={props.setTestimonials}
       />
     </div>
   );

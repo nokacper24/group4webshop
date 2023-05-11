@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { AccordionBody } from "./AccordionBody";
 import { AccordionHeader } from "./AccordionHeader";
-import { AccordionRowProps } from "./AccordionRow";
 import { ChangeType } from "./ChangeTypes";
 import { showPopup } from "../Edit-popups/RowEditPopup";
+import { SimpleDescription } from "../../../../../Interfaces";
 
 /**
  * The props of the AccordionSection component.
@@ -12,7 +12,16 @@ export type AccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: AccordionRowProps[];
+  rows: SimpleDescription[];
+
+  sectionID: number;
+};
+
+type PrivateAccordionSectionProps = {
+  header: {
+    title: string;
+  };
+  rows: SimpleDescription[];
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
@@ -27,7 +36,9 @@ let latestID = 100;
  * @param props the props of the component, must be of AccordionSectionProps type
  * @returns the React component for the Accordion section
  */
-export function AccordionSection(props: AccordionSectionProps) {
+export function AccordionSection(props: PrivateAccordionSectionProps) {
+  const [collapse, setCollapse] = useState<boolean>(false);
+
   /**
    * Calls the deleteSection function in the parent component. Deleting itself in the process.
    */
@@ -56,19 +67,22 @@ export function AccordionSection(props: AccordionSectionProps) {
       });
     }
     function finishCreation(image: boolean, title: string, content: string) {
-      props.registerContentChange(createID(), ChangeType.Add);
+      let id = createID();
+      props.registerContentChange(id, ChangeType.Add);
+
       rows.push({
-        title: title,
-        id: createID(),
-        image: image,
-        content: content,
+        component_id: id,
+        text: image ? undefined : { text_title: title, paragraph: content },
+        image: image ? { image_path: content, alt_text: title } : undefined,
+        is_text_not_image: !image,
       });
       setRows([...rows]);
     }
   };
 
   const createID = (): number => {
-    return latestID++;
+    latestID = latestID + Math.floor(Math.random() * 13);
+    return props.sectionID + latestID;
   };
 
   /**
@@ -77,7 +91,7 @@ export function AccordionSection(props: AccordionSectionProps) {
    * @param id the ID of the row to be deleted
    */
   const deleteRow = (id: number) => {
-    let newRows = rows.filter((row) => row.id !== id);
+    let newRows = rows.filter((row) => row.component_id !== id);
     setRows(newRows);
     props.registerContentChange(id, ChangeType.Delete);
   };
@@ -88,38 +102,58 @@ export function AccordionSection(props: AccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    let row = rows.find((row) => row.id === id);
+    let row = rows.find((row) => row.component_id === id);
     if (row) {
       showPopup({
-        image: row.image,
-        title: row.title,
-        content: row.content,
+        image: !row.is_text_not_image,
+        title: row.is_text_not_image
+          ? row.text?.text_title
+          : row.image?.alt_text,
+        content: row.is_text_not_image
+          ? row.text?.paragraph
+          : row.image?.image_path,
         informationCallBack: finishEdit,
       });
       function finishEdit(image: boolean, title: string, content: string) {
-        if (row) {
-          row.image = image;
-          row.title = title;
-          row.content = content;
-          setRows([...rows]);
-          props.registerContentChange(id, ChangeType.Edit);
-        }
+        //Tried creating a if (row) but sonarlint complains row always exists, but the TS/React compiler complains it might not exist
+        row!.is_text_not_image = !image;
+        row!.text = image
+          ? undefined
+          : { text_title: title, paragraph: content };
+        row!.image = image
+          ? { image_path: content, alt_text: title }
+          : undefined;
+        setRows([...rows]);
+        props.registerContentChange(id, ChangeType.Edit);
       }
     }
     props.registerContentChange(id, ChangeType.Edit);
   };
 
-  const [rows, setRows] = useState<AccordionRowProps[]>([...props.rows]);
+  const [rows, setRows] = useState<SimpleDescription[]>([...props.rows]);
+
+  const swapRows = () => {
+    let newRows = [...rows];
+    newRows.reverse();
+    setRows(newRows);
+  };
+
+  const collapseBody = () => {
+    setCollapse(!collapse);
+  };
 
   return (
     <>
       <AccordionHeader
         title={props.header.title}
+        collapseFunction={collapseBody}
         deleteSelf={deleteSelf}
         addRow={addRow}
       ></AccordionHeader>
       <AccordionBody
         rows={rows}
+        collapsed={collapse}
+        swapRows={swapRows}
         editRow={editRow}
         deleteRow={deleteRow}
       ></AccordionBody>
