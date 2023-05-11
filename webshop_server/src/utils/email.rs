@@ -89,25 +89,41 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
 fn register_user_template(invite_code: &str) -> String {
     let email_template = format!(
         r#"
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Confirm Your User Account on ProFlex</title>
-    </head>
-    <body>
-        <p>Dear Customer,</p>
-        <p>Thank you for accepting our invitation to create a user account on ProFlex. We're thrilled to have you on board!</p>
-        <p>To complete your registration, please click the following link:</p>
-        <a href="https://group04.web-tek.ninja/verify/{invite_code}">Click Here</a>
-        <p>You'll be asked to set up your account and create a password. Once you've completed this step, you'll be able to access all of ProFlex's features.</p>
-        <p>If you did not request this invitation, please ignore this email or contact us at <a href="group04webshop@gmail.com">group04webshop@gmail.com</a> for further assistance.</p>
-        <p>If you have any questions or encounter any issues during the registration process, please don't hesitate to reach out to us. We're here to help!</p>
-        <p>Thank you for choosing ProFlex. We look forward to working with you.</p>
-        <p>Best regards,</p>
-        <p>The ProFlex Team</p>
-    </body>
-    </html>
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8">
+            <title>Confirm Your User Account on ProFlex</title>
+        </head>
+
+        <style>
+            p {{
+                margin-top: 2em;
+                margin-bottom: 2em;
+            }}
+        </style>
+
+        <body style=" font-family: sans-serif">
+            <div style="padding: 1em;">
+                <h1 style="font-size: 1.2em">Dear Customer,</h1>
+                <p>Thank you for accepting our invitation to create a user account on ProFlex. We're thrilled to have you on
+                    board!
+                </p>
+                <p>To complete your registration, please click the following link: <a
+                        href="https://group04.web-tek.ninja/verify/{invite_code}">Verify your e-mail</a>.</p>
+                <p>You'll be asked to set
+                    up your account and create a password. Once you've completed this step, you'll be
+                    able to access all of ProFlex's features. Thank you for choosing us. We look forward to working with you.
+                </p>
+                <p><b>Best regards,<br>
+                    The ProFlex Team</b></p>
+                <p style="font-size: 0.8em; opacity: 0.8;">If you did not request this invitation, please ignore this e-mail.
+                </p>
+            </div>
+        </body>
+
+        </html>
     "#,
         invite_code = invite_code
     );
