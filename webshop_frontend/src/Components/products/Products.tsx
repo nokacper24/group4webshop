@@ -51,7 +51,7 @@ function NoProductsYet() {
       <p>
         It seems like we don't have any products yet!
         <br />
-        Come backlater...
+        Come back later...
       </p>
     </>
   );
