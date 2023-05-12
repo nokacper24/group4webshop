@@ -42,7 +42,7 @@ export default function SelectTableRow(props: RowProps) {
   };
 
   return (
-    <tr className={`${selected ? "selected-row" : ""}`}>
+    <tr className={selected ? "selected-row" : ""}>
       <td>
         <label className="hidden-label">Select</label>
         <input type="checkbox" checked={selected} onChange={toggleSelect} />

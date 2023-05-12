@@ -41,7 +41,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
             onClick={toggleVisibility}
           >
             <svg
-              transform={`${collapsed ? "" : "scale(1 -1)"}`}
+              transform={collapsed ? "" : "scale(1 -1)"}
               width="2em"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 150 320 260"

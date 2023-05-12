@@ -80,7 +80,7 @@ function ImageDescription(props: ImageDescriptionProps) {
   return (
     <div className={classes}>
       <img
-        src={`${props.description.image?.image_path}`}
+        src={props.description.image?.image_path}
         alt={props.description.image?.alt_text}
       />
     </div>
