@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent } from "react";
+import { useRef, useState } from "react";
 import TermsOfService from "./TermsOfService";
 
 /**
@@ -8,98 +8,87 @@ import TermsOfService from "./TermsOfService";
  * @returns A Register Company component.
  */
 export default function RegisterCompanyAccount() {
-  return (
-    <>
-      <>
-        <p>Fill out all the fields to create your account.</p>
+  const password = useRef<HTMLInputElement>(null);
+  const confirmPassword = useRef<HTMLInputElement>(null);
+  const [formAlert, setFormAlert] = useState<string>("");
 
-        <form>
-          <label htmlFor="create-account_email">E-mail</label>
-          <input
-            id="create-account_email"
-            name="email"
-            value="user@company.com" /* TODO: Fill value from URL */
-            required
-            disabled
-          />
-
-          <label htmlFor="create-account_company-name">Company name</label>
-          <input
-            id="create-account_company-name"
-            name="company-name"
-            type="text"
-            required
-          />
-
-          <label htmlFor="create-account_company-address">
-            Company address
-          </label>
-          <input
-            id="create-account_company-address"
-            name="company-address"
-            type="text"
-            required
-          />
-
-          <label htmlFor="create-account_password">Password</label>
-          <input
-            id="create-account_password"
-            name="password"
-            type="password"
-            required
-          />
-
-          <label htmlFor="create-account_confirm-password">
-            Confirm password
-          </label>
-          <input
-            id="create-account_confirm-password"
-            name="confirm-password"
-            type="password"
-            required
-          />
-
-          <TermsOfService />
-
-          <p className="form-alert"></p>
-
-          <button
-            className="default-button submit-button m-t-1"
-            type="submit"
-            onClick={(event) => validateForm(event)}
-          >
-            Register
-          </button>
-        </form>
-      </>
-    </>
-  );
-}
-
-/**
- * Confirm that the form has valid input.
- * Check if the password and confirm password fields are identical.
- *
- * @param event Mouse Event on button
- */
-function validateForm(
-  event: ReactMouseEvent<HTMLButtonElement, MouseEvent>
-): void {
-  const formAlert: HTMLParagraphElement | null =
-    document.querySelector(".form-alert");
-  const password: HTMLInputElement | null = document.querySelector(
-    "#create-account_password"
-  );
-  const confirmPassword: HTMLInputElement | null = document.querySelector(
-    "#create-account_confirm-password"
-  );
-
-  if (password?.value != confirmPassword?.value) {
+  /**
+   * Handle the submit of the support form. Validates the form data.
+   *
+   * @param event The form event.
+   */
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (formAlert != null) {
-      formAlert.innerHTML =
-        '"Confirm password" must contain the same value as "Password"';
+    if (password.current?.value != confirmPassword.current?.value) {
+      setFormAlert(
+        '"Confirm password" must contain the same value as "Password"'
+      );
+    } else {
+      setFormAlert("");
     }
-  }
+
+    // TODO: Send the form info somewhere
+  };
+
+  return (
+    <>
+      <p>Fill out all the fields to create your account.</p>
+
+      <form onSubmit={(event) => handleSubmit(event)}>
+        <label htmlFor="create-account_email">E-mail</label>
+        <input
+          id="create-account_email"
+          name="email"
+          value="user@company.com" /* TODO: Fill value from URL */
+          required
+          disabled
+        />
+
+        <label htmlFor="create-account_company-name">Company name</label>
+        <input
+          id="create-account_company-name"
+          name="company-name"
+          type="text"
+          required
+        />
+
+        <label htmlFor="create-account_company-address">Company address</label>
+        <input
+          id="create-account_company-address"
+          name="company-address"
+          type="text"
+          required
+        />
+
+        <label htmlFor="create-account_password">Password</label>
+        <input
+          ref={password}
+          id="create-account_password"
+          name="password"
+          type="password"
+          required
+        />
+
+        <label htmlFor="create-account_confirm-password">
+          Confirm password
+        </label>
+        <input
+          ref={confirmPassword}
+          id="create-account_confirm-password"
+          name="confirm-password"
+          type="password"
+          required
+        />
+
+        <TermsOfService />
+
+        <p className="form-alert">{formAlert}</p>
+
+        <button className="default-button submit-button m-t-1" type="submit">
+          Register
+        </button>
+      </form>
+    </>
+  );
 }
