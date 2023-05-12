@@ -84,7 +84,7 @@ export default function ProductPage() {
             </div>
           </section>
           {descriptions.length != 0 && (
-            <section style={{ marginTop: "2em" }} className="container">
+            <section className="container">
               {DescriptionsContainer(descriptions)}
             </section>
           )}
@@ -92,7 +92,7 @@ export default function ProductPage() {
             <section className="gallery-wrapper">
               <div className="container">
                 <h2 className="testimonial-title">Testimonials</h2>
-                <Gallery slides={testimonials} galleryName={"Testimonials"} />
+                <Gallery slides={testimonials} galleryName="Testimonials" />
               </div>
             </section>
           )}
