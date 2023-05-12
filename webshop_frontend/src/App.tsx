@@ -12,6 +12,7 @@ import Profile from "./Components/profile/Profile";
 import ManageProductPage from "./Components/profile/admin/product-managing/ManageProductPage";
 import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
 import Credits from "./Components/credits/Credits";
+import PageNotFound from "./Components/PageNotFound";
 
 /**
  * Represents the website content.
@@ -26,6 +27,7 @@ export default function App() {
       <main id="main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="home" element={<Home />} />
           <Route path="products" element={<Products />} />
           <Route path="products/:productId" element={<ProductPage />} />
           <Route
@@ -48,6 +50,7 @@ export default function App() {
             element={<ManageProductPage />}
           />
           <Route path="product/create" element={<ManageProductPage />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </main>
 
