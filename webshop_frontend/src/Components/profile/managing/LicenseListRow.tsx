@@ -32,7 +32,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     <>
       <tr className="row-header">
         <td>{license.display_name}</td>
-        <td>{0}</td>
+        <td>{license.active_users}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>
         <td>

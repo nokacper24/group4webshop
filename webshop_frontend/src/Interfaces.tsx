@@ -23,6 +23,7 @@ export interface FullLicenseInfo {
   product_id: string;
   company_name: string;
   display_name: string;
+  active_users: number;
 }
 
 export interface User {

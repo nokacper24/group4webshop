@@ -42,6 +42,7 @@ pub struct FullLicenseInfo {
     product_id: String,
     company_name: String,
     display_name: String,
+    active_users: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -66,10 +67,15 @@ pub async fn get_licenses(pool: &Pool<Postgres>) -> Result<Vec<License>, sqlx::E
 pub async fn get_licenses_full(pool: &Pool<Postgres>) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
         FullLicenseInfo,
-        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users
         FROM license
         JOIN product USING (product_id)
-        JOIN company USING (company_id)"#
+        JOIN company USING (company_id)
+        JOIN (
+            SELECT count(*) AS active_users, license_id
+            FROM user_license
+            GROUP BY license_id
+        ) AS count USING (license_id)"#
     )
     .fetch_all(pool)
     .await?;
@@ -98,10 +104,15 @@ pub async fn get_licenses_full_by_company(
 ) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
         FullLicenseInfo,
-        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)
+        JOIN (
+            SELECT count(*) AS active_users, license_id
+            FROM user_license
+            GROUP BY license_id
+        ) AS count USING (license_id)
         WHERE company_id = $1"#,
         company_id
     )
@@ -162,12 +173,20 @@ pub async fn get_licenses_for_user(
 ) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
         FullLicenseInfo,
-        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users
         FROM license
-        JOIN user_license USING (license_id)
         JOIN product USING (product_id)
         JOIN company USING (company_id)
-        WHERE user_id = $1"#,
+        JOIN (
+            SELECT count(*) AS active_users, license_id
+                FROM user_license
+                WHERE license_id IN (
+                    SELECT license_id
+                    FROM user_license
+                    WHERE user_id = $1
+                )
+            GROUP BY license_id
+            ) AS count USING (license_id)"#,
         user_id
     )
     .fetch_all(pool)
@@ -184,10 +203,15 @@ pub async fn get_licenses_for_user_no_access(
 ) -> Result<Vec<FullLicenseInfo>, sqlx::Error> {
     let licenses = query_as!(
         FullLicenseInfo,
-        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name
+        r#"SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)
+        JOIN (
+            SELECT count(*) AS active_users, license_id
+            FROM user_license
+            GROUP BY license_id
+        ) AS count USING (license_id)
         WHERE company_id = $1
         AND license_id NOT IN(
             SELECT license_id
