@@ -20,6 +20,7 @@ export default function Gallery(props: GalleryProps) {
   let container = useRef<HTMLDivElement>(null);
 
   const [index, setIndex] = useState<number>(0);
+  const [noButtons] = useState<boolean>(props.slides.length <= 1);
 
   /**
    * Update the index of the current slide.
@@ -49,11 +50,11 @@ export default function Gallery(props: GalleryProps) {
   };
 
   return (
-    <div className="gallery">
+    <div className={`gallery ${noButtons ? "grid-auto" : ""}`}>
       <button
         style={{ paddingRight: "0.2em" }}
         className={`icon-button slide-button ${
-          props.slides.length > 1 ? "" : "display-none"
+          noButtons ? "display-none" : ""
         }`}
         onClick={() => changeSlide(-1)}
       >
@@ -69,12 +70,8 @@ export default function Gallery(props: GalleryProps) {
           />
         </svg>
       </button>
-      <div className="slides-view">
-        <div
-          style={props.slides.length > 1 ? { gridTemplateColumns: "auto" } : {}}
-          className="slides-container"
-          ref={container}
-        >
+      <div className={`slides-view ${noButtons ? "full-slides-view" : ""}`}>
+        <div className="slides-container" ref={container}>
           {props.slides.map((slide) => (
             <ParagraphSlide
               key={slide.testimonial_id}
@@ -89,7 +86,7 @@ export default function Gallery(props: GalleryProps) {
       <button
         style={{ paddingLeft: "0.2em" }}
         className={`icon-button slide-button ${
-          props.slides.length > 1 ? "" : "display-none"
+          noButtons ? "display-none" : ""
         }`}
         onClick={() => changeSlide(1)}
       >
