@@ -246,7 +246,7 @@ label {
   width: 100%;
   margin-block: 2em;
   padding-block: 1em;
-  outline: 2px solid transparent;
+  outline: 5px solid transparent;
 }
 
 .highlight-section:before,
@@ -661,7 +661,7 @@ form a:hover {
 }
 
 .form-alert {
-  margin: 0;
+  margin-block: 0.5em;
   color: var(--clr-danger);
 }
 
@@ -743,7 +743,7 @@ form a:hover {
   color: var(--clr-neutral-1000);
   background-color: var(--clr-primary);
 
-  border: 2px solid var(--clr-neutral-1000);
+  border: 1px solid var(--clr-neutral-1000);
   border-radius: 0.5em;
   outline: 1px solid transparent;
 
@@ -760,6 +760,7 @@ form a:hover {
   color: var(--clr-secondary);
   background-color: var(--clr-neutral-1000);
   border-color: var(--clr-neutral-0);
+  outline-width: 3px;
 }
 
 .partners {
@@ -878,6 +879,8 @@ form a:hover {
   text-shadow: var(--text-shadow);
   text-align: center;
   overflow: hidden;
+
+  outline: 1px solid transparent;
 }
 
 .banner-title {
@@ -939,6 +942,7 @@ form a:hover {
   border-radius: 0.5rem;
   object-fit: cover;
   box-shadow: var(--box-shadow);
+  outline: 1px solid transparent;
 }
 
 @media (max-width: 800px) {
@@ -959,10 +963,8 @@ form a:hover {
   color: var(--clr-neutral-1000);
   background-color: var(--clr-primary);
   background-image: linear-gradient(var(--clr-gradient-2));
-}
-
-.gallery-wrapper :is(h2, p) {
-  filter: drop-shadow(0 0 0.1rem var(--clr-neutral-0));
+  outline: 1px solid transparent;
+  text-shadow: var(--text-shadow);
 }
 
 .gallery-wrapper p {
@@ -1070,15 +1072,16 @@ form a:hover {
 }
 
 /* || PURCHASE LICENSE PAGE */
-.checkbox-input>input {
+.checkbox-input input {
   width: initial;
+  margin-right: 0.5em;
   display: inline-block;
 }
 
 .checkbox-input>label {
   width: initial;
   display: inline-block;
-  margin: 0.5em;
+  margin-block: 0.5em;
   cursor: pointer;
 }
 
