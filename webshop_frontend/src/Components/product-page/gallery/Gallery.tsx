@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Testimonial } from "../../../Interfaces";
 import { ParagraphSlide } from "./ParagraphSlide";
 
@@ -7,14 +7,14 @@ import { ParagraphSlide } from "./ParagraphSlide";
  */
 export type GalleryProps = {
   galleryName: string;
-  testimonials: Testimonial[];
+  slides: Testimonial[];
 };
 
 /**
  * Renders a gallery with the given slides.
  *
- * @param props the props of the gallery, must be of type GalleryProps
- * @returns the gallery HTML element
+ * @param props the props of the gallery.
+ * @returns The Gallery component.
  */
 export default function Gallery(props: GalleryProps) {
   let container = useRef<HTMLDivElement>(null);
@@ -27,17 +27,19 @@ export default function Gallery(props: GalleryProps) {
    * @param amount the amount of slides to change.
    */
   const changeSlide = (amount: number) => {
-    let slidesAmount = props.testimonials.length;
+    let slidesAmount = props.slides.length;
 
     if (container.current) {
       let newIndex = index + amount;
 
+      // If the new index is out of range, wrap it around
       if (newIndex < 0) {
         newIndex = slidesAmount - 1;
       } else if (newIndex >= slidesAmount) {
         newIndex = 0;
       }
 
+      // Move the slides
       container.current.style.transform = `translateX(-${
         (newIndex * 100) / slidesAmount
       }%)`;
@@ -51,7 +53,7 @@ export default function Gallery(props: GalleryProps) {
       <button
         style={{ paddingRight: "0.2em" }}
         className={`icon-button slide-button ${
-          props.testimonials.length > 1 ? "" : "display-none"
+          props.slides.length > 1 ? "" : "display-none"
         }`}
         onClick={() => changeSlide(-1)}
       >
@@ -69,13 +71,11 @@ export default function Gallery(props: GalleryProps) {
       </button>
       <div className="slides-view">
         <div
-          style={
-            props.testimonials.length > 1 ? { gridTemplateColumns: "auto" } : {}
-          }
+          style={props.slides.length > 1 ? { gridTemplateColumns: "auto" } : {}}
           className="slides-container"
           ref={container}
         >
-          {props.testimonials.map((slide) => (
+          {props.slides.map((slide) => (
             <ParagraphSlide
               key={slide.testimonial_id}
               paragraph={slide.text}
@@ -89,7 +89,7 @@ export default function Gallery(props: GalleryProps) {
       <button
         style={{ paddingLeft: "0.2em" }}
         className={`icon-button slide-button ${
-          props.testimonials.length > 1 ? "" : "display-none"
+          props.slides.length > 1 ? "" : "display-none"
         }`}
         onClick={() => changeSlide(1)}
       >
