@@ -3,20 +3,16 @@ import { FullLicenseInfo } from "../../../Interfaces";
 import LicenseListRow from "./LicenseListRow";
 import { fetchCompanyLicenses } from "../../../ApiController";
 
-type LicenseListProps = {
-  companyId: number;
-};
-
 /**
  * A list of all owned licenses for a user, and their details.
  *
  * @returns A License List component as a JSX element.
  */
-export default function LicenseList(props: LicenseListProps) {
+export default function LicenseList(companyId: number) {
   const [licenses, setLicenses] = useState<FullLicenseInfo[]>([]);
 
   useEffect(() => {
-    fetchCompanyLicenses(props.companyId).then((licenses) => {
+    fetchCompanyLicenses(companyId).then((licenses) => {
       setLicenses(licenses);
     });
   }, []);
