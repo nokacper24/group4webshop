@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import teapot from "../assets/teapot.png";
 
 export default function PageNotFound() {
@@ -7,6 +8,10 @@ export default function PageNotFound() {
         <h1>404 Not Found</h1>
         <p>Sorry, we could not find the page you were looking for!</p>
         <img src={teapot} alt="teapot" width="300" height="170"></img>
+        <br />
+        <Link className="hero-button" to="/">
+          Return home
+        </Link>
       </section>
     </>
   );
