@@ -158,7 +158,7 @@ button:disabled {
   color: var(--clr-neutral-0) !important;
   background-color: var(--clr-neutral-900) !important;
   outline-color: var(--clr-neutral-600) !important;
-  border: initial;
+  border: initial !important;
   cursor: not-allowed !important;
 }
 
@@ -220,6 +220,10 @@ tr {
 
 label {
   display: block;
+}
+
+input:disabled {
+  cursor: not-allowed !important;
 }
 
 .container {
