@@ -2,8 +2,8 @@ import { dangerWords } from "./SelectTableButton";
 
 type SelectTableButtonProps = {
   text: string;
-  indices: number[];
-  action: (indices: number[]) => void;
+  selectedIds: string[];
+  action: (ids: string[]) => void;
   clearSelected: () => void;
 };
 
@@ -17,7 +17,7 @@ export default function SelectTableOutsideButton(
   props: SelectTableButtonProps
 ) {
   const handleClick = () => {
-    props.action(props.indices);
+    props.action(props.selectedIds);
     props.clearSelected();
   };
 

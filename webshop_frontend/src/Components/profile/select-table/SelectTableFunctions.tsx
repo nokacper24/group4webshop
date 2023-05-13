@@ -15,8 +15,8 @@ export function createSelectTableProps(
   headers: string[],
   rows: SelectTableRowProps[],
   buttonText: string,
-  buttonAction: (index: number) => void,
-  outsideButtons: Map<string, (selectedIndex: number[]) => void>
+  buttonAction: (id: string) => void,
+  outsideButtons: Map<string, (selectedIds: string[]) => void>
 ): SelectTableProps {
   let headerColumns = headers.map((text) => {
     return {
@@ -74,46 +74,61 @@ export function createRowProps(
  * @returns The item that was moved.
  */
 export function moveItemBetweenTables(
-  index: number,
+  id: string,
   fromTable: SelectTableProps,
   toTable: SelectTableProps,
-  setFromListFunction: any,
-  setToListFunction: any
+  setFromListFunction: (rows: SelectTableRowProps[]) => void,
+  setToListFunction: (rows: SelectTableRowProps[]) => void
 ) {
-  /* Get the item to be moved from the "From list" to the "To list" */
-  let item: SelectTableRowProps = fromTable.rows[index];
+  let item: SelectTableRowProps = {
+    id: "",
+    columns: [
+      {
+        text: "",
+      },
+    ],
+  };
 
-  /* Remove item from the "From list" */
-  fromTable.rows = fromTable.rows.filter((element) => element !== item);
-  setFromListFunction(fromTable.rows);
+  fromTable.rows.forEach((row) => {
+    if (row.id == id) {
+      /* Get the item to be moved from the "From list" to the "To list" */
+      item = row;
 
-  /* Add item to the "To list" */
-  toTable.rows.push(item);
-  setToListFunction(toTable.rows);
+      /* Remove item from the "From list" */
+      fromTable.rows = fromTable.rows.filter((element) => element !== item);
+      setFromListFunction(fromTable.rows);
+
+      /* Add item to the "To list" */
+      toTable.rows.push(item);
+      setToListFunction(toTable.rows);
+    }
+  });
 
   return item;
 }
 
 export function moveItemsBetweenTables(
-  indices: number[],
+  ids: string[],
   fromTable: SelectTableProps,
   toTable: SelectTableProps,
-  setFromListFunction: any,
-  setToListFunction: any,
+  setFromListFunction: (rows: SelectTableRowProps[]) => void,
+  setToListFunction: (rows: SelectTableRowProps[]) => void,
   newFromList: Set<string>,
   newToList: Set<string>
 ) {
-  let sortedIndices = indices.sort((a, b) => a - b);
+  ids.forEach((id) => {
+    fromTable.rows.forEach((row) => {
+      if (id == row.id) {
+        let item: SelectTableRowProps = row;
 
-  for (let i = sortedIndices.length - 1; i >= 0; i--) {
-    let index = sortedIndices[i];
-    let item: SelectTableRowProps = fromTable.rows[index];
+        fromTable.rows = fromTable.rows.filter((element) => element !== item);
+        toTable.rows.push(item);
 
-    fromTable.rows = fromTable.rows.filter((element) => element !== item);
-    toTable.rows.push(item);
+        updateNewChanges(item, newFromList, newToList);
+      }
+    });
+  });
 
-    updateNewChanges(item, newFromList, newToList);
-  }
   setFromListFunction(fromTable.rows);
   setToListFunction(toTable.rows);
 }

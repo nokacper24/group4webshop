@@ -3,7 +3,7 @@ export type SelectTableHeaderProps = {
     text: string;
   }[];
   toggleSelectAll: () => void;
-  selectAll: string;
+  selectAll: boolean;
 };
 
 /**
@@ -19,7 +19,7 @@ export default function SelectTableHeader(props: SelectTableHeaderProps) {
         <label>Select</label>
         <input
           type="checkbox"
-          checked={props.selectAll == "all"}
+          checked={props.selectAll}
           onChange={props.toggleSelectAll}
         />
       </th>

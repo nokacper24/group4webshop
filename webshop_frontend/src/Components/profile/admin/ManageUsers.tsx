@@ -64,9 +64,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const removeItHead = (index: number) => {
+  const removeItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -81,9 +81,9 @@ export default function ManageUsers() {
    *
    * @param indices The indices of the users in the list of IT  heads.
    */
-  const removeSelectedItHeads = (indices: number[]) => {
+  const removeSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -106,9 +106,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const addItHead = (index: number) => {
+  const addItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,
@@ -121,11 +121,11 @@ export default function ManageUsers() {
   /**
    * Add all the selected users to the list of IT heads.
    *
-   * @param indices The indices of the users in the list of IT  heads.
+   * @param ids The indices of the users in the list of IT  heads.
    */
-  const addSelectedItHeads = (indices: number[]) => {
+  const addSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,

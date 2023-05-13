@@ -10,12 +10,7 @@ export type SelectTableProps = {
       text: string;
     }[];
   };
-  rows: {
-    id: string;
-    columns: {
-      text: string;
-    }[];
-  }[];
+  rows: SelectTableRowProps[];
   button: Button;
   outsideButtons: OutsideButton[];
 };
@@ -35,65 +30,91 @@ export type SelectTableRowProps = {
  * @returns A Select Table component.
  */
 export default function SelectTable(props: SelectTableProps) {
-  const [selectedRows, setSelectedRows] = useState(0);
-  const [selectedRowsIndices, setSelectedRowsIndices] = useState<number[]>([]);
-  const [selectAll, setSelectAll] = useState("none");
+  const [selectedRows, setSelectedRows] = useState<Map<string, boolean>>(
+    new Map()
+  );
+  const [allSelected, setAllSelected] = useState<boolean>(false);
 
-  const clearSelected = () => {
-    setSelectedRows(0);
-    setSelectedRowsIndices([]);
+  const getSelectedRows = () => {
+    let rows: string[] = [];
+
+    selectedRows.forEach((value, key) => {
+      if (value) {
+        rows.push(key);
+      }
+    });
+
+    return rows;
+  };
+
+  /**
+   * Set all rows to be either selected or not.
+   *
+   * @param value If the rows are to be set as selected or not.
+   */
+  const setAllSelectedRows = (value: boolean) => {
+    let tempMap = new Map<string, boolean>();
+
+    selectedRows.forEach((_, key) => {
+      tempMap.set(key, value);
+    });
+
+    setSelectedRows(tempMap);
   };
 
   const selectAllIndices = () => {
-    let allIndices = [];
-    for (let i = 0; i < props.rows.length; i++) {
-      allIndices.push(i);
-    }
-    setSelectedRowsIndices([...allIndices]);
+    setAllSelectedRows(true);
   };
 
   const selectNoIndices = () => {
-    setSelectedRowsIndices([]);
+    setAllSelectedRows(false);
   };
 
   const toggleSelectAll = () => {
-    if (selectedRows != props.rows.length) {
-      setSelectedRows(props.rows.length);
-      selectAllIndices();
-    } else {
-      setSelectedRows(0);
-      selectNoIndices();
-    }
+    setAllSelected((oldAllSelected) => {
+      if (oldAllSelected) {
+        selectNoIndices();
+      } else {
+        selectAllIndices();
+      }
+      return !oldAllSelected;
+    });
   };
 
-  const incrementSelectedRows = () => {
-    setSelectedRows(selectedRows + 1);
-  };
-  const decrementSelectedRows = () => {
-    setSelectedRows(selectedRows - 1);
+  const checkIfAllSelected = (tempMap: Map<string, boolean>) => {
+    let value = true;
+
+    tempMap.forEach((v) => {
+      if (!v) {
+        value = false;
+      }
+    });
+
+    return value;
   };
 
-  const updateSelected = (checked: boolean, index: number) => {
-    setSelectAll("some");
-    if (checked) {
-      incrementSelectedRows();
-      setSelectedRowsIndices([...selectedRowsIndices, index]);
-    } else {
-      decrementSelectedRows();
-      let newSelected = selectedRowsIndices.filter((item) => item != index);
-      setSelectedRowsIndices(newSelected);
-    }
+  const updateSelected = (checked: boolean, id: string) => {
+    let tempMap = new Map(selectedRows);
+    tempMap.set(id, checked);
+    setSelectedRows(tempMap);
+
+    setAllSelected(checkIfAllSelected(tempMap));
   };
 
   useEffect(() => {
-    if (selectedRows == props.rows.length) {
-      setSelectAll("all");
-    } else if (selectedRows == 0) {
-      setSelectAll("none");
-    } else {
-      setSelectAll("some");
-    }
-  });
+    // Add each ID of props.rows to the selectedRows map with default false
+    let tempMap = new Map<string, boolean>();
+
+    props.rows.forEach((row) => {
+      tempMap.set(row.id, false);
+    });
+
+    setSelectedRows(tempMap);
+
+    console.log("Prop rows: ", props.rows);
+    console.log("State rows: ", tempMap);
+    console.log(" ");
+  }, [props.rows]);
 
   return (
     <>
@@ -102,18 +123,19 @@ export default function SelectTable(props: SelectTableProps) {
           <thead>
             <SelectTableHeader
               columns={props.header.columns}
-              toggleSelectAll={() => toggleSelectAll()}
-              selectAll={selectAll}
+              toggleSelectAll={toggleSelectAll}
+              selectAll={allSelected}
             />
           </thead>
           <tbody>
             {props.rows.map((row, index) => (
               <SelectTableRow
                 key={row.id}
+                id={row.id}
                 rowIndex={index}
                 columns={row.columns}
                 updateSelected={updateSelected}
-                selectAll={selectAll}
+                selected={selectedRows.get(row.id)!}
                 button={props.button}
               />
             ))}
@@ -126,9 +148,9 @@ export default function SelectTable(props: SelectTableProps) {
             <SelectTableOutsideButton
               key={button.text}
               text={button.text}
-              indices={selectedRowsIndices}
+              selectedIds={getSelectedRows()}
               action={button.action}
-              clearSelected={clearSelected}
+              clearSelected={selectNoIndices}
             />
           );
         })}

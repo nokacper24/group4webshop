@@ -1,7 +1,7 @@
 type SelectTableButtonProps = {
   text: string;
-  rowIndex: number;
-  action: (index: number) => void;
+  id: string;
+  action: (id: string) => void;
 };
 
 export const dangerWords = ["remove", "invalidate"];
@@ -20,7 +20,7 @@ export default function SelectTableButton(props: SelectTableButtonProps) {
           ? "bg-danger"
           : ""
       }`}
-      onClick={() => props.action(props.rowIndex)}
+      onClick={() => props.action(props.id)}
     >
       {props.text}
     </button>

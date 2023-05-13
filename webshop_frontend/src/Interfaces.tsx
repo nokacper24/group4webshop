@@ -96,10 +96,10 @@ export interface Testimonial {
 
 export interface Button {
   text: string;
-  action: (index: number) => void;
+  action: (id: string) => void;
 }
 
 export interface OutsideButton {
   text: string;
-  action: (indices: number[]) => void;
+  action: (ids: string[]) => void;
 }
