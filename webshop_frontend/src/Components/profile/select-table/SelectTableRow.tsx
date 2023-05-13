@@ -47,7 +47,6 @@ export default function SelectTableRow(props: RowProps) {
       ))}
       <td>
         <SelectTableButton
-          key={props.button.text}
           id={props.id}
           text={props.button.text}
           action={props.button.action}
