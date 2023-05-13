@@ -15,8 +15,7 @@
   --clr-gradient: 180deg, var(--clr-primary) 20%, var(--clr-secondary) 90%;
   --clr-gradient-2: -30deg, var(--clr-primary) 20%, var(--clr-secondary) 90%;
 
-  --clr-danger: #bc0000;
-  --clr-danger-highlight: red;
+  --clr-danger: #b20000;
 
   /* Font family variables */
   --ff-primary: 'Open Sans', 'Arial', sans-serif;
@@ -157,7 +156,7 @@ button {
 button:disabled {
   color: var(--clr-neutral-0) !important;
   background-color: var(--clr-neutral-900) !important;
-  outline-color: var(--clr-neutral-600) !important;
+  outline-color: var(--clr-neutral-700) !important;
   border: initial !important;
   cursor: not-allowed !important;
 }
@@ -188,10 +187,6 @@ button:disabled {
 
 .bg-danger {
   background-color: var(--clr-danger);
-}
-
-.bg-danger:is(:hover) {
-  background-color: var(--clr-danger-highlight);
 }
 
 .text-danger {
@@ -1360,7 +1355,7 @@ form a:hover {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: var(--clr-neutral-600);
+  background-color: var(--clr-neutral-700);
   border-radius: 1em;
   -webkit-transition: 400ms;
   transition: 400ms;
