@@ -99,8 +99,9 @@ export function moveItemBetweenTables(
       setFromListFunction(fromTable.rows);
 
       /* Add item to the "To list" */
-      toTable.rows.push(item);
-      setToListFunction(toTable.rows);
+      let newList = Array.from(toTable.rows);
+      newList.push(item);
+      setToListFunction(newList);
     }
   });
 
@@ -116,13 +117,15 @@ export function moveItemsBetweenTables(
   newFromList: Set<string>,
   newToList: Set<string>
 ) {
+  let newTo: SelectTableRowProps[] = Array.from(toTable.rows);
+
   ids.forEach((id) => {
     fromTable.rows.forEach((row) => {
       if (id == row.id) {
         let item: SelectTableRowProps = row;
 
         fromTable.rows = fromTable.rows.filter((element) => element !== item);
-        toTable.rows.push(item);
+        newTo.push(item);
 
         updateNewChanges(item, newFromList, newToList);
       }
@@ -130,7 +133,7 @@ export function moveItemsBetweenTables(
   });
 
   setFromListFunction(fromTable.rows);
-  setToListFunction(toTable.rows);
+  setToListFunction(newTo);
 }
 
 /**
