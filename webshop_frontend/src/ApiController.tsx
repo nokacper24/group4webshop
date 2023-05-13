@@ -104,6 +104,51 @@ export const patchPartialUser = async (userId: string, email?: string) => {
 };
 
 /**
+ * Send a GET request to get all users with the role 'Company IT Head'
+ *
+ * @returns A list of all company IT head users.
+ */
+export const fetchCompanyItHead = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyItHead`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Company IT'
+ *
+ * @returns A list of all company IT users.
+ */
+export const fetchCompanyIt = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Default'
+ *
+ * @returns A list of all default users.
+ */
+export const fetchDefaultUser = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
  * Reset a user's password.
  *
  * @param email The user's e-mail address.

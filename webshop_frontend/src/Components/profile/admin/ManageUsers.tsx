@@ -12,6 +12,11 @@ import {
   moveItemsBetweenTables,
 } from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchCompanyIt,
+  fetchCompanyItHead,
+  fetchDefaultUser,
+} from "../../../ApiController";
 
 /**
  * A Manage Users page.
@@ -137,41 +142,6 @@ export default function ManageUsers() {
     addItHead,
     new Map([["Add all selected", addSelectedItHeads]])
   );
-
-  /**
-   * Send a GET request to get all users with the role 'Company IT Head'
-   *
-   * @returns A list of all company IT head users.
-   */
-  const fetchCompanyItHead = async () => {
-    const response = await fetch(
-      `${baseUrl}/api/priv/users/role/CompanyItHead`
-    );
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Company IT'
-   *
-   * @returns A list of all company IT users.
-   */
-  const fetchCompanyIt = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Default'
-   *
-   * @returns A list of all default users.
-   */
-  const fetchDefaultUser = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
 
   /**
    * Send a PATCH request to give some users the 'Company IT Head' role.
