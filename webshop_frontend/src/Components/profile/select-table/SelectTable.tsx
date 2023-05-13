@@ -111,9 +111,8 @@ export default function SelectTable(props: SelectTableProps) {
 
     setSelectedRows(tempMap);
 
-    console.log("Prop rows: ", props.rows);
-    console.log("State rows: ", tempMap);
-    console.log(" ");
+    // Check if all rows are selected
+    setAllSelected(checkIfAllSelected(tempMap));
   }, [props.rows]);
 
   return (
