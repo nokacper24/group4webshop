@@ -5,6 +5,7 @@ import { SimpleDescription } from "../../../../../Interfaces";
 type PrivateAccordionRowProps = {
   description: SimpleDescription;
   isTop: boolean;
+  data: HTMLFormElement;
   swapFunction: () => void;
   editFunction: (id: number) => void;
   removeFunction: (id: number) => void;
