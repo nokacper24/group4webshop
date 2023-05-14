@@ -10,7 +10,13 @@ export type RowEditPopupProps = {
   image: boolean;
   title: string | undefined;
   content: string | undefined;
-  informationCallBack: (image: boolean, title: string, content: string) => void;
+  data: HTMLFormElement | undefined;
+  informationCallBack: (
+    image: boolean,
+    title: string,
+    content: string,
+    data: HTMLFormElement
+  ) => void;
 };
 
 let popupRef: RefObject<HTMLDivElement>;
@@ -21,6 +27,7 @@ let paragraphRef: RefObject<HTMLTextAreaElement>;
 let updatePropsFunc: (newProps: RowEditPopupProps) => void;
 export default function RowEditPopup() {
   popupRef = useRef(null);
+  let formRef: RefObject<HTMLFormElement> = useRef(null);
   imageRef = useRef(null);
   titleRef = useRef(null);
   altTextRef = useRef(null);
@@ -30,6 +37,7 @@ export default function RowEditPopup() {
     image: false,
     title: undefined,
     content: undefined,
+    data: undefined,
     informationCallBack: () => {},
   });
 
@@ -59,7 +67,7 @@ export default function RowEditPopup() {
     } else {
       title = titleRef.current?.value ? titleRef.current.value : "";
     }
-    props.informationCallBack(props.image, title, content);
+    props.informationCallBack(props.image, title, content, formRef.current!);
     hidePopup();
   };
 
@@ -84,6 +92,7 @@ export default function RowEditPopup() {
       <div>
         <form
           className="form-container container"
+          method="POST"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -104,10 +113,10 @@ export default function RowEditPopup() {
                 defaultValue={props.content ? props.content : ""}
               />
               <p>Current image: {props.content}</p>
-              <label htmlFor="alt-text">Alt-text:</label>
+              <label htmlFor="alt_text">Alt-text:</label>
               <textarea
-                name="alt-text"
-                id="alt-text"
+                name="alt_text"
+                id="alt_text"
                 cols={40}
                 rows={10}
                 ref={altTextRef}

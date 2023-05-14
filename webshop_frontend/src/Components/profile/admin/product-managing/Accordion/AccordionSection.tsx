@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AccordionBody } from "./AccordionBody";
 import { AccordionHeader } from "./AccordionHeader";
 import { ChangeType } from "./ChangeTypes";
 import { showPopup } from "../Edit-popups/RowEditPopup";
 import { SimpleDescription } from "../../../../../Interfaces";
+import { SimpleAccordionRowProps } from "./AccordionRow";
 
 /**
  * The props of the AccordionSection component.
@@ -12,7 +13,7 @@ export type AccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: SimpleDescription[];
+  rows: SimpleAccordionRowProps[];
 
   sectionID: number;
 };
@@ -21,7 +22,7 @@ type PrivateAccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: SimpleDescription[];
+  rows: SimpleAccordionRowProps[];
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
@@ -64,17 +65,26 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
         title: undefined,
         content: undefined,
         informationCallBack: finishCreation,
+        data: undefined,
       });
     }
-    function finishCreation(image: boolean, title: string, content: string) {
+    function finishCreation(
+      image: boolean,
+      title: string,
+      content: string,
+      data: HTMLFormElement
+    ) {
       let id = createID();
       props.registerContentChange(id, ChangeType.Add);
 
       rows.push({
-        component_id: id,
-        text: image ? undefined : { text_title: title, paragraph: content },
-        image: image ? { image_path: content, alt_text: title } : undefined,
-        is_text_not_image: !image,
+        description: {
+          component_id: id,
+          text: image ? undefined : { text_title: title, paragraph: content },
+          image: image ? { image_path: content, alt_text: title } : undefined,
+          is_text_not_image: !image,
+        },
+        data: data,
       });
       setRows([...rows]);
     }
@@ -91,7 +101,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be deleted
    */
   const deleteRow = (id: number) => {
-    let newRows = rows.filter((row) => row.component_id !== id);
+    let newRows = rows.filter((row) => row.description.component_id !== id);
     setRows(newRows);
     props.registerContentChange(id, ChangeType.Delete);
   };
@@ -102,25 +112,26 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    let row = rows.find((row) => row.component_id === id);
+    let row = rows.find((row) => row.description.component_id === id);
     if (row) {
       showPopup({
-        image: !row.is_text_not_image,
-        title: row.is_text_not_image
-          ? row.text?.text_title
-          : row.image?.alt_text,
-        content: row.is_text_not_image
-          ? row.text?.paragraph
-          : row.image?.image_path,
+        image: !row.description.is_text_not_image,
+        title: row.description.is_text_not_image
+          ? row.description.text?.text_title
+          : row.description.image?.alt_text,
+        content: row.description.is_text_not_image
+          ? row.description.text?.paragraph
+          : row.description.image?.image_path,
         informationCallBack: finishEdit,
+        data: row.data,
       });
       function finishEdit(image: boolean, title: string, content: string) {
         //Tried creating a if (row) but sonarlint complains row always exists, but the TS/React compiler complains it might not exist
-        row!.is_text_not_image = !image;
-        row!.text = image
+        row!.description.is_text_not_image = !image;
+        row!.description.text = image
           ? undefined
           : { text_title: title, paragraph: content };
-        row!.image = image
+        row!.description.image = image
           ? { image_path: content, alt_text: title }
           : undefined;
         setRows([...rows]);
@@ -130,7 +141,18 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
     props.registerContentChange(id, ChangeType.Edit);
   };
 
-  const [rows, setRows] = useState<SimpleDescription[]>([...props.rows]);
+  useEffect(() => {
+    let newRows: SimpleAccordionRowProps[] = [];
+    props.rows.forEach((row) => {
+      return newRows.push({
+        description: row.description,
+        data: row.data,
+      });
+    });
+    setRows(newRows);
+  }, [props.rows]);
+
+  const [rows, setRows] = useState<SimpleAccordionRowProps[]>([]);
 
   const swapRows = () => {
     let newRows = [...rows];

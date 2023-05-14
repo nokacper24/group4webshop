@@ -30,7 +30,10 @@ export default function AccordionTable(props: AccordionTableProps) {
   const deleteSection = (id: number) => {
     const section = props.sections.find((section) => section.sectionID === id);
     section?.rows.forEach((row) => {
-      props.registerContentChange(row.component_id, ChangeType.Delete);
+      props.registerContentChange(
+        row.description.component_id,
+        ChangeType.Delete
+      );
     });
     const newSections = props.sections.filter(
       (section) => section.sectionID !== id

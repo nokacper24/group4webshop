@@ -1,8 +1,8 @@
 import { SimpleDescription } from "../../../../../Interfaces";
-import { AccordionRow } from "./AccordionRow";
+import { AccordionRow, SimpleAccordionRowProps } from "./AccordionRow";
 
 type AccordionBodyProps = {
-  rows: SimpleDescription[];
+  rows: SimpleAccordionRowProps[];
   collapsed: boolean;
   swapRows: () => void;
   editRow: (id: number) => void;
@@ -23,12 +23,13 @@ export function AccordionBody(props: AccordionBodyProps) {
       {props.rows.map((row) => {
         return (
           <AccordionRow
-            key={"row" + row.component_id}
-            description={row}
+            key={"row" + row.description.component_id}
+            description={row.description}
             swapFunction={props.swapRows}
             editFunction={props.editRow}
             removeFunction={props.deleteRow}
-            isTop={row.component_id === 0}
+            isTop={row.description.component_id === 0}
+            data={row.data!}
           ></AccordionRow>
         );
       })}

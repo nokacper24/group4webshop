@@ -17,6 +17,7 @@ import {
 } from "../../../../ApiController";
 import { AccordionSectionProps } from "./Accordion/AccordionSection";
 import { ChangeType } from "./Accordion/ChangeTypes";
+import { SimpleAccordionRowProps } from "./Accordion/AccordionRow";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // Check if we are in production mode
@@ -36,6 +37,7 @@ export default function ManageProductPage() {
   const productPrice = useRef<HTMLInputElement>(null);
   const productImage = useRef<HTMLInputElement>(null);
   const productDescription = useRef<HTMLTextAreaElement>(null);
+  const productForm = useRef<HTMLFormElement>(null);
 
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [sections, setSections] = useState<AccordionSectionProps[]>([]);
@@ -148,14 +150,17 @@ export default function ManageProductPage() {
       for (let j = 0; j < 2; j += 1) {
         if (descriptions[i + j]) {
           newSection.rows.push({
-            component_id: descriptions[i + j].component_id,
-            text: descriptions[i + j].is_text_not_image
-              ? descriptions[i + j].text
-              : undefined,
-            image: descriptions[i + j].is_text_not_image
-              ? undefined
-              : descriptions[i + j].image,
-            is_text_not_image: descriptions[i + j].is_text_not_image,
+            description: {
+              component_id: descriptions[i + j].component_id,
+              text: descriptions[i + j].is_text_not_image
+                ? descriptions[i + j].text
+                : undefined,
+              image: descriptions[i + j].is_text_not_image
+                ? undefined
+                : descriptions[i + j].image,
+              is_text_not_image: descriptions[i + j].is_text_not_image,
+            },
+            data: undefined,
           });
         }
       }
@@ -181,10 +186,13 @@ export default function ManageProductPage() {
    * Starts the process of saving the product. This includes saving the product itself, the sections and the testimonials.
    */
   const initializeSaveProtocol = () => {
-    sendDeleteDescriptions();
+    productForm.current?.submit();
+    /* sendDeleteDescriptions();
     sendNewDescriptions();
     sendPriorityChanges();
-    sendEdits();
+    sendEdits(); */
+
+    alert("Product saved!");
 
     //TODO: Send testimonials
   };
@@ -205,10 +213,10 @@ export default function ManageProductPage() {
 
   const findRow = (
     id: number
-  ): { description: SimpleDescription | undefined; foundAt: number } => {
+  ): { description: SimpleAccordionRowProps | undefined; foundAt: number } => {
     for (let i = 0; i < sections.length; i += 1) {
       for (let j = 0; j < sections[i].rows.length; j += 1) {
-        if (sections[i].rows[j].component_id === id) {
+        if (sections[i].rows[j].description.component_id === id) {
           return { description: sections[i].rows[j], foundAt: i + j + 2 };
         }
       }
@@ -219,9 +227,9 @@ export default function ManageProductPage() {
   const sendNewDescriptions = async () => {
     let found = false;
     contentChanges?.get(ChangeType.Add)?.forEach((id) => {
-      let { description, foundAt } = findRow(id);
-      if (description) {
-        if (description.is_text_not_image) {
+      let { description: rowData, foundAt } = findRow(id);
+      if (rowData) {
+        if (rowData.description.is_text_not_image) {
           let respone = fetch(
             `${baseUrl}/api/priv/products/${productId}/descriptions/text`,
             {
@@ -230,33 +238,15 @@ export default function ManageProductPage() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                component_id: id,
-                full_width: false,
-                image: null,
-                priority: foundAt,
-                product_id: productId,
-                text: description.text,
+                text_title: rowData.description.text?.text_title,
+                paragraph: rowData.description.text?.paragraph,
               }),
             }
           );
-        } else {
-          let response = fetch(
-            `${baseUrl}/api/priv/products/${productId}/descriptions/image`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                component_id: id,
-                full_width: false,
-                image: description.image,
-                priority: foundAt,
-                product_id: productId,
-                text: null,
-              }),
-            }
-          );
+        } else if (rowData.data) {
+          rowData.data.action = `${baseUrl}/api/priv/products/${productId}/descriptions/image`;
+          rowData.data.method = "POST";
+          rowData.data.submit();
         }
       }
     });
@@ -273,7 +263,10 @@ export default function ManageProductPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify([rows![0].component_id, rows![1].component_id]),
+          body: JSON.stringify([
+            rows![0].description.component_id,
+            rows![1].description.component_id,
+          ]),
         }
       );
     });
@@ -281,9 +274,9 @@ export default function ManageProductPage() {
 
   const sendEdits = async () => {
     contentChanges?.get(ChangeType.Edit)?.forEach((id) => {
-      let { description, foundAt } = findRow(id);
-      if (description) {
-        if (description.is_text_not_image) {
+      let { description: rowData, foundAt } = findRow(id);
+      if (rowData) {
+        if (rowData.description.is_text_not_image) {
           let respone = fetch(
             `${baseUrl}/api/priv/products/${productId}/descriptions/text/${id}`,
             {
@@ -297,28 +290,16 @@ export default function ManageProductPage() {
                 image: null,
                 priority: foundAt,
                 product_id: productId,
-                text: description.text,
+                text: rowData.description.text,
               }),
             }
           );
         } else {
-          let response = fetch(
-            `${baseUrl}/api/priv/products/${productId}/descriptions/image/${id}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                component_id: id,
-                full_width: false,
-                image: description.image,
-                priority: foundAt,
-                product_id: productId,
-                text: null,
-              }),
-            }
-          );
+          if (rowData.data) {
+            rowData.data.action = `${baseUrl}/api/priv/products/${productId}/descriptions/image/${id}`;
+            rowData.data.method = "PUT";
+            rowData.data.submit();
+          }
         }
       }
     });
@@ -330,7 +311,14 @@ export default function ManageProductPage() {
       <TestimonialPopup product_id={productId!}></TestimonialPopup>
       <section className="container">
         <h2> Manage product</h2>
-        <form className="wide-section">
+        <form
+          className="wide-section"
+          action={
+            `${baseUrl}/api/priv/products` + createState ? "" : `/${productId}`
+          }
+          method={createState ? "POST" : "PUT"}
+          ref={productForm}
+        >
           <label className="no-inline-margin" htmlFor="product-name">
             <b>Product name:</b>
           </label>

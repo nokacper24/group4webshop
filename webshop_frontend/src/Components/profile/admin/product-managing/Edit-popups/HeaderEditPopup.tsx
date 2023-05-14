@@ -29,6 +29,7 @@ export default function RowEditPopup() {
       <div>
         <form
           className="form-container container"
+          method="POST"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
