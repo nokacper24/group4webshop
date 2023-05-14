@@ -10,6 +10,11 @@ type PrivateAccordionRowProps = {
   removeFunction: (id: number) => void;
 };
 
+export type SimpleAccordionRowProps = {
+  description: SimpleDescription;
+  data: HTMLFormElement | undefined;
+};
+
 /**
  * The component for a single row in the accordion body.
  *
