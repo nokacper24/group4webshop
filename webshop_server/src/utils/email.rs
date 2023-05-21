@@ -31,17 +31,36 @@ pub enum MailError {
     NotImplemented,
 }
 
+#[derive(Clone)]
 pub struct otherEmail {
     pub recipient_email: String,
     pub subject: String,
     pub body: String,
 }
 
+pub struct supportEmail {
+    pub recipient_email: String,
+    pub subject: String,
+    pub product: String,
+    pub message: String,
+}
+
+impl supportEmail {
+    pub fn new(recipient_email: String, subject: String, product: String, message: String) -> Self {
+        supportEmail {
+            recipient_email,
+            subject,
+            product,
+            message,
+        }
+    }
+}
+
 pub enum EmailType {
     RegisterUser,
     RegisterUserCompany,
     ResetPassword,
-    Support,
+    Support(supportEmail),
     other(otherEmail),
 }
 
@@ -121,8 +140,12 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
                 .unwrap();
             Ok(email)
         }
-        EmailType::Support => {
-            let email_template = support_template();
+        EmailType::Support(supportEmail) => {
+            let email_template = support_template(
+                &supportEmail.subject,
+                &supportEmail.product,
+                &supportEmail.message,
+            );
             let email = Message::builder()
                 .from(from)
                 .to(to)
@@ -133,13 +156,13 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
             Ok(email)
         }
         EmailType::other(otherEmail) => {
-            let email_template = other_template(otherEmail);
+            let email_template = other_template(otherEmail.clone());
             let email = Message::builder()
                 .from(from)
                 .to(to)
                 .subject(otherEmail.subject)
                 .header(ContentType::TEXT_HTML)
-                .body(otherEmail.body)
+                .body(email_template)
                 .unwrap();
             Ok(email)
         }
@@ -279,7 +302,7 @@ fn reset_password_template(invite_code: &str) -> String {
     email_template
 }
 
-fn support_template() -> String {
+fn support_template(subject: &str, product: &str, message: &str) -> String {
     let email_template = format!(
         r#"
         <!DOCTYPE html>
@@ -287,7 +310,7 @@ fn support_template() -> String {
 
         <head>
             <meta charset="UTF-8">
-            <title>Support Request on ProFlex</title>
+            <title>Support Request on ProFlex about {subject}</title>
         </head>
 
         <style>
@@ -302,6 +325,9 @@ fn support_template() -> String {
                 <h1 style="font-size: 1.2em">Dear Customer,</h1>
                 <p>We have received your support request. We will get back to you as soon as possible.
                 </p>
+                <p>product: {product}</p>
+                <pYour message: <br>
+                    {message}</p>
                 <p><b>Best regards,<br>
                     The ProFlex Team</b></p>
             </div>

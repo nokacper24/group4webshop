@@ -275,6 +275,16 @@ pub async fn get_partial_user(
     Ok(user)
 }
 
+pub async fn delete_partial_user(id: &i32, pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM register_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 /// A struct to represent a user that is registering themselves and linking to a company.
 pub struct RegisterCompanyUser {
@@ -388,6 +398,27 @@ pub async fn get_partial_company_user(
     Ok(user)
 }
 
+/// Deletes a user that is registering themselves and linking to a company.
+/// # Arguments
+/// * `id` - The id of the user
+/// * `pool` - The database pool
+/// # Returns
+/// * `()` - An empty tuple
+/// # Errors
+/// * `sqlx::Error` - An error from the database
+pub async fn delete_partial_company_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM register_company_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
 /// Fetches a user by their email address and returns a boolean indicating if the user exists.
 /// # Arguments
 /// * `email` - The email of the user
@@ -478,6 +509,7 @@ pub async fn delete_invite(id: &str, pool: &Pool<Postgres>) -> Result<(), sqlx::
     }
 }
 
+#[derive(Debug)]
 pub enum UserCreationError {
     Database(sqlx::Error),
     Hashing(argon2::Error),
