@@ -1,10 +1,10 @@
 //TODO: Make all endpoints private
 use crate::{
     data_access::{
-        company, error_handling, license,
+        self, company, error_handling, license,
         user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::{self, auth},
+    utils::{self, auth, email::supportEmail},
     SharedData,
 };
 use actix_multipart::{Multipart, MultipartError};
@@ -22,6 +22,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(user_by_id);
     cfg.service(users_by_company);
     cfg.service(users_by_license);
+    cfg.service(generate_invite_new);
     cfg.service(generate_invite);
     cfg.service(generate_invites);
     cfg.service(add_license_users);
@@ -30,6 +31,10 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(update_user_roles);
     cfg.service(delete_users);
     cfg.service(update_user);
+    cfg.service(support);
+    cfg.service(invite_type);
+    cfg.service(register_new_company_user);
+    cfg.service(register_new_user);
 }
 
 #[derive(OpenApi)]
@@ -292,6 +297,64 @@ async fn users_by_license(
 }
 
 #[derive(Deserialize, Serialize)]
+struct newUser {
+    email: String,
+}
+
+#[post("/generate_invite_new")]
+async fn generate_invite_new(
+    SharedData: web::Data<SharedData>,
+    invite: web::Json<newUser>,
+) -> impl Responder {
+    let pool = &SharedData.db_pool;
+    let mailer = &SharedData.mailer;
+    let email = &invite.email;
+
+    // check if user exists
+    match user::user_exists(&email, &pool).await {
+        Ok(true) => HttpResponse::BadRequest().json("User already exists"),
+        Ok(false) => {
+            let partial_user = user::create_partial_user(&email, &pool).await;
+            match partial_user {
+                Ok(partial_user) => {
+                    let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
+                    match invite_obj {
+                        Ok(invite_obj) => {
+                            let email = utils::email::Email::new(
+                                partial_user.email,
+                                utils::email::EmailType::RegisterUser,
+                                Some(invite_obj.id),
+                            );
+                            let res = utils::email::send_email(email, mailer).await;
+                            match res {
+                                Ok(_) => HttpResponse::Ok().json("Invite sent"),
+                                Err(e) => {
+                                    log::error!("Error: {}", e);
+                                    HttpResponse::InternalServerError()
+                                        .json("Internal Server Error")
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            log::error!("Error: {}", e);
+                            HttpResponse::InternalServerError().json("Internal Server Error")
+                        }
+                    }
+                }
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    HttpResponse::InternalServerError().json("Internal Server Error")
+                }
+            }
+        }
+        Err(e) => {
+            log::error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
 struct Invite {
     email: String,
     company_id: Option<i32>,
@@ -343,8 +406,8 @@ async fn generate_invite(
                             Ok(invite) => {
                                 let email = utils::email::Email::new(
                                     partial.email,
-                                    "Invite to Proflex".to_string(),
-                                    invite.id,
+                                    utils::email::EmailType::RegisterUserCompany,
+                                    Some(invite.id),
                                 );
                                 let res = utils::email::send_email(email,mailer).await;
                                 match res {
@@ -396,8 +459,8 @@ async fn generate_invite(
                                     Ok(invite) => {
                                         let email = utils::email::Email::new(
                                             partial.email,
-                                            "Invite to Proflex".to_string(),
-                                            invite.id,
+                                            utils::email::EmailType::RegisterUserCompany,
+                                            Some(invite.id),
                                         );
                                         let res = utils::email::send_email(email,mailer).await;
                                         match res {
@@ -442,8 +505,8 @@ async fn generate_invite(
                                 Ok(invite) => {
                                     let email = utils::email::Email::new(
                                         partial.email,
-                                        "Invite to Proflex".to_string(),
-                                        invite.id,
+                                        utils::email::EmailType::RegisterUserCompany,
+                                        Some(invite.id),
                                     );
                                     let res = utils::email::send_email(email,mailer).await;
                                     match res {
@@ -580,37 +643,6 @@ fn csv_string_to_list(text: String) -> Vec<String> {
         string_list.push(word.trim().to_string());
     }
     string_list
-}
-
-#[post("/register")]
-async fn register(shared_data: web::Data<SharedData>, invite: web::Json<Invite>) -> impl Responder {
-    let pool = &shared_data.db_pool;
-    match user::user_exists(&invite.email, &pool).await {
-        Ok(true) => HttpResponse::BadRequest().json("User already exists"),
-        Ok(false) => {
-            let partial_user = user::create_partial_user(&invite.email, &pool).await;
-            match partial_user {
-                Ok(partial_user) => {
-                    let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
-                    match invite_obj {
-                        Ok(invite_obj) => HttpResponse::Created().json(invite_obj),
-                        Err(e) => {
-                            log::error!("Error: {}", e);
-                            HttpResponse::InternalServerError().json("Internal Server Error")
-                        }
-                    }
-                }
-                Err(e) => {
-                    log::error!("Error: {}", e);
-                    HttpResponse::InternalServerError().json("Internal Server Error")
-                }
-            }
-        }
-        Err(e) => {
-            log::error!("Error: {}", e);
-            HttpResponse::InternalServerError().json("Internal Server Error")
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -833,4 +865,257 @@ async fn update_user(
         None => return HttpResponse::InternalServerError().finish(),
     };
     HttpResponse::Ok().json(returned_user)
+}
+
+#[derive(Deserialize, Serialize)]
+struct supportRequest {
+    product: String,
+    subject: String,
+    message: String,
+}
+
+#[post("/support")]
+async fn support(
+    shared_data: web::Data<SharedData>,
+    body: web::Json<supportRequest>,
+    req: HttpRequest,
+) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    let mailer = &shared_data.mailer;
+    let user = match auth::validate_user(req, &pool).await {
+        Ok(user) => user,
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+    let supportEmail: supportEmail = supportEmail::new(
+        user.email.clone(),
+        body.product.clone(),
+        body.subject.clone(),
+        body.message.clone(),
+    );
+    let email = utils::email::Email::new(
+        user.email,
+        utils::email::EmailType::Support(supportEmail),
+        None,
+    );
+    let res = utils::email::send_email(email, mailer).await;
+    match res {
+        Ok(_) => HttpResponse::Ok().json("Support request sent"),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            HttpResponse::InternalServerError().json("Internal Server Error")
+        }
+    }
+}
+
+#[get("/invite-type/{invite_id}")]
+async fn invite_type(
+    invite_id: web::Path<String>,
+    shared_data: web::Data<SharedData>,
+) -> impl Responder {
+    let pool = &shared_data.db_pool;
+
+    let invite = match data_access::user::get_invite_by_id(&invite_id, &pool).await {
+        Ok(invite) => invite,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let invite_type = match invite.company_user_id {
+        Some(_) => "company",
+        None => "user",
+    };
+
+    HttpResponse::Ok().json(invite_type)
+}
+
+#[derive(Deserialize, Serialize)]
+struct RegisterUser {
+    invite_id: String,
+    company_name: String,
+    company_address: String,
+    password: String,
+}
+
+#[post("/register_new_user")]
+async fn register_new_user(
+    SharedData: web::Data<SharedData>,
+    register_user: web::Json<RegisterUser>,
+) -> impl Responder {
+    let pool = &SharedData.db_pool;
+
+    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, &pool).await {
+        Ok(invite) => invite,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let company = match data_access::company::create_company(
+        &pool,
+        &register_user.company_name,
+        &register_user.company_address,
+    )
+    .await
+    {
+        Ok(company) => company,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // unpack Some invite.user_id
+    let user_id = match invite.user_id {
+        Some(user_id) => user_id,
+        None => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // Get partial user from invite
+    let partial_user = match data_access::user::get_partial_user(&user_id, &pool).await {
+        Ok(partial_user) => partial_user,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let user = match data_access::user::create_user(
+        &partial_user.email,
+        &register_user.password,
+        company.company_id,
+        Role::CompanyItHead,
+        &pool,
+    )
+    .await
+    {
+        Ok(user) => user,
+        Err(e) => {
+            log::error!("Error: {:?}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // Delete the invite
+    match data_access::user::delete_invite(&invite.id, &pool).await {
+        Ok(_) => (),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    }
+
+    // Delete the partial user
+    match data_access::user::delete_partial_user(&partial_user.id, &pool).await {
+        Ok(_) => (),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    }
+
+    HttpResponse::Ok().json(user)
+}
+
+#[derive(Deserialize, Serialize)]
+struct RegisterCompanyUser {
+    invite_id: String,
+    password: String,
+}
+
+#[post("/register_new_company_user")]
+async fn register_new_company_user(
+    SharedData: web::Data<SharedData>,
+    register_user: web::Json<RegisterCompanyUser>,
+) -> impl Responder {
+    let pool = &SharedData.db_pool;
+
+    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, &pool).await {
+        Ok(invite) => invite,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // unpack Some invite.company_user_id
+    let company_user_id = match invite.company_user_id {
+        Some(company_user_id) => company_user_id,
+        None => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let company = match data_access::company::get_company_by_id(&pool, &company_user_id).await {
+        Ok(company) => company,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // unpack Some invite.user_id
+    let user_id = match invite.company_user_id {
+        Some(user_id) => user_id,
+        None => {
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // Get partial user from invite
+    let partial_user = match data_access::user::get_partial_company_user(&user_id, &pool).await {
+        Ok(partial_user) => partial_user,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let user = match data_access::user::create_user(
+        &partial_user.email,
+        &register_user.password,
+        company.company_id,
+        Role::Default,
+        &pool,
+    )
+    .await
+    {
+        Ok(user) => user,
+        Err(e) => {
+            log::error!("Error: {:?}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    // Delete the invite
+    match data_access::user::delete_invite(&invite.id, &pool).await {
+        Ok(_) => (),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    }
+
+    // Delete the partial user
+    match data_access::user::delete_partial_company_user(&partial_user.id, &pool).await {
+        Ok(_) => (),
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    }
+
+    HttpResponse::Ok().json(user)
 }
