@@ -371,3 +371,35 @@ export const logout = async () => {
     credentials: "include",
   });
 };
+
+/**
+ * Register an invite to a new user.
+ * @param email The email of the new user.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerInvite = async (email: string) => {
+  return await fetch(`${baseUrl}/api/priv/generate_invite_new`, {
+    method: "POST",
+    body: JSON.stringify({
+      email: email,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * check what type of invite the user has.
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const checkInvite = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite-type/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
