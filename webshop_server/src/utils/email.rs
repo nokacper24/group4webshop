@@ -106,9 +106,14 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
         Err(_) => return Err(MailError::InvalidRecipient),
     };
 
+    let invite_code = match email.invite_code {
+        Some(invite_code) => invite_code,
+        None => return Err(MailError::InvalidBody),
+    };
+
     let email: Result<Message, lettre::error::Error> = match email.mail_type {
         EmailType::RegisterUser => {
-            let email_template = register_user_template(&email.recipient_email);
+            let email_template = register_user_template(&invite_code);
             let email = Message::builder()
                 .from(from)
                 .to(to)
@@ -119,7 +124,7 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
             Ok(email)
         }
         EmailType::RegisterUserCompany => {
-            let email_template = register_user_company_template(&email.recipient_email);
+            let email_template = register_user_company_template(&invite_code);
             let email = Message::builder()
                 .from(from)
                 .to(to)
@@ -130,7 +135,7 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
             Ok(email)
         }
         EmailType::ResetPassword => {
-            let email_template = reset_password_template(&email.recipient_email);
+            let email_template = reset_password_template(&invite_code);
             let email = Message::builder()
                 .from(from)
                 .to(to)
