@@ -28,11 +28,12 @@ export default function RegisterUser() {
   const getInfo = async (id: string) => {
     let result = await getInviteInfo(id);
     if (result.ok) {
-      setInviteInfo(await result.json());
+      let resultJson = await result.json();
+      setInviteInfo(resultJson);
 
-      setEmail(inviteInfo!.email);
-      setCompanyName(inviteInfo!.companyName);
-      setCompanyAddress(inviteInfo!.companyAddress);
+      setEmail(resultJson.email);
+      setCompanyName(resultJson.companyName);
+      setCompanyAddress(resultJson.companyAddress);
     } else {
       console.log("Invalid invite ID");
     }
@@ -83,20 +84,18 @@ export default function RegisterUser() {
       <form onSubmit={(event) => handleSubmit(event)}>
         <label htmlFor="create-account_email">E-mail</label>
         <input
-          ref={email}
           id="create-account_email"
           name="email"
-          value="user@company.com" /* TODO: Fill value dynamically */
+          value={email}
           required
           disabled
         />
 
         <label htmlFor="create-account_company-name">Company name</label>
         <input
-          ref={companyName}
           id="create-account_company-name"
           name="company-name"
-          value="CompanyName" /* TODO: Fill value dynamically */
+          value={companyName}
           type="text"
           required
           disabled

@@ -44,12 +44,12 @@ export default function CreateCompanyAccount() {
         <Route path="/" element={<RegisterEmail />} />
         <Route path="verify" element={<EmailVerify />} />
         <Route
-          path="register/:inviteid"
+          path="data/:inviteid"
           element={
             inviteType === "company" ? (
-              <RegisterCompanyAccount />
-            ) : (
               <RegisterUser />
+            ) : (
+              <RegisterCompanyAccount />
             )
           }
         ></Route>
