@@ -35,6 +35,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(invite_type);
     cfg.service(register_new_company_user);
     cfg.service(register_new_user);
+    cfg.service(get_invite_info);
 }
 
 #[derive(OpenApi)]
@@ -936,6 +937,84 @@ async fn invite_type(
     };
 
     HttpResponse::Ok().json(invite_type)
+}
+
+#[derive(Deserialize, Serialize)]
+struct InviteInfo {
+    company_name: String,
+    company_address: String,
+    email: String,
+    role: String,
+}
+
+#[get("/invite/info/{invite_id}")]
+async fn get_invite_info(
+    SharedData: web::Data<SharedData>,
+    invite_id: web::Path<String>,
+) -> impl Responder {
+    let pool = &SharedData.db_pool;
+
+    let invite = match data_access::user::get_invite_by_id(&invite_id, &pool).await {
+        Ok(invite) => invite,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let invite_info = match invite.company_user_id {
+        Some(company_user_id) => {
+            let company =
+                match data_access::company::get_company_by_id(&pool, &company_user_id).await {
+                    Ok(company) => company,
+                    Err(e) => {
+                        log::error!("Error: {}", e);
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                };
+
+            let company_user =
+                match data_access::user::get_partial_company_user(&invite.user_id.unwrap(), &pool)
+                    .await
+                {
+                    Ok(company_user) => company_user,
+                    Err(e) => {
+                        log::error!("Error: {}", e);
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                };
+
+            let invite_info = InviteInfo {
+                company_name: company.company_name,
+                company_address: company.company_address,
+                email: company_user.email,
+                role: "company".to_string(),
+            };
+
+            invite_info
+        }
+        None => {
+            let partial_user =
+                match data_access::user::get_partial_user(&invite.user_id.unwrap(), &pool).await {
+                    Ok(partial_user) => partial_user,
+                    Err(e) => {
+                        log::error!("Error: {}", e);
+                        return HttpResponse::InternalServerError().json("Internal Server Error");
+                    }
+                };
+
+            let invite_info = InviteInfo {
+                company_name: "".to_string(),
+                company_address: "".to_string(),
+                email: partial_user.email,
+                role: "user".to_string(),
+            };
+
+            invite_info
+        }
+    };
+
+    HttpResponse::Ok().json(invite_info)
 }
 
 #[derive(Deserialize, Serialize)]
