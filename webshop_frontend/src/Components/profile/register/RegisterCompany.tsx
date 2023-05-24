@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import TermsOfService from "./TermsOfService";
 import { getInviteInfo, registerCompany } from "../../../ApiController";
-import { error } from "console";
 
 /**
  * Represents the Register Company component on the Create Account page.
@@ -27,7 +26,7 @@ export default function RegisterCompanyAccount() {
     if (result.ok) {
       setInviteInfo(await result.json());
     } else {
-      error("Invalid invite ID");
+      console.log("Invalid invite ID");
     }
   };
 
