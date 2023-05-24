@@ -448,3 +448,73 @@ export const checkInvite = async (inviteId: string) => {
     credentials: "include",
   });
 };
+
+/**
+ * Get invite info from endpoint
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const getInviteInfo = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite/info/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+/**
+ * Register a new company user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompanyUser = async (
+  invite_id: string,
+  password: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_company_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * Register a new company with a new user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompany = async (
+  invite_id: string,
+  password: string,
+  companyName: string,
+  companyAddress: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+      company_name: companyName,
+      company_address: companyAddress,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};

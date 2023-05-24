@@ -1,5 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TermsOfService from "./TermsOfService";
+import { getInviteInfo, registerCompanyUser } from "../../../ApiController";
+import { error } from "console";
 
 /**
  * Represents the Register User component on the Create Account page.
@@ -12,12 +14,37 @@ export default function RegisterUser() {
   const confirmPassword = useRef<HTMLInputElement>(null);
   const [formAlert, setFormAlert] = useState<string>("");
 
+  const [email, setEmail] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>("");
+  const [companyAddress, setCompanyAddress] = useState<string>("");
+
+  interface InviteInfo {
+    email: string;
+    companyName: string;
+    companyAddress: string;
+    role: string;
+  }
+  const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
+
+  const getInfo = async (id: string) => {
+    let result = await getInviteInfo(id);
+    if (result.ok) {
+      setInviteInfo(await result.json());
+
+      setEmail(inviteInfo!.email);
+      setCompanyName(inviteInfo!.companyName);
+      setCompanyAddress(inviteInfo!.companyAddress);
+    } else {
+      error("Invalid invite ID");
+    }
+  };
+
   /**
    * Handle the submit of the support form. Validates the form data.
    *
    * @param event The form event.
    */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (password.current?.value != confirmPassword.current?.value) {
@@ -28,8 +55,27 @@ export default function RegisterUser() {
       setFormAlert("");
     }
 
-    // TODO: Send the form info somewhere
+    // send data to endpoint
+    let url = window.location.href;
+    let id = url.substring(url.lastIndexOf("/") + 1);
+    let passw0rd = event.currentTarget["password"].value;
+
+    let result = await registerCompanyUser(id, passw0rd);
+
+    if (result.ok) {
+      window.location.href = "/login";
+    } else {
+      setFormAlert("Something went wrong. Please try again.");
+    }
   };
+
+  useEffect(() => {
+    //get the id from the url and call the getInfo function. e.g. /register/company/1234 -> 1234 or /someting/1234 -> 1234
+    //get the last part of the url
+    const url = window.location.href;
+    const id = url.substring(url.lastIndexOf("/") + 1);
+    getInfo(id);
+  }, []);
 
   return (
     <>
@@ -38,6 +84,7 @@ export default function RegisterUser() {
       <form onSubmit={(event) => handleSubmit(event)}>
         <label htmlFor="create-account_email">E-mail</label>
         <input
+          ref={email}
           id="create-account_email"
           name="email"
           value="user@company.com" /* TODO: Fill value dynamically */
@@ -47,6 +94,7 @@ export default function RegisterUser() {
 
         <label htmlFor="create-account_company-name">Company name</label>
         <input
+          ref={companyName}
           id="create-account_company-name"
           name="company-name"
           value="CompanyName" /* TODO: Fill value dynamically */
