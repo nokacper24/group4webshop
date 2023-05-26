@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import ToggleButton from "../../../toggle-table/ToggleButton";
-import { SimpleDescription } from "../../../../../Interfaces";
+import { LocalDescription } from "../../../../../Interfaces";
 
 type PrivateAccordionRowProps = {
-  description: SimpleDescription;
+  description: LocalDescription;
   isTop: boolean;
-  data: HTMLFormElement;
   swapFunction: () => void;
   editFunction: (id: number) => void;
   removeFunction: (id: number) => void;
-};
-
-export type SimpleAccordionRowProps = {
-  description: SimpleDescription;
-  data: HTMLFormElement | undefined;
 };
 
 /**
@@ -23,7 +17,7 @@ export type SimpleAccordionRowProps = {
  * @returns the React component for the Accordion row
  */
 export function AccordionRow(props: PrivateAccordionRowProps) {
-  const [state, setState] = useState<SimpleDescription>(props.description);
+  const [state, setState] = useState<LocalDescription>(props.description);
   const [visible, setVisible] = useState<boolean>(true);
   if (state.text && state.text.text_title.length <= 0) {
     setState({

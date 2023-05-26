@@ -31,7 +31,7 @@ export default function AccordionTable(props: AccordionTableProps) {
     const section = props.sections.find((section) => section.sectionID === id);
     section?.rows.forEach((row) => {
       props.registerContentChange(
-        row.description.component_id,
+        row.component_id,
         ChangeType.Delete
       );
     });

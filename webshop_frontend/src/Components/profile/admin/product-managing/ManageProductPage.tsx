@@ -7,7 +7,7 @@ import TestimonialPopup from "./Edit-popups/TestimonialPopup";
 import {
   Description,
   Product,
-  SimpleDescription,
+  LocalDescription,
   Testimonial,
 } from "../../../../Interfaces";
 import {
@@ -17,7 +17,6 @@ import {
 } from "../../../../ApiController";
 import { AccordionSectionProps } from "./Accordion/AccordionSection";
 import { ChangeType } from "./Accordion/ChangeTypes";
-import { SimpleAccordionRowProps } from "./Accordion/AccordionRow";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // Check if we are in production mode
@@ -150,17 +149,14 @@ export default function ManageProductPage() {
       for (let j = 0; j < 2; j += 1) {
         if (descriptions[i + j]) {
           newSection.rows.push({
-            description: {
-              component_id: descriptions[i + j].component_id,
-              text: descriptions[i + j].is_text_not_image
-                ? descriptions[i + j].text
-                : undefined,
-              image: descriptions[i + j].is_text_not_image
-                ? undefined
-                : descriptions[i + j].image,
-              is_text_not_image: descriptions[i + j].is_text_not_image,
-            },
-            data: undefined,
+            component_id: descriptions[i + j].component_id,
+            text: descriptions[i + j].is_text_not_image
+              ? descriptions[i + j].text
+              : undefined,
+            image: descriptions[i + j].is_text_not_image
+              ? undefined
+              : descriptions[i + j].image,
+            is_text_not_image: descriptions[i + j].is_text_not_image,
           });
         }
       }
@@ -185,9 +181,10 @@ export default function ManageProductPage() {
   /**
    * Starts the process of saving the product. This includes saving the product itself, the sections and the testimonials.
    */
-  const initializeSaveProtocol = () => {
-    productForm.current?.submit();
-    /* sendDeleteDescriptions();
+  const initializeSaveProtocol = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    sendProduct();
+    /*sendDeleteDescriptions();
     sendNewDescriptions();
     sendPriorityChanges();
     sendEdits(); */
@@ -195,6 +192,24 @@ export default function ManageProductPage() {
     alert("Product saved!");
 
     //TODO: Send testimonials
+  };
+
+  const sendProduct = async () => {
+    let formData = new FormData();
+    formData.append("image", productImage.current!.files![0]);
+    formData.append("price_per_unit", productPrice.current!.value);
+    formData.append("product_name", productName.current!.value);
+    formData.append("short_description", productDescription.current!.value);
+    let response = await fetch(
+      `${baseUrl}/api/priv/products${createState ? "" : `/${productId}`}`,
+      {
+        method: createState ? "POST" : "PUT",
+        headers: {
+          Accept: "multipart/form-data",
+        },
+        body: formData,
+      }
+    );
   };
 
   const sendDeleteDescriptions = async () => {
@@ -213,10 +228,10 @@ export default function ManageProductPage() {
 
   const findRow = (
     id: number
-  ): { description: SimpleAccordionRowProps | undefined; foundAt: number } => {
+  ): { description: LocalDescription | undefined; foundAt: number } => {
     for (let i = 0; i < sections.length; i += 1) {
       for (let j = 0; j < sections[i].rows.length; j += 1) {
-        if (sections[i].rows[j].description.component_id === id) {
+        if (sections[i].rows[j].component_id === id) {
           return { description: sections[i].rows[j], foundAt: i + j + 2 };
         }
       }
@@ -226,10 +241,11 @@ export default function ManageProductPage() {
 
   const sendNewDescriptions = async () => {
     let found = false;
+
     contentChanges?.get(ChangeType.Add)?.forEach((id) => {
-      let { description: rowData, foundAt } = findRow(id);
-      if (rowData) {
-        if (rowData.description.is_text_not_image) {
+      let { description: row, foundAt } = findRow(id);
+      if (row) {
+        if (row.is_text_not_image) {
           let respone = fetch(
             `${baseUrl}/api/priv/products/${productId}/descriptions/text`,
             {
@@ -238,15 +254,30 @@ export default function ManageProductPage() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                text_title: rowData.description.text?.text_title,
-                paragraph: rowData.description.text?.paragraph,
+                text_title: row.text?.text_title,
+                paragraph: row.text?.paragraph,
               }),
             }
           );
-        } else if (rowData.data) {
-          rowData.data.action = `${baseUrl}/api/priv/products/${productId}/descriptions/image`;
-          rowData.data.method = "POST";
-          rowData.data.submit();
+        } else {
+          const formData = new FormData();
+          let image_content: Blob;
+          if (row.image instanceof File) {
+            image_content = row.image;
+          }
+          formData.append("image", image_content!);
+          formData.append("alt_text", row.image?.alt_text!);
+          let response = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/image`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Accept: "multipart/form-data",
+              },
+              body: formData,
+            }
+          );
         }
       }
     });
@@ -263,10 +294,7 @@ export default function ManageProductPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify([
-            rows![0].description.component_id,
-            rows![1].description.component_id,
-          ]),
+          body: JSON.stringify([rows![0].component_id, rows![1].component_id]),
         }
       );
     });
@@ -274,9 +302,9 @@ export default function ManageProductPage() {
 
   const sendEdits = async () => {
     contentChanges?.get(ChangeType.Edit)?.forEach((id) => {
-      let { description: rowData, foundAt } = findRow(id);
-      if (rowData) {
-        if (rowData.description.is_text_not_image) {
+      let { description: row, foundAt } = findRow(id);
+      if (row) {
+        if (row.is_text_not_image) {
           let respone = fetch(
             `${baseUrl}/api/priv/products/${productId}/descriptions/text/${id}`,
             {
@@ -290,16 +318,29 @@ export default function ManageProductPage() {
                 image: null,
                 priority: foundAt,
                 product_id: productId,
-                text: rowData.description.text,
+                text: row.text,
               }),
             }
           );
         } else {
-          if (rowData.data) {
-            rowData.data.action = `${baseUrl}/api/priv/products/${productId}/descriptions/image/${id}`;
-            rowData.data.method = "PUT";
-            rowData.data.submit();
+          const formData = new FormData();
+          let image_content: Blob;
+          if (row.image instanceof File) {
+            image_content = row.image;
           }
+          formData.append("image", image_content!);
+          formData.append("alt_text", row.image?.alt_text!);
+          let response = fetch(
+            `${baseUrl}/api/priv/products/${productId}/descriptions/image/${id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Accept: "multipart/form-data",
+              },
+              body: formData,
+            }
+          );
         }
       }
     });
@@ -309,23 +350,26 @@ export default function ManageProductPage() {
       <HeaderEditPopup></HeaderEditPopup>
       <RowEditPopup></RowEditPopup>
       <TestimonialPopup product_id={productId!}></TestimonialPopup>
-      <section className="container">
-        <h2> Manage product</h2>
-        <form
-          className="wide-section"
-          action={
-            `${baseUrl}/api/priv/products` + createState ? "" : `/${productId}`
-          }
-          method={createState ? "POST" : "PUT"}
-          ref={productForm}
-        >
+      <form
+        className="wide-section"
+        action={`${baseUrl}/api/priv/products${
+          createState ? "" : `/${productId}`
+        }`}
+        method={createState ? "POST" : "PUT"}
+        encType="multipart/form-data"
+        onSubmit={initializeSaveProtocol}
+        ref={productForm}
+      >
+        <section className="container">
+          <h2> Manage product</h2>
+
           <label className="no-inline-margin" htmlFor="product-name">
             <b>Product name:</b>
           </label>
           <input
             type="text"
             id="product-name"
-            name="product-name"
+            name="product_name"
             ref={productName}
           />
           <label htmlFor="product-price">
@@ -334,7 +378,7 @@ export default function ManageProductPage() {
           <input
             type="number"
             id="product-price"
-            name="product-price"
+            name="price_per_unit"
             ref={productPrice}
           />
           <label htmlFor="product-image">
@@ -343,7 +387,7 @@ export default function ManageProductPage() {
           <input
             type="file"
             id="product-image"
-            name="product-image"
+            name="image"
             accept="image/png, image/jpeg, image/webp"
             ref={productImage}
           />
@@ -353,7 +397,7 @@ export default function ManageProductPage() {
           </label>
           <textarea
             id="product-description"
-            name="product-description"
+            name="short_description"
             style={{
               fontSize: "1rem",
               fontFamily: "var(--ff-primary)",
@@ -363,35 +407,32 @@ export default function ManageProductPage() {
             cols={50}
             ref={productDescription}
           />
-        </form>
-      </section>
-      <section className="accordion-wrapper container">
-        <AccordionTable
-          sections={sections}
-          testimonials={testimonials}
-          productID={productId!}
-          registerContentChange={registerContentChange}
-          setTestimonials={setTestimonials}
-          setSections={setSections}
-        ></AccordionTable>
-      </section>
-      <section className="container">
-        <iframe src=""></iframe>
-      </section>
-      <section className="button-container">
-        <button
-          className="default-button small-button bg-danger"
-          onClick={() => initializeAvailabilityChangeProtocol()}
-        >
-          {hidden ? "Unhide" : "Hide"}
-        </button>
-        <button
-          className="default-button small-button"
-          onClick={() => initializeSaveProtocol()}
-        >
-          Save
-        </button>
-      </section>
+        </section>
+        <section className="accordion-wrapper container">
+          <AccordionTable
+            sections={sections}
+            testimonials={testimonials}
+            productID={productId!}
+            registerContentChange={registerContentChange}
+            setTestimonials={setTestimonials}
+            setSections={setSections}
+          ></AccordionTable>
+        </section>
+        <section className="container">
+          <iframe src=""></iframe>
+        </section>
+        <section className="button-container">
+          <button
+            className="default-button small-button bg-danger"
+            onClick={() => initializeAvailabilityChangeProtocol()}
+          >
+            {hidden ? "Unhide" : "Hide"}
+          </button>
+          <button className="default-button small-button" type="submit">
+            Save
+          </button>
+        </section>
+      </form>
     </>
   );
 }

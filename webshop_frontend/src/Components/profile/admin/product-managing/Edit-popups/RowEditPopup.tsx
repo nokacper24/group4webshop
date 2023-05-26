@@ -9,26 +9,23 @@ import { RefObject, useEffect, useRef, useState } from "react";
 export type RowEditPopupProps = {
   image: boolean;
   title: string | undefined;
-  content: string | undefined;
-  data: HTMLFormElement | undefined;
+  content: string | File | undefined;
   informationCallBack: (
     image: boolean,
     title: string,
-    content: string,
-    data: HTMLFormElement
+    content: string | File
   ) => void;
 };
 
 let popupRef: RefObject<HTMLDivElement>;
-let imageRef: RefObject<HTMLInputElement>;
+let imageInputRef: RefObject<HTMLInputElement>;
 let titleRef: RefObject<HTMLInputElement>;
 let altTextRef: RefObject<HTMLTextAreaElement>;
 let paragraphRef: RefObject<HTMLTextAreaElement>;
 let updatePropsFunc: (newProps: RowEditPopupProps) => void;
 export default function RowEditPopup() {
   popupRef = useRef(null);
-  let formRef: RefObject<HTMLFormElement> = useRef(null);
-  imageRef = useRef(null);
+  imageInputRef = useRef(null);
   titleRef = useRef(null);
   altTextRef = useRef(null);
   paragraphRef = useRef(null);
@@ -37,7 +34,6 @@ export default function RowEditPopup() {
     image: false,
     title: undefined,
     content: undefined,
-    data: undefined,
     informationCallBack: () => {},
   });
 
@@ -46,7 +42,7 @@ export default function RowEditPopup() {
     if (titleRef.current) {
       titleRef.current.value = newProps.title ? newProps.title : "";
     }
-    if (paragraphRef.current) {
+    if (paragraphRef.current && typeof newProps.content === "string") {
       paragraphRef.current.value = newProps.content ? newProps.content : "";
     }
     if (altTextRef.current) {
@@ -57,7 +53,7 @@ export default function RowEditPopup() {
   const save = () => {
     let content: string;
     if (props.image) {
-      content = imageRef.current ? imageRef.current.value : "";
+      content = imageInputRef.current ? imageInputRef.current.value : "";
     } else {
       content = paragraphRef.current?.value ? paragraphRef.current.value : "";
     }
@@ -67,7 +63,7 @@ export default function RowEditPopup() {
     } else {
       title = titleRef.current?.value ? titleRef.current.value : "";
     }
-    props.informationCallBack(props.image, title, content, formRef.current!);
+    props.informationCallBack(props.image, title, content);
     hidePopup();
   };
 
@@ -85,6 +81,10 @@ export default function RowEditPopup() {
 
   useEffect(() => {
     updatePropsFunc = updateProps;
+  });
+
+  imageInputRef.current?.addEventListener("change", () => {
+    props.content = imageInputRef.current?.files?.[0];
   });
 
   return (
@@ -107,12 +107,16 @@ export default function RowEditPopup() {
                 name="image"
                 accept="image/png, image/jpeg, image/webp"
                 onChange={() =>
-                  setProps({ ...props, content: imageRef.current?.value })
+                  setProps({ ...props, content: imageInputRef.current?.value })
                 }
-                ref={imageRef}
-                defaultValue={props.content ? props.content : ""}
+                ref={imageInputRef}
+                defaultValue={
+                  props.content && typeof props.content === "string"
+                    ? props.content
+                    : ""
+                }
               />
-              <p>Current image: {props.content}</p>
+              <p>Current image: TODO: Preview</p>
               <label htmlFor="alt_text">Alt-text:</label>
               <textarea
                 name="alt_text"
@@ -137,7 +141,11 @@ export default function RowEditPopup() {
               <label htmlFor="paragraph">Paragraph:</label>
               <textarea
                 id="paragraph"
-                defaultValue={props.content ? props.content : ""}
+                defaultValue={
+                  props.content && typeof props.content === "string"
+                    ? props.content
+                    : ""
+                }
                 cols={40}
                 rows={10}
                 ref={paragraphRef}

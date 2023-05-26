@@ -3,8 +3,7 @@ import { AccordionBody } from "./AccordionBody";
 import { AccordionHeader } from "./AccordionHeader";
 import { ChangeType } from "./ChangeTypes";
 import { showPopup } from "../Edit-popups/RowEditPopup";
-import { SimpleDescription } from "../../../../../Interfaces";
-import { SimpleAccordionRowProps } from "./AccordionRow";
+import { Image, LocalDescription, LocalImage } from "../../../../../Interfaces";
 
 /**
  * The props of the AccordionSection component.
@@ -13,7 +12,7 @@ export type AccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: SimpleAccordionRowProps[];
+  rows: LocalDescription[];
 
   sectionID: number;
 };
@@ -22,7 +21,7 @@ type PrivateAccordionSectionProps = {
   header: {
     title: string;
   };
-  rows: SimpleAccordionRowProps[];
+  rows: LocalDescription[];
 
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
@@ -65,26 +64,28 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
         title: undefined,
         content: undefined,
         informationCallBack: finishCreation,
-        data: undefined,
       });
     }
     function finishCreation(
       image: boolean,
       title: string,
-      content: string,
-      data: HTMLFormElement
+      content: string | File
     ) {
       let id = createID();
       props.registerContentChange(id, ChangeType.Add);
-
+      let image_content: Image | LocalImage | undefined = undefined;
+      if (typeof content === "string") {
+        image_content = image
+          ? { image_path: content, alt_text: title }
+          : undefined;
+      }
       rows.push({
-        description: {
-          component_id: id,
-          text: image ? undefined : { text_title: title, paragraph: content },
-          image: image ? { image_path: content, alt_text: title } : undefined,
-          is_text_not_image: !image,
-        },
-        data: data,
+        component_id: id,
+        text: image
+          ? undefined
+          : { text_title: title, paragraph: content as string },
+        image: image_content,
+        is_text_not_image: !image,
       });
       setRows([...rows]);
     }
@@ -101,7 +102,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be deleted
    */
   const deleteRow = (id: number) => {
-    let newRows = rows.filter((row) => row.description.component_id !== id);
+    let newRows = rows.filter((row) => row.component_id !== id);
     setRows(newRows);
     props.registerContentChange(id, ChangeType.Delete);
   };
@@ -112,28 +113,43 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    let row = rows.find((row) => row.description.component_id === id);
+    let row = rows.find((row) => row.component_id === id);
+    let content_image: string | File;
+    if (row?.image && row?.is_text_not_image) {
+      content_image = instanceOfImage(row.image)
+        ? row.image.image_path
+        : row.image.image_file;
+    } else {
+      content_image = "";
+    }
     if (row) {
       showPopup({
-        image: !row.description.is_text_not_image,
-        title: row.description.is_text_not_image
-          ? row.description.text?.text_title
-          : row.description.image?.alt_text,
-        content: row.description.is_text_not_image
-          ? row.description.text?.paragraph
-          : row.description.image?.image_path,
+        image: !row.is_text_not_image,
+        title: row.is_text_not_image
+          ? row.text?.text_title
+          : row.image?.alt_text,
+        content: row.is_text_not_image ? content_image : row.text?.paragraph,
         informationCallBack: finishEdit,
-        data: row.data,
       });
-      function finishEdit(image: boolean, title: string, content: string) {
+      function finishEdit(
+        image: boolean,
+        title: string,
+        content: string | File
+      ) {
         //Tried creating a if (row) but sonarlint complains row always exists, but the TS/React compiler complains it might not exist
-        row!.description.is_text_not_image = !image;
-        row!.description.text = image
+        let content_image: Image | LocalImage | undefined = undefined;
+        if (content instanceof File && image) {
+          content_image = { image_file: content, alt_text: title };
+        } else if (typeof content === "string" && image) {
+          content_image = { image_path: content, alt_text: title };
+        } else {
+          content_image = undefined;
+        }
+        row!.is_text_not_image = !image;
+        row!.text = image
           ? undefined
-          : { text_title: title, paragraph: content };
-        row!.description.image = image
-          ? { image_path: content, alt_text: title }
-          : undefined;
+          : { text_title: title, paragraph: content as string };
+        row!.image = row!.is_text_not_image ? undefined : content_image;
         setRows([...rows]);
         props.registerContentChange(id, ChangeType.Edit);
       }
@@ -141,18 +157,19 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
     props.registerContentChange(id, ChangeType.Edit);
   };
 
+  function instanceOfImage(object: any): object is Image {
+    return "image_path" in object;
+  }
+
   useEffect(() => {
-    let newRows: SimpleAccordionRowProps[] = [];
+    let newRows: LocalDescription[] = [];
     props.rows.forEach((row) => {
-      return newRows.push({
-        description: row.description,
-        data: row.data,
-      });
+      return newRows.push(row);
     });
     setRows(newRows);
   }, [props.rows]);
 
-  const [rows, setRows] = useState<SimpleAccordionRowProps[]>([]);
+  const [rows, setRows] = useState<LocalDescription[]>([]);
 
   const swapRows = () => {
     let newRows = [...rows];
