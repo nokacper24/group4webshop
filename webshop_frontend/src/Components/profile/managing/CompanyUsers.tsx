@@ -261,9 +261,10 @@ export default function CompanyUsers() {
         <h1>Invite users</h1>
         <p>
           Add users by writing their e-mail in the field below. Alternatively,
-          you can upload a comma separated file (CSV) with multiple e-mails.
-          They will then get an invitation to create a user with that e-mail
-          address.
+          you can upload a CSV file separated with commas with multiple e-mail
+          addresses. Example: <code>user1@email.com,user2@email.com</code> or{" "}
+          <code>user1@email.com, user2@email.com</code>. They will then get an
+          invitation to create a user with that e-mail address.
         </p>
         <form onSubmit={handleSubmitSingleEmail}>
           <label style={{ display: "inline-block" }}>
