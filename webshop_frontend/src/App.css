@@ -1151,7 +1151,7 @@ form a:hover {
 /* || MANAGER/ADMIN PAGES */
 /* Select Table */
 .table-container {
-  max-height: 30em;
+  max-height: 40em;
   max-width: 80vw;
   margin: 0 auto;
   overflow: auto;
