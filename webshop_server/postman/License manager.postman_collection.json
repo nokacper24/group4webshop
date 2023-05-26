@@ -1,0 +1,459 @@
+{
+	"info": {
+		"_postman_id": "09ca4edd-e6e1-4596-b2ca-c34f13fd8d41",
+		"name": "License manager",
+		"description": "## About\n\nThis collection is a test set, designed to test endpoints related to actions **admin** has access to.\n\n## Important note\n\nStartFragment\n\nTests like `Create users (CSV file)` use CSV file with content like `user1@email.com, user2@email.com`. This cannot be saved in the environment. In order to run the this collection, you need to place **`emails.csv`** in your Postman working directory",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26873608"
+	},
+	"item": [
+		{
+			"name": "Licenses",
+			"item": [
+				{
+					"name": "Get users with valid license ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/licenses/1/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"licenses",
+								"1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users with invalid license ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function() {\r",
+									"    pm.response.to.have.status(400);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/licenses/invalid_id/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"licenses",
+								"invalid_id",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add new access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function() {\r",
+									"    pm.response.to.have.status(201);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"users\": [\r\n        {\r\n            \"user_id\": 1,\r\n            \"license_id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/license_users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"license_users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add existing access",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function() {\r",
+									"    pm.response.to.have.status(409);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"users\": [\r\n        {\r\n            \"user_id\": 1,\r\n            \"license_id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/license_users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"license_users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove existing access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"users\": [\r\n        {\r\n            \"user_id\": 1,\r\n            \"license_id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/license_users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"license_users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove non-existing access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function() {\r",
+									"    pm.response.to.have.status(404);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"users\": [\r\n        {\r\n            \"user_id\": 1,\r\n            \"license_id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/license_users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"license_users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get licenses for user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/user_licenses/user/3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"user_licenses",
+								"user",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get licenses for user with no access",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/user_licenses/user/3/no_access",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"user_licenses",
+								"user",
+								"3",
+								"no_access"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create user for company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@email.com\",\r\n    \"company_id\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/generate_invite",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"generate_invite"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create users (CSV file)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "csv",
+									"type": "file",
+									"src": "/C:/Users/zile/Downloads/emails.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/priv/generate_invites",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"generate_invites"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "admin_cookie",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"users\": [\r\n        {\r\n            \"user_id\": 1\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
