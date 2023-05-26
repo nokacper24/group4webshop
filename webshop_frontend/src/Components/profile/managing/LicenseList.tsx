@@ -22,13 +22,7 @@ export default function LicenseList({ companyId }: Props) {
   }, []);
 
   return (
-    <div
-      style={{
-        maxWidth: "80vw",
-        overflow: "auto",
-        margin: "0 auto",
-      }}
-    >
+    <div className="table-container">
       <table>
         <thead>
           <tr>
