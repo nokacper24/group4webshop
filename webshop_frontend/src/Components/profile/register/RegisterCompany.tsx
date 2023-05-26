@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TermsOfService from "./TermsOfService";
+import { getInviteInfo, registerCompany } from "../../../ApiController";
 
 /**
  * Represents the Register Company component on the Create Account page.
@@ -8,6 +9,27 @@ import TermsOfService from "./TermsOfService";
  * @returns A Register Company component.
  */
 export default function RegisterCompanyAccount() {
+  interface InviteInfo {
+    email: string;
+    companyName: string;
+    companyAddress: string;
+    role: string;
+  }
+
+  const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
+  // get invite info from endpoint
+  // if invite info is valid, fill in email field and disable it
+  // if invite info is invalid, show error message and redirect to /register/email
+
+  const getInfo = async (id: string) => {
+    let result = await getInviteInfo(id);
+    if (result.ok) {
+      setInviteInfo(await result.json());
+    } else {
+      console.log("Invalid invite ID");
+    }
+  };
+
   const password = useRef<HTMLInputElement>(null);
   const confirmPassword = useRef<HTMLInputElement>(null);
   const [formAlert, setFormAlert] = useState<string>("");
@@ -17,7 +39,7 @@ export default function RegisterCompanyAccount() {
    *
    * @param event The form event.
    */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (password.current?.value != confirmPassword.current?.value) {
@@ -28,8 +50,34 @@ export default function RegisterCompanyAccount() {
       setFormAlert("");
     }
 
-    // TODO: Send the form info somewhere
+    // send data to endpoint
+    let url = window.location.href;
+    let id = url.substring(url.lastIndexOf("/") + 1);
+    let companyName = event.currentTarget["company-name"].value;
+    let companyAddress = event.currentTarget["company-address"].value;
+    let passw0rd = event.currentTarget["password"].value;
+
+    let result = await registerCompany(
+      id,
+      passw0rd,
+      companyName,
+      companyAddress
+    );
+
+    if (result.ok) {
+      window.location.href = "/login";
+    } else {
+      setFormAlert("Something went wrong. Please try again.");
+    }
   };
+
+  useEffect(() => {
+    //get the id from the url and call the getInfo function. e.g. /register/company/1234 -> 1234 or /someting/1234 -> 1234
+    //get the last part of the url
+    const url = window.location.href;
+    const id = url.substring(url.lastIndexOf("/") + 1);
+    getInfo(id);
+  }, []);
 
   return (
     <>
@@ -40,7 +88,7 @@ export default function RegisterCompanyAccount() {
         <input
           id="create-account_email"
           name="email"
-          value="user@company.com" /* TODO: Fill value from URL */
+          value={inviteInfo?.email}
           required
           disabled
         />

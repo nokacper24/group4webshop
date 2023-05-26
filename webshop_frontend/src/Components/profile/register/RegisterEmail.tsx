@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerInvite } from "../../../ApiController";
 
 /**
  * Represents the Register E-mail component on the Create Account page.
@@ -14,11 +15,14 @@ export function RegisterEmail() {
 
   const email = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // TODO: Fix
-    console.log(email.current!.value);
-    navigate("/register/verify");
+    let result = await registerInvite(email.current!.value);
+    if (result.ok) {
+      navigate("/register/verify");
+    } else {
+      // TODO: Show error message
+    }
   };
 
   return (

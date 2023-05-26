@@ -4,8 +4,8 @@ use sqlx::{query_as, Pool, Postgres};
 #[derive(Deserialize, Serialize)]
 pub struct Company {
     pub company_id: i32,
-    company_name: String,
-    company_address: String,
+    pub company_name: String,
+    pub company_address: String,
 }
 
 /// Get all companies from the database.
