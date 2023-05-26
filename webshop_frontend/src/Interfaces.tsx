@@ -68,6 +68,11 @@ export interface Image {
   alt_text: string;
 }
 
+export interface LocalImage {
+  image_file: File;
+  alt_text: string;
+}
+
 export interface Description {
   component_id: number;
   priority: number;
@@ -78,10 +83,10 @@ export interface Description {
   full_width: boolean;
 }
 
-export interface SimpleDescription {
+export interface LocalDescription {
   component_id: number;
   text: Text | undefined;
-  image: Image | undefined;
+  image: Image | LocalImage | undefined;
   is_text_not_image: boolean;
 }
 
