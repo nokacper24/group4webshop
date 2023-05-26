@@ -16,23 +16,25 @@ export default function UserLicenses(props: Props) {
   }, []);
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Start</th>
-          <th>End</th>
-        </tr>
-      </thead>
-      <tbody>
-        {licenses?.map((license) => (
+    <div className="table-container">
+      <table>
+        <thead>
           <tr>
-            <td>{license.display_name}</td>
-            <td>{new Date(license.start_date).toLocaleDateString()}</td>
-            <td>{new Date(license.end_date).toLocaleDateString()}</td>
+            <th>Product</th>
+            <th>Start</th>
+            <th>End</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {licenses?.map((license) => (
+            <tr>
+              <td>{license.display_name}</td>
+              <td>{new Date(license.start_date).toLocaleDateString()}</td>
+              <td>{new Date(license.end_date).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
