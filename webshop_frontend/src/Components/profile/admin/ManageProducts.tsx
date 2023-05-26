@@ -10,6 +10,7 @@ import {
 } from "../select-table/SelectTableFunctions";
 import { fetchProducts } from "../../../ApiController";
 import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 
 export default function ManageProducts() {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ export default function ManageProducts() {
         button={productsTable.button}
         outsideButtons={productsTable.outsideButtons}
       />
+      <Link className="default-button" to={"/product/create"}>Create new product</Link>
     </section>
   );
 }
