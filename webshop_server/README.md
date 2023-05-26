@@ -1,6 +1,9 @@
 # Webshop Server
 This is the back-end for the webshop project. It is written in [Rust](https://www.rust-lang.org/), using the [Actix](https://actix.rs/) framework. We used [SQLx](https://crates.io/crates/sqlx) for database access and [PostgreSQL](https://www.postgresql.org/) for the database itself.
 
+## Documentation
+The REST api is documented using [OpenAPI](https://swagger.io/specification/) specification. You can find the Swagger UI [here](https://group04.web-tek.ninja/api-doc/swagger-ui/).
+
 ## How to build and run
 First of all, you will need to have Rust and Cargo installed. You can install them by following the instructions on [rustup.rs](https://rustup.rs/).  
 In addition you will need a PostgreSQL database running. We recommend using [Docker](https://docs.docker.com/get-docker/) to run the database. You will also need to create the database schema. Refer to [database README](../database/README.md) for more information.
@@ -70,3 +73,6 @@ In order to regenerate [sqlx-data.json](./sqlx-data.json), run the following com
 cargo sqlx prepare
 ```
 **Note:** You will need to have a database running in order to regenerate [sqlx-data.json](./sqlx-data.json)!
+
+## Testing
+There are Postman tests in the [`postman`](./postman) directory. You can import the collections into Postman and run them. There are more details on the collections' overview pages.
