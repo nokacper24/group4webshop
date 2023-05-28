@@ -15,9 +15,7 @@ fn public_routes_docs() -> Vec<openapi::OpenApi> {
 }
 
 fn protected_routes_docs() -> Vec<openapi::OpenApi> {
-    vec![
-        // nothing here yet
-    ]
+    vec![private::users_protected::UserApiDoc::openapi()]
 }
 
 fn admin_routes_docs() -> Vec<openapi::OpenApi> {
