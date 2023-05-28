@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
-import { Description, Testimonial } from "../../../../../Interfaces";
+import {
+  Description,
+  LocalDescription,
+  Testimonial,
+} from "../../../../../Interfaces";
 import { TestimonialSection } from "../testimonials/TestimonialSection";
 
 export type AccordionTableProps = {
@@ -10,6 +14,7 @@ export type AccordionTableProps = {
   testimonials: Testimonial[];
   productID: string;
   registerContentChange: (id: number, type: ChangeType) => void;
+  registerTestimonialChange: (id: number, type: ChangeType) => void;
   setTestimonials: (testimonials: Testimonial[]) => void;
   setSections: (sections: AccordionSectionProps[]) => void;
 };
@@ -30,10 +35,7 @@ export default function AccordionTable(props: AccordionTableProps) {
   const deleteSection = (id: number) => {
     const section = props.sections.find((section) => section.sectionID === id);
     section?.rows.forEach((row) => {
-      props.registerContentChange(
-        row.component_id,
-        ChangeType.Delete
-      );
+      props.registerContentChange(row.component_id, ChangeType.Delete);
     });
     const newSections = props.sections.filter(
       (section) => section.sectionID !== id
@@ -102,6 +104,7 @@ export default function AccordionTable(props: AccordionTableProps) {
         sectionId={0}
         productId={props.productID}
         setTestimonials={props.setTestimonials}
+        registerChange={props.registerTestimonialChange}
       />
     </div>
   );
