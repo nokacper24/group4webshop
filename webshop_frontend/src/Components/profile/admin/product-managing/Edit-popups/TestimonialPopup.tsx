@@ -107,9 +107,9 @@ export default function TestimonialPopup(
           />
           <p>
             Current image:{" "}
-            {props.testimonial?.author_pic
+            {typeof props.testimonial?.author_pic === "string"
               ? props.testimonial?.author_pic
-              : "none"}
+              : props.testimonial?.author_pic.name}
           </p>
           <label htmlFor="testimonial-text">Testimonial:</label>
           <textarea

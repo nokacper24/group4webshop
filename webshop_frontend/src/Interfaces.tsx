@@ -94,7 +94,7 @@ export interface Testimonial {
   testimonial_id: number;
   author: string;
   text: string;
-  author_pic: string;
+  author_pic: string | File;
   product_id: string;
 }
 

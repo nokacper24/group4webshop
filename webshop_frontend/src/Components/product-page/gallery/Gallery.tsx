@@ -72,7 +72,10 @@ export default function Gallery(props: GalleryProps) {
   };
 
   const reviewerProfile = {
-    picturePath: props.testimonials[index].author_pic,
+    picturePath:
+      typeof props.testimonials[index].author_pic === "string"
+        ? (props.testimonials[index].author_pic as string)
+        : "",
     name: props.testimonials[index].author,
   };
 
