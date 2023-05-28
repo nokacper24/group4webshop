@@ -26,6 +26,7 @@ type PrivateAccordionSectionProps = {
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
   deleteSection: (id: number) => void;
+  setRows: (sectionId: number,rows: LocalDescription[]) => void;
 };
 
 let latestID = 100;
@@ -58,7 +59,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    */
   const addRow = () => {
     // Temporary debug solution
-    if (rows.length < 2) {
+    if (props.rows.length < 2) {
       showPopup({
         image: false,
         title: undefined,
@@ -79,7 +80,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
           ? { image_path: content, alt_text: title }
           : undefined;
       }
-      rows.push({
+      props.rows.push({
         component_id: id,
         text: image
           ? undefined
@@ -87,7 +88,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
         image: image_content,
         is_text_not_image: !image,
       });
-      setRows([...rows]);
+      props.setRows(props.sectionID, [...props.rows]);
     }
   };
 
@@ -102,8 +103,8 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be deleted
    */
   const deleteRow = (id: number) => {
-    let newRows = rows.filter((row) => row.component_id !== id);
-    setRows(newRows);
+    let newRows = props.rows.filter((row) => row.component_id !== id);
+    props.setRows(props.sectionID, newRows);
     props.registerContentChange(id, ChangeType.Delete);
   };
 
@@ -113,7 +114,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
    * @param id the ID of the row to be edited
    */
   const editRow = (id: number) => {
-    let row = rows.find((row) => row.component_id === id);
+    let row = props.rows.find((row) => row.component_id === id);
     let content_image: string | File;
     if (row?.image && row?.is_text_not_image) {
       content_image = instanceOfImage(row.image)
@@ -150,7 +151,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
           ? undefined
           : { text_title: title, paragraph: content as string };
         row!.image = row!.is_text_not_image ? undefined : content_image;
-        setRows([...rows]);
+        props.setRows(props.sectionID, [...props.rows]);
         props.registerContentChange(id, ChangeType.Edit);
       }
     }
@@ -161,20 +162,13 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
     return "image_path" in object;
   }
 
-  useEffect(() => {
-    let newRows: LocalDescription[] = [];
-    props.rows.forEach((row) => {
-      return newRows.push(row);
-    });
-    setRows(newRows);
-  }, [props.rows]);
 
-  const [rows, setRows] = useState<LocalDescription[]>([]);
 
   const swapRows = () => {
-    let newRows = [...rows];
+    let newRows = [...props.rows];
     newRows.reverse();
-    setRows(newRows);
+    props.setRows(props.sectionID, newRows);
+    props.registerContentChange(props.sectionID, ChangeType.Swap);
   };
 
   const collapseBody = () => {
@@ -190,7 +184,7 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
         addRow={addRow}
       ></AccordionHeader>
       <AccordionBody
-        rows={rows}
+        rows={props.rows}
         collapsed={collapse}
         swapRows={swapRows}
         editRow={editRow}

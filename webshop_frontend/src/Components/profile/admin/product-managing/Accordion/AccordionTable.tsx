@@ -62,6 +62,16 @@ export default function AccordionTable(props: AccordionTableProps) {
     }
   };
 
+  const addNewRow = (sectionId: number, rows: LocalDescription[]) => {
+    let section = props.sections.find(
+      (section) => section.sectionID === sectionId
+    );
+    if (section) {
+      section.rows = rows;
+      props.setSections([...props.sections]);
+    }
+  };
+
   const createUniqueID = () => {
     //While in theory it is possible to generate the same ID, the chance is so small that it is not worth worrying about.
     //It also requires them to create multiple sections in the same millisecond, which should be impossible for a human, maybe even a computer.
@@ -84,6 +94,7 @@ export default function AccordionTable(props: AccordionTableProps) {
           sectionID={section.sectionID}
           registerContentChange={props.registerContentChange}
           deleteSection={deleteSection}
+          setRows={addNewRow}
         />
       ))}
       <TestimonialSection
