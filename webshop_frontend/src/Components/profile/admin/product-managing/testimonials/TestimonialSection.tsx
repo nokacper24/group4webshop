@@ -3,6 +3,7 @@ import { TestimonialHeader } from "./TestimonialHeader";
 import { TestimonialBody } from "./TestimonialBody";
 import { showTestimonialPopup } from "../Edit-popups/TestimonialPopup";
 import { Testimonial } from "../../../../../Interfaces";
+import { ChangeType } from "../Accordion/ChangeTypes";
 
 /**
  * The props of the TestimonialSection component.
@@ -12,7 +13,14 @@ export type TestimonialSectionProps = {
 
   sectionId: number;
   productId: string;
+};
+
+type PrivateProps = {
+  testimonials: Testimonial[];
+  sectionId: number;
+  productId: string;
   setTestimonials: (testimonials: Testimonial[]) => void;
+  registerChange: (id: number, change: ChangeType) => void;
 };
 
 let latestID = 100;
