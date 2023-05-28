@@ -106,8 +106,8 @@ async fn create_user(
                             //print invite temporarely TODO: send email
                             let email = utils::email::Email {
                                 recipient_email: email.email.clone(),
-                                subject: "Invite to webshop".to_string(),
-                                body: _v.id,
+                                mail_type: utils::email::EmailType::RegisterUser,
+                                invite_code: Some(_v.id),
                             };
                             let outcome = utils::email::send_email(email, mailer).await;
 

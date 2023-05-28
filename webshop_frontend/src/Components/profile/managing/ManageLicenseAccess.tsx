@@ -59,12 +59,12 @@ export default function ManageLicenseAccess() {
   /**
    * Add a user to the list of users with license access.
    *
-   * @param index The index of the user in the list of users without
+   * @param id The index of the user in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addUserAccess = (index: number) => {
+  const addUserAccess = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       withoutAccessTable,
       withAccessTable,
       setUsersWithoutAccess,
@@ -77,12 +77,12 @@ export default function ManageLicenseAccess() {
   /**
    * Remove a user from the list of users with license access.
    *
-   * @param index The index of the user in the list of users with
+   * @param id The index of the user in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeUserAccess = (index: number) => {
+  const removeUserAccess = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       withAccessTable,
       withoutAccessTable,
       setUsersWithAccess,
@@ -98,9 +98,9 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addSelectedUsersAccess = (indices: number[]) => {
+  const addSelectedUsersAccess = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       withoutAccessTable,
       withAccessTable,
       setUsersWithoutAccess,
@@ -116,9 +116,9 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeSelectedUsersAccess = (indices: number[]) => {
+  const removeSelectedUsersAccess = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       withAccessTable,
       withoutAccessTable,
       setUsersWithAccess,

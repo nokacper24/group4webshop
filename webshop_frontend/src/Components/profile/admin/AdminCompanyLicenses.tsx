@@ -41,11 +41,11 @@ export default function AdminCompanyLicenses() {
   /**
    * Remove a license from list of valid licenses.
    *
-   * @param index The index of the license in the list.
+   * @param id The ID of the license.
    */
-  const invalidateLicense = (index: number) => {
-    let license = moveItemBetweenTables(
-      index,
+  const invalidateLicense = (id: string) => {
+    let license: SelectTableRowProps = moveItemBetweenTables(
+      id,
       validLicensesTable,
       invalidLicensesTable,
       setValidLicenses,
@@ -60,9 +60,9 @@ export default function AdminCompanyLicenses() {
    *
    * @param index The index of the license in the list.
    */
-  const validateLicense = (index: number) => {
-    let license = moveItemBetweenTables(
-      index,
+  const validateLicense = (id: string) => {
+    let license: SelectTableRowProps = moveItemBetweenTables(
+      id,
       invalidLicensesTable,
       validLicensesTable,
       setInvalidLicenses,
@@ -78,9 +78,9 @@ export default function AdminCompanyLicenses() {
    *
    * @param indices The indices of the licenses in the list.
    */
-  const invalidateSelectedLicenses = (indices: number[]) => {
+  const invalidateSelectedLicenses = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       validLicensesTable,
       invalidLicensesTable,
       setValidLicenses,
@@ -96,9 +96,9 @@ export default function AdminCompanyLicenses() {
    *
    * @param indices The indices of the licenses in the list.
    */
-  const validateSelectedLicenses = (indices: number[]) => {
+  const validateSelectedLicenses = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       invalidLicensesTable,
       validLicensesTable,
       setInvalidLicenses,

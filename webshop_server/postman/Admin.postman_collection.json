@@ -1,0 +1,366 @@
+{
+	"info": {
+		"_postman_id": "e5a6b335-eade-46da-9b1f-206e2a1992c4",
+		"name": "Admin",
+		"description": "## About\n\nThis collection is a test set, designed to test endpoints related to actions **admin** has access to.\n\n## Important note\n\nSome tests, like `Create license` are not repeatable, because there are no corresponding `Delete license` endpoint, by design. There is only `Invalidate licenses`.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26873608"
+	},
+	"item": [
+		{
+			"name": "Licenses",
+			"item": [
+				{
+					"name": "admin login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin_proflex@gmail.com\",\n    \"password\": \"mmmsecurepass\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create license",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "admin_cookie",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"company_id\": 1,\r\n    \"product_id\": \"bpa_solutions\",\r\n    \"start_date\": \"2023-01-01T00:00:00.000Z\",\r\n    \"end_date\": \"2023-03-01T00:00:00.000Z\",\r\n    \"amount\": 10,\r\n    \"valid\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/licenses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"licenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalidate licenses",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"licenses\": [\r\n        {\r\n            \"license_id\": 1,\r\n            \"valid\": false\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/licenses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"licenses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "admin login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin_proflex@gmail.com\",\n    \"password\": \"mmmsecurepass\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users by role (Company IT head)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/users/role/CompanyItHead",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users",
+								"role",
+								"CompanyItHead"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users by role (Company IT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/users/role/CompanyIt",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users",
+								"role",
+								"CompanyIt"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users by role (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/users/role/Admin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users",
+								"role",
+								"Admin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users by role (Default)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/users/role/Default",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users",
+								"role",
+								"Default"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get users by non-existing role",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function() {\r",
+									"    pm.response.to.have.status(404);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/priv/users/role/NonExistingRole",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"users",
+								"role",
+								"NonExistingRole"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user roles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 Ok\", function() {\r",
+									"    pm.response.to.have.status(200);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"users\": [\r\n  {\r\n    \"user_id\": 5,\r\n    \"role\": \"CompanyItHead\"\r\n  },\r\n  {\r\n    \"user_id\": 4,\r\n    \"role\": \"Default\"\r\n  }\r\n]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/priv/user_roles",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"priv",
+								"user_roles"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

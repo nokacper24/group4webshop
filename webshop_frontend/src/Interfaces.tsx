@@ -23,6 +23,7 @@ export interface FullLicenseInfo {
   product_id: string;
   company_name: string;
   display_name: string;
+  active_users: number;
 }
 
 export interface User {
@@ -100,10 +101,10 @@ export interface Testimonial {
 
 export interface Button {
   text: string;
-  action: (index: number) => void;
+  action: (id: string) => void;
 }
 
 export interface OutsideButton {
   text: string;
-  action: (indices: number[]) => void;
+  action: (ids: string[]) => void;
 }

@@ -32,7 +32,7 @@ export default function PurchaseLicense() {
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   const price = useRef<HTMLSelectElement>(null);
-  const formAlert = useRef<HTMLParagraphElement>(null);
+  const [formAlert, setFormAlert] = useState<string>("");
 
   /**
    * Update the total price in the object's state.
@@ -49,14 +49,11 @@ export default function PurchaseLicense() {
    * @returns true if the form is valid, false if the form is not valid.
    */
   const validateForm = () => {
-    if (price.current && formAlert.current) {
-      if (parseInt(price.current.value) > 0) {
-        formAlert.current.innerHTML = "";
-        return true;
-      } else {
-        formAlert.current.innerHTML = "Please select a plan";
-      }
+    if (price.current && parseInt(price.current.value) > 0) {
+      setFormAlert("");
+      return true;
     } else {
+      setFormAlert("Please select a plan");
       return false;
     }
   };
@@ -117,6 +114,7 @@ export default function PurchaseLicense() {
           setLoadingProd(false);
         }
       });
+
     fetchMe()
       .then((user: MeUser) => {
         setUser(user);
@@ -170,7 +168,7 @@ export default function PurchaseLicense() {
                       Buy
                     </button>
 
-                    <p className="form-alert" ref={formAlert}></p>
+                    <p className="form-alert">{formAlert}</p>
                   </form>
                 )}
               </>

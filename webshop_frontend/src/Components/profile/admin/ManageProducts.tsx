@@ -17,8 +17,27 @@ export default function ManageProducts() {
 
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
-  const editProduct = (index: number) => {
-    navigate(`/product/manage/${products[index].id}`);
+  const getProduct = (id: string) => {
+    let product: SelectTableRowProps = {
+      id: "",
+      columns: [
+        {
+          text: "",
+        },
+      ],
+    };
+
+    products.forEach((p) => {
+      if (p.id == id) {
+        product = p;
+      }
+    });
+
+    return product;
+  };
+
+  const editProduct = (id: string) => {
+    navigate(`/product/manage/${getProduct(id).id}`);
   };
 
   const productsTable: SelectTableProps = createSelectTableProps(

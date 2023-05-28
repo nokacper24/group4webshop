@@ -1,3 +1,4 @@
+import { LegacyRef, forwardRef } from "react";
 import { Product } from "../../Interfaces";
 
 type ProductSelectProps = {
@@ -12,9 +13,12 @@ type ProductSelectProps = {
  * @param products The list of products and their names.
  * @returns The ProductSelect component as a JSX element.
  */
-export default function ProductSelect({ products }: ProductSelectProps) {
+const ProductSelect = forwardRef(function ProductSelect(
+  { products }: ProductSelectProps,
+  ref: LegacyRef<HTMLSelectElement>
+) {
   return (
-    <select id="product-select" name="products" defaultValue="0">
+    <select ref={ref} id="product-select" name="products" defaultValue="0">
       <option value="0" disabled>
         Please choose a product
       </option>
@@ -24,4 +28,6 @@ export default function ProductSelect({ products }: ProductSelectProps) {
       ))}
     </select>
   );
-}
+});
+
+export default ProductSelect;

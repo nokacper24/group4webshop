@@ -230,9 +230,15 @@ export default function EditUserAccess() {
         <p>
           For user: <b>{user?.email}</b>
         </p>
-        <ToggleTable headers={headers} rows={rows} handleClick={handleClick} />
+        <div className="table-container">
+          <ToggleTable
+            headers={headers}
+            rows={rows}
+            handleClick={handleClick}
+          />
+        </div>
         <button
-          className="default-button small-button"
+          className="default-button small-button m-t-1"
           onClick={handleSaveAccess}
         >
           Save

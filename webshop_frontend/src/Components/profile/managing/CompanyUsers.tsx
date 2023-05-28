@@ -34,9 +34,8 @@ export default function CompanyUsers() {
   const singleEmail = useRef<HTMLInputElement>(null);
   const csvEmail = useRef<HTMLInputElement>(null);
 
-  const editUser = (index: number) => {
-    let userId = users[index].id;
-    navigate(`/profile/${userId}/license-access`);
+  const editUser = (id: string) => {
+    navigate(`/profile/${id}/license-access`);
   };
 
   /**
@@ -53,19 +52,20 @@ export default function CompanyUsers() {
    *
    * @param indices The indices of the users in the list.
    */
-  const removeUsers = (indices: number[]) => {
-    let sortedIndices = indices.sort((a, b) => a - b);
+  const removeUsers = (ids: string[]) => {
+    ids.forEach((id) => {
+      usersTable.rows.forEach((row) => {
+        if (id == row.id) {
+          let item: SelectTableRowProps = row;
 
-    for (let i = sortedIndices.length - 1; i >= 0; i--) {
-      let index = sortedIndices[i];
-      let user = usersTable.rows[index];
-      usersTable.rows = [
-        ...usersTable.rows.slice(0, index),
-        ...usersTable.rows.slice(index + 1),
-      ];
+          usersTable.rows = usersTable.rows.filter(
+            (element) => element !== item
+          );
 
-      updateNewRemovedUsers(user.id);
-    }
+          updateNewRemovedUsers(id);
+        }
+      });
+    });
 
     setUsers(usersTable.rows);
   };
@@ -259,9 +259,10 @@ export default function CompanyUsers() {
         <h1>Invite users</h1>
         <p>
           Add users by writing their e-mail in the field below. Alternatively,
-          you can upload a comma separated file (CSV) with multiple e-mails.
-          They will then get an invitation to create a user with that e-mail
-          address.
+          you can upload a CSV file separated with commas with multiple e-mail
+          addresses. Example: <code>user1@email.com,user2@email.com</code> or{" "}
+          <code>user1@email.com, user2@email.com</code>. They will then get an
+          invitation to create a user with that e-mail address.
         </p>
         <form onSubmit={handleSubmitSingleEmail}>
           <label style={{ display: "inline-block" }}>

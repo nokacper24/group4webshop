@@ -12,6 +12,11 @@ import {
   moveItemsBetweenTables,
 } from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchCompanyIt,
+  fetchCompanyItHead,
+  fetchDefaultUser,
+} from "../../../ApiController";
 
 /**
  * A Manage Users page.
@@ -59,9 +64,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const removeItHead = (index: number) => {
+  const removeItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -76,9 +81,9 @@ export default function ManageUsers() {
    *
    * @param indices The indices of the users in the list of IT  heads.
    */
-  const removeSelectedItHeads = (indices: number[]) => {
+  const removeSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -101,9 +106,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const addItHead = (index: number) => {
+  const addItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,
@@ -116,11 +121,11 @@ export default function ManageUsers() {
   /**
    * Add all the selected users to the list of IT heads.
    *
-   * @param indices The indices of the users in the list of IT  heads.
+   * @param ids The indices of the users in the list of IT  heads.
    */
-  const addSelectedItHeads = (indices: number[]) => {
+  const addSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,
@@ -137,41 +142,6 @@ export default function ManageUsers() {
     addItHead,
     new Map([["Add all selected", addSelectedItHeads]])
   );
-
-  /**
-   * Send a GET request to get all users with the role 'Company IT Head'
-   *
-   * @returns A list of all company IT head users.
-   */
-  const fetchCompanyItHead = async () => {
-    const response = await fetch(
-      `${baseUrl}/api/priv/users/role/CompanyItHead`
-    );
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Company IT'
-   *
-   * @returns A list of all company IT users.
-   */
-  const fetchCompanyIt = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Default'
-   *
-   * @returns A list of all default users.
-   */
-  const fetchDefaultUser = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
 
   /**
    * Send a PATCH request to give some users the 'Company IT Head' role.

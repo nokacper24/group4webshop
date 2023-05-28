@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent } from "react";
+import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { MeUser, Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
@@ -15,37 +15,63 @@ export default function SupportForm() {
   const [user, setUser] = useState<MeUser>();
   const [products, setProducts] = useState<Product[]>([]);
 
+  const productSelect = useRef<HTMLSelectElement>(null);
+  const [formAlert, setFormAlert] = useState<string>("");
+  let userEmail;
+
   useEffect(() => {
     fetchProducts().then((products: Product[]) => setProducts(products));
-    fetchMe().then((user: MeUser) => {
-      setUser(user);
-    });
+    fetchMe()
+      .then((user: MeUser) => {
+        setUser(user);
+      })
+      .catch((error) => {});
+
+    if (user && user.email) {
+      userEmail = (
+        <p>
+          You are signed in as:
+          <br />
+          <span className="user-email">{user.email}</span>
+        </p>
+      );
+    } else {
+      userEmail = (
+        <p>
+          You are not signed in. Please <Link to="/profile">sign in</Link> to
+          use the form.
+        </p>
+      );
+    }
   }, []);
 
-  let userEmail;
-  if (user && user.email) {
-    userEmail = (
-      <p>
-        You are signed in as:
-        <br />
-        <span className="user-email">{user.email}</span>
-      </p>
-    );
-  } else {
-    userEmail = (
-      <p>
-        You are not signed in. Please <Link to="/profile">sign in</Link> to use
-        the form.
-      </p>
-    );
-  }
+  /**
+   * Handle the submit of the support form. Validates the form data
+   * and sends the support ticket to ProFlex.
+   *
+   * @param event The form event.
+   */
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (productSelect.current && productSelect.current.selectedIndex == 0) {
+      setFormAlert("Please select a product");
+    } else {
+      setFormAlert("");
+    }
+
+    // TODO: Send the form info as an e-mail
+  };
 
   return (
-    <form className="container form-container">
+    <form
+      className="container form-container"
+      onSubmit={(event) => handleSubmit(event)}
+    >
       <h2>Contact support</h2>
       {userEmail}
 
-      <ProductSelect products={products} />
+      <ProductSelect ref={productSelect} products={products} />
 
       <label htmlFor="support-subject">Subject</label>
       <input
@@ -67,36 +93,11 @@ export default function SupportForm() {
       <button
         className="default-button submit-button m-t-1"
         type="submit"
-        onClick={(event) => validateForm(event)}
         disabled={user ? false : true}
       >
         Send
       </button>
-      <p className="form-alert"></p>
+      <p className="form-alert">{formAlert}</p>
     </form>
   );
-}
-
-/**
- * Confirm that all the form's input is valid.
- *
- * If the user has not selected an option for the product,
- * inform the user that their input is needed.
- *
- * @param event Mouse Event on button
- */
-function validateForm(
-  event: ReactMouseEvent<HTMLButtonElement, MouseEvent>
-): void {
-  const productSelect: HTMLSelectElement | null =
-    document.querySelector("#product-select");
-  const formAlert: HTMLElement | null = document.querySelector(".form-alert");
-
-  if (productSelect?.selectedIndex == 0) {
-    event.preventDefault();
-
-    if (formAlert != null) {
-      formAlert.innerHTML = "Please select a product";
-    }
-  }
 }

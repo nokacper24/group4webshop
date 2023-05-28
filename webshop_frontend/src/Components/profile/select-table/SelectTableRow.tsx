@@ -3,19 +3,21 @@ import SelectTableButton from "./SelectTableButton";
 import { Button } from "../../../Interfaces";
 
 /**
+ * id: the row's ID.
  * rowIndex: the row's index in the list, starts at 0.
  * columns: a list of the text cells in the table row.
  * updateSelected: inform parent the checked status of this row.
- * selectAll: information about the  status of the "select all" checkbox.
+ * selected: if this row is selected.
  * button: the action button to be put in the last column of the row.
  */
-export type RowProps = {
+type RowProps = {
+  id: string;
   rowIndex: number;
   columns: {
     text: string;
   }[];
-  updateSelected: (checked: boolean, index: number) => void;
-  selectAll: string;
+  updateSelected: (checked: boolean, id: string) => void;
+  selected: boolean;
   button: Button;
 };
 
@@ -26,34 +28,26 @@ export type RowProps = {
  * @returns The table row component.
  */
 export default function SelectTableRow(props: RowProps) {
-  const [selected, setSelected] = useState(false);
-
-  useEffect(() => {
-    if (props.selectAll == "all") {
-      setSelected(true);
-    } else if (props.selectAll == "none") {
-      setSelected(false);
-    }
-  });
-
   const toggleSelect = () => {
-    props.updateSelected(!selected, props.rowIndex);
-    setSelected((selected) => !selected);
+    props.updateSelected(!props.selected, props.id);
   };
 
   return (
-    <tr className={`${selected ? "selected-row" : ""}`}>
+    <tr className={props.selected ? "selected-row" : ""}>
       <td>
         <label className="hidden-label">Select</label>
-        <input type="checkbox" checked={selected} onChange={toggleSelect} />
+        <input
+          type="checkbox"
+          checked={props.selected}
+          onChange={toggleSelect}
+        />
       </td>
       {props.columns.map((column, index) => (
         <td key={index}>{column.text}</td>
       ))}
       <td>
         <SelectTableButton
-          key={props.button.text}
-          rowIndex={props.rowIndex}
+          id={props.id}
           text={props.button.text}
           action={props.button.action}
         />

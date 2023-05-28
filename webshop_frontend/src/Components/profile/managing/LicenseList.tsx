@@ -3,7 +3,7 @@ import { FullLicenseInfo } from "../../../Interfaces";
 import LicenseListRow from "./LicenseListRow";
 import { fetchCompanyLicenses } from "../../../ApiController";
 
-type LicenseListProps = {
+type Props = {
   companyId: number;
 };
 
@@ -12,23 +12,17 @@ type LicenseListProps = {
  *
  * @returns A License List component as a JSX element.
  */
-export default function LicenseList(props: LicenseListProps) {
+export default function LicenseList({ companyId }: Props) {
   const [licenses, setLicenses] = useState<FullLicenseInfo[]>([]);
 
   useEffect(() => {
-    fetchCompanyLicenses(props.companyId).then((licenses) => {
+    fetchCompanyLicenses(companyId).then((licenses) => {
       setLicenses(licenses);
     });
   }, []);
 
   return (
-    <div
-      style={{
-        maxWidth: "80vw",
-        overflow: "auto",
-        margin: "0 auto",
-      }}
-    >
+    <div className="table-container">
       <table>
         <thead>
           <tr>

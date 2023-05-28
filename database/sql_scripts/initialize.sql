@@ -22,6 +22,7 @@ CREATE TABLE app_user (
     pass_hash TEXT NOT NULL,
     company_id INT NOT NULL,
     role role_enum NOT NULL,
+    UNIQUE (email),
     FOREIGN KEY (company_id) REFERENCES company(company_id)
 );
 

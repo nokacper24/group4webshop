@@ -104,6 +104,51 @@ export const patchPartialUser = async (userId: string, email?: string) => {
 };
 
 /**
+ * Send a GET request to get all users with the role 'Company IT Head'
+ *
+ * @returns A list of all company IT head users.
+ */
+export const fetchCompanyItHead = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyItHead`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Company IT'
+ *
+ * @returns A list of all company IT users.
+ */
+export const fetchCompanyIt = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Default'
+ *
+ * @returns A list of all default users.
+ */
+export const fetchDefaultUser = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
  * Reset a user's password.
  *
  * @param email The user's e-mail address.
@@ -369,5 +414,107 @@ export const logout = async () => {
   return await fetch(`${baseUrl}/api/priv/logout`, {
     method: "POST",
     credentials: "include",
+  });
+};
+
+/**
+ * Register an invite to a new user.
+ * @param email The email of the new user.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerInvite = async (email: string) => {
+  return await fetch(`${baseUrl}/api/priv/generate_invite_new`, {
+    method: "POST",
+    body: JSON.stringify({
+      email: email,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * check what type of invite the user has.
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const checkInvite = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite-type/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+/**
+ * Get invite info from endpoint
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const getInviteInfo = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite/info/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+/**
+ * Register a new company user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompanyUser = async (
+  invite_id: string,
+  password: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_company_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * Register a new company with a new user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompany = async (
+  invite_id: string,
+  password: string,
+  companyName: string,
+  companyAddress: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+      company_name: companyName,
+      company_address: companyAddress,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
   });
 };

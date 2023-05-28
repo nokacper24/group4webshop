@@ -17,9 +17,7 @@ type AccordionBodyProps = {
  */
 export function AccordionBody(props: AccordionBodyProps) {
   return (
-    <div
-      className={`accordion-body ${props.collapsed ? "hidden-element" : ""}`}
-    >
+    <div className={`accordion-body ${props.collapsed ? "display-none" : ""}`}>
       {props.rows.map((row) => {
         return (
           <AccordionRow
