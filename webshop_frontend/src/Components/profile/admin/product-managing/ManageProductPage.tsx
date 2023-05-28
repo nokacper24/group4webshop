@@ -68,20 +68,33 @@ export default function ManageProductPage() {
     });
   };
 
-  const [priorityChanges, setPriorityChanges] = useState<number[]>(); //Section IDs that has had a swap change as value
+  const [priorityChanges, setPriorityChanges] = useState<number[][]>([]); //Section IDs that has had a swap change as value
   const [contentChanges, setContentChanges] = useState<
+    Map<ChangeType, number[]>
+  >(new Map()); //The type of change as key, list of IDs that has had that change as value
+  const [testimonialChanges, setTestimonialChanges] = useState<
     Map<ChangeType, number[]>
   >(new Map()); //The type of change as key, list of IDs that has had that change as value
 
   useEffect(() => {
     // Sets up the map so that it can register changes
+    initializeContentAndTestimonialChanges();
+  }, []);
+
+  function initializeContentAndTestimonialChanges() {
     setContentChanges((changes) => {
       for (let type in ChangeType) {
         changes.set(ChangeType[type as keyof typeof ChangeType], []);
       }
       return changes;
     });
-  });
+    setTestimonialChanges((changes) => {
+      for (let type in ChangeType) {
+        changes.set(ChangeType[type as keyof typeof ChangeType], []);
+      }
+      return changes;
+    });
+  }
 
   /**
    * Registers changes to the content of the table. This is used to keep track of what has changed and what needs to be saved.
@@ -90,6 +103,10 @@ export default function ManageProductPage() {
    * @param change The type of change that has been made
    */
   const registerContentChange = (id: number, change: ChangeType) => {
+    if (contentChanges.get(change)) {
+      console.log(contentChanges.get(change));
+      console.log(contentChanges);
+    }
     if (!contentChanges.get(change)?.includes(id)) {
       contentChanges.get(change)?.push(id);
     }
@@ -97,18 +114,37 @@ export default function ManageProductPage() {
       contentChanges
         .get(ChangeType.Edit)
         ?.filter((changeId) => changeId !== id);
-      priorityChanges?.filter((changeId) => changeId !== id);
+      priorityChanges?.filter((array) => array[0] !== id && array[1] !== id);
       setPriorityChanges(priorityChanges);
     } else if (change === ChangeType.Swap) {
-      if (!priorityChanges?.includes(id)) {
-        priorityChanges?.push(id);
+      if (
+        !priorityChanges?.find((array) => array[0] === id || array[1] === id)
+      ) {
+        let rows: number[] = [];
+        sections
+          .find((sections) => sections.sectionID === id)
+          ?.rows.forEach((row) => rows.push(row.component_id));
+        priorityChanges?.push(rows);
         setPriorityChanges(priorityChanges);
       } else {
         //Since a section only can have two rows at a time, we can assume that if the section already is on the list, the rows are swapped back to their original positions
-        priorityChanges?.filter((changeId) => changeId !== id);
+        priorityChanges?.filter((array) => array[0] !== id && array[1] !== id);
         setPriorityChanges(priorityChanges);
       }
     }
+    setContentChanges(contentChanges);
+  };
+
+  const registerTestimonialChange = (id: number, change: ChangeType) => {
+    if (!testimonialChanges.get(change)?.includes(id)) {
+      testimonialChanges.get(change)?.push(id);
+    }
+    if (change === ChangeType.Delete) {
+      testimonialChanges
+        .get(ChangeType.Edit)
+        ?.filter((changeId) => changeId !== id);
+    }
+    setTestimonialChanges(testimonialChanges);
   };
 
   const assignImageState = (descriptions: Description[]): Description[] => {
@@ -184,14 +220,16 @@ export default function ManageProductPage() {
   const initializeSaveProtocol = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     sendProduct();
-    /*sendDeleteDescriptions();
+    sendDeleteDescriptions();
     sendNewDescriptions();
     sendPriorityChanges();
-    sendEdits(); */
+    sendEdits();
+
+    sendDeletedTestimonials();
+    sendNewTestimonials();
+    sendEditedTestimonials();
 
     alert("Product saved!");
-
-    //TODO: Send testimonials
   };
 
   const sendProduct = async () => {
@@ -241,8 +279,11 @@ export default function ManageProductPage() {
 
   const sendNewDescriptions = async () => {
     let found = false;
-
+    console.log(contentChanges);
     contentChanges?.get(ChangeType.Add)?.forEach((id) => {
+      console.log(
+        "Gotten contentChange " + contentChanges?.get(ChangeType.Add)
+      );
       let { description: row, foundAt } = findRow(id);
       if (row) {
         if (row.is_text_not_image) {
@@ -284,9 +325,7 @@ export default function ManageProductPage() {
   };
 
   const sendPriorityChanges = async () => {
-    priorityChanges?.forEach((id) => {
-      let section = sections.find((section) => section.sectionID === id);
-      let rows = section?.rows;
+    priorityChanges?.forEach((rows) => {
       let response = fetch(
         `${baseUrl}/api/priv/products/${productId}/descriptions/priorityswap`,
         {
@@ -294,7 +333,7 @@ export default function ManageProductPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify([rows![0].component_id, rows![1].component_id]),
+          body: JSON.stringify([rows[0], rows[1]]),
         }
       );
     });
@@ -345,6 +384,92 @@ export default function ManageProductPage() {
       }
     });
   };
+
+  const sendDeletedTestimonials = async () => {
+    testimonialChanges?.get(ChangeType.Delete)?.forEach((id) => {
+      let response = fetch(
+        `${baseUrl}/api/priv/testimonials/${productId}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+  };
+
+  const sendNewTestimonials = async () => {
+    let formData = new FormData();
+    testimonialChanges?.get(ChangeType.Add)?.forEach((id) => {
+      let testimonial = testimonials.find((t) => {
+        return t.testimonial_id === id;
+      });
+      if (testimonial) {
+        formData.append("author", testimonial.author);
+        formData.append(
+          "author_pic",
+          typeof testimonial.author_pic === "string"
+            ? ""
+            : (testimonial.author_pic as Blob)
+        );
+        formData.append("product_id", productId!);
+        formData.append("text", testimonial.text);
+        formData.append(
+          "testimonial_id",
+          testimonial.testimonial_id.toString()
+        );
+        let response = fetch(`${baseUrl}/api/priv/testimonials/${productId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "multipart/form-data",
+          },
+          body: JSON.stringify({
+            formData,
+          }),
+        });
+      }
+    });
+  };
+
+  const sendEditedTestimonials = async () => {
+    testimonialChanges?.get(ChangeType.Edit)?.forEach((id) => {
+      let testimonial = testimonials.find((t) => {
+        return t.testimonial_id === id;
+      });
+      if (testimonial) {
+        let formData = new FormData();
+        formData.append("author", testimonial.author);
+        formData.append(
+          "author_pic",
+          typeof testimonial.author_pic === "string"
+            ? ""
+            : (testimonial.author_pic as Blob)
+        );
+        formData.append("product_id", productId!);
+        formData.append("text", testimonial.text);
+        formData.append(
+          "testimonial_id",
+          testimonial.testimonial_id.toString()
+        );
+        let response = fetch(
+          `${baseUrl}/api/priv/testimonials/${productId}/${id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Accept: "multipart/form-data",
+            },
+            body: JSON.stringify({
+              formData,
+            }),
+          }
+        );
+      }
+    });
+  };
+
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
@@ -370,16 +495,20 @@ export default function ManageProductPage() {
             type="text"
             id="product-name"
             name="product_name"
+            maxLength={100}
             ref={productName}
+            required={true}
           />
           <label htmlFor="product-price">
             <b>Product price &#40;NOK&#41;:</b>
           </label>
           <input
             type="number"
+            step={0.01}
             id="product-price"
             name="price_per_unit"
             ref={productPrice}
+            required={true}
           />
           <label htmlFor="product-image">
             <b>Upload header image</b>
@@ -390,6 +519,7 @@ export default function ManageProductPage() {
             name="image"
             accept="image/png, image/jpeg, image/webp"
             ref={productImage}
+            required={true}
           />
           <p>Image: {productInfo?.main_image}</p>
           <label htmlFor="product-description">
@@ -405,7 +535,9 @@ export default function ManageProductPage() {
             }}
             rows={10}
             cols={50}
+            maxLength={255}
             ref={productDescription}
+            required={true}
           />
         </section>
         <section className="accordion-wrapper container">
@@ -414,12 +546,10 @@ export default function ManageProductPage() {
             testimonials={testimonials}
             productID={productId!}
             registerContentChange={registerContentChange}
+            registerTestimonialChange={registerTestimonialChange}
             setTestimonials={setTestimonials}
             setSections={setSections}
           ></AccordionTable>
-        </section>
-        <section className="container">
-          <iframe src=""></iframe>
         </section>
         <section className="button-container">
           <button
