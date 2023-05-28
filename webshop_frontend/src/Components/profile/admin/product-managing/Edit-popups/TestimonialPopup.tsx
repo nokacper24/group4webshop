@@ -69,6 +69,12 @@ export default function TestimonialPopup(
     updatePropsFunc = updateProps;
   });
 
+  authorPicRef.current?.addEventListener("change", () => {
+    props.testimonial!.author_pic = authorPicRef.current?.files![0]
+      ? authorPicRef.current?.files![0]
+      : "";
+  });
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div>
