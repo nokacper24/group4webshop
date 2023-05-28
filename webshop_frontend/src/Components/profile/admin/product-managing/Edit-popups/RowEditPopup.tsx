@@ -51,6 +51,7 @@ export default function RowEditPopup() {
   };
 
   const save = () => {
+    if(!validateForm()) return;
     let content: string;
     if (props.image) {
       content = imageInputRef.current ? imageInputRef.current.value : "";
@@ -86,6 +87,36 @@ export default function RowEditPopup() {
   imageInputRef.current?.addEventListener("change", () => {
     props.content = imageInputRef.current?.files?.[0];
   });
+
+  function validateForm(): boolean {
+    if (!props.image) {
+      if (
+        paragraphRef.current?.value === undefined ||
+        paragraphRef.current?.value.match(/^ *$/) !== null
+      ) {
+        alert("Paragraph cannot be empty");
+        return false;
+      }
+      if (paragraphRef.current?.value.length > 255) {
+        alert("Paragraph cannot be longer than 255 characters");
+        return false;
+      }
+    } else {
+      if (imageInputRef.current?.files?.[0] === undefined) {
+        alert("Please upload an image");
+        return false;
+      }
+    }
+    if (
+      props.title === undefined ||
+      props.title.match(/^ *$/) !== null ||
+      props.title.length > 255
+    ) {
+      alert("Title cannot be empty or longer than 255 characters");
+      return false;
+    }
+    return true;
+  }
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>
