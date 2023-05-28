@@ -30,7 +30,7 @@ let latestID = 100;
  * @param props the props of the component
  * @returns the React component for the Testimonial section
  */
-export function TestimonialSection(props: TestimonialSectionProps) {
+export function TestimonialSection(props: PrivateProps) {
   /**
    * Initializes the process of creating a new row.
    */
@@ -48,6 +48,7 @@ export function TestimonialSection(props: TestimonialSectionProps) {
       };
       props.testimonials.push(testimonial);
       props.setTestimonials([...props.testimonials]);
+      props.registerChange(props.sectionId, ChangeType.Add);
     }
   };
 
@@ -65,6 +66,7 @@ export function TestimonialSection(props: TestimonialSectionProps) {
       (testimonial) => testimonial.testimonial_id !== id
     );
     props.setTestimonials(newTestimonials);
+    props.registerChange(props.sectionId, ChangeType.Delete);
   };
 
   /**
@@ -86,6 +88,7 @@ export function TestimonialSection(props: TestimonialSectionProps) {
         props.testimonials[props.testimonials.indexOf(testimonial)] =
           testimonial;
         props.setTestimonials([...props.testimonials]);
+        props.registerChange(props.sectionId, ChangeType.Edit);
       }
     }
   };
