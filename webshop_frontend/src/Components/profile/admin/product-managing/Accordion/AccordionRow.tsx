@@ -48,6 +48,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
           setMoveUp(!moveUp);
           props.swapFunction();
         }}
+        type="button"
       >
         <title>Move row {moveUp ? "up" : "down"}</title>
         {/*<!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->*/}
@@ -62,6 +63,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
       <button
         className="accordion-edit-button"
         onClick={() => props.editFunction(props.description.component_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"
@@ -95,6 +97,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
       <button
         className="accordion-remove-button"
         onClick={() => props.removeFunction(props.description.component_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"

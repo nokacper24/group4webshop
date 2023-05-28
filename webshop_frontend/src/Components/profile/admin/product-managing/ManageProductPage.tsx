@@ -425,6 +425,7 @@ export default function ManageProductPage() {
           <button
             className="default-button small-button bg-danger"
             onClick={() => initializeAvailabilityChangeProtocol()}
+            type="button"
           >
             {hidden ? "Unhide" : "Hide"}
           </button>

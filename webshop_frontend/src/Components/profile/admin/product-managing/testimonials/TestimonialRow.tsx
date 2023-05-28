@@ -28,6 +28,7 @@ export function TestimonialRow(props: TestimonialRowProps) {
       <button
         className="accordion-edit-button"
         onClick={() => props.editFunction(props.testimonial.testimonial_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"
@@ -61,6 +62,7 @@ export function TestimonialRow(props: TestimonialRowProps) {
       <button
         className="accordion-remove-button"
         onClick={() => props.removeFunction(props.testimonial.testimonial_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"
