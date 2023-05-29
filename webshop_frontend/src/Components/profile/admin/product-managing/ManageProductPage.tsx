@@ -245,7 +245,7 @@ export default function ManageProductPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          available: !hidden,
+          "available": !hidden,
         }),
       }
     );
