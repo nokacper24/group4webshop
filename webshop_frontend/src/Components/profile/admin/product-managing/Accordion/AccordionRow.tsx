@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import ToggleButton from "../../../toggle-table/ToggleButton";
-import { SimpleDescription } from "../../../../../Interfaces";
+import { LocalDescription } from "../../../../../Interfaces";
 
 type PrivateAccordionRowProps = {
-  description: SimpleDescription;
+  description: LocalDescription;
   isTop: boolean;
   swapFunction: () => void;
   editFunction: (id: number) => void;
@@ -17,7 +17,7 @@ type PrivateAccordionRowProps = {
  * @returns the React component for the Accordion row
  */
 export function AccordionRow(props: PrivateAccordionRowProps) {
-  const [state, setState] = useState<SimpleDescription>(props.description);
+  const [state, setState] = useState<LocalDescription>(props.description);
   const [visible, setVisible] = useState<boolean>(true);
   if (state.text && state.text.text_title.length <= 0) {
     setState({
@@ -33,7 +33,12 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
     visibleTitle = state.text!.text_title;
   }
 
-  const changeVisibility = (checked: boolean, id: string) => {
+  /**
+   * Updates the visibility of the row.
+   *
+   * @param checked if the row should be visible
+   */
+  const changeVisibility = (checked: boolean) => {
     setVisible(checked);
   };
 
@@ -48,6 +53,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
           setMoveUp(!moveUp);
           props.swapFunction();
         }}
+        type="button"
       >
         <title>Move row {moveUp ? "up" : "down"}</title>
         {/*<!-- Font Awesome Pro 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) -->*/}
@@ -62,6 +68,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
       <button
         className="accordion-edit-button"
         onClick={() => props.editFunction(props.description.component_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"
@@ -95,6 +102,7 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
       <button
         className="accordion-remove-button"
         onClick={() => props.removeFunction(props.description.component_id)}
+        type="button"
       >
         <svg
           className="accordion-button-icon"

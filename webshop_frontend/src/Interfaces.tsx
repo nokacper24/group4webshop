@@ -69,6 +69,14 @@ export interface Image {
   alt_text: string;
 }
 
+/**
+ * Image that is not yet stored in the database.
+ */
+export interface LocalImage {
+  image_file: File;
+  alt_text: string;
+}
+
 export interface Description {
   component_id: number;
   priority: number;
@@ -79,10 +87,13 @@ export interface Description {
   full_width: boolean;
 }
 
-export interface SimpleDescription {
+/**
+ * Description that is not yet stored in the database.
+ */
+export interface LocalDescription {
   component_id: number;
   text: Text | undefined;
-  image: Image | undefined;
+  image: Image | LocalImage | undefined;
   is_text_not_image: boolean;
 }
 
@@ -90,7 +101,7 @@ export interface Testimonial {
   testimonial_id: number;
   author: string;
   text: string;
-  author_pic: string;
+  author_pic: string | File;
   product_id: string;
 }
 

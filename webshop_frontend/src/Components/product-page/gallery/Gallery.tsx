@@ -76,7 +76,11 @@ export default function Gallery(props: GalleryProps) {
             <ParagraphSlide
               key={slide.testimonial_id}
               paragraph={slide.text}
-              imagePath={slide.author_pic}
+              imagePath={
+                typeof slide.author_pic === "string"
+                  ? slide.author_pic
+                  : slide.author_pic.name
+              }
               name={slide.author}
             />
           ))}

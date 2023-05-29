@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { AccordionSection, AccordionSectionProps } from "./AccordionSection";
 import { ChangeType } from "./ChangeTypes";
 import { showHeaderPopup } from "../Edit-popups/HeaderEditPopup";
-import { Description, Testimonial } from "../../../../../Interfaces";
+import {
+  Description,
+  LocalDescription,
+  Testimonial,
+} from "../../../../../Interfaces";
 import { TestimonialSection } from "../testimonials/TestimonialSection";
 
 export type AccordionTableProps = {
@@ -10,6 +14,7 @@ export type AccordionTableProps = {
   testimonials: Testimonial[];
   productID: string;
   registerContentChange: (id: number, type: ChangeType) => void;
+  registerTestimonialChange: (id: number, type: ChangeType) => void;
   setTestimonials: (testimonials: Testimonial[]) => void;
   setSections: (sections: AccordionSectionProps[]) => void;
 };
@@ -59,6 +64,27 @@ export default function AccordionTable(props: AccordionTableProps) {
     }
   };
 
+  /**
+   * Adds a new row to a section.
+   *
+   * @param sectionId the ID of the section
+   * @param rows the rows of the section
+   */
+  const addNewRow = (sectionId: number, rows: LocalDescription[]) => {
+    let section = props.sections.find(
+      (section) => section.sectionID === sectionId
+    );
+    if (section) {
+      section.rows = rows;
+      props.setSections([...props.sections]);
+    }
+  };
+
+  /**
+   * Creates a unique ID for a section.
+   *
+   * @returns the ID
+   */
   const createUniqueID = () => {
     //While in theory it is possible to generate the same ID, the chance is so small that it is not worth worrying about.
     //It also requires them to create multiple sections in the same millisecond, which should be impossible for a human, maybe even a computer.
@@ -70,6 +96,7 @@ export default function AccordionTable(props: AccordionTableProps) {
       <button
         className="default-button small-button popup-button"
         onClick={() => newSection()}
+        type="button"
       >
         New section
       </button>
@@ -81,6 +108,7 @@ export default function AccordionTable(props: AccordionTableProps) {
           sectionID={section.sectionID}
           registerContentChange={props.registerContentChange}
           deleteSection={deleteSection}
+          setRows={addNewRow}
         />
       ))}
       <TestimonialSection
@@ -88,6 +116,7 @@ export default function AccordionTable(props: AccordionTableProps) {
         sectionId={0}
         productId={props.productID}
         setTestimonials={props.setTestimonials}
+        registerChange={props.registerTestimonialChange}
       />
     </div>
   );

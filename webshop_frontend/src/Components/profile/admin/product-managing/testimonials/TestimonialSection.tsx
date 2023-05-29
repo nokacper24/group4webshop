@@ -3,6 +3,7 @@ import { TestimonialHeader } from "./TestimonialHeader";
 import { TestimonialBody } from "./TestimonialBody";
 import { showTestimonialPopup } from "../Edit-popups/TestimonialPopup";
 import { Testimonial } from "../../../../../Interfaces";
+import { ChangeType } from "../Accordion/ChangeTypes";
 
 /**
  * The props of the TestimonialSection component.
@@ -12,7 +13,14 @@ export type TestimonialSectionProps = {
 
   sectionId: number;
   productId: string;
+};
+
+type PrivateProps = {
+  testimonials: Testimonial[];
+  sectionId: number;
+  productId: string;
   setTestimonials: (testimonials: Testimonial[]) => void;
+  registerChange: (id: number, change: ChangeType) => void;
 };
 
 let latestID = 100;
@@ -22,7 +30,7 @@ let latestID = 100;
  * @param props the props of the component
  * @returns the React component for the Testimonial section
  */
-export function TestimonialSection(props: TestimonialSectionProps) {
+export function TestimonialSection(props: PrivateProps) {
   /**
    * Initializes the process of creating a new row.
    */
@@ -40,11 +48,17 @@ export function TestimonialSection(props: TestimonialSectionProps) {
       };
       props.testimonials.push(testimonial);
       props.setTestimonials([...props.testimonials]);
+      props.registerChange(props.sectionId, ChangeType.Add);
     }
   };
 
+  /**
+   * Creates a unique, semi-random ID for a testimonial.
+   *
+   * @returns the ID
+   */
   const createID = (): number => {
-    return latestID++; //TODO: May need to take a look at implementing a better way of doing this.
+    return Date.now() + latestID++ + Math.floor(Math.random() * 13); //13 is a prime number.
   };
 
   /**
@@ -57,6 +71,7 @@ export function TestimonialSection(props: TestimonialSectionProps) {
       (testimonial) => testimonial.testimonial_id !== id
     );
     props.setTestimonials(newTestimonials);
+    props.registerChange(props.sectionId, ChangeType.Delete);
   };
 
   /**
@@ -78,12 +93,16 @@ export function TestimonialSection(props: TestimonialSectionProps) {
         props.testimonials[props.testimonials.indexOf(testimonial)] =
           testimonial;
         props.setTestimonials([...props.testimonials]);
+        props.registerChange(props.sectionId, ChangeType.Edit);
       }
     }
   };
 
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
+  /**
+   * Toggles the collapsed state of the section.
+   */
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
   };

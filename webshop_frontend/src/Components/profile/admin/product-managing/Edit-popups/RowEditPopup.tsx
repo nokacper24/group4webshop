@@ -9,19 +9,29 @@ import { RefObject, useEffect, useRef, useState } from "react";
 export type RowEditPopupProps = {
   image: boolean;
   title: string | undefined;
-  content: string | undefined;
-  informationCallBack: (image: boolean, title: string, content: string) => void;
+  content: string | File | undefined;
+  informationCallBack: (
+    image: boolean,
+    title: string,
+    content: string | File
+  ) => void;
 };
 
 let popupRef: RefObject<HTMLDivElement>;
-let imageRef: RefObject<HTMLInputElement>;
+let imageInputRef: RefObject<HTMLInputElement>;
 let titleRef: RefObject<HTMLInputElement>;
 let altTextRef: RefObject<HTMLTextAreaElement>;
 let paragraphRef: RefObject<HTMLTextAreaElement>;
 let updatePropsFunc: (newProps: RowEditPopupProps) => void;
+
+/**
+ * The popup for editing a row.
+ *
+ * @returns The RowEditPopup component
+ */
 export default function RowEditPopup() {
   popupRef = useRef(null);
-  imageRef = useRef(null);
+  imageInputRef = useRef(null);
   titleRef = useRef(null);
   altTextRef = useRef(null);
   paragraphRef = useRef(null);
@@ -33,12 +43,17 @@ export default function RowEditPopup() {
     informationCallBack: () => {},
   });
 
+  /**
+   * Updates the props of the component with the parameter.
+   *
+   * @param newProps The new props of the component.
+   */
   const updateProps = (newProps: RowEditPopupProps) => {
     setProps(newProps); //TODO: Remove nested ternary operators
     if (titleRef.current) {
       titleRef.current.value = newProps.title ? newProps.title : "";
     }
-    if (paragraphRef.current) {
+    if (paragraphRef.current && typeof newProps.content === "string") {
       paragraphRef.current.value = newProps.content ? newProps.content : "";
     }
     if (altTextRef.current) {
@@ -46,10 +61,16 @@ export default function RowEditPopup() {
     }
   };
 
+  /**
+   * Saves the row and closes the popup. If the form is invalid, the user will be alerted and the popup will not close.
+   *
+   * @returns void
+   */
   const save = () => {
+    if (!validateForm()) return;
     let content: string;
     if (props.image) {
-      content = imageRef.current ? imageRef.current.value : "";
+      content = imageInputRef.current ? imageInputRef.current.value : "";
     } else {
       content = paragraphRef.current?.value ? paragraphRef.current.value : "";
     }
@@ -67,10 +88,18 @@ export default function RowEditPopup() {
     ? "Change to paragraph"
     : "Change to image";
 
+  /**
+   * Changes the state of the popup between image and paragraph.
+   */
   function changeImageState() {
     setProps({ ...props, image: !props.image });
   }
 
+  /**
+   * Default handleSubmit function to prevent the form from incorrectly submitting.
+   *
+   * @param event The event that triggered the function.
+   */
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
@@ -79,11 +108,52 @@ export default function RowEditPopup() {
     updatePropsFunc = updateProps;
   });
 
+  imageInputRef.current?.addEventListener("change", () => {
+    props.content = imageInputRef.current?.files?.[0];
+  });
+
+  /**
+   * Validates the form and alerts the user if there are any fields not filled or
+   * filled incorrectly.
+   *
+   * @returns true if the form is valid, false otherwise.
+   */
+  function validateForm(): boolean {
+    if (!props.image) {
+      if (
+        paragraphRef.current?.value === undefined ||
+        RegExp(/^ *$/).exec(paragraphRef.current?.value) !== null
+      ) {
+        alert("Paragraph cannot be empty");
+        return false;
+      }
+      if (paragraphRef.current?.value.length > 255) {
+        alert("Paragraph cannot be longer than 255 characters");
+        return false;
+      }
+    } else {
+      if (imageInputRef.current?.files?.[0] === undefined) {
+        alert("Please upload an image");
+        return false;
+      }
+    }
+    if (
+      props.title === undefined ||
+      RegExp(/^ *$/).exec(props.title) !== null ||
+      props.title.length > 255
+    ) {
+      alert("Title cannot be empty or longer than 255 characters");
+      return false;
+    }
+    return true;
+  }
+
   return (
     <div className="popup-grey-zone" ref={popupRef}>
       <div>
         <form
           className="form-container container"
+          method="POST"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -98,16 +168,20 @@ export default function RowEditPopup() {
                 name="image"
                 accept="image/png, image/jpeg, image/webp"
                 onChange={() =>
-                  setProps({ ...props, content: imageRef.current?.value })
+                  setProps({ ...props, content: imageInputRef.current?.value })
                 }
-                ref={imageRef}
-                defaultValue={props.content ? props.content : ""}
+                ref={imageInputRef}
+                defaultValue={
+                  props.content && typeof props.content === "string"
+                    ? props.content
+                    : ""
+                }
               />
-              <p>Current image: {props.content}</p>
-              <label htmlFor="alt-text">Alt-text:</label>
+              <p>Current image: TODO: Preview</p>
+              <label htmlFor="alt_text">Alt-text:</label>
               <textarea
-                name="alt-text"
-                id="alt-text"
+                name="alt_text"
+                id="alt_text"
                 cols={40}
                 rows={10}
                 ref={altTextRef}
@@ -128,7 +202,11 @@ export default function RowEditPopup() {
               <label htmlFor="paragraph">Paragraph:</label>
               <textarea
                 id="paragraph"
-                defaultValue={props.content ? props.content : ""}
+                defaultValue={
+                  props.content && typeof props.content === "string"
+                    ? props.content
+                    : ""
+                }
                 cols={40}
                 rows={10}
                 ref={paragraphRef}

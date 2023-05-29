@@ -91,6 +91,7 @@ export default function RegisterCompanyAccount() {
           value={inviteInfo?.email}
           required
           disabled
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_company-name">Company name</label>
@@ -99,6 +100,7 @@ export default function RegisterCompanyAccount() {
           name="company-name"
           type="text"
           required
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_company-address">Company address</label>
@@ -107,6 +109,7 @@ export default function RegisterCompanyAccount() {
           name="company-address"
           type="text"
           required
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_password">Password</label>
@@ -116,6 +119,7 @@ export default function RegisterCompanyAccount() {
           name="password"
           type="password"
           required
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_confirm-password">
@@ -127,6 +131,7 @@ export default function RegisterCompanyAccount() {
           name="confirm-password"
           type="password"
           required
+          autoComplete="off"
         />
 
         <TermsOfService />

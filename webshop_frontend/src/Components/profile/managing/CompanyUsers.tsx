@@ -146,8 +146,6 @@ export default function CompanyUsers() {
    * @param email The e-mail for the user to be created.
    */
   const sendPostRegisterUserRequest = async (email: string) => {
-    const formData = new FormData();
-    formData.append("email", email);
 
     fetch(`${baseUrl}/api/priv/generate_invite`, {
       method: "POST",

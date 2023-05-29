@@ -89,6 +89,7 @@ export default function RegisterUser() {
           value={email}
           required
           disabled
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_company-name">Company name</label>
@@ -99,6 +100,7 @@ export default function RegisterUser() {
           type="text"
           required
           disabled
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_password">Password</label>
@@ -108,6 +110,7 @@ export default function RegisterUser() {
           name="password"
           type="password"
           required
+          autoComplete="off"
         />
 
         <label htmlFor="create-account_confirm-password">
@@ -119,6 +122,7 @@ export default function RegisterUser() {
           name="confirm-password"
           type="password"
           required
+          autoComplete="off"
         />
 
         <TermsOfService />

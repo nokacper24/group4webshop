@@ -13,7 +13,11 @@ export function TestimonialHeader(props: TestimonialHeaderProps) {
   return (
     <>
       <div className="accordion-header-container">
-        <button className="accordion-header" onClick={() => props.toggleCollapse()}>
+        <button
+          className="accordion-header"
+          onClick={() => props.toggleCollapse()}
+          type="button"
+        >
           <p>Testimonials</p>
           <svg
             className="header-icon accordion-button-icon"
@@ -29,6 +33,7 @@ export function TestimonialHeader(props: TestimonialHeaderProps) {
         <button
           className="add-button overlay-button accordion-button-icon"
           onClick={() => props.addTestimonial()}
+          type="button"
         >
           <svg
             className="header-icon"

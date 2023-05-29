@@ -18,9 +18,9 @@
   --clr-danger: #b20000;
 
   /* Font family variables */
-  --ff-primary: 'Open Sans', 'Arial', sans-serif;
-  --ff-title: 'Lalezar', 'Arial Black', 'Geneva', sans-serif;
-  --ff-subtitle: 'Poiret One', 'Goudy Old Style', serif;
+  --ff-primary: "Open Sans", "Arial", sans-serif;
+  --ff-title: "Lalezar", "Arial Black", "Geneva", sans-serif;
+  --ff-subtitle: "Poiret One", "Goudy Old Style", serif;
 
   /* Sizes */
   --header-height: 3.5em;
@@ -250,7 +250,7 @@ input:disabled {
 
 .highlight-section:before,
 .highlight-section::after {
-  content: '';
+  content: "";
   position: absolute;
   height: 0.5em;
   width: 100%;
@@ -498,7 +498,7 @@ nav {
   .hamburger:after {
     position: absolute;
     display: block;
-    content: '';
+    content: "";
     cursor: pointer;
     border-radius: 1px;
     height: 5px;
@@ -520,21 +520,21 @@ nav {
     top: 20px;
   }
 
-  #nav-toggle.active>.hamburger {
+  #nav-toggle.active > .hamburger {
     background-color: transparent;
     outline: none;
   }
 
-  #nav-toggle.active>.hamburger:before,
-  #nav-toggle.active>.hamburger:after {
+  #nav-toggle.active > .hamburger:before,
+  #nav-toggle.active > .hamburger:after {
     top: 10px;
   }
 
-  #nav-toggle.active>.hamburger:before {
+  #nav-toggle.active > .hamburger:before {
     transform: rotate(45deg);
   }
 
-  #nav-toggle.active>.hamburger:after {
+  #nav-toggle.active > .hamburger:after {
     transform: rotate(-45deg);
   }
 }
@@ -578,7 +578,7 @@ footer {
   outline: 1px solid transparent;
 }
 
-footer>p {
+footer > p {
   max-width: var(--max-width);
   text-align: center;
   margin-inline: auto;
@@ -594,7 +594,7 @@ footer a:is(:hover, :focus) {
 }
 
 /* Form */
-form>h1 {
+form > h1 {
   font-size: 2rem;
 }
 
@@ -675,7 +675,6 @@ form a:hover {
 }
 
 @keyframes bounce {
-
   0%,
   10%,
   25%,
@@ -694,7 +693,7 @@ form a:hover {
 }
 
 .hero {
-  height: min(calc(100vh - var(--header-height)), 40em);
+  height: calc(100vh - var(--header-height));
   width: 100%;
   background: var(--clr-neutral-0);
   background-image: url(assets/hero.jpg);
@@ -750,8 +749,7 @@ form a:hover {
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: none;
-  transition: color var(--transition-speed),
-    background var(--transition-speed);
+  transition: color var(--transition-speed), background var(--transition-speed);
   text-shadow: initial;
 }
 
@@ -820,13 +818,17 @@ form a:hover {
 }
 
 .product-card:after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   bottom: 0;
   height: 1em;
   width: 100%;
-  background-image: linear-gradient(0deg, var(--clr-neutral-1000) 20%, transparent 100%);
+  background-image: linear-gradient(
+    0deg,
+    var(--clr-neutral-1000) 20%,
+    transparent 100%
+  );
 }
 
 .product-card:is(:hover, :focus) {
@@ -844,7 +846,7 @@ form a:hover {
   border-radius: 0.4em;
 }
 
-.product-card>h2 {
+.product-card > h2 {
   line-height: 1.2em;
   margin-top: 0.2em;
 }
@@ -918,7 +920,7 @@ form a:hover {
   margin-block: 1rem;
 }
 
-.unavailable-tag>p {
+.unavailable-tag > p {
   margin: 0;
 }
 
@@ -935,7 +937,7 @@ form a:hover {
   flex-basis: 50%;
 }
 
-.image-description>img {
+.image-description > img {
   width: 100%;
   max-width: 80vw;
   border-radius: 0.5rem;
@@ -1040,7 +1042,7 @@ form a:hover {
   display: flex;
   align-items: center;
   width: max-content;
-  transition-duration: calc(var(--transition-speed)*3);
+  transition-duration: calc(var(--transition-speed) * 3);
 }
 
 .slide {
@@ -1077,7 +1079,7 @@ form a:hover {
   display: inline-block;
 }
 
-.checkbox-input>label {
+.checkbox-input > label {
   width: initial;
   display: inline-block;
   margin-block: 0.5em;
@@ -1085,7 +1087,7 @@ form a:hover {
 }
 
 #prices,
-.form-container>select {
+.form-container > select {
   padding: 0.5em;
   font-size: 1.1rem;
   font-family: var(--ff-primary);
@@ -1157,7 +1159,7 @@ form a:hover {
   overflow: auto;
 }
 
-.table-container+.button-container {
+.table-container + .button-container {
   margin-top: 1em;
 }
 
@@ -1185,8 +1187,8 @@ form a:hover {
   border-bottom: 1px solid var(--clr-neutral-1000);
 }
 
-.select-table td>input,
-.select-table td>button {
+.select-table td > input,
+.select-table td > button {
   display: block;
   margin-inline: auto;
 }
@@ -1240,12 +1242,12 @@ form a:hover {
   background: var(--clr-neutral-700);
 }
 
-.accordion-header>p {
+.accordion-header > p {
   margin-block: 0;
   margin-left: 0.5em;
 }
 
-.accordion-header> :first-child {
+.accordion-header > :first-child {
   margin-right: auto;
 }
 
@@ -1271,7 +1273,9 @@ form a:hover {
 }
 
 .add-button {
-  right: calc(2 * calc(var(--header-icon-width) + var(--header-button-distance)));
+  right: calc(
+    2 * calc(var(--header-icon-width) + var(--header-button-distance))
+  );
 }
 
 .accordion-body {
@@ -1291,17 +1295,17 @@ form a:hover {
   background-color: var(--clr-neutral-900);
 }
 
-.accordion-body> :not(:last-child) {
+.accordion-body > :not(:last-child) {
   border-bottom: 1px solid var(--clr-neutral-0);
 }
 
-.accordion-row> :first-child {
+.accordion-row > :first-child {
   margin-right: auto;
   margin-left: 1.45em;
   margin-block: 0;
 }
 
-.accordion-row>p {
+.accordion-row > p {
   width: 16em;
   text-align: start;
   white-space: nowrap;
@@ -1345,7 +1349,7 @@ form a:hover {
   height: 2em;
 }
 
-.switch>input {
+.switch > input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -1363,7 +1367,7 @@ form a:hover {
 
 .slider:before {
   position: absolute;
-  content: '';
+  content: "";
   height: 1.5em;
   width: 1.5em;
   left: 0.25em;
@@ -1374,15 +1378,15 @@ form a:hover {
   transition: 400ms;
 }
 
-input:checked+.slider {
+input:checked + .slider {
   background-color: var(--clr-secondary);
 }
 
-input:focus+.slider {
+input:focus + .slider {
   box-shadow: 0 0 0.3em var(--clr-neutral-0);
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
   -webkit-transform: translateX(1.5em);
   -ms-transform: translateX(1.5em);
   transform: translateX(1.5em);
@@ -1411,7 +1415,7 @@ input:checked+.slider:before {
   background-color: var(--clr-neutral-1000);
 }
 
-.popup-form>* {
+.popup-form > * {
   padding-inline: 1em;
 }
 

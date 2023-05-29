@@ -18,6 +18,7 @@ export function AccordionHeader(props: AccordionHeaderProps) {
         <button
           className="accordion-header"
           onClick={() => props.collapseFunction()}
+          type="button"
         >
           <p>{props.title}</p>
           <svg
@@ -34,6 +35,7 @@ export function AccordionHeader(props: AccordionHeaderProps) {
         <button
           className="add-button overlay-button accordion-button-icon"
           onClick={() => props.addRow()}
+          type="button"
         >
           <svg
             className="header-icon"
@@ -49,6 +51,7 @@ export function AccordionHeader(props: AccordionHeaderProps) {
         <button
           className="remove-button overlay-button accordion-button-icon"
           onClick={() => props.deleteSelf()}
+          type="button"
         >
           <svg
             className="header-icon"

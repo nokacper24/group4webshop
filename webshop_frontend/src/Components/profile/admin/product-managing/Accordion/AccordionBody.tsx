@@ -1,8 +1,8 @@
-import { SimpleDescription } from "../../../../../Interfaces";
+import { LocalDescription } from "../../../../../Interfaces";
 import { AccordionRow } from "./AccordionRow";
 
 type AccordionBodyProps = {
-  rows: SimpleDescription[];
+  rows: LocalDescription[];
   collapsed: boolean;
   swapRows: () => void;
   editRow: (id: number) => void;

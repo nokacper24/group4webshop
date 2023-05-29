@@ -1,5 +1,7 @@
 import { RefObject, useRef } from "react";
 
+//TODO: Update to follow the best practices. This is currently an old copy of the RowEditPopup component with minor changes.
+
 /**
  * Props for the HeaderEditPopup component.
  * The title can be undefined if a new header is being created.
@@ -16,7 +18,7 @@ let props: HeaderEditPopupProps = {
   title: undefined,
   informationCallBack: () => {},
 };
-export default function RowEditPopup() {
+export default function HeaderEditPopup() {
   popupRef = useRef<HTMLDivElement>(null);
   titleRef = useRef(null);
 
@@ -29,6 +31,7 @@ export default function RowEditPopup() {
       <div>
         <form
           className="form-container container"
+          method="POST"
           onSubmit={(event) => {
             handleSubmit(event);
           }}
@@ -59,6 +62,11 @@ export default function RowEditPopup() {
   );
 }
 
+/**
+ * Shows the popup with the given props.
+ * 
+ * @param inProps 
+ */
 export function showHeaderPopup(inProps: HeaderEditPopupProps) {
   props = inProps;
   if (titleRef.current) {
@@ -67,6 +75,9 @@ export function showHeaderPopup(inProps: HeaderEditPopupProps) {
   popupRef.current?.classList.add("popup-visible");
 }
 
+/**
+ * Saves the information from the form and calls the informationCallBack function.
+ */
 function save() {
   props.informationCallBack(
     titleRef.current ? titleRef.current.value : "Undefined Header"
@@ -74,6 +85,9 @@ function save() {
   hidePopup();
 }
 
+/**
+ * Hides the popup.
+ */
 function hidePopup() {
   popupRef.current?.classList.remove("popup-visible");
 }

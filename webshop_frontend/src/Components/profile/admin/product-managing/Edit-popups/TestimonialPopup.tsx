@@ -46,6 +46,11 @@ export default function TestimonialPopup(
     event.preventDefault();
   }
 
+  /**
+   * Updates the props of the component with the parameter.
+   *
+   * @param newProps The new props of the component.
+   */
   const updateProps = (newProps: TestimonialPopupProps) => {
     setProps(newProps);
   };
@@ -67,6 +72,12 @@ export default function TestimonialPopup(
 
   useEffect(() => {
     updatePropsFunc = updateProps;
+  });
+
+  authorPicRef.current?.addEventListener("change", () => {
+    props.testimonial!.author_pic = authorPicRef.current?.files![0]
+      ? authorPicRef.current?.files[0]
+      : "";
   });
 
   return (
@@ -107,9 +118,9 @@ export default function TestimonialPopup(
           />
           <p>
             Current image:{" "}
-            {props.testimonial?.author_pic
+            {typeof props.testimonial?.author_pic === "string"
               ? props.testimonial?.author_pic
-              : "none"}
+              : props.testimonial?.author_pic.name}
           </p>
           <label htmlFor="testimonial-text">Testimonial:</label>
           <textarea
