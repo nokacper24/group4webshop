@@ -72,3 +72,25 @@ Period 13. March - 9. April
 Crucial functionality is in place, and this was generally a succesfull sprint. All product related endpoints are finished, and documented. The only thing left is to finish the docker image and host it on a server, which should be done early in sprint 4.
 
 ## Sprint 4
+Period: 10. April – 14. May
+
+### Goals
+- Finish remaining features 
+
+### Finished
+- Added constraints to DB for licenses and user access 
+- Webserver in a Docker image on a live server 
+- Password hashing 
+- Proper data for product in production 
+- Postman tests for products 
+- Logging to files 
+- Testimonial endpoints 
+- Email utility to handle different templates and send email to different users 
+
+### Unfinished
+- Few minor issues with emails 
+- Video presentations not finished 
+- Reset password 
+
+### Reflection
+During Sprint 4 in AppDev, we achieved significant milestones by adding constraints to the database, deploying the webserver in a Docker image on a live server, implementing password hashing, and completing various other features. However, a few minor issues with emails and unfinished video presentations remained. We will address before the project is handed in. Despite the challenges, we are satisfied with the progress made and remain committed to delivering a well-done project.
