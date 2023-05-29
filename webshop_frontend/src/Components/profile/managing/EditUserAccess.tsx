@@ -192,7 +192,6 @@ export default function EditUserAccess() {
 
               // Add licenses with access to temporary list and set access to true
               licensesWithAccess.forEach((license) => {
-                // TODO: Possible to SetLicenses for every single license instead of pushing to a temp array?
                 tempLicenses.set(license.license_id.toString(), {
                   license: license,
                   access: true,
