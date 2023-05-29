@@ -533,3 +533,30 @@ export const registerCompany = async (
     },
   });
 };
+
+/**
+ * Send a support ticket.
+ * @param product The product the ticket is about.
+ * @param subject The subject of the ticket.
+ * @param message The message of the ticket.
+ * @returns The response from the fetch request.
+ * */
+export const sendSupportTicket = async (
+  product: string,
+  subject: string,
+  message: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/support`, {
+    method: "POST",
+    body: JSON.stringify({
+      product: product,
+      subject: subject,
+      message: message,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};

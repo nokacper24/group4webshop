@@ -2,7 +2,11 @@ import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { MeUser, Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
-import { fetchMe, fetchAvailableProducts } from "../../ApiController";
+import {
+  fetchMe,
+  fetchAvailableProducts,
+  sendSupportTicket,
+} from "../../ApiController";
 import { Link } from "react-router-dom";
 
 /**
@@ -53,7 +57,7 @@ export default function SupportForm() {
    *
    * @param event The form event.
    */
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (productSelect.current && productSelect.current.selectedIndex == 0) {
@@ -62,7 +66,23 @@ export default function SupportForm() {
       setFormAlert("");
     }
 
-    // TODO: Send the form info as an e-mail
+    let product = productSelect.current?.value;
+
+    if (product !== undefined) {
+      const result = await sendSupportTicket(
+        product,
+        event.currentTarget["support-subject"].value,
+        event.currentTarget["support-message"].value
+      );
+
+      if (result) {
+        setFormAlert("Your message has been sent");
+      } else {
+        setFormAlert("There was an error sending your message");
+      }
+    } else {
+      setFormAlert("Please select a product");
+    }
   };
 
   return (
