@@ -9,7 +9,6 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
-import ManageProductPage from "./Components/profile/admin/product-managing/ManageProductPage";
 import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
 import Credits from "./Components/credits/Credits";
 import PageNotFound from "./Components/PageNotFound";
@@ -45,11 +44,6 @@ export default function App() {
             path="product/purchase-license"
             element={<PurchaseLicense />}
           />
-          <Route
-            path="product/manage/:productId"
-            element={<ManageProductPage />}
-          />
-          <Route path="product/create" element={<ManageProductPage />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </main>

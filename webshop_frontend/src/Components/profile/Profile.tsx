@@ -14,6 +14,7 @@ import PageNotFound from "../PageNotFound";
 import { FetchError, fetchMe } from "../../ApiController";
 import { MeUser } from "../../Interfaces";
 import { ErrorMessage } from "../ErrorMessage";
+import ManageProductPage from "./admin/product-managing/ManageProductPage";
 
 /**
  * The user Profile page.
@@ -95,6 +96,11 @@ export default function Profile() {
                 element={<ManageProducts />}
               ></Route>
               <Route path="/admin-users" element={<ManageUsers />}></Route>
+              <Route
+                path="product/manage/:productId"
+                element={<ManageProductPage />}
+              />
+              <Route path="product/create" element={<ManageProductPage />} />
             </>
           )}
 
