@@ -131,20 +131,27 @@ export default function RowEditPopup() {
         alert("Paragraph cannot be longer than 255 characters");
         return false;
       }
+      if (
+        titleRef.current?.value === undefined ||
+        RegExp(/^ *$/).exec(titleRef.current?.value) !== null ||
+        titleRef.current?.value.length > 255
+      ) {
+        alert("Title cannot be empty or longer than 255 characters");
+        return false;
+      }
     } else {
       if (imageInputRef.current?.files?.[0] === undefined) {
         alert("Please upload an image");
         return false;
       }
+      if (altTextRef.current?.value === undefined ||
+        RegExp(/^ *$/).exec(altTextRef.current?.value) !== null ||
+        altTextRef.current?.value.length > 255) {
+        alert("Alt-text cannot be empty or longer than 255 characters");
+        return false;
+      }
     }
-    if (
-      props.title === undefined ||
-      RegExp(/^ *$/).exec(props.title) !== null ||
-      props.title.length > 255
-    ) {
-      alert("Title cannot be empty or longer than 255 characters");
-      return false;
-    }
+    
     return true;
   }
 
@@ -177,7 +184,7 @@ export default function RowEditPopup() {
                     : ""
                 }
               />
-              <p>Current image: TODO: Preview</p>
+              <p>Current image: </p>
               <label htmlFor="alt_text">Alt-text:</label>
               <textarea
                 name="alt_text"
