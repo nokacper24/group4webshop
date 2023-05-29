@@ -243,7 +243,7 @@
         {
           "name": "short_description",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Varchar"
         },
         {
           "name": "main_image",
@@ -932,7 +932,7 @@
         {
           "name": "short_description",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Varchar"
         },
         {
           "name": "main_image",
@@ -957,7 +957,7 @@
         "Left": [
           "Text",
           "Float4",
-          "Text",
+          "Varchar",
           "Text",
           "Bool",
           "Text"
@@ -1874,7 +1874,7 @@
           "Text",
           "Text",
           "Float4",
-          "Text",
+          "Varchar",
           "Text",
           "Bool"
         ]
@@ -2007,7 +2007,7 @@
         {
           "name": "short_description",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Varchar"
         },
         {
           "name": "main_image",
@@ -2213,7 +2213,7 @@
         {
           "name": "short_description",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Varchar"
         },
         {
           "name": "main_image",
@@ -2432,7 +2432,7 @@
         {
           "name": "short_description",
           "ordinal": 3,
-          "type_info": "Text"
+          "type_info": "Varchar"
         },
         {
           "name": "main_image",
