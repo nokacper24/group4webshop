@@ -204,7 +204,7 @@ fn register_user_template(invite_code: &str) -> String {
                     board!
                 </p>
                 <p>To complete your registration, please click the following link: <a
-                        href="https://group04.web-tek.ninja//register/data/{invite_code}">Verify your e-mail</a>.</p>
+                        href="https://group04.web-tek.ninja/register/data/{invite_code}">Verify your e-mail</a>.</p>
                 <p>You'll be asked to set
                     up your account and create a password. Once you've completed this step, you'll be
                     able to access all of ProFlex's features. Thank you for choosing us. We look forward to working with you.
