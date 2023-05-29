@@ -65,7 +65,7 @@ export default function RegisterCompanyAccount() {
     );
 
     if (result.ok) {
-      window.location.href = "/login";
+      window.location.href = "/profile";
     } else {
       setFormAlert("Something went wrong. Please try again.");
     }

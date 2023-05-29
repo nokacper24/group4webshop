@@ -14,8 +14,9 @@ export default function RegisterUser() {
   const [formAlert, setFormAlert] = useState<string>("");
 
   const [email, setEmail] = useState<string>("");
-  const [companyName, setCompanyName] = useState<string>("");
-  const [companyAddress, setCompanyAddress] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>("companyName");
+  const [companyAddress, setCompanyAddress] =
+    useState<string>("companyAddress");
 
   interface InviteInfo {
     email: string;
@@ -29,11 +30,11 @@ export default function RegisterUser() {
     let result = await getInviteInfo(id);
     if (result.ok) {
       let resultJson = await result.json();
-      setInviteInfo(resultJson);
+      setInviteInfo(await resultJson);
 
-      setEmail(resultJson.email);
-      setCompanyName(resultJson.companyName);
-      setCompanyAddress(resultJson.companyAddress);
+      setEmail(await resultJson.email);
+      setCompanyName(await resultJson.companyName);
+      setCompanyAddress(await resultJson.companyAddress);
     } else {
       console.log("Invalid invite ID");
     }
@@ -63,7 +64,7 @@ export default function RegisterUser() {
     let result = await registerCompanyUser(id, passw0rd);
 
     if (result.ok) {
-      window.location.href = "/login";
+      window.location.href = "/profile";
     } else {
       setFormAlert("Something went wrong. Please try again.");
     }
