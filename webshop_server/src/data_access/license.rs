@@ -177,7 +177,7 @@ pub async fn get_licenses_for_user(
         FROM license
         JOIN product USING (product_id)
         JOIN company USING (company_id)
-        LEFT JOIN (
+        JOIN (
             SELECT count(*) AS active_users, license_id
                 FROM user_license
                 WHERE license_id IN (
