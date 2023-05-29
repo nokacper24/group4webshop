@@ -82,74 +82,73 @@ export default function TestimonialPopup(
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>
-      <div>
-        <form
-          className="form-container container"
-          onSubmit={(event) => {
-            handleSubmit(event);
+      <form
+        style={{ maxHeight: "95vh", overflow: "auto" }}
+        className="form-container container"
+        onSubmit={(event) => {
+          handleSubmit(event);
+        }}
+      >
+        <h2>Edit testimonial</h2>
+        <label htmlFor="authorName">Author name:</label>
+        <input
+          type="text"
+          ref={authorNameRef}
+          id="authorName"
+          name="authorName"
+          defaultValue={props.testimonial ? props.testimonial.author : ""}
+        />
+        <label htmlFor="authorPic">Author picture:</label>
+        <input
+          type="file"
+          id="authorPic"
+          name="authorPic"
+          alt="Author picture"
+          accept="image/png, image/jpeg, image/webp"
+          onChange={() => {
+            setProps({
+              ...props,
+              testimonial: {
+                ...props.testimonial!,
+                author_pic: authorPicRef.current?.value!,
+              },
+            });
           }}
-        >
-          <h2>Edit testimonial</h2>
-          <label htmlFor="authorName">Author name:</label>
-          <input
-            type="text"
-            ref={authorNameRef}
-            id="authorName"
-            name="authorName"
-            defaultValue={props.testimonial ? props.testimonial.author : ""}
-          />
-          <label htmlFor="authorPic">Author picture:</label>
-          <input
-            type="file"
-            id="authorPic"
-            name="authorPic"
-            alt="Author picture"
-            accept="image/png, image/jpeg, image/webp"
-            onChange={() => {
-              setProps({
-                ...props,
-                testimonial: {
-                  ...props.testimonial!,
-                  author_pic: authorPicRef.current?.value!,
-                },
-              });
-            }}
-            ref={authorPicRef}
-          />
-          <p>
-            Current image:{" "}
-            {typeof props.testimonial?.author_pic === "string"
-              ? props.testimonial?.author_pic
-              : props.testimonial?.author_pic.name}
-          </p>
-          <label htmlFor="testimonial-text">Testimonial:</label>
-          <textarea
-            name="testimonial-text"
-            id="testimonial-text"
-            cols={40}
-            rows={10}
-            ref={testimonialText}
-            defaultValue={props.testimonial ? props.testimonial.text : ""}
-          ></textarea>
+          ref={authorPicRef}
+        />
+        <p>
+          Current image:{" "}
+          {typeof props.testimonial?.author_pic === "string"
+            ? props.testimonial?.author_pic
+            : props.testimonial?.author_pic.name}
+        </p>
+        <label htmlFor="testimonial-text">Testimonial:</label>
+        <textarea
+          name="testimonial-text"
+          id="testimonial-text"
+          cols={40}
+          rows={10}
+          ref={testimonialText}
+          defaultValue={props.testimonial ? props.testimonial.text : ""}
+        ></textarea>
 
-          <div className="button-container popup-button-container">
-            <button
-              className="default-button small-button popup-button"
-              type="button"
-              onClick={() => save()}
-            >
-              Add
-            </button>
-            <button
-              className="default-button small-button popup-button"
-              type="button"
-              onClick={() => hidePopup()}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="button-container popup-button-container">
+          <button
+            className="default-button small-button popup-button"
+            type="button"
+            onClick={() => save()}
+          >
+            Add
+          </button>
+          <button
+            className="default-button small-button popup-button"
+            type="button"
+            onClick={() => hidePopup()}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
