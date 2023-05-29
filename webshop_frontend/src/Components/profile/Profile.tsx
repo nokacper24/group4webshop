@@ -97,10 +97,10 @@ export default function Profile() {
               ></Route>
               <Route path="/admin-users" element={<ManageUsers />}></Route>
               <Route
-                path="product/manage/:productId"
+                path="/product/manage/:productId"
                 element={<ManageProductPage />}
               />
-              <Route path="product/create" element={<ManageProductPage />} />
+              <Route path="/product/create" element={<ManageProductPage />} />
             </>
           )}
 

@@ -37,7 +37,7 @@ export default function ManageProducts() {
   };
 
   const editProduct = (id: string) => {
-    navigate(`/product/manage/${getProduct(id).id}`);
+    navigate(`/profile/product/manage/${getProduct(id).id}`);
   };
 
   const productsTable: SelectTableProps = createSelectTableProps(
@@ -70,7 +70,7 @@ export default function ManageProducts() {
         button={productsTable.button}
         outsideButtons={productsTable.outsideButtons}
       />
-      <Link className="default-button" to={"/product/create"}>
+      <Link className="default-button" to={"/profile/product/create"}>
         Create new product
       </Link>
     </section>
