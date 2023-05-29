@@ -266,6 +266,7 @@ export default function ManageProductPage() {
     formData.append("price_per_unit", productPrice.current!.value);
     formData.append("product_name", productName.current!.value);
     formData.append("short_description", productDescription.current!.value);
+    formData.append("available", hidden.valueOf.toString());
     let response = await fetch(
       `${baseUrl}/api/priv/products${createState ? "" : `/${productId}`}`,
       {
@@ -612,7 +613,7 @@ export default function ManageProductPage() {
             onClick={() => initializeAvailabilityChangeProtocol()}
             type="button"
           >
-            {hidden ? "Unhide" : "Hide"}
+            {hidden ? "Unavailable" : "Available"}
           </button>
           <button className="default-button small-button" type="submit">
             Save
