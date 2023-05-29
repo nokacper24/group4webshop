@@ -444,6 +444,10 @@ async fn update_product(
     }
 }
 
+#[derive(Deserialize, ToSchema)]
+struct AvailibilityBody {
+    available: bool,
+}
 /// Update the availability of a product.
 #[utoipa::path(
     context_path = "/api/priv",
@@ -463,16 +467,17 @@ async fn update_product(
     request_body(
         content_type = "application/json",
         description = "New availability of the product",
-        content = bool,
+        content = inline(AvailibilityBody),
     ),
 )]
 #[patch("/products/{product_id}/available")]
 async fn update_availability(
     shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
-    available: web::Json<bool>,
+    req_body: web::Json<AvailibilityBody>,
     req: HttpRequest,
 ) -> impl Responder {
+    let available = req_body.available;
     let pool = &shared_data.db_pool;
     match auth::validate_user(req, pool).await {
         Ok(user) => {
@@ -491,7 +496,7 @@ async fn update_availability(
         }
     };
 
-    match product::update_product_available(pool, &product_id, available.into_inner()).await {
+    match product::update_product_available(pool, &product_id, available).await {
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),

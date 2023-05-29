@@ -213,6 +213,11 @@ async fn update_priority(
     }
 }
 
+#[derive(Deserialize, ToSchema)]
+struct FullWidthBody {
+    full_width: bool,
+}
+
 /// Update the full_width attribute of a description component.
 #[utoipa::path(
     context_path = "/api/priv/products",
@@ -233,16 +238,17 @@ async fn update_priority(
     request_body(
         content_type = "application/json",
         description = "full_width attribute",
-        content = bool,
+        content = inline(FullWidthBody),
     ),
 )]
 #[patch("/{product_id}/descriptions/{component_id}/full-width")]
 async fn set_full_width(
     shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
-    full_width: web::Json<bool>,
+    req_body: web::Json<FullWidthBody>,
     req: HttpRequest,
 ) -> impl Responder {
+    let full_width = req_body.into_inner().full_width;
     let pool = &shared_data.db_pool;
     match auth::validate_user(req, pool).await {
         Ok(user) => {
@@ -266,7 +272,7 @@ async fn set_full_width(
         pool,
         product_id.as_str(),
         component_id,
-        full_width.into_inner(),
+        full_width,
     )
     .await;
     match query_result {
