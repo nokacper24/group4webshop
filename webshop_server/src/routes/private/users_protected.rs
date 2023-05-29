@@ -15,7 +15,7 @@ use futures::StreamExt;
 use log::error;
 use serde::{Deserialize, Serialize};
 use std::str;
-use utoipa::OpenApi;
+use utoipa::{OpenApi, ToSchema};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(users);
@@ -49,7 +49,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         remove_license_users,
         get_users_by_role,
         update_user_roles,
-        delete_users
+        delete_users,
+        register_new_user,
+        register_new_company_user,
     ),
     components(
         schemas(User)
@@ -1017,14 +1019,21 @@ async fn get_invite_info(
     HttpResponse::Ok().json(invite_info)
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 struct RegisterUser {
     invite_id: String,
     company_name: String,
     company_address: String,
     password: String,
 }
-
+#[utoipa::path(
+    context_path = "/api/priv",
+    post,
+    responses(
+        (status = 200, description = "User successfully registered", body = User),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/register_new_user")]
 async fn register_new_user(
     SharedData: web::Data<SharedData>,
@@ -1108,12 +1117,19 @@ async fn register_new_user(
     HttpResponse::Ok().json(user)
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize,ToSchema)]
 struct RegisterCompanyUser {
     invite_id: String,
     password: String,
 }
-
+#[utoipa::path(
+    context_path = "/api/priv",
+    post,
+    responses(
+        (status = 200, description = "User successfully registered", body = User),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/register_new_company_user")]
 async fn register_new_company_user(
     SharedData: web::Data<SharedData>,
