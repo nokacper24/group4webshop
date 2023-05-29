@@ -33,7 +33,12 @@ export function AccordionRow(props: PrivateAccordionRowProps) {
     visibleTitle = state.text!.text_title;
   }
 
-  const changeVisibility = (checked: boolean, id: string) => {
+  /**
+   * Updates the visibility of the row.
+   *
+   * @param checked if the row should be visible
+   */
+  const changeVisibility = (checked: boolean) => {
     setVisible(checked);
   };
 

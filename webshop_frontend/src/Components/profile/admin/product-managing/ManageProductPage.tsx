@@ -81,6 +81,9 @@ export default function ManageProductPage() {
     initializeContentAndTestimonialChanges();
   }, []);
 
+  /**
+   * Initializes the maps that keeps track of changes to the content and testimonials.
+   */
   function initializeContentAndTestimonialChanges() {
     setContentChanges((changes) => {
       for (let type in ChangeType) {
@@ -135,6 +138,12 @@ export default function ManageProductPage() {
     setContentChanges(contentChanges);
   };
 
+  /**
+   * Registers a change to a testimonial. This is used to keep track of what has changed and what needs to be saved.
+   *
+   * @param id the ID of the testimonial that has changed
+   * @param change the type of change that has been made
+   */
   const registerTestimonialChange = (id: number, change: ChangeType) => {
     if (!testimonialChanges.get(change)?.includes(id)) {
       testimonialChanges.get(change)?.push(id);
@@ -147,8 +156,15 @@ export default function ManageProductPage() {
     setTestimonialChanges(testimonialChanges);
   };
 
+  /**
+   * Assigns the is_text_not_image property to each description.
+   *
+   * @param descriptions the descriptions to assign the property to
+   * @returns the descriptions with the property assigned
+   */
   const assignImageState = (descriptions: Description[]): Description[] => {
     for (let i = 0; i < descriptions.length; i += 1) {
+      //TODO: For of loop?
       if (descriptions[i].text) {
         descriptions[i].is_text_not_image = true;
       } else {
@@ -158,6 +174,11 @@ export default function ManageProductPage() {
     return descriptions;
   };
 
+  /**
+   * Assigns the product info to the form fields.
+   *
+   * @returns void
+   */
   const assignProductInfo = () => {
     if (!productInfo) return;
     productName.current!.value = productInfo.display_name;
@@ -203,6 +224,9 @@ export default function ManageProductPage() {
 
   const [hidden, setHidden] = useState<boolean>(false);
 
+  /**
+   * Starts the process of hiding or unhiding the product.
+   */
   const initializeAvailabilityChangeProtocol = () => {
     let confirmChange = confirm(
       hidden
@@ -219,12 +243,13 @@ export default function ManageProductPage() {
    */
   const initializeSaveProtocol = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    //Product description API calls
     sendProduct();
     sendDeleteDescriptions();
     sendNewDescriptions();
     sendPriorityChanges();
     sendEdits();
-
+    //Testimonial API calls
     sendDeletedTestimonials();
     sendNewTestimonials();
     sendEditedTestimonials();
@@ -232,6 +257,9 @@ export default function ManageProductPage() {
     alert("Product saved!");
   };
 
+  /**
+   * Sends the new product descriptions to the API.
+   */
   const sendProduct = async () => {
     let formData = new FormData();
     formData.append("image", productImage.current!.files![0]);
@@ -250,6 +278,9 @@ export default function ManageProductPage() {
     );
   };
 
+  /**
+   * Sends which descriptions have been deleted to the API.
+   */
   const sendDeleteDescriptions = async () => {
     contentChanges?.get(ChangeType.Delete)?.forEach((id) => {
       let response = fetch(
@@ -264,6 +295,12 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Finds a description row in the sections array by its component_id.
+   *
+   * @param id the component_id of the description to find
+   * @returns the description and the index of the section it was found in
+   */
   const findRow = (
     id: number
   ): { description: LocalDescription | undefined; foundAt: number } => {
@@ -277,6 +314,9 @@ export default function ManageProductPage() {
     return { description: undefined, foundAt: -1 };
   };
 
+  /**
+   * Sends the new descriptions to the API.
+   */
   const sendNewDescriptions = async () => {
     let found = false;
     console.log(contentChanges);
@@ -324,6 +364,9 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Sends the priority changes to the API.
+   */
   const sendPriorityChanges = async () => {
     priorityChanges?.forEach((rows) => {
       let response = fetch(
@@ -339,6 +382,9 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Sends the edited descriptions to the API.
+   */
   const sendEdits = async () => {
     contentChanges?.get(ChangeType.Edit)?.forEach((id) => {
       let { description: row, foundAt } = findRow(id);
@@ -385,6 +431,9 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Sends the deleted testimonials to the API.
+   */
   const sendDeletedTestimonials = async () => {
     testimonialChanges?.get(ChangeType.Delete)?.forEach((id) => {
       let response = fetch(
@@ -399,6 +448,9 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Sends the newly created testimonials to the API.
+   */
   const sendNewTestimonials = async () => {
     let formData = new FormData();
     testimonialChanges?.get(ChangeType.Add)?.forEach((id) => {
@@ -433,6 +485,9 @@ export default function ManageProductPage() {
     });
   };
 
+  /**
+   * Sends the edited testimonials to the API.
+   */
   const sendEditedTestimonials = async () => {
     testimonialChanges?.get(ChangeType.Edit)?.forEach((id) => {
       let testimonial = testimonials.find((t) => {

@@ -69,6 +69,9 @@ export interface Image {
   alt_text: string;
 }
 
+/**
+ * Image that is not yet stored in the database.
+ */
 export interface LocalImage {
   image_file: File;
   alt_text: string;
@@ -84,6 +87,9 @@ export interface Description {
   full_width: boolean;
 }
 
+/**
+ * Description that is not yet stored in the database.
+ */
 export interface LocalDescription {
   component_id: number;
   text: Text | undefined;

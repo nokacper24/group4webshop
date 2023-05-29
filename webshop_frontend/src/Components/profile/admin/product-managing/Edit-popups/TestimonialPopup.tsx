@@ -46,6 +46,11 @@ export default function TestimonialPopup(
     event.preventDefault();
   }
 
+  /**
+   * Updates the props of the component with the parameter.
+   *
+   * @param newProps The new props of the component.
+   */
   const updateProps = (newProps: TestimonialPopupProps) => {
     setProps(newProps);
   };
@@ -71,7 +76,7 @@ export default function TestimonialPopup(
 
   authorPicRef.current?.addEventListener("change", () => {
     props.testimonial!.author_pic = authorPicRef.current?.files![0]
-      ? authorPicRef.current?.files![0]
+      ? authorPicRef.current?.files[0]
       : "";
   });
 

@@ -52,8 +52,13 @@ export function TestimonialSection(props: PrivateProps) {
     }
   };
 
+  /**
+   * Creates a unique, semi-random ID for a testimonial.
+   *
+   * @returns the ID
+   */
   const createID = (): number => {
-    return latestID++; //TODO: May need to take a look at implementing a better way of doing this.
+    return Date.now() + latestID++ + Math.floor(Math.random() * 13); //13 is a prime number.
   };
 
   /**
@@ -95,6 +100,9 @@ export function TestimonialSection(props: PrivateProps) {
 
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
+  /**
+   * Toggles the collapsed state of the section.
+   */
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
   };

@@ -23,6 +23,12 @@ let titleRef: RefObject<HTMLInputElement>;
 let altTextRef: RefObject<HTMLTextAreaElement>;
 let paragraphRef: RefObject<HTMLTextAreaElement>;
 let updatePropsFunc: (newProps: RowEditPopupProps) => void;
+
+/**
+ * The popup for editing a row.
+ *
+ * @returns The RowEditPopup component
+ */
 export default function RowEditPopup() {
   popupRef = useRef(null);
   imageInputRef = useRef(null);
@@ -37,6 +43,11 @@ export default function RowEditPopup() {
     informationCallBack: () => {},
   });
 
+  /**
+   * Updates the props of the component with the parameter.
+   *
+   * @param newProps The new props of the component.
+   */
   const updateProps = (newProps: RowEditPopupProps) => {
     setProps(newProps); //TODO: Remove nested ternary operators
     if (titleRef.current) {
@@ -50,8 +61,13 @@ export default function RowEditPopup() {
     }
   };
 
+  /**
+   * Saves the row and closes the popup. If the form is invalid, the user will be alerted and the popup will not close.
+   *
+   * @returns void
+   */
   const save = () => {
-    if(!validateForm()) return;
+    if (!validateForm()) return;
     let content: string;
     if (props.image) {
       content = imageInputRef.current ? imageInputRef.current.value : "";
@@ -72,10 +88,18 @@ export default function RowEditPopup() {
     ? "Change to paragraph"
     : "Change to image";
 
+  /**
+   * Changes the state of the popup between image and paragraph.
+   */
   function changeImageState() {
     setProps({ ...props, image: !props.image });
   }
 
+  /**
+   * Default handleSubmit function to prevent the form from incorrectly submitting.
+   *
+   * @param event The event that triggered the function.
+   */
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
@@ -88,11 +112,17 @@ export default function RowEditPopup() {
     props.content = imageInputRef.current?.files?.[0];
   });
 
+  /**
+   * Validates the form and alerts the user if there are any fields not filled or
+   * filled incorrectly.
+   *
+   * @returns true if the form is valid, false otherwise.
+   */
   function validateForm(): boolean {
     if (!props.image) {
       if (
         paragraphRef.current?.value === undefined ||
-        paragraphRef.current?.value.match(/^ *$/) !== null
+        RegExp(/^ *$/).exec(paragraphRef.current?.value) !== null
       ) {
         alert("Paragraph cannot be empty");
         return false;
@@ -109,7 +139,7 @@ export default function RowEditPopup() {
     }
     if (
       props.title === undefined ||
-      props.title.match(/^ *$/) !== null ||
+      RegExp(/^ *$/).exec(props.title) !== null ||
       props.title.length > 255
     ) {
       alert("Title cannot be empty or longer than 255 characters");

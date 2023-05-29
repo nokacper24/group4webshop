@@ -26,7 +26,7 @@ type PrivateAccordionSectionProps = {
   sectionID: number;
   registerContentChange: (id: number, change: ChangeType) => void;
   deleteSection: (id: number) => void;
-  setRows: (sectionId: number,rows: LocalDescription[]) => void;
+  setRows: (sectionId: number, rows: LocalDescription[]) => void;
 };
 
 let latestID = 100;
@@ -92,6 +92,11 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
     }
   };
 
+  /**
+   * Creates a unique ID for a row.
+   *
+   * @returns a unique ID
+   */
   const createID = (): number => {
     latestID = latestID + Math.floor(Math.random() * 13);
     return props.sectionID + latestID;
@@ -162,8 +167,9 @@ export function AccordionSection(props: PrivateAccordionSectionProps) {
     return "image_path" in object;
   }
 
-
-
+  /**
+   * Swaps the order of the rows in the body of the section.
+   */
   const swapRows = () => {
     let newRows = [...props.rows];
     newRows.reverse();
