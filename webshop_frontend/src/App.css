@@ -270,7 +270,7 @@ header {
   height: var(--header-height);
   color: var(--clr-neutral-1000);
   background-color: var(--clr-primary);
-  z-index: 1000;
+  z-index: 100;
   outline: 1px solid transparent;
   box-shadow: 0px 0px 5px var(--clr-neutral-0);
 }
@@ -1396,7 +1396,7 @@ input:checked + .slider:before {
 .popup-grey-zone {
   width: 100vw;
   height: 100vh;
-  z-index: 5;
+  z-index: 150;
   background-color: #3d3d3d7c;
   position: fixed;
   inset: 0;
