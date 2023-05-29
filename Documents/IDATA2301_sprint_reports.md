@@ -63,7 +63,7 @@ Period: 13. February–12. March
 
 ## Sprint 3
 Period 13. March - 9. April  
-Goals:
+### Goals:
 - Admin management panel 
 - Fix bugs 
 
@@ -83,3 +83,25 @@ Goals:
 We fixed a few bugs and connected most of the front end to the back end. There were not many specific goals for the sprint, since it was later in the project, but we managed quite well. Most issues with the sprint came from the fact that the earlier sprint should have been longer.  
 
 ## Sprint 4
+Period: 10. April – 14. May
+
+### Goals
+- Finish remaining features
+- Write and edit video presentation 
+
+### Finished
+- Presentation script and slides created 
+- Some videos edited and some audio files created 
+- Fixed bugs 
+  - Select table properly selects rows 
+  - Fix style in high-contrast mode 
+  - Only customers can contact support 
+  - Fix saving profile changes when no changes have been made 
+- Implemented loading of Products from API into product manager. 
+
+### Unfinished
+- Manage product page 
+- Video presentations not finished 
+
+### Reflection
+The manage product page is still in development as it was found more difficult to implement than first thought. The mental health of the developer also caused the developer to be out of action for two weeks, really slowing development down.  
