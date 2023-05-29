@@ -96,6 +96,7 @@ export default function AccordionTable(props: AccordionTableProps) {
       <button
         className="default-button small-button popup-button"
         onClick={() => newSection()}
+        type="button"
       >
         New section
       </button>
