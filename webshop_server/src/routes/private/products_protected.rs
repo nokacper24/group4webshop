@@ -44,8 +44,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     components(
         schemas(
             Product,
-            NewProductForm,
-            UpdateProductForm,
         )
     ),
     tags(
@@ -125,7 +123,7 @@ struct NewProductForm {
     request_body(
         content_type = "multipart/form-data",
         description = "Product creation form",
-        content = NewProductForm,
+        content = inline(NewProductForm),
     ),
 )]
 #[post("/products")]
@@ -294,7 +292,7 @@ struct UpdateProductForm {
     request_body(
         content_type = "multipart/form-data",
         description = "Product creation form",
-        content = UpdateProductForm,
+        content = inline(UpdateProductForm),
     ),
 )]
 #[put("/products/{product_id}")]

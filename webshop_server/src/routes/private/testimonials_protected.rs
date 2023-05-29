@@ -34,7 +34,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         delete_testimonial,
     ),
     components(
-        schemas(Testimonial, PartialTestimonial, NewTestimonialForm, UpdateTestimonialForm)
+        schemas(Testimonial,)
     ),
     tags(
         (name = "Testimonials", description = "API endpoints for testimonials management")
@@ -78,7 +78,7 @@ struct UpdateTestimonialForm {
     request_body(
         content_type = "multipart/form-data",
         description = "Testimonial creation form",
-        content = NewTestimonialForm,
+        content = inline(NewTestimonialForm),
     ),
 )]
 #[post("/testimonials/{product_id}")]
@@ -235,7 +235,7 @@ async fn create_testimonial(
     request_body(
         content_type = "multipart/form-data",
         description = "Testimonial update form",
-        content = UpdateTestimonialForm,
+        content = inline(UpdateTestimonialForm),
     ),
 )]
 #[put("/testimonials/{product_id}/{testimonial_id}")]

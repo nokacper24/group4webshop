@@ -54,8 +54,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             DescriptionComponent,
             TextComponent,
             ImageComponent,
-            NewImageComponentForm,
-            UpdateImageComponentForm,
         )
     ),
     tags(
@@ -585,7 +583,7 @@ struct NewImageComponentForm {
     request_body(
         content_type = "multipart/form-data",
         description = "Description image creation form.",
-        content = NewImageComponentForm,
+        content = inline(NewImageComponentForm),
     ),
 )]
 #[post("/{product_id}/descriptions/image")]
@@ -861,7 +859,7 @@ struct UpdateImageComponentForm {
     request_body(
         content_type = "multipart/form-data",
         description = "The new image component. The image_id will be ignored if provided.",
-        content = UpdateImageComponentForm,
+        content = inline(UpdateImageComponentForm),
     ),
 )]
 #[put("/{product_id}/descriptions/image/{component_id}")]
