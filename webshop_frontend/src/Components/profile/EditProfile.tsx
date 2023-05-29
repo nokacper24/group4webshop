@@ -73,15 +73,6 @@ export default function EditProfile(props: Props) {
           </div>
         </form>
       </section>
-      <section className="container left-aligned">
-        <h1>Change password</h1>
-        <button
-          className="default-button small-button"
-          onClick={() => handlePasswordReset}
-        >
-          Reset password
-        </button>
-      </section>
     </>
   );
 }
