@@ -617,7 +617,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "1",
+					"raw": "{\r\n  \"new_priority\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -672,7 +672,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "3",
+					"raw": "{\r\n  \"new_priority\": 3\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
