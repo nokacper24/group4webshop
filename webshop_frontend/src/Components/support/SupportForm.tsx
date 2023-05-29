@@ -21,7 +21,6 @@ export default function SupportForm() {
 
   const productSelect = useRef<HTMLSelectElement>(null);
   const [formAlert, setFormAlert] = useState<string>("");
-  let userEmail;
 
   useEffect(() => {
     fetchAvailableProducts().then((products: Product[]) =>
@@ -31,24 +30,7 @@ export default function SupportForm() {
       .then((user: MeUser) => {
         setUser(user);
       })
-      .catch((error) => {});
-
-    if (user && user.email) {
-      userEmail = (
-        <p>
-          You are signed in as:
-          <br />
-          <span className="user-email">{user.email}</span>
-        </p>
-      );
-    } else {
-      userEmail = (
-        <p>
-          You are not signed in. Please <Link to="/profile">sign in</Link> to
-          use the form.
-        </p>
-      );
-    }
+      .catch(() => {});
   }, []);
 
   /**
@@ -91,7 +73,19 @@ export default function SupportForm() {
       onSubmit={(event) => handleSubmit(event)}
     >
       <h2>Contact support</h2>
-      {userEmail}
+      {user?.email && (
+        <p>
+          You are signed in as:
+          <br />
+          <span className="user-email">{user.email}</span>
+        </p>
+      )}
+      {!user && (
+        <p>
+          You are not signed in. Please <Link to="/profile">sign in</Link> to
+          use the form.
+        </p>
+      )}
 
       <ProductSelect ref={productSelect} products={products} />
 
