@@ -11,11 +11,7 @@ export function EmailVerify() {
         instructions in the e-mail to verify your account. It may take a few
         minutes to appear in your inbox.
       </p>
-      <p>
-        Do not see the e-mail? Check your spam folder.
-        <br />
-        If you did not receive it, <a href="#">resend e-mail</a>.
-      </p>
+      <p>Do not see the e-mail? Check your spam folder.</p>
     </>
   );
 }
