@@ -127,9 +127,9 @@ export default function AdminCompanyLicenses() {
   /**
    * Send a PATCH request to set licenses validation to false.
    */
-  const patchInvalidated = () => {
+  const patchInvalidated = async () => {
     if (newInvalidatedLicenses.size > 0) {
-      fetch(`${baseUrl}/api/priv/licenses`, {
+      await fetch(`${baseUrl}/api/priv/licenses`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -154,9 +154,9 @@ export default function AdminCompanyLicenses() {
   /**
    * Send a PATCH request to set licenses validation to true.
    */
-  const patchValidated = () => {
+  const patchValidated = async () => {
     if (newValidatedLicenses.size > 0) {
-      fetch(`${baseUrl}/api/priv/licenses`, {
+      await fetch(`${baseUrl}/api/priv/licenses`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",

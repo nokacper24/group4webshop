@@ -82,7 +82,7 @@ export default function CompanyUsers() {
    * Send a DELETE request to remove users.
    */
   const sendDeleteUsersRequest = async () => {
-    fetch(`${baseUrl}/api/priv/users`, {
+    await fetch(`${baseUrl}/api/priv/users`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -146,8 +146,7 @@ export default function CompanyUsers() {
    * @param email The e-mail for the user to be created.
    */
   const sendPostRegisterUserRequest = async (email: string) => {
-
-    fetch(`${baseUrl}/api/priv/generate_invite`, {
+    await fetch(`${baseUrl}/api/priv/generate_invite`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -179,7 +178,7 @@ export default function CompanyUsers() {
       formData.append("csv", csvEmail.current.files[0]);
     }
 
-    fetch(`${baseUrl}/api/priv/generate_invites`, {
+    await fetch(`${baseUrl}/api/priv/generate_invites`, {
       method: "POST",
       headers: {
         Accept: "multipart/form-data",

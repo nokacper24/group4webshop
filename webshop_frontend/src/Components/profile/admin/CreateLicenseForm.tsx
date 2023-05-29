@@ -40,7 +40,7 @@ export default function CreateLicenseForm() {
    * @param license The license to create.
    */
   const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/priv/licenses`, {
+    await fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",

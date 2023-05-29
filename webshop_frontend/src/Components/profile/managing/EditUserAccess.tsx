@@ -126,7 +126,7 @@ export default function EditUserAccess() {
    */
   const addLicensesAccess = async () => {
     if (newLicensesAccess.size > 0) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -148,7 +148,7 @@ export default function EditUserAccess() {
    */
   const removeLicensesAccess = async () => {
     if (newLicensesAccess.size > 0) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",

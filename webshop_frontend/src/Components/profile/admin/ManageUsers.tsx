@@ -146,9 +146,9 @@ export default function ManageUsers() {
   /**
    * Send a PATCH request to give some users the 'Company IT Head' role.
    */
-  const sendPatchAddItHeadsRequest = () => {
+  const sendPatchAddItHeadsRequest = async () => {
     if (newItHeads.size > 0) {
-      fetch(`${baseUrl}/api/priv/user_roles`, {
+      await fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -178,9 +178,9 @@ export default function ManageUsers() {
   /**
    * Send a PATCH request to give some users the 'Default' role.
    */
-  const patchAddDefaultUsersRequest = () => {
+  const patchAddDefaultUsersRequest = async () => {
     if (newDefaultUsers.size > 0) {
-      fetch(`${baseUrl}/api/priv/user_roles`, {
+      await fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",

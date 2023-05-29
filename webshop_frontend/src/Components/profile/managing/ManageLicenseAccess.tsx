@@ -163,9 +163,9 @@ export default function ManageLicenseAccess() {
   /**
    * Send a POST request to add users' access to the license.
    */
-  const sendAddUsersRequest = () => {
+  const sendAddUsersRequest = async () => {
     if (newUsersWithAccess.size > 0 && licenseId) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -198,9 +198,9 @@ export default function ManageLicenseAccess() {
   /**
    * Send a DELETE request to remove users' access to the license.
    */
-  const sendRemoveUsersRequest = () => {
+  const sendRemoveUsersRequest = async () => {
     if (newUsersWithoutAccess.size > 0) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
