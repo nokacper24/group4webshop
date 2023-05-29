@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { User } from "../../../Interfaces";
+import { Company, User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
@@ -13,6 +13,7 @@ import {
 } from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
 import {
+  fetchCompanies,
   fetchCompanyIt,
   fetchCompanyItHead,
   fetchDefaultUser,
@@ -38,6 +39,8 @@ export default function ManageUsers() {
 
   const [defaultUsers, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
   const [newDefaultUsers] = useState<Set<string>>(new Set());
+
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   /**
    * Update the lists of new IT heads and default users
@@ -208,6 +211,20 @@ export default function ManageUsers() {
   };
 
   /**
+   * Find the name of a company given its ID.
+   */
+  const findCompanyName = (id: number) => {
+    const company_found = companies.find(
+      (company) => company.company_id === id
+    );
+    let name = company_found?.company_name ?? "Unknown";
+    if (name.length > 25) {
+      name = name.substring(0, 22) + "...";
+    }
+    return name;
+  };
+
+  /**
    * Save the changes made to the user lists.
    */
   const handleSave = () => {
@@ -216,12 +233,20 @@ export default function ManageUsers() {
   };
 
   useEffect(() => {
+    fetchCompanies()
+      .then((companies: Company[]) => {
+        setCompanies(companies);
+      })
+      .catch(() => alert("Failed to load companies"));
+  }, []);
+
+  useEffect(() => {
     fetchCompanyItHead().then((users) => {
       setItHeads(
         users.map((user: User) => {
           return createRowProps(user.user_id, [
             user.email,
-            user.company_id.toString(),
+            findCompanyName(user.company_id).toString(),
           ]);
         })
       );
@@ -231,20 +256,20 @@ export default function ManageUsers() {
       fetchDefaultUser().then((defaultUser) => {
         let users: SelectTableRowProps[] = [];
 
-        companyIt.map((user: User) => {
+        companyIt.forEach((user: User) => {
           users.push(
             createRowProps(user.user_id, [
               user.email,
-              user.company_id.toString(),
+              findCompanyName(user.company_id).toString(),
             ])
           );
         });
 
-        defaultUser.map((user: User) => {
+        defaultUser.forEach((user: User) => {
           users.push(
             createRowProps(user.user_id, [
               user.email,
-              user.company_id.toString(),
+              findCompanyName(user.company_id).toString(),
             ])
           );
         });
@@ -252,7 +277,7 @@ export default function ManageUsers() {
         setDefaultUsers(users);
       });
     });
-  }, []);
+  }, [companies]);
 
   return (
     <>
