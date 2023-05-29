@@ -222,33 +222,32 @@ export default function ManageProductPage() {
     setSections(sections);
   };
 
-  const [hidden, setHidden] = useState<boolean>(false);
-
   /**
    * Starts the process of hiding or unhiding the product.
    */
   const initializeAvailabilityChangeProtocol = async () => {
     let confirmChange = confirm(
-      hidden
+      productInfo?.available
         ? "Do you want to unhide this product? \n This will make this product visible on the webshop."
         : "Do you want to hide this product? \n This will make this product hidden from the webshop."
     );
     if (confirmChange) {
-      setHidden(!hidden);
+      setProductInfo({ ...productInfo!, available: !productInfo?.available });
     }
-
-    let response = await fetch(
-      `${baseUrl}/api/priv/products/${productId}/available`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          "available": !hidden,
-        }),
-      }
-    );
+    if (!createState) {
+      let response = await fetch(
+        `${baseUrl}/api/priv/products/${productId}/available`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            available: !productInfo?.available,
+          }),
+        }
+      );
+    }
   };
 
   /**
@@ -625,7 +624,7 @@ export default function ManageProductPage() {
             onClick={() => initializeAvailabilityChangeProtocol()}
             type="button"
           >
-            {hidden ? "Unavailable" : "Available"}
+            {productInfo?.available ? "Unavailable" : "Available"}
           </button>
           <button className="default-button small-button" type="submit">
             Save
