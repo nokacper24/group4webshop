@@ -48,7 +48,7 @@ export function TestimonialSection(props: PrivateProps) {
       };
       props.testimonials.push(testimonial);
       props.setTestimonials([...props.testimonials]);
-      props.registerChange(props.sectionId, ChangeType.Add);
+      props.registerChange(testimonial.testimonial_id, ChangeType.Add);
     }
   };
 
@@ -71,7 +71,7 @@ export function TestimonialSection(props: PrivateProps) {
       (testimonial) => testimonial.testimonial_id !== id
     );
     props.setTestimonials(newTestimonials);
-    props.registerChange(props.sectionId, ChangeType.Delete);
+    props.registerChange(id, ChangeType.Delete);
   };
 
   /**
@@ -93,7 +93,7 @@ export function TestimonialSection(props: PrivateProps) {
         props.testimonials[props.testimonials.indexOf(testimonial)] =
           testimonial;
         props.setTestimonials([...props.testimonials]);
-        props.registerChange(props.sectionId, ChangeType.Edit);
+        props.registerChange(id, ChangeType.Edit);
       }
     }
   };

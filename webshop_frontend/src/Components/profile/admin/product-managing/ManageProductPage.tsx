@@ -537,6 +537,10 @@ export default function ManageProductPage() {
     });
   };
 
+  productName?.current?.addEventListener("input", () => {
+    productId = productName?.current?.value.toLowerCase().replace(/ /g, "_");
+  });
+
   return (
     <>
       <HeaderEditPopup></HeaderEditPopup>
