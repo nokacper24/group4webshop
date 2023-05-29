@@ -29,13 +29,13 @@ struct Login {
 async fn login(user: web::Json<Login>, shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
     // check if user exists
-    let db_user = get_by_username_with_pass(&pool, &user.email).await;
+    let db_user = get_by_username_with_pass(pool, &user.email).await;
     match db_user {
         Ok(v) => {
             let hash = data_access::user::verify(&user.password, &v.pass_hash);
             match hash {
                 Ok(hash) => {
-                    if hash == false {
+                    if !hash {
                         return HttpResponse::Unauthorized().json(
                             json!({"success": false, "message": "Incorrect username or password"}),
                         );
@@ -47,7 +47,7 @@ async fn login(user: web::Json<Login>, shared_data: web::Data<SharedData>) -> im
                 }
             }
 
-            let cookie_string = create_cookie(&pool, &v.user_id).await;
+            let cookie_string = create_cookie(pool, &v.user_id).await;
             match cookie_string {
                 Ok(v) => {
                     // set cookie
@@ -91,16 +91,16 @@ async fn create_user(
     let pool = &shared_data.db_pool;
     let mailer = &shared_data.mailer;
     // check if user exists
-    let db_user = get_by_username_with_pass(&pool, &email.email).await;
+    let db_user = get_by_username_with_pass(pool, &email.email).await;
     match db_user {
         Ok(_v) => HttpResponse::BadRequest().json("User already exists"),
         Err(_e) => {
             // create partial user
-            let partial_user = data_access::user::create_partial_user(&email.email, &pool).await;
+            let partial_user = data_access::user::create_partial_user(&email.email, pool).await;
             match partial_user {
                 Ok(v) => {
                     // create invite
-                    let invite = create_invite(Some(v.id), None, &pool).await;
+                    let invite = create_invite(Some(v.id), None, pool).await;
                     match invite {
                         Ok(_v) => {
                             //print invite temporarely TODO: send email
@@ -147,17 +147,17 @@ async fn valid_verify(
     shared_data: web::Data<SharedData>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let invite = data_access::user::get_invite_by_id(&invite_id, &pool).await;
+    let invite = data_access::user::get_invite_by_id(&invite_id, pool).await;
     match invite {
         Ok(v) => match v.company_user_id {
             Some(v) => {
                 let partial_comp_user =
-                    data_access::user::get_partial_company_user(&v, &pool).await;
+                    data_access::user::get_partial_company_user(&v, pool).await;
                 match partial_comp_user {
                     Ok(u) => {
                         //return both partial company user and info about company
                         let company =
-                            data_access::company::get_company_by_id(&pool, &u.company_id).await;
+                            data_access::company::get_company_by_id(pool, &u.company_id).await;
                         match company {
                             Ok(c) => {
                                 let data = json!({
@@ -174,7 +174,7 @@ async fn valid_verify(
             }
             None => match v.user_id {
                 Some(v) => {
-                    let partial_user = data_access::user::get_partial_user(&v, &pool).await;
+                    let partial_user = data_access::user::get_partial_user(&v, pool).await;
                     match partial_user {
                         Ok(u) => HttpResponse::Found().json(u),
                         Err(_e) => HttpResponse::NotFound().json("No Partial user found"),
@@ -194,7 +194,7 @@ async fn verify(
     shared_data: web::Data<SharedData>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let invite = data_access::user::get_invite_by_id(&invite_id, &pool).await;
+    let invite = data_access::user::get_invite_by_id(&invite_id, pool).await;
     match invite {
         Ok(v) => {
             // check if invite has company
@@ -209,12 +209,12 @@ async fn verify(
                 };
 
                 let partial_company_user =
-                    data_access::user::get_partial_company_user(&id, &pool).await;
+                    data_access::user::get_partial_company_user(&id, pool).await;
                 match partial_company_user {
                     Ok(v) => {
                         // get company
                         let company =
-                            data_access::company::get_company_by_id(&pool, &v.company_id).await;
+                            data_access::company::get_company_by_id(pool, &v.company_id).await;
 
                         match company {
                             Ok(c) => {
@@ -224,7 +224,7 @@ async fn verify(
                                     &data.password,
                                     c.company_id,
                                     data_access::user::Role::Default,
-                                    &pool,
+                                    pool,
                                 )
                                 .await;
 
@@ -232,7 +232,7 @@ async fn verify(
                                     Ok(_v) => {
                                         // delete invite
                                         let delete =
-                                            data_access::user::delete_invite(&invite_id, &pool)
+                                            data_access::user::delete_invite(&invite_id, pool)
                                                 .await;
                                         match delete {
                                             Ok(_v) => {
@@ -266,13 +266,13 @@ async fn verify(
             match (&data.company_name, &data.company_address) {
                 (Some(name), Some(address)) => {
                     // create company
-                    let company = data_access::company::create_company(&pool, name, address).await;
+                    let company = data_access::company::create_company(pool, name, address).await;
                     match company {
                         Ok(c) => {
                             // create user with company from partial user
                             if let Some(id) = v.user_id {
                                 let partial_user =
-                                    data_access::user::get_partial_user(&id, &pool).await;
+                                    data_access::user::get_partial_user(&id, pool).await;
                                 match partial_user {
                                     Ok(v) => {
                                         // create user with company
@@ -281,7 +281,7 @@ async fn verify(
                                             &data.password,
                                             c.company_id,
                                             data_access::user::Role::CompanyItHead,
-                                            &pool,
+                                            pool,
                                         )
                                         .await;
 

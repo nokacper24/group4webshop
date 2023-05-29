@@ -91,7 +91,7 @@ async fn delete_description_component(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -110,7 +110,7 @@ async fn delete_description_component(
 
     let (product_id, component_id) = path.into_inner();
     let query_result =
-        product::description::delete_component(&pool, product_id.as_str(), component_id).await;
+        product::description::delete_component(pool, product_id.as_str(), component_id).await;
     let img_path: Option<String> = match query_result {
         Ok(opt_path) => opt_path,
         Err(e) => match e {
@@ -170,7 +170,7 @@ async fn update_priority(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -189,7 +189,7 @@ async fn update_priority(
 
     let (product_id, component_id) = path.into_inner();
     let query_result = product::description::update_priority(
-        &pool,
+        pool,
         product_id.as_str(),
         component_id,
         new_priority.into_inner(),
@@ -244,7 +244,7 @@ async fn set_full_width(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -263,7 +263,7 @@ async fn set_full_width(
 
     let (product_id, component_id) = path.into_inner();
     let query_result = product::description::update_full_width(
-        &pool,
+        pool,
         product_id.as_str(),
         component_id,
         full_width.into_inner(),
@@ -313,7 +313,7 @@ async fn update_priorities(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -335,7 +335,7 @@ async fn update_priorities(
         .map(|(id, _)| *id)
         .collect::<Vec<i32>>();
     let valid =
-        match product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await {
+        match product::description::verify_component_ids(pool, product_id.as_str(), &ids).await {
             Ok(valid) => valid,
             Err(e) => match e {
                 sqlx::Error::RowNotFound => {
@@ -353,7 +353,7 @@ async fn update_priorities(
     }
 
     let query_result = product::description::update_priorities_bulk(
-        &pool,
+        pool,
         product_id.as_str(),
         &ids_and_priotities,
     )
@@ -410,7 +410,7 @@ async fn swap_priorities(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let description_ids = description_ids.into_inner();
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -428,7 +428,7 @@ async fn swap_priorities(
     };
 
     let descriptions = product::description::swap_priority(
-        &pool,
+        pool,
         product_id.as_str(),
         (description_ids.0, description_ids.1),
     )
@@ -493,7 +493,7 @@ async fn create_text_component(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -510,7 +510,7 @@ async fn create_text_component(
         }
     };
 
-    match product::product_exists(&pool, product_id.as_str()).await {
+    match product::product_exists(pool, product_id.as_str()).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -520,7 +520,7 @@ async fn create_text_component(
     }
 
     let created_component = product::description::create_text_component(
-        &pool,
+        pool,
         product_id.as_str(),
         description.into_inner(),
     )
@@ -584,7 +584,7 @@ async fn create_image_component(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -601,7 +601,7 @@ async fn create_image_component(
         }
     };
 
-    match product::product_exists(&pool, product_id.as_str()).await {
+    match product::product_exists(pool, product_id.as_str()).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -700,7 +700,7 @@ async fn create_image_component(
     };
 
     let created_component = product::description::create_image_component(
-        &pool,
+        pool,
         product_id.as_str(),
         product::description::ImageComponent::new(None, path, alt_text),
     )
@@ -765,7 +765,7 @@ async fn update_text_component(
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -783,7 +783,7 @@ async fn update_text_component(
     };
 
     let updated_component = product::description::update_text_component(
-        &pool,
+        pool,
         product_id,
         description.into_inner(),
         component_id,
@@ -863,7 +863,7 @@ async fn update_image_component(
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -881,7 +881,7 @@ async fn update_image_component(
     };
 
     let unupdated_desc = match product::description::get_description_component_checked(
-        &pool,
+        pool,
         product_id,
         component_id,
     )
@@ -1011,7 +1011,7 @@ async fn update_image_component(
     let new_img_comp = product::description::ImageComponent::new(None, new_image_path, alt_text);
 
     let updated_component =
-        product::description::update_image_component(&pool, product_id, new_img_comp, component_id)
+        product::description::update_image_component(pool, product_id, new_img_comp, component_id)
             .await;
 
     match updated_component {

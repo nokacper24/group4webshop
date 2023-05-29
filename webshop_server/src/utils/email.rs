@@ -3,7 +3,7 @@ use lettre::{
     Message, SmtpTransport, Transport,
 };
 
-use crate::data_access;
+
 
 pub struct Email {
     pub recipient_email: String,

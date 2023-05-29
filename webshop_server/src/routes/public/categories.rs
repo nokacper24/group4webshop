@@ -14,7 +14,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[get("/categories")]
 async fn categories(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let categories = get_categories(&pool).await;
+    let categories = get_categories(pool).await;
 
     // Error check
     if categories.is_err() {
@@ -37,7 +37,7 @@ async fn category_by_id(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let category_id = category_id.into_inner();
-    let category = get_category_by_id(&pool, &category_id).await;
+    let category = get_category_by_id(pool, &category_id).await;
 
     // Error check
     if category.is_err() {

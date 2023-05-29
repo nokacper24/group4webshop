@@ -72,7 +72,7 @@ pub struct UserApiDoc;
 #[get("/users")]
 async fn users(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -89,7 +89,7 @@ async fn users(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Res
         }
     };
 
-    let users = user::get_all_users(&pool).await;
+    let users = user::get_all_users(pool).await;
 
     //error check
     if users.is_err() {
@@ -124,9 +124,9 @@ async fn user_by_id(
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let user = user::get_user_by_id(&pool, &id).await;
+    let user = user::get_user_by_id(pool, &id).await;
 
-    let auth_user = match auth::validate_user(req, &pool).await {
+    let auth_user = match auth::validate_user(req, pool).await {
         Ok(auth_user) => {
             if auth_user.role != user::Role::Admin
                 && auth_user.role != user::Role::CompanyItHead
@@ -150,10 +150,8 @@ async fn user_by_id(
     //parse to json
     match user {
         Ok(user) => {
-            if auth_user.company_id != user.company_id {
-                if auth_user.role != user::Role::Admin {
-                    return HttpResponse::Forbidden().finish();
-                }
+            if auth_user.company_id != user.company_id && auth_user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
             HttpResponse::Ok().json(user)
         }
@@ -180,7 +178,7 @@ async fn users_by_company(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let auth_user = match auth::validate_user(req, &pool).await {
+    let auth_user = match auth::validate_user(req, pool).await {
         Ok(auth_user) => {
             if auth_user.role != user::Role::Admin
                 && auth_user.role != user::Role::CompanyItHead
@@ -205,13 +203,11 @@ async fn users_by_company(
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
 
-    if auth_user.company_id != company_id {
-        if auth_user.role != user::Role::Admin {
-            return HttpResponse::Forbidden().finish();
-        }
+    if auth_user.company_id != company_id && auth_user.role != user::Role::Admin {
+        return HttpResponse::Forbidden().finish();
     }
 
-    let other_users = user::get_users_by_company(&pool, &company_id).await;
+    let other_users = user::get_users_by_company(pool, &company_id).await;
 
     // Error check
     if other_users.is_err() {
@@ -247,7 +243,7 @@ async fn users_by_license(
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
 
-    let auth_user = match auth::validate_user(req, &pool).await {
+    let auth_user = match auth::validate_user(req, pool).await {
         Ok(auth_user) => {
             if auth_user.role != user::Role::Admin
                 && auth_user.role != user::Role::CompanyItHead
@@ -268,14 +264,12 @@ async fn users_by_license(
         }
     };
 
-    let license = license::get_license_by_id(&pool, &license_id).await;
+    let license = license::get_license_by_id(pool, &license_id).await;
 
     match license {
         Ok(license) => {
-            if auth_user.company_id != license.company_id {
-                if auth_user.role != user::Role::Admin {
-                    return HttpResponse::Forbidden().finish();
-                }
+            if auth_user.company_id != license.company_id && auth_user.role != user::Role::Admin {
+                return HttpResponse::Forbidden().finish();
             }
         }
         Err(e) => match e {
@@ -284,7 +278,7 @@ async fn users_by_license(
         },
     }
 
-    let other_users = user::get_users_by_license(&pool, &license_id).await;
+    let other_users = user::get_users_by_license(pool, &license_id).await;
 
     // Error check
     if other_users.is_err() {
@@ -314,13 +308,13 @@ async fn generate_invite_new(
     let email = &invite.email;
 
     // check if user exists
-    match user::user_exists(&email, &pool).await {
+    match user::user_exists(email, pool).await {
         Ok(true) => HttpResponse::BadRequest().json("User already exists"),
         Ok(false) => {
-            let partial_user = user::create_partial_user(&email, &pool).await;
+            let partial_user = user::create_partial_user(email, pool).await;
             match partial_user {
                 Ok(partial_user) => {
-                    let invite_obj = user::create_invite(Some(partial_user.id), None, &pool).await;
+                    let invite_obj = user::create_invite(Some(partial_user.id), None, pool).await;
                     match invite_obj {
                         Ok(invite_obj) => {
                             let email = utils::email::Email::new(
@@ -372,7 +366,7 @@ async fn generate_invite(
     let pool = &shared_data.db_pool;
     let mailer = &shared_data.mailer;
     let company = match invite.company_id {
-        Some(company_id) => match company::get_company_by_id(&pool, &company_id).await {
+        Some(company_id) => match company::get_company_by_id(pool, &company_id).await {
             Ok(company) => Ok(company),
             Err(e) => {
                 log::error!("Error: {}", e);
@@ -382,7 +376,7 @@ async fn generate_invite(
         None => Err("No company ID provided"),
     };
 
-    let user = match auth::validate_user(req.clone(), &pool).await {
+    let user = match auth::validate_user(req.clone(), pool).await {
         Ok(user) => user,
         Err(e) => match e {
             auth::AuthError::Unauthorized => {
@@ -399,12 +393,12 @@ async fn generate_invite(
         user::Role::Admin => match company {
             Ok(company) => {
                 let partial =
-                    user::create_partial_company_user(&invite.email, company.company_id, &pool)
+                    user::create_partial_company_user(&invite.email, company.company_id, pool)
                         .await;
                 match partial {
                     Ok(partial) => {
                         let invite =
-                            user::create_invite(None, Some(partial.company_id), &pool).await;
+                            user::create_invite(None, Some(partial.company_id), pool).await;
                         match invite {
                             Ok(invite) => {
                                 let email = utils::email::Email::new(
@@ -450,13 +444,13 @@ async fn generate_invite(
                         let partial = user::create_partial_company_user(
                             &invite.email,
                             company.company_id,
-                            &pool,
+                            pool,
                         )
                         .await;
                         match partial {
                             Ok(partial) => {
                                 let invite =
-                                    user::create_invite(None, Some(partial.company_id), &pool)
+                                    user::create_invite(None, Some(partial.company_id), pool)
                                         .await;
                                 match invite {
                                     Ok(invite) => {
@@ -499,11 +493,11 @@ async fn generate_invite(
                     //if no id is provided, then the user is trying to invite a user to their company
                     let comp_id = user.company_id;
                     let partial =
-                        user::create_partial_company_user(&invite.email, comp_id, &pool).await;
+                        user::create_partial_company_user(&invite.email, comp_id, pool).await;
                     match partial {
                         Ok(partial) => {
                             let invite =
-                                user::create_invite(None, Some(partial.company_id), &pool).await;
+                                user::create_invite(None, Some(partial.company_id), pool).await;
                             match invite {
                                 Ok(invite) => {
                                     let email = utils::email::Email::new(
@@ -553,7 +547,7 @@ async fn generate_invites(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let user = match auth::validate_user(req, &pool).await {
+    let user = match auth::validate_user(req, pool).await {
         Ok(user) => user,
         Err(e) => {
             return match e {
@@ -583,7 +577,7 @@ async fn generate_invites(
                 }
             }
 
-            match user::create_partial_company_users(&other_users, &pool).await {
+            match user::create_partial_company_users(&other_users, pool).await {
                 Ok(created_users) => HttpResponse::Ok().json(created_users),
                 Err(_) => HttpResponse::InternalServerError().finish(),
             }
@@ -680,7 +674,7 @@ async fn add_license_users(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
-    match user::add_license_users(&pool, other_users).await {
+    match user::add_license_users(pool, other_users).await {
         Ok(_) => HttpResponse::Created().json(other_users),
 
         Err(e) => match e {
@@ -721,7 +715,7 @@ async fn remove_license_users(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
-    match user::remove_license_users(&pool, other_users).await {
+    match user::remove_license_users(pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
@@ -744,7 +738,7 @@ async fn get_users_by_role(
     request: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(request, &pool).await {
+    match auth::validate_user(request, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -760,7 +754,7 @@ async fn get_users_by_role(
             }
         }
     }
-    let found_users = user::get_users_by_role(&pool, &role).await;
+    let found_users = user::get_users_by_role(pool, &role).await;
     match found_users {
         Ok(found_users) => HttpResponse::Ok().json(found_users),
         Err(e) => {
@@ -792,7 +786,7 @@ async fn update_user_roles(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
-    match user::update_user_roles(&pool, other_users).await {
+    match user::update_user_roles(pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
@@ -830,7 +824,7 @@ async fn delete_users(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let other_users = &other_users.users;
-    match user::delete_users(&pool, other_users).await {
+    match user::delete_users(pool, other_users).await {
         Ok(_) => HttpResponse::Ok().json(other_users),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
@@ -861,7 +855,7 @@ async fn update_user(
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
     let returned_user = match mail {
-        Some(email) => match user::update_email(&pool, email, &id).await {
+        Some(email) => match user::update_email(pool, email, &id).await {
             Ok(user) => user,
             Err(_) => return HttpResponse::InternalServerError().finish(),
         },
@@ -885,7 +879,7 @@ async fn support(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let mailer = &shared_data.mailer;
-    let user = match auth::validate_user(req, &pool).await {
+    let user = match auth::validate_user(req, pool).await {
         Ok(user) => user,
         Err(e) => {
             return match e {
@@ -925,7 +919,7 @@ async fn invite_type(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
 
-    let invite = match data_access::user::get_invite_by_id(&invite_id, &pool).await {
+    let invite = match data_access::user::get_invite_by_id(&invite_id, pool).await {
         Ok(invite) => invite,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -956,7 +950,7 @@ async fn get_invite_info(
 ) -> impl Responder {
     let pool = &SharedData.db_pool;
 
-    let invite = match data_access::user::get_invite_by_id(&invite_id, &pool).await {
+    let invite = match data_access::user::get_invite_by_id(&invite_id, pool).await {
         Ok(invite) => invite,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -967,7 +961,7 @@ async fn get_invite_info(
     let invite_info = match invite.company_user_id {
         Some(company_user_id) => {
             let company =
-                match data_access::company::get_company_by_id(&pool, &company_user_id).await {
+                match data_access::company::get_company_by_id(pool, &company_user_id).await {
                     Ok(company) => company,
                     Err(e) => {
                         log::error!("Error: {}", e);
@@ -976,7 +970,7 @@ async fn get_invite_info(
                 };
 
             let company_user =
-                match data_access::user::get_partial_company_user(&invite.user_id.unwrap(), &pool)
+                match data_access::user::get_partial_company_user(&invite.user_id.unwrap(), pool)
                     .await
                 {
                     Ok(company_user) => company_user,
@@ -986,18 +980,18 @@ async fn get_invite_info(
                     }
                 };
 
-            let invite_info = InviteInfo {
+            
+
+            InviteInfo {
                 company_name: company.company_name,
                 company_address: company.company_address,
                 email: company_user.email,
                 role: "company".to_string(),
-            };
-
-            invite_info
+            }
         }
         None => {
             let partial_user =
-                match data_access::user::get_partial_user(&invite.user_id.unwrap(), &pool).await {
+                match data_access::user::get_partial_user(&invite.user_id.unwrap(), pool).await {
                     Ok(partial_user) => partial_user,
                     Err(e) => {
                         log::error!("Error: {}", e);
@@ -1005,14 +999,14 @@ async fn get_invite_info(
                     }
                 };
 
-            let invite_info = InviteInfo {
+            
+
+            InviteInfo {
                 company_name: "".to_string(),
                 company_address: "".to_string(),
                 email: partial_user.email,
                 role: "user".to_string(),
-            };
-
-            invite_info
+            }
         }
     };
 
@@ -1041,7 +1035,7 @@ async fn register_new_user(
 ) -> impl Responder {
     let pool = &SharedData.db_pool;
 
-    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, &pool).await {
+    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, pool).await {
         Ok(invite) => invite,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1050,7 +1044,7 @@ async fn register_new_user(
     };
 
     let company = match data_access::company::create_company(
-        &pool,
+        pool,
         &register_user.company_name,
         &register_user.company_address,
     )
@@ -1072,7 +1066,7 @@ async fn register_new_user(
     };
 
     // Get partial user from invite
-    let partial_user = match data_access::user::get_partial_user(&user_id, &pool).await {
+    let partial_user = match data_access::user::get_partial_user(&user_id, pool).await {
         Ok(partial_user) => partial_user,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1085,7 +1079,7 @@ async fn register_new_user(
         &register_user.password,
         company.company_id,
         Role::CompanyItHead,
-        &pool,
+        pool,
     )
     .await
     {
@@ -1097,7 +1091,7 @@ async fn register_new_user(
     };
 
     // Delete the invite
-    match data_access::user::delete_invite(&invite.id, &pool).await {
+    match data_access::user::delete_invite(&invite.id, pool).await {
         Ok(_) => (),
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1106,7 +1100,7 @@ async fn register_new_user(
     }
 
     // Delete the partial user
-    match data_access::user::delete_partial_user(&partial_user.id, &pool).await {
+    match data_access::user::delete_partial_user(&partial_user.id, pool).await {
         Ok(_) => (),
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1137,7 +1131,7 @@ async fn register_new_company_user(
 ) -> impl Responder {
     let pool = &SharedData.db_pool;
 
-    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, &pool).await {
+    let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, pool).await {
         Ok(invite) => invite,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1153,7 +1147,7 @@ async fn register_new_company_user(
         }
     };
 
-    let company = match data_access::company::get_company_by_id(&pool, &company_user_id).await {
+    let company = match data_access::company::get_company_by_id(pool, &company_user_id).await {
         Ok(company) => company,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1170,7 +1164,7 @@ async fn register_new_company_user(
     };
 
     // Get partial user from invite
-    let partial_user = match data_access::user::get_partial_company_user(&user_id, &pool).await {
+    let partial_user = match data_access::user::get_partial_company_user(&user_id, pool).await {
         Ok(partial_user) => partial_user,
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1183,7 +1177,7 @@ async fn register_new_company_user(
         &register_user.password,
         company.company_id,
         Role::Default,
-        &pool,
+        pool,
     )
     .await
     {
@@ -1195,7 +1189,7 @@ async fn register_new_company_user(
     };
 
     // Delete the invite
-    match data_access::user::delete_invite(&invite.id, &pool).await {
+    match data_access::user::delete_invite(&invite.id, pool).await {
         Ok(_) => (),
         Err(e) => {
             log::error!("Error: {}", e);
@@ -1204,7 +1198,7 @@ async fn register_new_company_user(
     }
 
     // Delete the partial user
-    match data_access::user::delete_partial_company_user(&partial_user.id, &pool).await {
+    match data_access::user::delete_partial_company_user(&partial_user.id, pool).await {
         Ok(_) => (),
         Err(e) => {
             log::error!("Error: {}", e);

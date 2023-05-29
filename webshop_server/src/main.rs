@@ -12,9 +12,9 @@ use flexi_logger::{Duplicate, FileSpec};
 use log::info;
 use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
-use lettre::message::header::ContentType;
+
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport, Transport};
+use lettre::{SmtpTransport};
 
 mod data_access;
 mod routes;

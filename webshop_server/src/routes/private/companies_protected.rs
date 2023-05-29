@@ -14,7 +14,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[get("/companies")]
 async fn companies(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let companies = company::get_all_companies(&pool).await;
+    let companies = company::get_all_companies(pool).await;
 
     match companies {
         Ok(companies) => HttpResponse::Ok().json(companies),

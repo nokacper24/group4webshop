@@ -15,7 +15,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 #[post("/logout")]
 async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let cookie = match auth::extract_valid_cookie(req, &pool).await {
+    let cookie = match auth::extract_valid_cookie(req, pool).await {
         Ok(token) => token,
         Err(e) => {
             return match e {
@@ -28,7 +28,7 @@ async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Re
         }
     };
 
-    let cookie = delete_cookie(&pool, &cookie).await;
+    let cookie = delete_cookie(pool, &cookie).await;
     match cookie {
         Ok(_) => HttpResponse::Ok()
             .cookie(
@@ -48,7 +48,7 @@ async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Re
 #[get("/logged_in")]
 async fn logged_in(req: HttpRequest, shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let valid = auth::validate_user(req, &pool).await;
+    let valid = auth::validate_user(req, pool).await;
     match valid {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(e) => match e {

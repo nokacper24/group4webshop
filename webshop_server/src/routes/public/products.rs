@@ -43,7 +43,7 @@ pub struct ProductsApiDoc;
 #[get("/products")]
 async fn all_available_products(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match product::get_products(&pool, true).await {
+    match product::get_products(pool, true).await {
         Ok(products) => HttpResponse::Ok().json(products),
         Err(e) => {
             error!("Error: {}", e);
@@ -73,7 +73,7 @@ async fn product_by_id(
     product_id: web::Path<String>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let product = product::get_product_by_id(&pool, product_id.as_str()).await;
+    let product = product::get_product_by_id(pool, product_id.as_str()).await;
 
     match product {
         Ok(product) => HttpResponse::Ok().json(product),

@@ -44,7 +44,7 @@ async fn get_testimonials_by_product(
     product_id: web::Path<String>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let testimonials = testimonial::get_testimonials_by_product(&pool, &product_id).await;
+    let testimonials = testimonial::get_testimonials_by_product(pool, &product_id).await;
     match testimonials {
         Ok(testimonials) => HttpResponse::Ok().json(testimonials),
         Err(e) => {

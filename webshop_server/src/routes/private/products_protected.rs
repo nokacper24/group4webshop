@@ -72,7 +72,7 @@ pub struct ProductsApiDoc;
 #[get("/products")]
 async fn get_all_products(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -89,7 +89,7 @@ async fn get_all_products(shared_data: web::Data<SharedData>, req: HttpRequest) 
         }
     };
 
-    match product::get_products(&pool, false).await {
+    match product::get_products(pool, false).await {
         Ok(products) => HttpResponse::Ok().json(products),
         Err(e) => {
             error!("{}", e);
@@ -135,7 +135,7 @@ async fn create_product(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -244,7 +244,7 @@ async fn create_product(
         false,
     );
 
-    match product::create_product(&pool, new_product).await {
+    match product::create_product(pool, new_product).await {
         Ok(product) => HttpResponse::Created().json(product),
         Err(e) => {
             if let Err(io_e) = img_multipart::remove_image(&file_name) {
@@ -305,7 +305,7 @@ async fn update_product(
     product_id: web::Path<String>,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -322,7 +322,7 @@ async fn update_product(
         }
     };
 
-    let unupadted_product = match product::get_product_by_id(&pool, &product_id).await {
+    let unupadted_product = match product::get_product_by_id(pool, &product_id).await {
         Ok(product) => product,
         Err(e) => match e {
             sqlx::Error::RowNotFound => return HttpResponse::NotFound().json("Product not found"),
@@ -435,7 +435,7 @@ async fn update_product(
         unupadted_product.available(),
     );
 
-    match product::update_product(&pool, &product_to_update).await {
+    match product::update_product(pool, &product_to_update).await {
         Ok(updated_product) => HttpResponse::Ok().json(updated_product),
         Err(e) => {
             log::error!("Couldnt update product: {}", e);
@@ -474,7 +474,7 @@ async fn update_availability(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -491,7 +491,7 @@ async fn update_availability(
         }
     };
 
-    match product::update_product_available(&pool, &product_id, available.into_inner()).await {
+    match product::update_product_available(pool, &product_id, available.into_inner()).await {
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => match e {
             sqlx::Error::RowNotFound => HttpResponse::NotFound().json("Product not found"),
@@ -527,7 +527,7 @@ async fn delete_product(
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -546,7 +546,7 @@ async fn delete_product(
 
     let product_id = product_id.into_inner();
 
-    match product::product_exists(&pool, &product_id).await {
+    match product::product_exists(pool, &product_id).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -555,7 +555,7 @@ async fn delete_product(
         Err(_) => return HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 
-    let all_images = match product::get_all_image_paths(&pool, &product_id).await {
+    let all_images = match product::get_all_image_paths(pool, &product_id).await {
         Ok(images) => images,
         Err(e) => {
             log::error!("Couldnt get all image paths: {}", e);
@@ -563,7 +563,7 @@ async fn delete_product(
         }
     };
 
-    match product::delete_product(&pool, &product_id).await {
+    match product::delete_product(pool, &product_id).await {
         Ok(_) => {
             for image in all_images {
                 if let Err(e) = img_multipart::remove_image(&image) {

@@ -89,7 +89,7 @@ async fn create_testimonial(
     payload: Multipart,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -106,7 +106,7 @@ async fn create_testimonial(
         }
     };
 
-    match product::product_exists(&pool, &product_id).await {
+    match product::product_exists(pool, &product_id).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -204,7 +204,7 @@ async fn create_testimonial(
         product_id.to_string(),
     );
 
-    match testimonial::create_testimonial(&pool, testimonial).await {
+    match testimonial::create_testimonial(pool, testimonial).await {
         Ok(testimonial) => HttpResponse::Created().json(testimonial),
         Err(e) => {
             log::error!("Couldnt create testimonial: {}", e);
@@ -248,7 +248,7 @@ async fn update_testimonial(
     let pool = &shared_data.db_pool;
     let product_id = &params.0;
     let testimonial_id = params.1;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -266,7 +266,7 @@ async fn update_testimonial(
     };
 
     let unupdated_testimonial =
-        match testimonial::get_testimonial_by_prod_and_id(&pool, product_id, &testimonial_id).await
+        match testimonial::get_testimonial_by_prod_and_id(pool, product_id, &testimonial_id).await
         {
             Ok(testimonial) => testimonial,
             Err(e) => match e {
@@ -380,7 +380,7 @@ async fn update_testimonial(
         product_id.to_string(),
     );
 
-    match testimonial::update_testimonial(&pool, new_testimonial).await {
+    match testimonial::update_testimonial(pool, new_testimonial).await {
         Ok(updated_testimonial) => HttpResponse::Ok().json(updated_testimonial),
         Err(e) => {
             error!("Couldnt update testimonial: {}", e);
@@ -416,7 +416,7 @@ async fn delete_testimonial(
     let pool = &shared_data.db_pool;
     let product_id = &paramas.0;
     let testimonial_id = paramas.1;
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -434,7 +434,7 @@ async fn delete_testimonial(
     };
 
     let deleted_testimonial =
-        match testimonial::delete_testimonial(&pool, product_id, &testimonial_id).await {
+        match testimonial::delete_testimonial(pool, product_id, &testimonial_id).await {
             Ok(testimonial) => testimonial,
             Err(e) => match e {
                 sqlx::Error::RowNotFound => {

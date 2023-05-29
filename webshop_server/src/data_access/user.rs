@@ -199,7 +199,7 @@ pub fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Err
     let pass = pass.as_bytes();
 
     // Hash to verify against
-    let hash = PasswordHash::new(&hash);
+    let hash = PasswordHash::new(hash);
     let hash = match hash {
         Ok(hash) => hash,
         Err(e) => return Err(e),
@@ -372,7 +372,8 @@ pub async fn create_partial_company_users(
     }
     transaction.commit().await?;
 
-    let created_users = query_as!(
+    
+    query_as!(
         RegisterCompanyUser,
         r#"SELECT id, email, company_id, exp_date
             FROM register_company_user
@@ -380,8 +381,7 @@ pub async fn create_partial_company_users(
         &email_list
     )
     .fetch_all(pool)
-    .await;
-    created_users
+    .await
 }
 
 pub async fn get_partial_company_user(
@@ -639,7 +639,8 @@ pub async fn update_email(
     email: &str,
     id: &i32,
 ) -> Result<UserWithoutHash, sqlx::Error> {
-    let result_row = query_as!(
+    
+    query_as!(
         UserWithoutHash,
         r#"UPDATE app_user 
         SET email = $1
@@ -649,6 +650,5 @@ pub async fn update_email(
         id,
     )
     .fetch_one(pool)
-    .await;
-    return result_row.into();
+    .await
 }

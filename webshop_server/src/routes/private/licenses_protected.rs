@@ -57,7 +57,7 @@ pub struct ProtectedLicensesOpenApi;
 #[get("/licenses")]
 async fn licenses(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let licenses = license::get_licenses(&pool).await;
+    let licenses = license::get_licenses(pool).await;
 
     // Error check
     if licenses.is_err() {
@@ -85,7 +85,7 @@ async fn licenses(shared_data: web::Data<SharedData>) -> impl Responder {
 #[get("/licenses_full")]
 async fn licenses_full(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let other_licenses = license::get_licenses_full(&pool).await;
+    let other_licenses = license::get_licenses_full(pool).await;
 
     // Error check
     if other_licenses.is_err() {
@@ -125,7 +125,7 @@ async fn license_by_id(
         Ok(license_id) => license_id,
         Err(_) => return HttpResponse::BadRequest().json("Bad Request"),
     };
-    let license = license::get_license_by_id(&pool, &license_id).await;
+    let license = license::get_license_by_id(pool, &license_id).await;
 
     // Error check
     if license.is_err() {
@@ -165,7 +165,7 @@ async fn licenses_full_by_company(
         Ok(company_id) => company_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
-    let license = license::get_licenses_full_by_company(&pool, &company_id).await;
+    let license = license::get_licenses_full_by_company(pool, &company_id).await;
 
     // Error check
     if license.is_err() {
@@ -205,7 +205,7 @@ async fn licenses_for_user(
         Ok(user_id) => user_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
-    let other_licenses = license::get_licenses_for_user(&pool, &user_id).await;
+    let other_licenses = license::get_licenses_for_user(pool, &user_id).await;
 
     // Error check
     if other_licenses.is_err() {
@@ -246,13 +246,13 @@ async fn licenses_for_user_no_access(
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    let company_id = match user::get_user_by_id(&pool, &user_id).await {
+    let company_id = match user::get_user_by_id(pool, &user_id).await {
         Ok(user) => user.company_id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
     let other_licenses =
-        license::get_licenses_for_user_no_access(&pool, &company_id, &user_id).await;
+        license::get_licenses_for_user_no_access(pool, &company_id, &user_id).await;
 
     // Error check
     if other_licenses.is_err() {
@@ -296,7 +296,7 @@ async fn create_license(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let license = license.into_inner();
-    let user = match auth::validate_user(req, &pool).await {
+    let user = match auth::validate_user(req, pool).await {
         Ok(user) => user,
         Err(e) => {
             return match e {
@@ -321,7 +321,7 @@ async fn create_license(
         Role::Admin => (),
     }
 
-    match license::create_license(&pool, &license).await {
+    match license::create_license(pool, &license).await {
         Ok(new_license) => HttpResponse::Created().json(new_license),
         Err(e) => {
             error!("{}", e);
@@ -352,7 +352,7 @@ async fn update_license_validations(
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let other_licenses = &other_licenses.licenses;
-    match license::update_license_validations(&pool, other_licenses).await {
+    match license::update_license_validations(pool, other_licenses).await {
         Ok(_) => HttpResponse::Ok().json(other_licenses),
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }

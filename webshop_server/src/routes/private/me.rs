@@ -32,7 +32,7 @@ impl From<crate::data_access::user::User> for MeUser {
 #[get("/me")]
 async fn me(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
-    let user = validate_user(req, &pool).await;
+    let user = validate_user(req, pool).await;
     match user {
         Ok(user) => HttpResponse::Ok().json(MeUser::from(user)),
         Err(e) => match e {

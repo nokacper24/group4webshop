@@ -21,16 +21,16 @@ pub async fn validate_user(req: HttpRequest, pool: &Pool<Postgres>) -> Result<Us
 
     if valid {
         let cookie = auth::get_cookie(pool, cookie_str).await;
-        return match cookie {
+        match cookie {
             Ok(cookie) => {
                 let user = data_access::user::get_user_by_id(pool, &cookie.user_id).await;
-                return match user {
+                match user {
                     Ok(user) => Ok(user),
                     Err(e) => Err(AuthError::SqlxError(e)),
-                };
+                }
             }
             Err(e) => Err(AuthError::SqlxError(e)),
-        };
+        }
     } else {
         Err(AuthError::Unauthorized)
     }
