@@ -197,7 +197,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "true",
+					"raw": "{\r\n  \"available\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -573,7 +573,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "true",
+					"raw": "{\r\n  \"full_width\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
