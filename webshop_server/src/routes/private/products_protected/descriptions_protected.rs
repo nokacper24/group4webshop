@@ -136,6 +136,11 @@ async fn delete_description_component(
     HttpResponse::NoContent().finish()
 }
 
+#[derive(Deserialize, ToSchema)]
+struct NewPriorityBody {
+    new_priority: i32,
+}
+
 /// Update the priority of a description component.
 ///
 /// Priotiy must be unique for descriptions of a product.
@@ -158,17 +163,18 @@ async fn delete_description_component(
     request_body(
         content_type = "application/json",
         description = "New priority",
-        content =i32,
-        example = json!(1),
+        content = inline(NewPriorityBody),
+        example = json!({"new_priority": 1}),
     ),
 )]
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
     shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
-    new_priority: web::Json<i32>,
+    req_body: web::Json<NewPriorityBody>,
     req: HttpRequest,
 ) -> impl Responder {
+    let new_priority = req_body.into_inner().new_priority;
     let pool = &shared_data.db_pool;
     match auth::validate_user(req, pool).await {
         Ok(user) => {
@@ -192,7 +198,7 @@ async fn update_priority(
         pool,
         product_id.as_str(),
         component_id,
-        new_priority.into_inner(),
+        new_priority,
     )
     .await;
 
