@@ -227,7 +227,7 @@ export default function ManageProductPage() {
   /**
    * Starts the process of hiding or unhiding the product.
    */
-  const initializeAvailabilityChangeProtocol = () => {
+  const initializeAvailabilityChangeProtocol = async () => {
     let confirmChange = confirm(
       hidden
         ? "Do you want to unhide this product? \n This will make this product visible on the webshop."
@@ -236,6 +236,19 @@ export default function ManageProductPage() {
     if (confirmChange) {
       setHidden(!hidden);
     }
+
+    let response = await fetch(
+      `${baseUrl}/api/priv/products/${productId}/available`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          available: !hidden,
+        }),
+      }
+    );
   };
 
   /**
@@ -266,7 +279,6 @@ export default function ManageProductPage() {
     formData.append("price_per_unit", productPrice.current!.value);
     formData.append("product_name", productName.current!.value);
     formData.append("short_description", productDescription.current!.value);
-    formData.append("available", hidden.valueOf.toString());
     let response = await fetch(
       `${baseUrl}/api/priv/products${createState ? "" : `/${productId}`}`,
       {
@@ -556,7 +568,7 @@ export default function ManageProductPage() {
             required={true}
           />
           <label htmlFor="product-price">
-            <b>Product price &#40;NOK&#41;:</b>
+            <b>Product price &#40;USD&#41;:</b>
           </label>
           <input
             type="number"
