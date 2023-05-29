@@ -315,81 +315,6 @@
     },
     "query": "UPDATE description_component\n        SET priority = $1\n        WHERE component_id = $2;\n        "
   },
-  "205be0d278dc355af5398e2292713c9ffc8d6a72eead67dfedc2610497ccdc74": {
-    "describe": {
-      "columns": [
-        {
-          "name": "license_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "valid",
-          "ordinal": 1,
-          "type_info": "Bool"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount",
-          "ordinal": 4,
-          "type_info": "Int4"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 5,
-          "type_info": "Int4"
-        },
-        {
-          "name": "product_id",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_name",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "active_users",
-          "ordinal": 9,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int4",
-          "Int4"
-        ]
-      }
-    },
-    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)\n        WHERE company_id = $1\n        AND license_id NOT IN(\n            SELECT license_id\n            FROM license\n            JOIN user_license USING (license_id)\n            WHERE user_id = $2)\n        "
-  },
   "2268fe884de195e26c1e13d58458c58cc7d0c205925f799fd838c5543a486381": {
     "describe": {
       "columns": [
@@ -649,78 +574,6 @@
     },
     "query": "SELECT id, email, company_id, exp_date FROM register_company_user WHERE id = $1"
   },
-  "36fc74c1ffd839040ae67f0ab3fda8e1e1596fc4de6d940ec3aebfc34a049052": {
-    "describe": {
-      "columns": [
-        {
-          "name": "license_id",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "valid",
-          "ordinal": 1,
-          "type_info": "Bool"
-        },
-        {
-          "name": "start_date",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "end_date",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount",
-          "ordinal": 4,
-          "type_info": "Int4"
-        },
-        {
-          "name": "company_id",
-          "ordinal": 5,
-          "type_info": "Int4"
-        },
-        {
-          "name": "product_id",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "company_name",
-          "ordinal": 7,
-          "type_info": "Text"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "active_users",
-          "ordinal": 9,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)"
-  },
   "376a2d1635035c78ffc010cb77b3474402148cf7e02a2efddcf43456b56b5038": {
     "describe": {
       "columns": [
@@ -966,6 +819,80 @@
     },
     "query": "UPDATE product\n        SET display_name = $1, price_per_user = $2, short_description = $3, main_image = $4, available = $5\n        WHERE product_id = $6\n        RETURNING *"
   },
+  "6058495ee61cd225d0c43bf5bcb6cdd09f9eef9651c42ae44a08344f51fdb393": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "valid",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "active_users",
+          "ordinal": 9,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, coalesce(cast(active_users as INTEGER), 0) AS active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        LEFT JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)\n        WHERE company_id = $1"
+  },
   "62bef44cbcf97c443e4720fb125c2a35310adc65cebd87e77b359c7f82e477f1": {
     "describe": {
       "columns": [
@@ -1112,7 +1039,7 @@
     },
     "query": "SELECT user_id, email, company_id, role as \"role: _\" FROM app_user"
   },
-  "715c004a614b9a95e46bbc34e7fe22844de1b351a0b2c19864eaa2f709efa458": {
+  "71067dd8345e75cb3de5cddaf411eb11163de2ba77a1ac2e606e056bef6eae0d": {
     "describe": {
       "columns": [
         {
@@ -1163,7 +1090,7 @@
         {
           "name": "active_users",
           "ordinal": 9,
-          "type_info": "Int8"
+          "type_info": "Int4"
         }
       ],
       "nullable": [
@@ -1184,7 +1111,7 @@
         ]
       }
     },
-    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        JOIN (\n            SELECT count(*) AS active_users, license_id\n                FROM user_license\n                WHERE license_id IN (\n                    SELECT license_id\n                    FROM user_license\n                    WHERE user_id = $1\n                )\n            GROUP BY license_id\n            ) AS count USING (license_id)"
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, coalesce(cast(active_users as INTEGER), 0) AS active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        LEFT JOIN (\n            SELECT count(*) AS active_users, license_id\n                FROM user_license\n                WHERE license_id IN (\n                    SELECT license_id\n                    FROM user_license\n                    WHERE user_id = $1\n                )\n            GROUP BY license_id\n            ) AS count USING (license_id)"
   },
   "7508e92d2c508189e697ad45d0884ec45f7e9c84b0d9d327942c4c62230d6025": {
     "describe": {
@@ -1770,6 +1697,78 @@
     },
     "query": "UPDATE app_user \n        SET email = $1\n        WHERE user_id = $2\n        RETURNING app_user.user_id, email, company_id, role as \"role: _\";"
   },
+  "aad1f40f6577be7427a3b4786cc554eff6a984dda4a547bff02c57e3ab2b1659": {
+    "describe": {
+      "columns": [
+        {
+          "name": "license_id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "valid",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "start_date",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "end_date",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "company_id",
+          "ordinal": 5,
+          "type_info": "Int4"
+        },
+        {
+          "name": "product_id",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "company_name",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "active_users",
+          "ordinal": 9,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, coalesce(cast(active_users as INTEGER), 0) AS active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        LEFT JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)"
+  },
   "b145fc3ab8dc880cace8ab5bd27258a857ce0f2ab0779485f91b841c2e19c4cb": {
     "describe": {
       "columns": [
@@ -1912,7 +1911,7 @@
     },
     "query": "SELECT * FROM category"
   },
-  "bc1868f3fd6738bbc72ca5468680f9360efa36e7e7ad7e1e58f126fb35392033": {
+  "c10627663aa1b86ce17277751b99de66c150aabe96d9fd56b7adf2cae6d5b653": {
     "describe": {
       "columns": [
         {
@@ -1963,7 +1962,7 @@
         {
           "name": "active_users",
           "ordinal": 9,
-          "type_info": "Int8"
+          "type_info": "Int4"
         }
       ],
       "nullable": [
@@ -1980,11 +1979,12 @@
       ],
       "parameters": {
         "Left": [
+          "Int4",
           "Int4"
         ]
       }
     },
-    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)\n        WHERE company_id = $1"
+    "query": "SELECT license_id, valid, start_date, end_date, amount, company_id, product_id, company_name, display_name, coalesce(cast(active_users as INTEGER), 0) AS active_users\n        FROM license\n        JOIN product USING (product_id)\n        JOIN company USING (company_id)\n        LEFT JOIN (\n            SELECT count(*) AS active_users, license_id\n            FROM user_license\n            GROUP BY license_id\n        ) AS count USING (license_id)\n        WHERE company_id = $1\n        AND license_id NOT IN(\n            SELECT license_id\n            FROM license\n            JOIN user_license USING (license_id)\n            WHERE user_id = $2)\n        "
   },
   "c423dff564c8ef2008e3155227a1b4954fd0da532391826cd7343b0380d1a97a": {
     "describe": {
