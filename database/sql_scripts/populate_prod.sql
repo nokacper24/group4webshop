@@ -7,9 +7,9 @@ INSERT INTO app_user (email, pass_hash, company_id, role)
 VALUES ('admin_proflex@gmail.com', '$argon2id$v=19$m=4096,t=3,p=1$zGDWbzz553WuAOr9wAscPw$scsw+3Q2pW19Jqz8uXQpzikahS3a8CNubaC1EQH3Fa4', 1, 'admin');
 
 INSERT INTO product ("product_id", "display_name", "price_per_user", "short_description", "main_image", "available") VALUES
-('online_scheduling_software',	'Online Scheduling Software',	2000,	'Streamline your scheduling process with Proflex Solutions'' Online Scheduling Software. Automate appointments, manage resources, and track performance effortlessly. Boost productivity and save time today!',	'/resources/images/online_scheduling_software/Oransj_calender_software_on_monitor_ab65cb91-6bb0-4891-896b-1e52813dfd49.png',	'1'),
-('proflex_bpa_solutions',	'Proflex BPA Solutions',	5000,	'Automate and optimize your business processes with ProFlex BPA Solutions. Streamline operations, save time and money, and focus on business growth with our secure and efficient software.',	'/resources/images/proflex_bpa_solutions/Oransj_automation_software_on_monitor_f69ffed8-f8db-4aa3-b416-57c66d238db9.png',	'1'),
-('proflex_tax_solutions',	'ProFlex Tax Solutions',	2000,	'Streamline your tax preparation and filing process with ProFlex Tax Solutions. Enter data quickly and accurately, automate workflows, and focus on your business while ensuring the security and efficiency of your tax-related data.',	'/resources/images/proflex_tax_solutions/Product-4.jpg',	'1');
+('online_scheduling_software',	'Online Scheduling Software',	200,	'Streamline your scheduling process with Proflex Solutions'' Online Scheduling Software. Automate appointments, manage resources, and track performance effortlessly. Boost productivity and save time today!',	'/resources/images/online_scheduling_software/Oransj_calender_software_on_monitor_ab65cb91-6bb0-4891-896b-1e52813dfd49.png',	'1'),
+('proflex_bpa_solutions',	'Proflex BPA Solutions',	500,	'Automate and optimize your business processes with ProFlex BPA Solutions. Streamline operations, save time and money, and focus on business growth with our secure and efficient software.',	'/resources/images/proflex_bpa_solutions/Oransj_automation_software_on_monitor_f69ffed8-f8db-4aa3-b416-57c66d238db9.png',	'1'),
+('proflex_tax_solutions',	'ProFlex Tax Solutions',	300,	'Streamline your tax preparation and filing process with ProFlex Tax Solutions. Enter data quickly and accurately, automate workflows, and focus on your business while ensuring the security and efficiency of your tax-related data.',	'/resources/images/proflex_tax_solutions/Product-4.jpg',	'1');
 
 INSERT INTO product_image ("image_path", "alt_text") VALUES
 ('/resources/images/online_scheduling_software/Product-1.jpg',	'mobile calender interface'),
@@ -39,6 +39,21 @@ INSERT INTO description_component ("priority", "product_id", "full_width", "imag
 
 INSERT INTO testimonial ("author", "text", "author_pic", "product_id") VALUES
 ('Sarah Thompson',	'ProFlex BPA Solutions transformed our business processes! With its intuitive interface and automated workflows, we saved time and optimized operations. Highly recommended!',	'/resources/images/proflex_bpa_solutions/sarahthompson.jpg',	'proflex_bpa_solutions'),
-('John Anderson',	'ProFlex Tax Solutions made tax season a breeze! Quick data entry, automated workflows, and top-notch security. It simplified our process and maximized our tax success.',	'/resources/images/proflex_tax_solutions/JohnAnderson.jpg',	'proflex_tax_solutions');
+('John Anderson',	'ProFlex Tax Solutions made tax season a breeze! Quick data entry, automated workflows, and top-notch security. It simplified our process and maximized our tax success.',	'/resources/images/proflex_tax_solutions/JohnAnderson.jpg',	'proflex_tax_solutions'),
+('Jane Thompson','ProFlex Tax Solutions has truly transformed our tax season at TechSolutions Inc. With seamless data entry, efficient automated workflows, and top-notch security, tax preparation has become a breeze. This software simplifies every step, maximizes tax success, and saves us valuable time. We no longer worry about manual processes as the intuitive interface and lightning-fast data entry automate our tasks flawlessly. The robust security measures ensure our sensitive tax-related data is protected, giving us peace of mind. ProFlex Tax Solutions is undoubtedly the best tax software we''ve ever used, revolutionizing our tax preparation process and allowing us to focus on growing our business.', '/resources/images/proflex_tax_solutions/JaneThompson.jpg', 'proflex_tax_solutions');
+
+INSERT INTO category ("name", "description") VALUES
+('tax', 'Tax software'),
+('legal', 'Legal software'),
+('finance', 'Finance software'),
+('bpa', 'Business process automation software'),
+('scheduling', 'Scheduling software');
+
+INSERT INTO product_category ("product_id", "category_id") VALUES
+('online_scheduling_software', 5),
+('proflex_bpa_solutions', 4),
+('proflex_tax_solutions', 1),
+('proflex_tax_solutions', 2),
+('proflex_tax_solutions', 3);
 
 COMMIT;
