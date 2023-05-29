@@ -8,7 +8,7 @@ import {
   createSelectTableProps,
   createRowProps,
 } from "../select-table/SelectTableFunctions";
-import { fetchProducts } from "../../../ApiController";
+import { fetchAllProducts } from "../../../ApiController";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 
@@ -49,7 +49,7 @@ export default function ManageProducts() {
   );
 
   useEffect(() => {
-    fetchProducts().then((products: Product[]) => {
+    fetchAllProducts().then((products: Product[]) => {
       setProducts(
         products.map((product: Product) => {
           return createRowProps(product.product_id, [
@@ -70,7 +70,9 @@ export default function ManageProducts() {
         button={productsTable.button}
         outsideButtons={productsTable.outsideButtons}
       />
-      <Link className="default-button" to={"/product/create"}>Create new product</Link>
+      <Link className="default-button" to={"/product/create"}>
+        Create new product
+      </Link>
     </section>
   );
 }

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useEffect, useState } from "react";
 import { MeUser, Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
-import { fetchMe, fetchProducts } from "../../ApiController";
+import { fetchMe, fetchAvailableProducts } from "../../ApiController";
 import { Link } from "react-router-dom";
 
 /**
@@ -20,7 +20,9 @@ export default function SupportForm() {
   let userEmail;
 
   useEffect(() => {
-    fetchProducts().then((products: Product[]) => setProducts(products));
+    fetchAvailableProducts().then((products: Product[]) =>
+      setProducts(products)
+    );
     fetchMe()
       .then((user: MeUser) => {
         setUser(user);

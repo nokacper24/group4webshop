@@ -323,12 +323,27 @@ export const fetchProduct = async (productId: string) => {
 };
 
 /**
+ * Get all available products.
+ *
+ * @returns All available products.
+ */
+export const fetchAvailableProducts = async () => {
+  const response = await fetch(`${baseUrl}/api/products`);
+  if (response.ok) {
+    const data: Product[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch products.");
+  }
+};
+
+/**
  * Get all products.
  *
  * @returns All products.
  */
-export const fetchProducts = async () => {
-  const response = await fetch(`${baseUrl}/api/products`);
+export const fetchAllProducts = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/products`);
   if (response.ok) {
     const data: Product[] = await response.json();
     return data;
