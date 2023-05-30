@@ -147,7 +147,7 @@ pub async fn create_license(
 /// Update the validation of licenses
 pub async fn update_license_validations(
     pool: &Pool<Postgres>,
-    licenses: &Vec<LicenseValidation>,
+    licenses: &[LicenseValidation],
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     for license in licenses.iter() {

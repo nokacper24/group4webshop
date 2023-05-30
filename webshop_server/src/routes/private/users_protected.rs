@@ -4,7 +4,7 @@ use crate::{
         self, company, error_handling, license,
         user::{self, LicenseUser, PartialRegisterCompanyUser, Role, User, UserID, UserRole},
     },
-    utils::{self, auth, email::supportEmail},
+    utils::{self, auth, email::SupportEmail},
     SharedData,
 };
 use actix_multipart::{Multipart, MultipartError};
@@ -294,17 +294,17 @@ async fn users_by_license(
 }
 
 #[derive(Deserialize, Serialize)]
-struct newUser {
+struct NewUser {
     email: String,
 }
 
 #[post("/generate_invite_new")]
 async fn generate_invite_new(
-    SharedData: web::Data<SharedData>,
-    invite: web::Json<newUser>,
+    shared_data: web::Data<SharedData>,
+    invite: web::Json<NewUser>,
 ) -> impl Responder {
-    let pool = &SharedData.db_pool;
-    let mailer = &SharedData.mailer;
+    let pool = &shared_data.db_pool;
+    let mailer = &shared_data.mailer;
     let email = &invite.email;
 
     // check if user exists
@@ -865,7 +865,7 @@ async fn update_user(
 }
 
 #[derive(Deserialize, Serialize)]
-struct supportRequest {
+struct SupportRequest {
     product: String,
     subject: String,
     message: String,
@@ -874,7 +874,7 @@ struct supportRequest {
 #[post("/support")]
 async fn support(
     shared_data: web::Data<SharedData>,
-    body: web::Json<supportRequest>,
+    body: web::Json<SupportRequest>,
     req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
@@ -891,7 +891,7 @@ async fn support(
             }
         }
     };
-    let supportEmail: supportEmail = supportEmail::new(
+    let support_email: SupportEmail = SupportEmail::new(
         user.email.clone(),
         body.product.clone(),
         body.subject.clone(),
@@ -899,7 +899,7 @@ async fn support(
     );
     let email = utils::email::Email::new(
         user.email,
-        utils::email::EmailType::Support(supportEmail),
+        utils::email::EmailType::Support(support_email),
         None,
     );
     let res = utils::email::send_email(email, mailer).await;
@@ -945,10 +945,10 @@ struct InviteInfo {
 
 #[get("/invite/info/{invite_id}")]
 async fn get_invite_info(
-    SharedData: web::Data<SharedData>,
+    shared_data: web::Data<SharedData>,
     invite_id: web::Path<String>,
 ) -> impl Responder {
-    let pool = &SharedData.db_pool;
+    let pool = &shared_data.db_pool;
 
     let invite = match data_access::user::get_invite_by_id(&invite_id, pool).await {
         Ok(invite) => invite,
@@ -1030,10 +1030,10 @@ struct RegisterUser {
 )]
 #[post("/register_new_user")]
 async fn register_new_user(
-    SharedData: web::Data<SharedData>,
+    shared_data: web::Data<SharedData>,
     register_user: web::Json<RegisterUser>,
 ) -> impl Responder {
-    let pool = &SharedData.db_pool;
+    let pool = &shared_data.db_pool;
 
     let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, pool).await {
         Ok(invite) => invite,
@@ -1126,10 +1126,10 @@ struct RegisterCompanyUser {
 )]
 #[post("/register_new_company_user")]
 async fn register_new_company_user(
-    SharedData: web::Data<SharedData>,
+    shared_data: web::Data<SharedData>,
     register_user: web::Json<RegisterCompanyUser>,
 ) -> impl Responder {
-    let pool = &SharedData.db_pool;
+    let pool = &shared_data.db_pool;
 
     let invite = match data_access::user::get_invite_by_id(&register_user.invite_id, pool).await {
         Ok(invite) => invite,

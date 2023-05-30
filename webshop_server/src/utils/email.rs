@@ -32,22 +32,22 @@ pub enum MailError {
 }
 
 #[derive(Clone)]
-pub struct otherEmail {
+pub struct OtherEmail {
     pub recipient_email: String,
     pub subject: String,
     pub body: String,
 }
 
-pub struct supportEmail {
+pub struct SupportEmail {
     pub recipient_email: String,
     pub subject: String,
     pub product: String,
     pub message: String,
 }
 
-impl supportEmail {
+impl SupportEmail {
     pub fn new(recipient_email: String, subject: String, product: String, message: String) -> Self {
-        supportEmail {
+        SupportEmail {
             recipient_email,
             subject,
             product,
@@ -60,8 +60,8 @@ pub enum EmailType {
     RegisterUser,
     RegisterUserCompany,
     ResetPassword,
-    Support(supportEmail),
-    other(otherEmail),
+    Support(SupportEmail),
+    Other(OtherEmail),
 }
 
 impl std::fmt::Display for MailError {
@@ -145,11 +145,11 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
                 .unwrap();
             Ok(email)
         }
-        EmailType::Support(supportEmail) => {
+        EmailType::Support(support_email) => {
             let email_template = support_template(
-                &supportEmail.subject,
-                &supportEmail.product,
-                &supportEmail.message,
+                &support_email.subject,
+                &support_email.product,
+                &support_email.message,
             );
             let email = Message::builder()
                 .from(from)
@@ -160,12 +160,12 @@ fn generate_email(email: Email) -> Result<Message, MailError> {
                 .unwrap();
             Ok(email)
         }
-        EmailType::other(otherEmail) => {
-            let email_template = other_template(otherEmail.clone());
+        EmailType::Other(other_email) => {
+            let email_template = other_template(other_email.clone());
             let email = Message::builder()
                 .from(from)
                 .to(to)
-                .subject(otherEmail.subject)
+                .subject(other_email.subject)
                 .header(ContentType::TEXT_HTML)
                 .body(email_template)
                 .unwrap();
@@ -345,7 +345,7 @@ fn support_template(subject: &str, product: &str, message: &str) -> String {
     email_template
 }
 
-fn other_template(email: otherEmail) -> String {
+fn other_template(email: OtherEmail) -> String {
     let email_template = format!(
         r#"
         <!DOCTYPE html>
