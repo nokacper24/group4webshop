@@ -870,6 +870,24 @@ struct SupportRequest {
     message: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Support",
+    request_body(
+        content_type = "application/json",
+        description = "The parameters of the mail",
+    content = SupportRequest,
+example = json!({
+    "product": "Product name",
+    "subject": "Subject",
+    "message": "Message"
+})),
+    responses(
+        (status = 200, description = "Support request sent"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/support")]
 async fn support(
     shared_data: web::Data<SharedData>,
@@ -911,6 +929,18 @@ async fn support(
     }
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Invite",
+    params(
+        ("invite_id", description = "The ID of the invite", example = "1234567890"),
+    ),
+    responses(
+        (status = 200, description = "Invite type", body = String),
+        (status = 404, description = "Invite not found"),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/invite-type/{invite_id}")]
 async fn invite_type(
     invite_id: web::Path<String>,
@@ -920,10 +950,15 @@ async fn invite_type(
 
     let invite = match data_access::user::get_invite_by_id(&invite_id, pool).await {
         Ok(invite) => invite,
-        Err(e) => {
-            log::error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json("Internal Server Error");
-        }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                return HttpResponse::NotFound().json("Invite not found");
+            }
+            _ => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
     };
 
     let invite_type = match invite.company_user_id {
