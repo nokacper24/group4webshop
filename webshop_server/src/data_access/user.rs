@@ -28,7 +28,7 @@ pub struct User {
     pub role: Role,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct LicenseUser {
     user_id: i32,
     license_id: i32,

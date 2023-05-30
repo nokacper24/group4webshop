@@ -54,7 +54,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         register_new_company_user,
     ),
     components(
-        schemas(User, Role, UserRole)
+        schemas(User, Role, UserRole, LicenseUser, LicenseUsers)
     ),
     tags(
         (name = "Users", description = "API endpoints for users")
@@ -646,23 +646,12 @@ fn csv_string_to_list(text: String) -> Vec<String> {
     string_list
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 struct LicenseUsers {
     users: Vec<LicenseUser>,
 }
 
 /// Add access to licenses for users.
-/// The JSON for `other_users` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 1,
-///             "license_id": 1
-///         }
-///     ]
-/// }
-/// ```
 #[utoipa::path(
     context_path = "/api/priv",
     tag = "Users",
@@ -670,6 +659,10 @@ struct LicenseUsers {
     (status = 201, description = "License user successfully added", body = Vec<User>),
     (status = 409, description = "License user already existed"),
     (status = 500, description = "Internal Server Error"),
+    ),
+    request_body(
+        description = "Pairs of user_id and license_id to grant access to licenses",
+        content = LicenseUsers,
     )
 )]
 #[post("/license_users")]
@@ -695,24 +688,19 @@ async fn add_license_users(
 }
 
 /// Remove access to licenses from users.
-/// The JSON for `other_users` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 1,
-///             "license_id": 1
-///         }
-///     ]
-/// }
-/// ```
 #[utoipa::path(
     context_path = "/api/priv",
     tag = "Users",
     responses(
     (status = 200, description = "License users successfully removed", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
+    ),
+    request_body (
+        description = "Pairs of user_id and license_id to remove access to licenses",
+        content = LicenseUsers,
+        
     )
+
 )]
 #[delete("/license_users")]
 async fn remove_license_users(
