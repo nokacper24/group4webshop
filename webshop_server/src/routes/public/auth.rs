@@ -151,8 +151,7 @@ async fn valid_verify(
     match invite {
         Ok(v) => match v.company_user_id {
             Some(v) => {
-                let partial_comp_user =
-                    data_access::user::get_partial_company_user(&v, pool).await;
+                let partial_comp_user = data_access::user::get_partial_company_user(&v, pool).await;
                 match partial_comp_user {
                     Ok(u) => {
                         //return both partial company user and info about company

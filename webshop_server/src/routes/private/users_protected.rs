@@ -980,8 +980,6 @@ async fn get_invite_info(
                     }
                 };
 
-            
-
             InviteInfo {
                 company_name: company.company_name,
                 company_address: company.company_address,
@@ -998,8 +996,6 @@ async fn get_invite_info(
                         return HttpResponse::InternalServerError().json("Internal Server Error");
                     }
                 };
-
-            
 
             InviteInfo {
                 company_name: "".to_string(),
@@ -1111,7 +1107,7 @@ async fn register_new_user(
     HttpResponse::Ok().json(user)
 }
 
-#[derive(Deserialize, Serialize,ToSchema)]
+#[derive(Deserialize, Serialize, ToSchema)]
 struct RegisterCompanyUser {
     invite_id: String,
     password: String,

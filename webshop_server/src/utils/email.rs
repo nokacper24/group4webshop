@@ -3,8 +3,6 @@ use lettre::{
     Message, SmtpTransport, Transport,
 };
 
-
-
 pub struct Email {
     pub recipient_email: String,
     pub mail_type: EmailType,

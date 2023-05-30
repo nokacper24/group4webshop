@@ -265,20 +265,24 @@ async fn update_testimonial(
         }
     };
 
-    let unupdated_testimonial =
-        match testimonial::get_testimonial_by_prod_and_id(pool, product_id, &testimonial_id).await
-        {
-            Ok(testimonial) => testimonial,
-            Err(e) => match e {
-                sqlx::Error::RowNotFound => {
-                    return HttpResponse::NotFound().json("Testimonial not found")
-                }
-                _ => {
-                    log::error!("Couldnt get testimonial: {}", e);
-                    return HttpResponse::InternalServerError().finish();
-                }
-            },
-        };
+    let unupdated_testimonial = match testimonial::get_testimonial_by_prod_and_id(
+        pool,
+        product_id,
+        &testimonial_id,
+    )
+    .await
+    {
+        Ok(testimonial) => testimonial,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                return HttpResponse::NotFound().json("Testimonial not found")
+            }
+            _ => {
+                log::error!("Couldnt get testimonial: {}", e);
+                return HttpResponse::InternalServerError().finish();
+            }
+        },
+    };
 
     let (extracted_image, text_fields) =
         match img_multipart::extract_image_and_texts_from_multipart(payload, vec!["author", "text"])

@@ -14,7 +14,7 @@ use rustls::{self, Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{SmtpTransport};
+use lettre::SmtpTransport;
 
 mod data_access;
 mod routes;
@@ -130,7 +130,7 @@ async fn main() -> std::io::Result<()> {
 
 /// Loads the TLS configuration.
 /// Paths to the certificate and private key are read from the environment variables `CERT_PATH` and `PRIV_KEY_PATH`.
-/// 
+///
 /// # Panics
 /// Panics if the environment variables are not set or if the certificate or private key could not be loaded.
 fn load_rustls_config() -> rustls::ServerConfig {
@@ -151,7 +151,6 @@ fn load_rustls_config() -> rustls::ServerConfig {
         Err(e) => panic!("Could not open private key file: {}", e),
     });
 
-    
     let cert_chain = certs(cert_file)
         .unwrap()
         .into_iter()

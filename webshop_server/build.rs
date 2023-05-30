@@ -11,9 +11,7 @@ fn main() -> std::io::Result<()> {
 
     match resource_dir(react_dist).build() {
         Ok(_) => {
-            println!(
-                "cargo:warning=Frontend files found, including in the build..."
-            );
+            println!("cargo:warning=Frontend files found, including in the build...");
             println!("cargo:warning=If you did not rebuild frontend after making changes, \x1b[31moutdated version will be included!\x1b[0m");
         }
         Err(_) => {

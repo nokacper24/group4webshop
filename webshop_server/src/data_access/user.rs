@@ -372,7 +372,6 @@ pub async fn create_partial_company_users(
     }
     transaction.commit().await?;
 
-    
     query_as!(
         RegisterCompanyUser,
         r#"SELECT id, email, company_id, exp_date
@@ -639,7 +638,6 @@ pub async fn update_email(
     email: &str,
     id: &i32,
 ) -> Result<UserWithoutHash, sqlx::Error> {
-    
     query_as!(
         UserWithoutHash,
         r#"UPDATE app_user 
