@@ -33,27 +33,31 @@ export default function ProductPage() {
       .then((product: Product) => {
         setProduct(product);
         setLoading(false);
-
-        fetchTestimonials(product.product_id).then(
-          (testimonials: Testimonial[]) => setTestimonials(testimonials)
-        );
-        fetchDescriptionComponents(product.product_id).then(
-          (descriptions: Description[]) => setDescriptions(descriptions)
-        );
-      })
-      .catch((error: unknown) => {
-        if (error instanceof FetchError) {
-          if (error.status === 404) {
-            setError(
-              new Error(`We could not find the product you are looking for.`)
-            );
-          } else {
+        
+        fetchTestimonials(product.product_id)
+          .then((testimonials: Testimonial[]) => setTestimonials(testimonials))
+          .catch((error: FetchError) =>
             setError(
               new Error(`We are sorry: ${error.statusText}, ${error.message}`)
-            );
-          }
+            )
+          );
+        fetchDescriptionComponents(product.product_id)
+          .then((descriptions: Description[]) => setDescriptions(descriptions))
+          .catch((error: FetchError) =>
+            setError(
+              new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+            )
+          );
+      })
+      .catch((error: FetchError) => {
+        if (error.status === 404) {
+          setError(
+            new Error(`We could not find the product you are looking for.`)
+          );
         } else {
-          setError(new Error(`We are sorry: ${error}`));
+          setError(
+            new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+          );
         }
         setLoading(false);
       });
