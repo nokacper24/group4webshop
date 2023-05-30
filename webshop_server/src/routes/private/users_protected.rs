@@ -651,7 +651,7 @@ struct LicenseUsers {
     users: Vec<LicenseUser>,
 }
 
-/// Add rows into the user license table.
+/// Add access to licenses for users.
 /// The JSON for `other_users` can be like this:
 /// ```
 /// {
@@ -694,7 +694,7 @@ async fn add_license_users(
     }
 }
 
-/// Delete from into the user license table.
+/// Remove access to licenses from users.
 /// The JSON for `other_users` can be like this:
 /// ```
 /// {
