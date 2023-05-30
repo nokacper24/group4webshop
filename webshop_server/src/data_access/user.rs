@@ -575,7 +575,7 @@ pub async fn get_users_by_role(
     Ok(users)
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, ToSchema)]
 pub struct UserRole {
     user_id: i32,
     role: Role,
