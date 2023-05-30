@@ -274,9 +274,11 @@ export const fetchLicensesForUserNoAccess = async (userId: string) => {
  * Create a license.
  *
  * @param license The license to create.
+ * @returns The created license.
+ * @throws FetchError if the request fails.
  */
 export const postLicense = async (license: License) => {
-  return await fetch(`${baseUrl}/api/priv/licenses`, {
+  const response = await fetch(`${baseUrl}/api/priv/licenses`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -285,6 +287,16 @@ export const postLicense = async (license: License) => {
     body: JSON.stringify(license),
     credentials: "include",
   });
+  if (response.status === 201) {
+    return await response.json();
+  } else {
+    throw new FetchError(
+      "Could not create license.",
+      response.status,
+      response.statusText
+    );
+  }
+  
 };
 
 /**
