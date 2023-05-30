@@ -10,25 +10,24 @@ fn public_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
         public::products::ProductsApiDoc::openapi(),
         public::products::descriptions::DescriptionApiDoc::openapi(),
-        public::licenses::LicensesOpenApi::openapi(),
         public::testimonials::TestimonialsOpenApi::openapi(),
     ]
 }
 
 fn protected_routes_docs() -> Vec<openapi::OpenApi> {
-    vec![
-        // nothing here yet
-    ]
+    vec![private::users_protected::UserApiDoc::openapi()]
 }
 
 fn admin_routes_docs() -> Vec<openapi::OpenApi> {
     vec![
         private::products_protected::ProductsApiDoc::openapi(),
         private::products_protected::descriptions_protected::DescriptionApiDoc::openapi(),
+        private::testimonials_protected::TestimonialsProtectedOpenApi::openapi(),
     ]
 }
 
 pub fn configure_opanapi(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::redirect("/api-doc/swagger-ui", "/api-doc/swagger-ui/").permanent());
     cfg.service(SwaggerUi::new("/api-doc/swagger-ui/{_:.*}").urls(vec![
         (
             Url::new("Public", "/api-doc/public_endpoints.json"),

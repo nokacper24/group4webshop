@@ -6,15 +6,24 @@ use sqlx::{
     query, query_as, Executor, {Pool, Postgres},
 };
 use std::fmt::Display;
-use std::{string, sync::Arc};
 use utoipa::ToSchema;
 use uuid::Uuid;
+
+/// User struct with their password hash
+/// Use this only if you **need** the password hash.
+#[derive(Debug)]
+pub struct UserWithPass {
+    pub user_id: i32,
+    pub email: String,
+    pub pass_hash: String,
+    pub company_id: i32,
+    pub role: Role,
+}
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct User {
     pub user_id: i32,
     pub email: String,
-    pub pass_hash: String,
     pub company_id: i32,
     pub role: Role,
 }
@@ -25,7 +34,7 @@ pub struct LicenseUser {
     license_id: i32,
 }
 
-#[derive(sqlx::Type, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(sqlx::Type, Serialize, Deserialize, Debug, PartialEq, ToSchema)]
 #[sqlx(type_name = "role_enum", rename_all = "snake_case")]
 pub enum Role {
     Admin,
@@ -52,25 +61,29 @@ pub struct RoleStruct {
 pub async fn get_all_users(pool: &Pool<Postgres>) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user"#
+        r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user"#
     )
     .fetch_all(pool)
     .await?;
     Ok(users)
 }
 
-pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: i32) -> Result<User, sqlx::Error> {
-    let user = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#, user_id)
-        .fetch_one(pool)
-        .await?;
+pub async fn get_user_by_id(pool: &Pool<Postgres>, user_id: &i32) -> Result<User, sqlx::Error> {
+    let user = query_as!(
+        User,
+        r#"SELECT user_id, email, company_id, role as "role: _" FROM app_user WHERE user_id = $1"#,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(user)
 }
 
-pub async fn get_user_by_username(
+pub async fn get_by_username_with_pass(
     pool: &Pool<Postgres>,
     username: &str,
-) -> Result<User, sqlx::Error> {
-    let user = query_as!(User, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE email = $1"#, username)
+) -> Result<UserWithPass, sqlx::Error> {
+    let user = query_as!(UserWithPass, r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" FROM app_user WHERE email = $1"#, username)
         .fetch_one(pool)
         .await?;
     Ok(user)
@@ -83,7 +96,7 @@ pub async fn get_users_by_company(
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _" 
+        r#"SELECT user_id, email, company_id, role as "role: _" 
         FROM app_user 
         WHERE company_id = $1"#,
         company_id
@@ -100,7 +113,7 @@ pub async fn get_users_by_license(
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT app_user.user_id, email, pass_hash, company_id, role as "role: _"
+        r#"SELECT app_user.user_id, email, company_id, role as "role: _"
         FROM app_user
         INNER JOIN user_license USING (user_id)
         WHERE license_id = $1"#,
@@ -181,24 +194,29 @@ pub fn hash(pass: &str) -> Result<String, argon2::password_hash::Error> {
     }
 }
 
-fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
+pub fn verify(pass: &str, hash: &str) -> Result<bool, argon2::password_hash::Error> {
     //pass to bytes
     let pass = pass.as_bytes();
 
-    // Parse the hash string
-    let parsed_hash = PasswordHash::new(hash)?;
+    // Hash to verify against
+    let hash = PasswordHash::new(hash);
+    let hash = match hash {
+        Ok(hash) => hash,
+        Err(e) => return Err(e),
+    };
 
     // Argon2 with default params (Argon2id v19)
     let argon2 = Argon2::default();
 
-    // Verify password
-    match argon2.verify_password(pass, &parsed_hash) {
+    // Verify password against the hash
+    match argon2.verify_password(pass, &hash) {
         Ok(_) => Ok(true),
         Err(e) => Err(e),
     }
 }
 
 /// A struct to represent a user that is registering themselves and a company.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterUser {
     pub id: i32,
     pub email: String,
@@ -255,6 +273,16 @@ pub async fn get_partial_user(
     .fetch_one(pool)
     .await?;
     Ok(user)
+}
+
+pub async fn delete_partial_user(id: &i32, pool: &Pool<Postgres>) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM register_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -344,7 +372,7 @@ pub async fn create_partial_company_users(
     }
     transaction.commit().await?;
 
-    let created_users = query_as!(
+    query_as!(
         RegisterCompanyUser,
         r#"SELECT id, email, company_id, exp_date
             FROM register_company_user
@@ -352,8 +380,7 @@ pub async fn create_partial_company_users(
         &email_list
     )
     .fetch_all(pool)
-    .await;
-    created_users
+    .await
 }
 
 pub async fn get_partial_company_user(
@@ -368,6 +395,27 @@ pub async fn get_partial_company_user(
     .fetch_one(pool)
     .await?;
     Ok(user)
+}
+
+/// Deletes a user that is registering themselves and linking to a company.
+/// # Arguments
+/// * `id` - The id of the user
+/// * `pool` - The database pool
+/// # Returns
+/// * `()` - An empty tuple
+/// # Errors
+/// * `sqlx::Error` - An error from the database
+pub async fn delete_partial_company_user(
+    id: &i32,
+    pool: &Pool<Postgres>,
+) -> Result<(), sqlx::Error> {
+    let result = query!(r#"DELETE FROM register_company_user WHERE id = $1"#, id)
+        .execute(pool)
+        .await;
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }
 
 /// Fetches a user by their email address and returns a boolean indicating if the user exists.
@@ -439,7 +487,7 @@ pub async fn create_invite(
     }
 }
 
-pub async fn get_invite(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
+pub async fn get_invite_by_id(id: &str, pool: &Pool<Postgres>) -> Result<Invite, sqlx::Error> {
     let invite = query_as!(
         Invite,
         r#"SELECT id, user_id, company_user_id FROM invite_user WHERE id = $1"#,
@@ -460,6 +508,7 @@ pub async fn delete_invite(id: &str, pool: &Pool<Postgres>) -> Result<(), sqlx::
     }
 }
 
+#[derive(Debug)]
 pub enum UserCreationError {
     Database(sqlx::Error),
     Hashing(argon2::Error),
@@ -493,7 +542,7 @@ pub async fn create_user(
         Ok(_) => {
             let user = query_as!(
                 User,
-                r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+                r#"SELECT user_id, email, company_id, role as "role: _"
                 FROM app_user
                 WHERE email = $1"#,
                 email
@@ -509,14 +558,14 @@ pub async fn create_user(
     }
 }
 
-/// Get all users that are IT responsible for a company
+/// Get all users with a specific role
 pub async fn get_users_by_role(
     pool: &Pool<Postgres>,
     role: &Role,
 ) -> Result<Vec<User>, sqlx::Error> {
     let users = query_as!(
         User,
-        r#"SELECT user_id, email, pass_hash, company_id, role as "role: _"
+        r#"SELECT user_id, email, company_id, role as "role: _"
         FROM app_user
         WHERE role = $1"#,
         role as _
@@ -589,7 +638,7 @@ pub async fn update_email(
     email: &str,
     id: &i32,
 ) -> Result<UserWithoutHash, sqlx::Error> {
-    let result_row = query_as!(
+    query_as!(
         UserWithoutHash,
         r#"UPDATE app_user 
         SET email = $1
@@ -599,6 +648,5 @@ pub async fn update_email(
         id,
     )
     .fetch_one(pool)
-    .await;
-    return result_row.into();
+    .await
 }

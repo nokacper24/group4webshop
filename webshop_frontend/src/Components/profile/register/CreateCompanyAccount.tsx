@@ -1,30 +1,59 @@
 import { Routes, Route } from "react-router-dom";
 import { RegisterEmail } from "./RegisterEmail";
 import { EmailVerify } from "./EmailVerify";
-import RegisterCompany from "./RegisterCompany";
+import RegisterCompanyAccount from "./RegisterCompany";
 import RegisterUser from "./RegisterUser";
+import { checkInvite } from "../../../ApiController";
+import { useEffect, useState } from "react";
 
 /**
  * Represents the Create Company Account page.
- * Lets the user register their e-mail, tells them to check their
- * e-mail inbox for verification link, and allows them to input
- * company information and user profile password.
+ *
+ * Lets the user register a company account (account that
+ * can manage the company), or a normal user account.
  *
  * @returns A Create Company Account page.
  */
 export default function CreateCompanyAccount() {
-  return (
-    <section className="center-container">
-      <form className="container form-container">
-        <h1>Register company account</h1>
+  const [inviteId, setInviteId] = useState<string>("");
+  const [inviteType, setInviteType] = useState<string>("");
 
-        <Routes>
-          <Route path="/" element={<RegisterEmail />} />
-          <Route path="verify" element={<EmailVerify />} />
-          <Route path="register-company" element={<RegisterCompany />} />
-          <Route path="register-user" element={<RegisterUser />} />
-        </Routes>
-      </form>
+  const checkInviteType = async (inviteId: string) => {
+    const response = await checkInvite(inviteId);
+    if (response.ok) {
+      const data: any = await response.json();
+
+      setInviteType(data);
+      return data;
+    } else {
+      throw new Error("Could not fetch invite.");
+    }
+  };
+
+  useEffect(() => {
+    const inviteId = window.location.href.split("/").pop();
+    setInviteId(inviteId!);
+    checkInviteType(inviteId!);
+  }, []);
+
+  return (
+    <section className="container form-container">
+      <h1>Create company account</h1>
+
+      <Routes>
+        <Route path="/" element={<RegisterEmail />} />
+        <Route path="verify" element={<EmailVerify />} />
+        <Route
+          path="data/:inviteid"
+          element={
+            inviteType === "company" ? (
+              <RegisterUser />
+            ) : (
+              <RegisterCompanyAccount />
+            )
+          }
+        ></Route>
+      </Routes>
     </section>
   );
 }

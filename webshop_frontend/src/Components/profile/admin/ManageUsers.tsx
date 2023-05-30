@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
-import { User } from "../../../Interfaces";
+import { Company, User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
   updateNewChanges,
   moveItemBetweenTables,
   moveItemsBetweenTables,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchCompanies,
+  fetchCompanyIt,
+  fetchCompanyItHead,
+  fetchDefaultUser,
+} from "../../../ApiController";
 
 /**
  * A Manage Users page.
@@ -33,6 +39,8 @@ export default function ManageUsers() {
 
   const [defaultUsers, setDefaultUsers] = useState<SelectTableRowProps[]>([]);
   const [newDefaultUsers] = useState<Set<string>>(new Set());
+
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   /**
    * Update the lists of new IT heads and default users
@@ -59,9 +67,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const removeItHead = (index: number) => {
+  const removeItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -76,9 +84,9 @@ export default function ManageUsers() {
    *
    * @param indices The indices of the users in the list of IT  heads.
    */
-  const removeSelectedItHeads = (indices: number[]) => {
+  const removeSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       itHeadsTable,
       defaultUsersTable,
       setItHeads,
@@ -101,9 +109,9 @@ export default function ManageUsers() {
    *
    * @param index The index of the user in the list of IT  heads.
    */
-  const addItHead = (index: number) => {
+  const addItHead = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,
@@ -116,11 +124,11 @@ export default function ManageUsers() {
   /**
    * Add all the selected users to the list of IT heads.
    *
-   * @param indices The indices of the users in the list of IT  heads.
+   * @param ids The indices of the users in the list of IT  heads.
    */
-  const addSelectedItHeads = (indices: number[]) => {
+  const addSelectedItHeads = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       defaultUsersTable,
       itHeadsTable,
       setDefaultUsers,
@@ -139,46 +147,11 @@ export default function ManageUsers() {
   );
 
   /**
-   * Send a GET request to get all users with the role 'Company IT Head'
-   *
-   * @returns A list of all company IT head users.
-   */
-  const fetchCompanyItHead = async () => {
-    const response = await fetch(
-      `${baseUrl}/api/priv/users/role/CompanyItHead`
-    );
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Company IT'
-   *
-   * @returns A list of all company IT users.
-   */
-  const fetchCompanyIt = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
-   * Send a GET request to get all users with the role 'Default'
-   *
-   * @returns A list of all default users.
-   */
-  const fetchDefaultUser = async () => {
-    const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
-    const data = await response.json();
-    return data.map((user: User) => user);
-  };
-
-  /**
    * Send a PATCH request to give some users the 'Company IT Head' role.
    */
-  const sendPatchAddItHeadsRequest = () => {
+  const sendPatchAddItHeadsRequest = async () => {
     if (newItHeads.size > 0) {
-      fetch(`${baseUrl}/api/priv/user_roles`, {
+      await fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -194,8 +167,7 @@ export default function ManageUsers() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {
@@ -209,9 +181,9 @@ export default function ManageUsers() {
   /**
    * Send a PATCH request to give some users the 'Default' role.
    */
-  const patchAddDefaultUsersRequest = () => {
+  const patchAddDefaultUsersRequest = async () => {
     if (newDefaultUsers.size > 0) {
-      fetch(`${baseUrl}/api/priv/user_roles`, {
+      await fetch(`${baseUrl}/api/priv/user_roles`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -227,8 +199,7 @@ export default function ManageUsers() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {
@@ -240,6 +211,20 @@ export default function ManageUsers() {
   };
 
   /**
+   * Find the name of a company given its ID.
+   */
+  const findCompanyName = (id: number) => {
+    const company_found = companies.find(
+      (company) => company.company_id === id
+    );
+    let name = company_found?.company_name ?? "Unknown";
+    if (name.length > 25) {
+      name = name.substring(0, 22) + "...";
+    }
+    return name;
+  };
+
+  /**
    * Save the changes made to the user lists.
    */
   const handleSave = () => {
@@ -248,12 +233,20 @@ export default function ManageUsers() {
   };
 
   useEffect(() => {
+    fetchCompanies()
+      .then((companies: Company[]) => {
+        setCompanies(companies);
+      })
+      .catch(() => alert("Failed to load companies"));
+  }, []);
+
+  useEffect(() => {
     fetchCompanyItHead().then((users) => {
       setItHeads(
         users.map((user: User) => {
           return createRowProps(user.user_id, [
             user.email,
-            user.company_id.toString(),
+            findCompanyName(user.company_id).toString(),
           ]);
         })
       );
@@ -263,20 +256,20 @@ export default function ManageUsers() {
       fetchDefaultUser().then((defaultUser) => {
         let users: SelectTableRowProps[] = [];
 
-        companyIt.map((user: User) => {
+        companyIt.forEach((user: User) => {
           users.push(
             createRowProps(user.user_id, [
               user.email,
-              user.company_id.toString(),
+              findCompanyName(user.company_id).toString(),
             ])
           );
         });
 
-        defaultUser.map((user: User) => {
+        defaultUser.forEach((user: User) => {
           users.push(
             createRowProps(user.user_id, [
               user.email,
-              user.company_id.toString(),
+              findCompanyName(user.company_id).toString(),
             ])
           );
         });
@@ -284,7 +277,7 @@ export default function ManageUsers() {
         setDefaultUsers(users);
       });
     });
-  }, []);
+  }, [companies]);
 
   return (
     <>

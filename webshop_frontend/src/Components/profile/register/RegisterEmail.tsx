@@ -1,39 +1,56 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { registerInvite } from "../../../ApiController";
 
 /**
  * Represents the Register E-mail component on the Create Account page.
  *
  * Allows the user to register their e-mail, and receive a
- * verification link to create their account.
+ * verification link to create their account and company.
  *
- * @returns The Create Account register component as a JSX element.
+ * @returns The Register E-mail component.
  */
 export function RegisterEmail() {
+  const navigate = useNavigate();
+
+  const email = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    let result = await registerInvite(email.current!.value);
+    if (result.ok) {
+      navigate("/register/verify");
+    } else {
+      // TODO: Show error message
+    }
+  };
+
   return (
-    <React.Fragment>
+    <>
       <p>
         Type in your business e-mail and we will send you a registration link.
-        This is only intended for license managers.
+        This is only intended for managers to register their company.
       </p>
       <p>
-        Not a license manager? Contact yours to get a direct invitation link.
+        Is your company already registered, or you're not a license manager?
+        Please contact yours to get a direct invitation link.
       </p>
 
-      <label htmlFor="register-email">E-mail</label>
-      <input
-        id="register-email"
-        name="email"
-        type="text"
-        placeholder="user@company.com"
-        required
-      ></input>
+      <form onSubmit={(event) => handleSubmit(event)}>
+        <label htmlFor="register-email">E-mail</label>
+        <input
+          ref={email}
+          id="register-email"
+          name="email"
+          type="text"
+          placeholder="user@company.com"
+          required
+        ></input>
 
-      <Link to="verify">
         <button className="default-button m-t-1" type="submit">
           Send verification
         </button>
-      </Link>
-    </React.Fragment>
+      </form>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from "react-router-dom";
 import SupportForm from "./SupportForm";
 
 /**
@@ -8,7 +8,7 @@ import SupportForm from "./SupportForm";
  */
 export default function Support() {
   return (
-    <React.Fragment>
+    <>
       <section className="container left-aligned">
         <h1>Support</h1>
         <p>
@@ -31,6 +31,12 @@ export default function Support() {
         </p>
       </section>
       <SupportForm />
-    </React.Fragment>
+      <section className="container">
+        <p>
+          If you're looking for non-product related support, you can find our
+          contact information <Link to="/about#contact-us">here</Link>.
+        </p>
+      </section>
+    </>
   );
 }

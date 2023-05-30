@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { License } from "../../../Interfaces";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { FullLicenseInfo } from "../../../Interfaces";
 
 type LicenseRowProps = {
-  license: License;
+  license: FullLicenseInfo;
 };
 
 /**
@@ -14,7 +14,7 @@ type LicenseRowProps = {
  * @returns The Row component as a JSX element.
  */
 export default function LicenseListRow({ license }: LicenseRowProps) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState<boolean>(true);
   const toggleVisibility = () => {
     setCollapsed((c) => !c);
   };
@@ -28,18 +28,11 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
     </Link>
   );
 
-  let buttons;
-  if (license.valid == true) {
-    buttons = <span className="button-container">{manageButton}</span>;
-  } else {
-    buttons = <span className="button-container">{manageButton}</span>;
-  }
-
   return (
-    <React.Fragment>
+    <>
       <tr className="row-header">
-        <td>{license.product_name}</td>
-        <td>{0}</td>
+        <td>{license.display_name}</td>
+        <td>{license.active_users}</td>
         <td>{license.amount}</td>
         <td>{license.valid ? "Valid" : "Invalid"}</td>
         <td>
@@ -48,7 +41,7 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
             onClick={toggleVisibility}
           >
             <svg
-              transform={`${collapsed ? "" : "scale(1 -1)"}`}
+              transform={collapsed ? "" : "scale(1 -1)"}
               width="2em"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 150 320 260"
@@ -61,15 +54,15 @@ export default function LicenseListRow({ license }: LicenseRowProps) {
           </button>
         </td>
       </tr>
-      <tr className={`row-details ${collapsed ? "collapsed" : ""}`}>
+      <tr className={`row-details ${collapsed ? "display-none" : ""}`}>
         <td colSpan={5}>
           <p>
             Active period: {new Date(license.start_date).toLocaleDateString()}{" "}
             to {new Date(license.end_date).toLocaleDateString()}
-            {buttons}
+            <span className="button-container">{manageButton}</span>
           </p>
         </td>
       </tr>
-    </React.Fragment>
+    </>
   );
 }

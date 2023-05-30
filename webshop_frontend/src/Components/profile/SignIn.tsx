@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { verifySignInInfo } from "../../ApiController";
 
@@ -12,15 +12,23 @@ export default function SignIn() {
 
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
+  const [formAlert, setFormAlert] = useState<string>("");
 
-  const handleSignIn = () => {
+  /**
+   * Verify the user's credentials to sign in to their account.
+   */
+  const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     verifySignInInfo(email.current!.value, password.current!.value).then(
       (response: Response) => {
-        if (response.status === 200) {
+        if (response.ok) {
+          setFormAlert("");
           // Refresh
           navigate(0);
         } else {
           password.current!.value = "";
+          setFormAlert("The e-mail or password is wrong.");
         }
       }
     );
@@ -30,12 +38,12 @@ export default function SignIn() {
     <section className="center-container">
       <form
         className="container form-container"
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={(event) => handleSignIn(event)}
       >
         <h1>Sign in</h1>
         <p>
           Not a customer yet?
-          <Link to="create-account"> Register here!</Link>
+          <Link to="/register"> Register here!</Link>
         </p>
 
         <label htmlFor="sign-in-email">E-mail</label>
@@ -58,12 +66,9 @@ export default function SignIn() {
           required
         ></input>
 
-        <button
-          onClick={handleSignIn}
-          className="default-button m-t-1"
-          type="submit"
-          value="Sign in"
-        >
+        <p className="error-message text-danger">{formAlert}</p>
+
+        <button className="default-button m-t-1" type="submit" value="Sign in">
           Sign in
         </button>
       </form>

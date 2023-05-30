@@ -1,29 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MeUser, User } from "../../Interfaces";
-import {
-  fetchUser,
-  resetPassword,
-  patchPartialUser,
-} from "../../ApiController";
+import { MeUser } from "../../Interfaces";
+import { resetPassword, patchPartialUser } from "../../ApiController";
 
 interface Props {
   user: MeUser;
 }
 
 export default function EditProfile(props: Props) {
-  const [user, setUser] = useState<MeUser>();
-  const [email, setEmail] = useState<string>("");
+  const [user, setUser] = useState<MeUser>(props.user);
+  const [email, setEmail] = useState<string>(props.user.email);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (email != user?.email) {
       patchPartialUser(user!.user_id.toString(), email).then(
         (response: Response) => {
-          if (response.status == 200) {
+          if (response.ok) {
             // Refresh
             navigate(0);
           } else {
@@ -36,7 +32,7 @@ export default function EditProfile(props: Props) {
 
   const handlePasswordReset = () => {
     resetPassword(user!.email).then((response) => {
-      if (response.status === 200) {
+      if (response.ok) {
         alert(
           "We have sent you an e-mail with a link to reset password. It may take a few minutes. Check the spam folder if you do not see it."
         );
@@ -46,15 +42,11 @@ export default function EditProfile(props: Props) {
     });
   };
 
-  useEffect(() => {
-    setUser(props.user);
-  }, []);
-
   return (
     <>
       <section className="container left-aligned">
         <h1>Edit Profile</h1>
-        <form onSubmit={(event) => handleSubmit(event)}>
+        <form onSubmit={(event) => handleSave(event)}>
           {/* Prevent implicit submission of the form */}
           <button
             type="submit"
@@ -80,15 +72,6 @@ export default function EditProfile(props: Props) {
             </button>
           </div>
         </form>
-      </section>
-      <section className="container left-aligned">
-        <h1>Change password</h1>
-        <button
-          className="default-button small-button"
-          onClick={() => handlePasswordReset}
-        >
-          Reset password
-        </button>
       </section>
     </>
   );

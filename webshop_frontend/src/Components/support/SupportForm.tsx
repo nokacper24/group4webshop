@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Product } from "../../Interfaces";
+import { useRef } from "react";
+import { useEffect, useState } from "react";
+import { MeUser, Product } from "../../Interfaces";
 import ProductSelect from "./ProductSelect";
-import { fetchProducts } from "../../ApiController";
+import {
+  fetchMe,
+  fetchAvailableProducts,
+  sendSupportTicket,
+} from "../../ApiController";
+import { Link } from "react-router-dom";
 
 /**
  * Represents a Support Form component.
@@ -10,23 +16,78 @@ import { fetchProducts } from "../../ApiController";
  * @returns A Support Form component.
  */
 export default function SupportForm() {
+  const [user, setUser] = useState<MeUser>();
   const [products, setProducts] = useState<Product[]>([]);
 
+  const productSelect = useRef<HTMLSelectElement>(null);
+  const [formAlert, setFormAlert] = useState<string>("");
+
   useEffect(() => {
-    fetchProducts().then((products: Product[]) => setProducts(products));
+    fetchAvailableProducts().then((products: Product[]) =>
+      setProducts(products)
+    );
+    fetchMe()
+      .then((user: MeUser) => {
+        setUser(user);
+      })
+      .catch(() => {});
   }, []);
 
-  return (
-    <form className="container form-container">
-      <h2>Contact support</h2>
-      <p>
-        You are signed in as:<br></br>
-        <span className="user-email">
-          {/* TODO: Add user e-mail */}email@company.com
-        </span>
-      </p>
+  /**
+   * Handle the submit of the support form. Validates the form data
+   * and sends the support ticket to ProFlex.
+   *
+   * @param event The form event.
+   */
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-      <ProductSelect products={products} />
+    if (productSelect.current && productSelect.current.selectedIndex == 0) {
+      setFormAlert("Please select a product");
+    } else {
+      setFormAlert("");
+    }
+
+    let product = productSelect.current?.value;
+
+    if (product !== undefined) {
+      const result = await sendSupportTicket(
+        product,
+        event.currentTarget["support-subject"].value,
+        event.currentTarget["support-message"].value
+      );
+
+      if (result) {
+        setFormAlert("Your message has been sent");
+      } else {
+        setFormAlert("There was an error sending your message");
+      }
+    } else {
+      setFormAlert("Please select a product");
+    }
+  };
+
+  return (
+    <form
+      className="container form-container"
+      onSubmit={(event) => handleSubmit(event)}
+    >
+      <h2>Contact support</h2>
+      {user?.email && (
+        <p>
+          You are signed in as:
+          <br />
+          <span className="user-email">{user.email}</span>
+        </p>
+      )}
+      {!user && (
+        <p>
+          You are not signed in. Please <Link to="/profile">sign in</Link> to
+          use the form.
+        </p>
+      )}
+
+      <ProductSelect ref={productSelect} products={products} />
 
       <label htmlFor="support-subject">Subject</label>
       <input
@@ -48,35 +109,11 @@ export default function SupportForm() {
       <button
         className="default-button submit-button m-t-1"
         type="submit"
-        onClick={(event) => validateForm(event)}
+        disabled={user ? false : true}
       >
         Send
       </button>
-      <p className="form-alert"></p>
+      <p className="form-alert">{formAlert}</p>
     </form>
   );
-}
-
-/**
- * Confirm that all the form's input is valid.
- *
- * If the user has not selected an option for the product,
- * inform the user that their input is needed.
- *
- * @param event Mouse Event on button
- */
-function validateForm(
-  event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-): void {
-  const productSelect: HTMLSelectElement | null =
-    document.querySelector("#product-select");
-  const formAlert: HTMLElement | null = document.querySelector(".form-alert");
-
-  if (productSelect?.selectedIndex == 0) {
-    event.preventDefault();
-
-    if (formAlert != null) {
-      formAlert.innerHTML = "Please select a product";
-    }
-  }
 }

@@ -1,0 +1,1261 @@
+{
+	"info": {
+		"_postman_id": "ad1533f9-ea43-4c0a-aada-d27e485688db",
+		"name": "product tests set",
+		"description": "## About\n\nThis collection is a test set, designed to test all endpoitns related to **products**, product **descriptions** and **testimonials**.\n\n## Important note\n\nRequests marked with **`IMAGE`** require an image file to work, this cannot be saved in the environment. In order to run the this collection, you need to place **`image.png`** in your Postman working directory. You can check where that is in Postman settings.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26886150"
+	},
+	"item": [
+		{
+			"name": "login as admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create product  `IMAGE`",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.collectionVariables.set(\"created_product\", pm.response.json().product_id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const url = pm.environment.get(\"url\");\r",
+							"pm.sendRequest(`${url}/priv/products`, function (err, response) {\r",
+							"    const amount_pre = response.json().length;\r",
+							"    pm.collectionVariables.set(\"products_pre\",amount_pre)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Bearer",
+						"value": "admin_cookie",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "image.png"
+						},
+						{
+							"key": "product_name",
+							"value": "{{$randomWord}} {{$randomWord}}",
+							"type": "text"
+						},
+						{
+							"key": "price_per_unit",
+							"value": "{{$randomInt}}",
+							"type": "text"
+						},
+						{
+							"key": "short_description",
+							"value": "{{$randomPhrase}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/priv/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after creation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    const exp_amount = pm.collectionVariables.get(\"products_pre\") + 1;\r",
+							"    pm.expect(jsonData.length).to.eql(exp_amount);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/priv/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "make product available",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const url = pm.environment.get(\"url\");\r",
+							"pm.sendRequest(`${url}/products`, function (err, response) {\r",
+							"    const amount_pre = response.json().length;\r",
+							"    pm.collectionVariables.set(\"available_products_pre\",amount_pre)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"available\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/available",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"available"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get available products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after availability update\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    const exp_amount = pm.collectionVariables.get(\"available_products_pre\")+1;\r",
+							"    pm.expect(jsonData.length).to.eql(exp_amount);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "description components pre add",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after creation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.eql(0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/products/{{created_product}}/descriptions",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"products",
+						"{{created_product}}",
+						"descriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new img description `IMAGE`",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.collectionVariables.set(\"last_created_img\", pm.response.json().component_id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "image.png"
+						},
+						{
+							"key": "alt_text",
+							"value": "{{$randomWords}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/image",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new text description",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.collectionVariables.set(\"last_created_txt\", pm.response.json().component_id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text_title\": \"{{$randomWord}}\",\n    \"paragraph\": \"{{$randomPhrase}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/text",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"text"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "description components",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after creation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.eql(2);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/products/{{created_product}}/descriptions",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"products",
+						"{{created_product}}",
+						"descriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update text comopnent",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text_title\": \"{{$randomWord}}\",\n    \"paragraph\": \"{{$randomPhrase}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/text/{{last_created_txt}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"text",
+						"{{last_created_txt}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update image component",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": [],
+							"disabled": true
+						},
+						{
+							"key": "alt_text",
+							"value": "{{$randomWords}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/image/{{last_created_img}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"image",
+						"{{last_created_img}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update full width",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Full width updated to true\", function () {\r",
+							"    const url = pm.environment.get(\"url\");\r",
+							"    const created_product = pm.collectionVariables.get(\"created_product\");\r",
+							"    const last_created_text = pm.collectionVariables.get(\"last_created_txt\");\r",
+							"    \r",
+							"    pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_text}`, function (err, response) {\r",
+							"        const full_width = response.json().full_width;\r",
+							"        pm.expect(full_width).to.eql(true);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"full_width\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/{{last_created_txt}}/full-width",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"{{last_created_txt}}",
+						"full-width"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update priority conflict",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"new_priority\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/{{last_created_txt}}/priority",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"{{last_created_txt}}",
+						"priority"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update priority",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Priority got updated\", function () {\r",
+							"    const url = pm.environment.get(\"url\");\r",
+							"    const created_product = pm.collectionVariables.get(\"created_product\");\r",
+							"    const last_created_text = pm.collectionVariables.get(\"last_created_txt\");\r",
+							"    \r",
+							"    pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_text}`, function (err, response) {\r",
+							"        const priority = response.json().priority;\r",
+							"        pm.expect(priority).to.eql(3);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"new_priority\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/{{last_created_txt}}/priority",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"{{last_created_txt}}",
+						"priority"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update multiple priorities",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Priorities got updated\", function () {\r",
+							"    const url = pm.environment.get(\"url\");\r",
+							"    const created_product = pm.collectionVariables.get(\"created_product\");\r",
+							"    const last_created_text = pm.collectionVariables.get(\"last_created_txt\");\r",
+							"    const last_created_img = pm.collectionVariables.get(\"last_created_img\");\r",
+							"\r",
+							"    pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_text}`, function (err, response) {\r",
+							"        const priority = response.json().priority;\r",
+							"        pm.expect(priority).to.eql(5);\r",
+							"    });\r",
+							"        pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_img}`, function (err, response) {\r",
+							"        const priority = response.json().priority;\r",
+							"        pm.expect(priority).to.eql(6);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    [{{last_created_txt}},5],\r\n    [{{last_created_img}},6]\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/all/priorities",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"all",
+						"priorities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "priority swap",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Priorities got swapped\", function () {\r",
+							"    const url = pm.environment.get(\"url\");\r",
+							"    const created_product = pm.collectionVariables.get(\"created_product\");\r",
+							"    const last_created_text = pm.collectionVariables.get(\"last_created_txt\");\r",
+							"    const last_created_img = pm.collectionVariables.get(\"last_created_img\");\r",
+							"\r",
+							"    pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_text}`, function (err, response) {\r",
+							"        const priority = response.json().priority;\r",
+							"        pm.expect(priority).to.eql(6);\r",
+							"    });\r",
+							"        pm.sendRequest(`${url}/products/${created_product}/descriptions/${last_created_img}`, function (err, response) {\r",
+							"        const priority = response.json().priority;\r",
+							"        pm.expect(priority).to.eql(5);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n    {{last_created_txt}},\n    {{last_created_img}}\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/priorityswap",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"priorityswap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete component",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}/descriptions/{{last_created_txt}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}",
+						"descriptions",
+						"{{last_created_txt}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "description components after delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after creation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.eql(1);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/products/{{created_product}}/descriptions",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"products",
+						"{{created_product}}",
+						"descriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create testimonial `IMAGE`",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.collectionVariables.set(\"created_testimonial\", pm.response.json().testimonial_id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Bearer",
+						"value": "admin_cookie",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "image.png"
+						},
+						{
+							"key": "author",
+							"value": "{{$randomFirstName}} {{$randomLastName}}",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "{{$randomPhrase}} {{$randomPhrase}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/priv/testimonials/{{created_product}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"testimonials",
+						"{{created_product}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update testimonial",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Was updated\", function () {\r",
+							"    const new_author = request.data.author;\r",
+							"    const new_text = request.data.text;\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.author).to.eql(new_author);\r",
+							"    pm.expect(jsonData.text).to.eql(new_text);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Bearer",
+						"value": "admin_cookie",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "image.png",
+							"disabled": true
+						},
+						{
+							"key": "author",
+							"value": "{{$randomFirstName}} {{$randomLastName}}",
+							"type": "text"
+						},
+						{
+							"key": "text",
+							"value": "{{$randomPhrase}} {{$randomPhrase}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/priv/testimonials/{{created_product}}/{{created_testimonial}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"testimonials",
+						"{{created_product}}",
+						"{{created_testimonial}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete testimonial",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Bearer",
+						"value": "admin_cookie",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/priv/testimonials/{{created_product}}/{{created_testimonial}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"testimonials",
+						"{{created_product}}",
+						"{{created_testimonial}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get testimonials after delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"No testimonials after delete\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.eql(0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Bearer",
+						"value": "admin_cookie",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/testimonials/{{created_product}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"testimonials",
+						"{{created_product}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Product amount check after delete\", function () {\r",
+							"\r",
+							"    const url = pm.environment.get(\"url\");\r",
+							"    pm.sendRequest(`${url}/priv/products`, function (err, response) {\r",
+							"        const amount_products = response.json().length;\r",
+							"        const exp_amount = pm.collectionVariables.get(\"products_pre\");\r",
+							"        pm.expect(amount_products).to.eql(exp_amount);\r",
+							"        \r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/products/{{created_product}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"products",
+						"{{created_product}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.clear();"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin_proflex@gmail.com\",\n    \"password\": \"mmmsecurepass\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/priv/logout",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"priv",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

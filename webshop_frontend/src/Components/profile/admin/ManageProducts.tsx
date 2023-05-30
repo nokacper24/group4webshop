@@ -3,18 +3,41 @@ import { Product } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
-} from "../managing/SelectTableFunctions";
-import { fetchProducts } from "../../../ApiController";
+} from "../select-table/SelectTableFunctions";
+import { fetchAllProducts } from "../../../ApiController";
+import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 
 export default function ManageProducts() {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<SelectTableRowProps[]>([]);
 
-  const editProduct = (index: number) => {
-    console.log("Editing: ", index); // TODO: Reroute to product page
+  const getProduct = (id: string) => {
+    let product: SelectTableRowProps = {
+      id: "",
+      columns: [
+        {
+          text: "",
+        },
+      ],
+    };
+
+    products.forEach((p) => {
+      if (p.id == id) {
+        product = p;
+      }
+    });
+
+    return product;
+  };
+
+  const editProduct = (id: string) => {
+    navigate(`/profile/product/manage/${getProduct(id).id}`);
   };
 
   const productsTable: SelectTableProps = createSelectTableProps(
@@ -26,7 +49,7 @@ export default function ManageProducts() {
   );
 
   useEffect(() => {
-    fetchProducts().then((products: Product[]) => {
+    fetchAllProducts().then((products: Product[]) => {
       setProducts(
         products.map((product: Product) => {
           return createRowProps(product.product_id, [
@@ -47,6 +70,9 @@ export default function ManageProducts() {
         button={productsTable.button}
         outsideButtons={productsTable.outsideButtons}
       />
+      <Link className="default-button" to={"/profile/product/create"}>
+        Create new product
+      </Link>
     </section>
   );
 }

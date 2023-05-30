@@ -3,86 +3,44 @@ import { NavLink } from "react-router-dom";
 
 /**
  * Represents the header and navbar.
- * Contains ProFlex' logo, a search form, and links to navigate the website.
+ * Contains ProFlex' logo, and links to navigate the website.
  * When the hamburger icon is clicked, toggle between open and closed menu.
  *
  * @returns A Header component.
  */
 export default function Header() {
-  const navToggle = useRef<HTMLButtonElement>(null);
   const navList = useRef<HTMLUListElement>(null);
-  const nav = useRef<HTMLElement>(null);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleOpen = () => {
-    setIsOpen((s) => !s);
-  };
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [closing, setClosing] = useState<boolean>(false);
 
   const openMenu = () => {
-    navList.current?.setAttribute("aria-expanded", "true");
-    navList.current?.setAttribute("data-state", "open");
-    if (nav.current) {
-      nav.current.style.height = "100vh";
-      nav.current.style.width = "100%";
-    }
+    setIsOpen(true);
   };
 
   const closeMenu = () => {
-    navList.current?.setAttribute("aria-expanded", "false");
-    navList.current?.setAttribute("data-state", "closing");
-
-    navList.current?.addEventListener(
-      "animationend",
-      () => {
-        navList.current?.setAttribute("data-state", "closed");
-
-        if (nav.current) {
-          nav.current.style.height = "var(--header-height)";
-          nav.current.style.width =
-            "calc(var(--header-height) + var(--scrollbar-width))";
-        }
-      },
-      { once: true }
-    );
-  };
-
-  const setNavPositionProperty = () => {
-    if (nav.current) {
-      nav.current.style.position = isOpen ? "absolute" : "fixed";
-    }
+    setClosing(true);
   };
 
   const handleNavClick = () => {
-    navToggle.current?.classList.remove("active");
-
     closeMenu();
-    setIsOpen(false);
-
-    if (nav.current) {
-      nav.current.style.position = "absolute";
-    }
   };
 
   const handleClick = () => {
-    // Toggle icon from hamburger to X
-    navToggle.current?.classList.toggle("active");
-
     // Toggle between open and close menu
     isOpen ? closeMenu() : openMenu();
-    toggleOpen();
+  };
 
-    // Set the nav position to be absolute when the menu
-    // is closed, and fixed when the menu is open
-    setNavPositionProperty();
+  const handleAnimationEnd = (animationName: String) => {
+    if (animationName === "closeMenu") {
+      setClosing(false);
+      setIsOpen(false);
+    }
   };
 
   return (
     <header>
       <div className="header-container">
-        <a href="#main" id="skip-navigation">
-          Skip Navigation
-        </a>
-
         {/* ProFlex Logo */}
         <NavLink onClick={handleNavClick} className="logo-link" to="/">
           <svg
@@ -97,11 +55,17 @@ export default function Header() {
           </svg>
         </NavLink>
 
-        <nav ref={nav}>
+        <a href="#main" id="skip-navigation">
+          Skip Navigation
+        </a>
+
+        <nav
+          className={isOpen ? "open-menu" + " position-fixed" : "closed-menu"}
+        >
           {/* Hamburger menu toggle */}
           <div className="toggle-container">
             <button
-              ref={navToggle}
+              className={isOpen ? "active" : ""}
               id="nav-toggle"
               aria-label="Menu"
               aria-controls="primary-navigation"
@@ -115,7 +79,9 @@ export default function Header() {
             ref={navList}
             className="nav-list"
             id="primary-navigation"
-            data-state="closed"
+            data-state={isOpen ? (closing ? "closing" : "open") : "closed"}
+            aria-expanded={isOpen ? true : false}
+            onAnimationEnd={(event) => handleAnimationEnd(event.animationName)}
           >
             <li>
               <NavLink onClick={handleNavClick} className="nav-link" to="/">

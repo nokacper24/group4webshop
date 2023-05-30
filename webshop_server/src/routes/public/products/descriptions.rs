@@ -1,8 +1,7 @@
-use crate::data_access::product;
+use crate::{data_access::product, SharedData};
 use actix_web::{get, web, HttpResponse, Responder};
 
 use log::error;
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -31,7 +30,7 @@ pub struct DescriptionApiDoc;
 
 /// Get all description components for a specific product
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/products",
     get,
     tag = "Product Descriptions",
     responses(
@@ -45,12 +44,13 @@ pub struct DescriptionApiDoc;
     )
 ]
 #[get("/{product_id}/descriptions")]
-pub async fn get_product_descriptions(
-    pool: web::Data<Pool<Postgres>>,
+async fn get_product_descriptions(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let descriptions =
-        product::description::get_product_description_components(&pool, product_id.as_str()).await;
+        product::description::get_product_description_components(pool, product_id.as_str()).await;
 
     let descriptions = match descriptions {
         Ok(descriptions) => descriptions,
@@ -61,7 +61,7 @@ pub async fn get_product_descriptions(
     };
 
     if descriptions.is_empty() {
-        let is_valid = match product::product_exists(&pool, product_id.as_str()).await {
+        let is_valid = match product::product_exists(pool, product_id.as_str()).await {
             Ok(is_valid) => is_valid,
             Err(e) => {
                 error!("Error while checking if product exists: {}", e);
@@ -78,7 +78,7 @@ pub async fn get_product_descriptions(
 
 /// Get a specific description component for a specific product
 #[utoipa::path (
-    context_path = "/api",
+    context_path = "/api/products",
     get,
     tag = "Product Descriptions",
     responses(
@@ -93,13 +93,14 @@ pub async fn get_product_descriptions(
     )
 ]
 #[get("/{product_id}/descriptions/{component_id}")]
-pub async fn get_product_description_component_by_id(
-    pool: web::Data<Pool<Postgres>>,
+async fn get_product_description_component_by_id(
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let (product_id, component_id) = path.into_inner();
     let description = product::description::get_description_component_checked(
-        &pool,
+        pool,
         product_id.as_str(),
         component_id,
     )

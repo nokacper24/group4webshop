@@ -9,6 +9,8 @@ import PurchaseLicense from "./Components/product-page/PurchaseLicense";
 import About from "./Components/about-us/About";
 import Support from "./Components/support/Support";
 import Profile from "./Components/profile/Profile";
+import CreateCompanyAccount from "./Components/profile/register/CreateCompanyAccount";
+import Credits from "./Components/credits/Credits";
 import PageNotFound from "./Components/PageNotFound";
 
 /**
@@ -24,6 +26,7 @@ export default function App() {
       <main id="main">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="home" element={<Home />} />
           <Route path="products" element={<Products />} />
           <Route path="products/:productId" element={<ProductPage />} />
           <Route
@@ -32,7 +35,15 @@ export default function App() {
           />
           <Route path="about" element={<About />} />
           <Route path="support" element={<Support />} />
+          <Route path="credits" element={<Credits />} />
           <Route path="profile/*" element={<Profile />} />
+          <Route path="register/*" element={<CreateCompanyAccount />} />
+
+          <Route path="product/*" element={<ProductPage />} />
+          <Route
+            path="product/purchase-license"
+            element={<PurchaseLicense />}
+          />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </main>

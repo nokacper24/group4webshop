@@ -9,19 +9,26 @@ export interface License {
   product_name: string;
 }
 
-export interface LicenseVital {
+/**
+ * All relevant info about License that might be stored in different table.
+ * Like company name and product name.
+ */
+export interface FullLicenseInfo {
   license_id: number;
-  company_id: number;
-  company_name: string;
-  product_id: string;
-  display_name: string;
   valid: boolean;
+  start_date: Date;
+  end_date: Date;
+  amount: number;
+  company_id: number;
+  product_id: string;
+  company_name: string;
+  display_name: string;
+  active_users: number;
 }
 
 export interface User {
   user_id: string;
   email: string;
-  pass_hash: string;
   company_id: number;
   role: string;
 }
@@ -62,6 +69,14 @@ export interface Image {
   alt_text: string;
 }
 
+/**
+ * Image that is not yet stored in the database.
+ */
+export interface LocalImage {
+  image_file: File;
+  alt_text: string;
+}
+
 export interface Description {
   component_id: number;
   priority: number;
@@ -72,10 +87,30 @@ export interface Description {
   full_width: boolean;
 }
 
+/**
+ * Description that is not yet stored in the database.
+ */
+export interface LocalDescription {
+  component_id: number;
+  text: Text | undefined;
+  image: Image | LocalImage | undefined;
+  is_text_not_image: boolean;
+}
+
 export interface Testimonial {
   testimonial_id: number;
   author: string;
   text: string;
-  author_pic: string;
+  author_pic: string | File;
   product_id: string;
+}
+
+export interface Button {
+  text: string;
+  action: (id: string) => void;
+}
+
+export interface OutsideButton {
+  text: string;
+  action: (ids: string[]) => void;
 }

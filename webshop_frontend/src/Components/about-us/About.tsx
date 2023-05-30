@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Represents the About page.
  *
@@ -7,7 +5,7 @@ import React from "react";
  */
 export default function About() {
   return (
-    <React.Fragment>
+    <>
       <section className="about-us-banner">
         <div className="dark-overlay wrapper-bottom">
           <div className="container left-aligned">
@@ -21,7 +19,6 @@ export default function About() {
           </div>
         </div>
       </section>
-      <hr></hr>
       <section className="container left-aligned">
         <h2>About our solutions</h2>
         <p>
@@ -48,22 +45,24 @@ export default function About() {
           products and services for your business.
         </p>
       </section>
-      <section className="container left-aligned">
+      <section id="contact-us" className="container left-aligned">
         <h2>Contact us</h2>
         <p>
-          <b>Phone number:</b> <a href="tel:+00000000">+000 00 000</a>
+          <b>Phone number:</b> <a href="tel:+4700000000">+47 000 00 000</a>
         </p>
         <p>
           <b>E-mail:</b>{" "}
-          <a href="mailto:contact@proflex.com">contact@proflex.com</a>
+          <a href="mailto:group04webshop@gmail.com">group04webshop@gmail.com</a>
         </p>
         <p>
-          <b>Address:</b> <br></br>
-          Streetname 04<br></br>
-          0404 Cityname<br></br>
-          Countryname
+          <b>Address:</b> <br />
+          Sandbergvegen 98
+          <br />
+          6009 Ålesund
+          <br />
+          Norway
         </p>
       </section>
-    </React.Fragment>
+    </>
   );
 }

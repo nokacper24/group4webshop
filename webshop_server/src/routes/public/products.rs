@@ -1,11 +1,13 @@
 use actix_web::{get, web, HttpResponse, Responder};
 use log::error;
-use sqlx::{Pool, Postgres};
 use utoipa::OpenApi;
 
 pub mod descriptions;
 
-use crate::data_access::product::{self, Product};
+use crate::{
+    data_access::product::{self, Product},
+    SharedData,
+};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(all_available_products);
@@ -39,8 +41,9 @@ pub struct ProductsApiDoc;
 )
 )]
 #[get("/products")]
-pub async fn all_available_products(pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    match product::get_products(&pool, true).await {
+async fn all_available_products(shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    match product::get_products(pool, true).await {
         Ok(products) => HttpResponse::Ok().json(products),
         Err(e) => {
             error!("Error: {}", e);
@@ -65,11 +68,12 @@ pub async fn all_available_products(pool: web::Data<Pool<Postgres>>) -> impl Res
     )
 ]
 #[get("/products/{product_id}")]
-pub async fn product_by_id(
-    pool: web::Data<Pool<Postgres>>,
+async fn product_by_id(
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
 ) -> impl Responder {
-    let product = product::get_product_by_id(&pool, product_id.as_str()).await;
+    let pool = &shared_data.db_pool;
+    let product = product::get_product_by_id(pool, product_id.as_str()).await;
 
     match product {
         Ok(product) => HttpResponse::Ok().json(product),

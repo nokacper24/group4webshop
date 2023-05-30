@@ -1,34 +1,28 @@
 use crate::{
-    IMAGES_DIR,
     data_access::{
         error_handling,
         product::{
             self,
             description::{
-                DescriptionCompError, DescriptionComponent, DescriptionUpdateError, ImageComponent,
-                TextComponent,
+                DescriptionComponent, DescriptionUpdateError, ImageComponent, TextComponent,
             },
         },
         user,
     },
-    routes::private::products_protected::descriptions_protected::description_utils::{
-        ImageExtractorError, ImageParsingError,
+    utils::{
+        auth,
+        img_multipart::{
+            self, ImageExtractorError, ImageParsingError, ALLOWED_FORMATS, IMAGES_DIR,
+        },
     },
-    utils::auth,
+    SharedData,
 };
 use actix_multipart::Multipart;
 use actix_web::{delete, patch, post, put, web, HttpRequest, HttpResponse, Responder};
-use image::{ImageError, ImageFormat};
-use log::{error, warn};
+use image::ImageError;
+use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres};
 use utoipa::{OpenApi, ToSchema};
-
-pub mod description_utils;
-
-const MAX_IMAGE_SIZE: usize = 1024 * 1024 * 5; // 5 MB
-pub const ALLOWED_FORMATS: [ImageFormat; 3] =
-    [ImageFormat::Png, ImageFormat::Jpeg, ImageFormat::WebP];
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(create_text_component);
@@ -60,8 +54,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             DescriptionComponent,
             TextComponent,
             ImageComponent,
-            NewImageComponentForm,
-            UpdateImageComponentForm,
         )
     ),
     tags(
@@ -92,11 +84,12 @@ pub struct DescriptionApiDoc;
 )]
 #[delete("/{product_id}/descriptions/{component_id}")]
 async fn delete_description_component(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -115,7 +108,7 @@ async fn delete_description_component(
 
     let (product_id, component_id) = path.into_inner();
     let query_result =
-        product::description::delete_component(&pool, product_id.as_str(), component_id).await;
+        product::description::delete_component(pool, product_id.as_str(), component_id).await;
     let img_path: Option<String> = match query_result {
         Ok(opt_path) => opt_path,
         Err(e) => match e {
@@ -129,13 +122,21 @@ async fn delete_description_component(
         },
     };
     if let Some(path) = img_path {
-        if let Err(e) = description_utils::remove_image(&path) {
-            error!("Error while deleting image: {}.", e);
-            warn!("Image file may be left in the file system.");
-            return HttpResponse::InternalServerError().json("Internal Server Error");
+        if let Err(e) = img_multipart::remove_image(&path) {
+            match e.kind() {
+                std::io::ErrorKind::NotFound => {} // Image already deleted
+                _ => {
+                    error!("Couldnt remove image from file system: {}", e);
+                }
+            }
         }
     }
     HttpResponse::NoContent().finish()
+}
+
+#[derive(Deserialize, ToSchema)]
+struct NewPriorityBody {
+    new_priority: i32,
 }
 
 /// Update the priority of a description component.
@@ -160,18 +161,20 @@ async fn delete_description_component(
     request_body(
         content_type = "application/json",
         description = "New priority",
-        content =i32,
-        example = json!(1),
+        content = inline(NewPriorityBody),
+        example = json!({"new_priority": 1}),
     ),
 )]
 #[patch("/{product_id}/descriptions/{component_id}/priority")]
 async fn update_priority(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
-    new_priority: web::Json<i32>,
+    req_body: web::Json<NewPriorityBody>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let new_priority = req_body.into_inner().new_priority;
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -190,10 +193,10 @@ async fn update_priority(
 
     let (product_id, component_id) = path.into_inner();
     let query_result = product::description::update_priority(
-        &pool,
+        pool,
         product_id.as_str(),
         component_id,
-        new_priority.into_inner(),
+        new_priority,
     )
     .await;
 
@@ -212,6 +215,11 @@ async fn update_priority(
             _ => HttpResponse::InternalServerError().json("Internal Server Error"),
         },
     }
+}
+
+#[derive(Deserialize, ToSchema)]
+struct FullWidthBody {
+    full_width: bool,
 }
 
 /// Update the full_width attribute of a description component.
@@ -234,17 +242,19 @@ async fn update_priority(
     request_body(
         content_type = "application/json",
         description = "full_width attribute",
-        content = bool,
+        content = inline(FullWidthBody),
     ),
 )]
 #[patch("/{product_id}/descriptions/{component_id}/full-width")]
 async fn set_full_width(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     path: web::Path<(String, i32)>,
-    full_width: web::Json<bool>,
+    req_body: web::Json<FullWidthBody>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let full_width = req_body.into_inner().full_width;
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -263,10 +273,10 @@ async fn set_full_width(
 
     let (product_id, component_id) = path.into_inner();
     let query_result = product::description::update_full_width(
-        &pool,
+        pool,
         product_id.as_str(),
         component_id,
-        full_width.into_inner(),
+        full_width,
     )
     .await;
     match query_result {
@@ -307,12 +317,13 @@ async fn set_full_width(
 )]
 #[patch("/{product_id}/descriptions/all/priorities")]
 async fn update_priorities(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     ids_and_priotities: web::Json<Vec<(i32, i32)>>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -334,7 +345,7 @@ async fn update_priorities(
         .map(|(id, _)| *id)
         .collect::<Vec<i32>>();
     let valid =
-        match product::description::verify_component_ids(&pool, product_id.as_str(), &ids).await {
+        match product::description::verify_component_ids(pool, product_id.as_str(), &ids).await {
             Ok(valid) => valid,
             Err(e) => match e {
                 sqlx::Error::RowNotFound => {
@@ -352,7 +363,7 @@ async fn update_priorities(
     }
 
     let query_result = product::description::update_priorities_bulk(
-        &pool,
+        pool,
         product_id.as_str(),
         &ids_and_priotities,
     )
@@ -402,13 +413,14 @@ async fn update_priorities(
 )]
 #[patch("/{product_id}/descriptions/priorityswap")]
 async fn swap_priorities(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     description_ids: web::Json<(i32, i32)>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let description_ids = description_ids.into_inner();
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -426,7 +438,7 @@ async fn swap_priorities(
     };
 
     let descriptions = product::description::swap_priority(
-        &pool,
+        pool,
         product_id.as_str(),
         (description_ids.0, description_ids.1),
     )
@@ -485,12 +497,13 @@ async fn swap_priorities(
 )]
 #[post("/{product_id}/descriptions/text")]
 async fn create_text_component(
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     product_id: web::Path<String>,
     description: web::Json<TextComponent>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -507,7 +520,7 @@ async fn create_text_component(
         }
     };
 
-    match product::product_exists(&pool, product_id.as_str()).await {
+    match product::product_exists(pool, product_id.as_str()).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -517,21 +530,17 @@ async fn create_text_component(
     }
 
     let created_component = product::description::create_text_component(
-        &pool,
+        pool,
         product_id.as_str(),
         description.into_inner(),
     )
     .await;
     match created_component {
         Ok(created_component) => HttpResponse::Created().json(created_component),
-        Err(e) => match e {
-            DescriptionCompError::InvalidComponent(e) => {
-                HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
-            }
-            DescriptionCompError::SqlxError(e) => {
-                HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
-            }
-        },
+        Err(e) => {
+            error!("Error while creating text component: {}", e);
+            HttpResponse::InternalServerError().json(format!("Internal Server Error: {}", e))
+        }
     }
 }
 
@@ -574,17 +583,18 @@ struct NewImageComponentForm {
     request_body(
         content_type = "multipart/form-data",
         description = "Description image creation form.",
-        content = NewImageComponentForm,
+        content = inline(NewImageComponentForm),
     ),
 )]
 #[post("/{product_id}/descriptions/image")]
 async fn create_image_component(
     payload: Multipart,
     product_id: web::Path<String>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
-    match auth::validate_user(req, &pool).await {
+    let pool = &shared_data.db_pool;
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -601,7 +611,7 @@ async fn create_image_component(
         }
     };
 
-    match product::product_exists(&pool, product_id.as_str()).await {
+    match product::product_exists(pool, product_id.as_str()).await {
         Ok(exists) => {
             if !exists {
                 return HttpResponse::NotFound().json("Product not found");
@@ -613,46 +623,47 @@ async fn create_image_component(
         }
     };
 
-    let (image, mut text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
-            .await
-        {
-            Ok((image, text_fields)) => (image, text_fields),
-            Err(e) => {
-                return match e {
-                    ImageExtractorError::MultipartError(e) => {
-                        error!("{}", e);
-                        HttpResponse::InternalServerError()
-                            .json("Couldnt extract multipart".to_string())
-                    }
-                    ImageExtractorError::MissingContentDisposition(field) => {
-                        HttpResponse::BadRequest()
-                            .json(format!("Missing content dispositio: {}", field))
-                    }
-                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
-                        .json("Missing data, expected 'image' and 'alt_text'"),
-                    ImageExtractorError::UnexpectedField(e) => {
-                        HttpResponse::BadRequest().json(format!(
-                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
-                            e
-                        ))
-                    }
-                    ImageExtractorError::Utf8Error(e) => {
-                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
-                    }
-                    ImageExtractorError::FileTooLarge => {
-                        HttpResponse::PayloadTooLarge().json("File too large")
-                    }
+    let (image, mut text_fields) = match img_multipart::extract_image_and_texts_from_multipart(
+        payload,
+        vec!["alt_text"],
+    )
+    .await
+    {
+        Ok((image, text_fields)) => (image, text_fields),
+        Err(e) => {
+            return match e {
+                ImageExtractorError::MultipartError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError()
+                        .json("Couldnt extract multipart".to_string())
+                }
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest()
+                    .json(format!("Missing content dispositio: {}", field)),
+                ImageExtractorError::MissingData => {
+                    HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
+                }
+                ImageExtractorError::UnexpectedField(e) => {
+                    HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                        e
+                    ))
+                }
+                ImageExtractorError::Utf8Error(e) => {
+                    HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                }
+                ImageExtractorError::FileTooLarge => {
+                    HttpResponse::PayloadTooLarge().json("File too large")
                 }
             }
-        };
+        }
+    };
 
     let extracted_image = match image {
         Some(image) => image,
         None => return HttpResponse::BadRequest().json("Missing image"),
     };
 
-    let image = match description_utils::parse_img(extracted_image.img_buffer) {
+    let image = match img_multipart::parse_img(extracted_image.img_buffer) {
         Ok(img) => img,
         Err(e) => {
             return match e {
@@ -678,7 +689,7 @@ async fn create_image_component(
 
     let image_dir = format!("{}/{}", IMAGES_DIR, product_id.as_str());
 
-    let path = match description_utils::save_image(image, &image_dir, &extracted_image.file_name) {
+    let path = match img_multipart::save_image(image, &image_dir, &extracted_image.file_name) {
         Ok(path) => path,
         Err(e) => match e {
             ImageError::Unsupported(e) => {
@@ -699,23 +710,18 @@ async fn create_image_component(
     };
 
     let created_component = product::description::create_image_component(
-        &pool,
+        pool,
         product_id.as_str(),
         product::description::ImageComponent::new(None, path, alt_text),
     )
     .await;
 
     match created_component {
-        Ok(created_component) => HttpResponse::Ok().json(created_component),
-        Err(e) => match e {
-            DescriptionCompError::InvalidComponent(e) => {
-                HttpResponse::BadRequest().json(format!("Invalid component: {}", e))
-            }
-            DescriptionCompError::SqlxError(e) => {
-                error!("{}", e);
-                HttpResponse::InternalServerError().finish()
-            }
-        },
+        Ok(created_component) => HttpResponse::Created().json(created_component),
+        Err(e) => {
+            error!("Error wgile creating image component: {}", e);
+            HttpResponse::InternalServerError().finish()
+        }
     }
 }
 
@@ -762,13 +768,14 @@ async fn create_image_component(
 async fn update_text_component(
     path_parms: web::Path<(String, i32)>,
     description: web::Json<TextComponent>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -786,7 +793,7 @@ async fn update_text_component(
     };
 
     let updated_component = product::description::update_text_component(
-        &pool,
+        pool,
         product_id,
         description.into_inner(),
         component_id,
@@ -852,20 +859,21 @@ struct UpdateImageComponentForm {
     request_body(
         content_type = "multipart/form-data",
         description = "The new image component. The image_id will be ignored if provided.",
-        content = UpdateImageComponentForm,
+        content = inline(UpdateImageComponentForm),
     ),
 )]
 #[put("/{product_id}/descriptions/image/{component_id}")]
 async fn update_image_component(
     payload: Multipart,
     path_parms: web::Path<(String, i32)>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
     req: HttpRequest,
 ) -> impl Responder {
+    let pool = &shared_data.db_pool;
     let product_id = path_parms.0.as_str();
     let component_id = path_parms.1;
 
-    match auth::validate_user(req, &pool).await {
+    match auth::validate_user(req, pool).await {
         Ok(user) => {
             if user.role != user::Role::Admin {
                 return HttpResponse::Forbidden().finish();
@@ -883,7 +891,7 @@ async fn update_image_component(
     };
 
     let unupdated_desc = match product::description::get_description_component_checked(
-        &pool,
+        pool,
         product_id,
         component_id,
     )
@@ -912,43 +920,44 @@ async fn update_image_component(
         }
     };
 
-    let (image, mut text_fields) =
-        match description_utils::extract_image_and_texts_from_multipart(payload, vec!["alt_text"])
-            .await
-        {
-            Ok((image, text_fields)) => (image, text_fields),
-            Err(e) => {
-                return match e {
-                    ImageExtractorError::MultipartError(e) => {
-                        error!("{}", e);
-                        HttpResponse::InternalServerError()
-                            .json("Couldnt extract multipart".to_string())
-                    }
-                    ImageExtractorError::MissingContentDisposition(field) => {
-                        HttpResponse::BadRequest()
-                            .json(format!("Missing content dispositio: {}", field))
-                    }
-                    ImageExtractorError::MissingData => HttpResponse::BadRequest()
-                        .json("Missing data, expected 'image' and 'alt_text'"),
-                    ImageExtractorError::UnexpectedField(e) => {
-                        HttpResponse::BadRequest().json(format!(
-                            "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
-                            e
-                        ))
-                    }
-                    ImageExtractorError::Utf8Error(e) => {
-                        HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
-                    }
-                    ImageExtractorError::FileTooLarge => {
-                        HttpResponse::PayloadTooLarge().json("File too large")
-                    }
+    let (image, mut text_fields) = match img_multipart::extract_image_and_texts_from_multipart(
+        payload,
+        vec!["alt_text"],
+    )
+    .await
+    {
+        Ok((image, text_fields)) => (image, text_fields),
+        Err(e) => {
+            return match e {
+                ImageExtractorError::MultipartError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError()
+                        .json("Couldnt extract multipart".to_string())
+                }
+                ImageExtractorError::MissingContentDisposition(field) => HttpResponse::BadRequest()
+                    .json(format!("Missing content dispositio: {}", field)),
+                ImageExtractorError::MissingData => {
+                    HttpResponse::BadRequest().json("Missing data, expected 'image' and 'alt_text'")
+                }
+                ImageExtractorError::UnexpectedField(e) => {
+                    HttpResponse::BadRequest().json(format!(
+                        "Unexpected field! Expected 'image' and 'alt_text', got '{}'",
+                        e
+                    ))
+                }
+                ImageExtractorError::Utf8Error(e) => {
+                    HttpResponse::BadRequest().json(format!("Couldnt parse utf8: {}", e))
+                }
+                ImageExtractorError::FileTooLarge => {
+                    HttpResponse::PayloadTooLarge().json("File too large")
                 }
             }
-        };
+        }
+    };
 
     let new_image_path = match image {
         Some(image) => {
-            let new_img = match description_utils::parse_img(image.img_buffer) {
+            let new_img = match img_multipart::parse_img(image.img_buffer) {
                 Ok(img) => img,
                 Err(e) => {
                     return match e {
@@ -975,7 +984,7 @@ async fn update_image_component(
             let image_dir = format!("{}/{}", IMAGES_DIR, product_id);
 
             let new_img_path =
-                match description_utils::save_image(new_img, &image_dir, &image.file_name) {
+                match img_multipart::save_image(new_img, &image_dir, &image.file_name) {
                     Ok(path) => path,
                     Err(e) => match e {
                         ImageError::Unsupported(e) => {
@@ -988,7 +997,7 @@ async fn update_image_component(
                         }
                     },
                 };
-            if let Err(e) = description_utils::remove_image(unupdated_img_comp.image_path()) {
+            if let Err(e) = img_multipart::remove_image(unupdated_img_comp.image_path()) {
                 match e.kind() {
                     std::io::ErrorKind::NotFound => {} // Image already deleted
                     _ => {
@@ -1012,7 +1021,7 @@ async fn update_image_component(
     let new_img_comp = product::description::ImageComponent::new(None, new_image_path, alt_text);
 
     let updated_component =
-        product::description::update_image_component(&pool, product_id, new_img_comp, component_id)
+        product::description::update_image_component(pool, product_id, new_img_comp, component_id)
             .await;
 
     match updated_component {

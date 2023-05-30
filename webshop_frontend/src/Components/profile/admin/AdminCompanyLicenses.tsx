@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "../managing/SelectTable";
+} from "../select-table/SelectTable";
 import CreateLicenseForm from "./CreateLicenseForm";
-import { LicenseVital } from "../../../Interfaces";
+import { FullLicenseInfo } from "../../../Interfaces";
 import {
   createSelectTableProps,
   createRowProps,
   moveItemBetweenTables,
   moveItemsBetweenTables,
   updateNewChanges,
-} from "../managing/SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import { useNavigate } from "react-router-dom";
-import { fetchLicensesVital } from "../../../ApiController";
+import { fetchLicensesFullInfo } from "../../../ApiController";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
 // Check if we are in production mode
@@ -41,11 +41,11 @@ export default function AdminCompanyLicenses() {
   /**
    * Remove a license from list of valid licenses.
    *
-   * @param index The index of the license in the list.
+   * @param id The ID of the license.
    */
-  const invalidateLicense = (index: number) => {
-    let license = moveItemBetweenTables(
-      index,
+  const invalidateLicense = (id: string) => {
+    let license: SelectTableRowProps = moveItemBetweenTables(
+      id,
       validLicensesTable,
       invalidLicensesTable,
       setValidLicenses,
@@ -60,9 +60,9 @@ export default function AdminCompanyLicenses() {
    *
    * @param index The index of the license in the list.
    */
-  const validateLicense = (index: number) => {
-    let license = moveItemBetweenTables(
-      index,
+  const validateLicense = (id: string) => {
+    let license: SelectTableRowProps = moveItemBetweenTables(
+      id,
       invalidLicensesTable,
       validLicensesTable,
       setInvalidLicenses,
@@ -73,13 +73,14 @@ export default function AdminCompanyLicenses() {
   };
 
   /**
-   *  Remove selected licenses from list of valid licenses.
+   * Remove selected licenses from list of valid licenses,
+   * and add to list of invalid licenses.
    *
    * @param indices The indices of the licenses in the list.
    */
-  const invalidateSelectedLicenses = (indices: number[]) => {
+  const invalidateSelectedLicenses = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       validLicensesTable,
       invalidLicensesTable,
       setValidLicenses,
@@ -89,9 +90,15 @@ export default function AdminCompanyLicenses() {
     );
   };
 
-  const validateSelectedLicenses = (indices: number[]) => {
+  /**
+   * Remove selected licenses from list of invalid licenses,
+   * and add to list of valid licenses.
+   *
+   * @param indices The indices of the licenses in the list.
+   */
+  const validateSelectedLicenses = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       invalidLicensesTable,
       validLicensesTable,
       setInvalidLicenses,
@@ -120,9 +127,9 @@ export default function AdminCompanyLicenses() {
   /**
    * Send a PATCH request to set licenses validation to false.
    */
-  const patchInvalidated = () => {
+  const patchInvalidated = async () => {
     if (newInvalidatedLicenses.size > 0) {
-      fetch(`${baseUrl}/api/priv/licenses`, {
+      await fetch(`${baseUrl}/api/priv/licenses`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -138,13 +145,7 @@ export default function AdminCompanyLicenses() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
-            // Refresh
-            navigate(0);
-          } else {
-            alert("Something went wrong when saving licenses");
-          }
+          handlePatchLicenseResponse(response);
         })
         .catch(() => alert("Failed to save license validation status"));
     }
@@ -153,9 +154,9 @@ export default function AdminCompanyLicenses() {
   /**
    * Send a PATCH request to set licenses validation to true.
    */
-  const patchValidated = () => {
+  const patchValidated = async () => {
     if (newValidatedLicenses.size > 0) {
-      fetch(`${baseUrl}/api/priv/licenses`, {
+      await fetch(`${baseUrl}/api/priv/licenses`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -171,15 +172,23 @@ export default function AdminCompanyLicenses() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
-            // Refresh
-            navigate(0);
-          } else {
-            alert("Something went wrong when saving licenses");
-          }
+          handlePatchLicenseResponse(response);
         })
         .catch(() => alert("Failed to save license validation status"));
+    }
+  };
+
+  /**
+   * Handle the response from a PATCH request sent for patching (saving) licenses.
+   *
+   * @param response The response from the fetch request.
+   */
+  const handlePatchLicenseResponse = (response: Response) => {
+    if (response.ok) {
+      // Refresh
+      navigate(0);
+    } else {
+      alert("Something went wrong when saving licenses");
     }
   };
 
@@ -189,12 +198,12 @@ export default function AdminCompanyLicenses() {
   };
 
   useEffect(() => {
-    fetchLicensesVital()
-      .then((licenses: LicenseVital[]) => {
+    fetchLicensesFullInfo()
+      .then((licenses: FullLicenseInfo[]) => {
         let validLicenses: SelectTableRowProps[] = [];
         let invalidLicenses: SelectTableRowProps[] = [];
 
-        licenses.map((license: LicenseVital) => {
+        licenses.map((license: FullLicenseInfo) => {
           let newLicense = createRowProps(license.license_id.toString(), [
             license.license_id.toString(),
             license.company_name,

@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Description, Product, Testimonial } from "../../Interfaces";
 import DescriptionsContainer from "./DescriptionsContainer";
 import Gallery from "./gallery/Gallery";
 import PurchaseLicenseButton from "./PurchaseLicenseButton";
+import Spinner from "../utils/utils";
 import {
   fetchDescriptionComponents,
   fetchProduct,
+  FetchError,
   fetchTestimonials,
 } from "../../ApiController";
+import { ErrorMessage } from "../ErrorMessage";
 
 /**
  * The product page component.
@@ -18,64 +21,104 @@ import {
 export default function ProductPage() {
   const { productId } = useParams();
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
   const [product, setProduct] = useState<Product>();
   const [descriptions, setDescriptions] = useState<Description[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    fetchProduct(productId!).then((product: Product) => {
-      if (product.product_id) {
+    fetchProduct(productId!)
+      .then((product: Product) => {
         setProduct(product);
-        fetchTestimonials(product.product_id).then(
-          (testimonials: Testimonial[]) => setTestimonials(testimonials)
-        );
-        fetchDescriptionComponents(product.product_id).then(
-          (descriptions: Description[]) => setDescriptions(descriptions)
-        );
-      }
-    });
+        setLoading(false);
+        
+        fetchTestimonials(product.product_id)
+          .then((testimonials: Testimonial[]) => setTestimonials(testimonials))
+          .catch((error: FetchError) =>
+            setError(
+              new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+            )
+          );
+        fetchDescriptionComponents(product.product_id)
+          .then((descriptions: Description[]) => setDescriptions(descriptions))
+          .catch((error: FetchError) =>
+            setError(
+              new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+            )
+          );
+      })
+      .catch((error: FetchError) => {
+        if (error.status === 404) {
+          setError(
+            new Error(`We could not find the product you are looking for.`)
+          );
+        } else {
+          setError(
+            new Error(`We are sorry: ${error.statusText}, ${error.message}`)
+          );
+        }
+        setLoading(false);
+      });
   }, []);
 
   return (
     <>
+      {loading && <Spinner />}
+      {error && (
+        <>
+          <ErrorMessage message={error.message} />
+          <Link className="hero-button" to="/products">
+            Back to products
+          </Link>
+        </>
+      )}
       {product && (
         <>
-          <section className="banner">
-            <div className="banner-inner">
-              <div className="banner-highlight">
-                <h1 className="banner-title">{product.display_name}</h1>
-                <PurchaseLicenseButton />
-              </div>
+          <section
+            className="banner"
+            style={{ backgroundImage: `url(${product.main_image})` }}
+          >
+            <div className="banner-highlight">
+              <h1 className="banner-title">{product.display_name}</h1>
+              <p className="banner-description">{product.short_description}</p>
+              <PurchaseLicenseButton active={product.available} />
+              {product.available === false && <UnavailableTag />}
             </div>
           </section>
-          <hr></hr>
-          <section className="product-description-container container">
-            {DescriptionsContainer(descriptions)}
-          </section>
+          {descriptions.length != 0 && (
+            <section className="container">
+              {DescriptionsContainer(descriptions)}
+            </section>
+          )}
           {testimonials.length > 0 && (
             <section className="gallery-wrapper">
               <div className="container">
                 <h2 className="testimonial-title">Testimonials</h2>
-                <Gallery
-                  testimonials={testimonials}
-                  galleryName={"Testimonials"}
-                />
+                <Gallery slides={testimonials} galleryName="Testimonials" />
               </div>
             </section>
           )}
-          <section className="container">
-            <h2>Purchase</h2>
-            <p>Purchase licenses for this product for your enterprise today!</p>
-            <PurchaseLicenseButton />
+          <section className="highlight-section">
+            <div className="container">
+              <h2>Purchase</h2>
+              <p>
+                Purchase licenses for this product for your enterprise today!
+              </p>
+              <PurchaseLicenseButton active={product.available} />
+            </div>
           </section>
         </>
       )}
-      {!product && (
-        <section className="container">
-          <h1>Product not found</h1>
-          <p>Sorry, could not find the product you were looking for!</p>
-        </section>
-      )}
     </>
+  );
+}
+
+function UnavailableTag() {
+  return (
+    <div className="unavailable-tag">
+      <p>Product is currently unavailable</p>
+    </div>
   );
 }

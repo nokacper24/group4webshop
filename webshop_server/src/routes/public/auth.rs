@@ -1,15 +1,15 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{Pool, Postgres};
 
 use crate::{
     data_access::{
         self,
         auth::create_cookie,
-        user::{create_invite, get_user_by_username},
+        user::{create_invite, get_by_username_with_pass},
     },
-    utils::auth::COOKIE_KEY_SECRET,
+    utils::{self, auth::COOKIE_KEY_SECRET},
+    SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -26,18 +26,28 @@ struct Login {
 }
 
 #[post("/login")]
-async fn login(user: web::Json<Login>, pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn login(user: web::Json<Login>, shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
     // check if user exists
-    let db_user = get_user_by_username(&pool, &user.email).await;
+    let db_user = get_by_username_with_pass(pool, &user.email).await;
     match db_user {
         Ok(v) => {
-            //check if password is correct TODO: use hash verify function
-            if v.pass_hash != user.password {
-                return HttpResponse::Unauthorized()
-                    .json(json!({"success": false, "message": "Incorrect username or password"}));
+            let hash = data_access::user::verify(&user.password, &v.pass_hash);
+            match hash {
+                Ok(hash) => {
+                    if !hash {
+                        return HttpResponse::Unauthorized().json(
+                            json!({"success": false, "message": "Incorrect username or password"}),
+                        );
+                    }
+                }
+                Err(e) => {
+                    log::error!("Error hashing password: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
             }
 
-            let cookie_string = create_cookie(&pool, &v.user_id).await;
+            let cookie_string = create_cookie(pool, &v.user_id).await;
             match cookie_string {
                 Ok(v) => {
                     // set cookie
@@ -74,24 +84,43 @@ struct Email {
 }
 
 #[post("/create-user")]
-async fn create_user(email: web::Json<Email>, pool: web::Data<Pool<Postgres>>) -> impl Responder {
+async fn create_user(
+    email: web::Json<Email>,
+    shared_data: web::Data<SharedData>,
+) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    let mailer = &shared_data.mailer;
     // check if user exists
-    let db_user = get_user_by_username(&pool, &email.email).await;
+    let db_user = get_by_username_with_pass(pool, &email.email).await;
     match db_user {
         Ok(_v) => HttpResponse::BadRequest().json("User already exists"),
         Err(_e) => {
             // create partial user
-            let partial_user = data_access::user::create_partial_user(&email.email, &pool).await;
+            let partial_user = data_access::user::create_partial_user(&email.email, pool).await;
             match partial_user {
                 Ok(v) => {
                     // create invite
-                    let invite = create_invite(Some(v.id), None, &pool).await;
+                    let invite = create_invite(Some(v.id), None, pool).await;
                     match invite {
                         Ok(_v) => {
                             //print invite temporarely TODO: send email
-                            println!("Invite: {}", v.id);
+                            let email = utils::email::Email {
+                                recipient_email: email.email.clone(),
+                                mail_type: utils::email::EmailType::RegisterUser,
+                                invite_code: Some(_v.id),
+                            };
+                            let outcome = utils::email::send_email(email, mailer).await;
 
-                            HttpResponse::Ok().json("Invite created, check your email")
+                            match outcome {
+                                Ok(_v) => {
+                                    HttpResponse::Ok().json("Invite created, check your email")
+                                }
+                                Err(e) => {
+                                    log::error!("Error sending email: {}", e);
+                                    HttpResponse::InternalServerError()
+                                        .json("Internal Server Error")
+                                }
+                            }
                         }
                         Err(_e) => {
                             HttpResponse::InternalServerError().json("Internal Server Error")
@@ -115,11 +144,44 @@ struct AddUserData {
 #[get("/verify/{invite_id}")]
 async fn valid_verify(
     invite_id: web::Path<String>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
 ) -> impl Responder {
-    let invite = data_access::user::get_invite(&invite_id, &pool).await;
+    let pool = &shared_data.db_pool;
+    let invite = data_access::user::get_invite_by_id(&invite_id, pool).await;
     match invite {
-        Ok(v) => HttpResponse::Ok().json(v),
+        Ok(v) => match v.company_user_id {
+            Some(v) => {
+                let partial_comp_user = data_access::user::get_partial_company_user(&v, pool).await;
+                match partial_comp_user {
+                    Ok(u) => {
+                        //return both partial company user and info about company
+                        let company =
+                            data_access::company::get_company_by_id(pool, &u.company_id).await;
+                        match company {
+                            Ok(c) => {
+                                let data = json!({
+                                    "partial_company_user": u,
+                                    "company": c
+                                });
+                                HttpResponse::Found().json(data)
+                            }
+                            Err(_e) => HttpResponse::NotFound().json("No company found"),
+                        }
+                    }
+                    Err(_e) => HttpResponse::NotFound().json("No Partial user found"),
+                }
+            }
+            None => match v.user_id {
+                Some(v) => {
+                    let partial_user = data_access::user::get_partial_user(&v, pool).await;
+                    match partial_user {
+                        Ok(u) => HttpResponse::Found().json(u),
+                        Err(_e) => HttpResponse::NotFound().json("No Partial user found"),
+                    }
+                }
+                None => HttpResponse::NotFound().json("No Partial user found"),
+            },
+        },
         Err(_e) => HttpResponse::InternalServerError().json("Internal Server Error"),
     }
 }
@@ -128,9 +190,10 @@ async fn valid_verify(
 async fn verify(
     invite_id: web::Path<String>,
     data: web::Json<AddUserData>,
-    pool: web::Data<Pool<Postgres>>,
+    shared_data: web::Data<SharedData>,
 ) -> impl Responder {
-    let invite = data_access::user::get_invite(&invite_id, &pool).await;
+    let pool = &shared_data.db_pool;
+    let invite = data_access::user::get_invite_by_id(&invite_id, pool).await;
     match invite {
         Ok(v) => {
             // check if invite has company
@@ -145,12 +208,12 @@ async fn verify(
                 };
 
                 let partial_company_user =
-                    data_access::user::get_partial_company_user(&id, &pool).await;
+                    data_access::user::get_partial_company_user(&id, pool).await;
                 match partial_company_user {
                     Ok(v) => {
                         // get company
                         let company =
-                            data_access::company::get_company_by_id(&pool, &v.company_id).await;
+                            data_access::company::get_company_by_id(pool, &v.company_id).await;
 
                         match company {
                             Ok(c) => {
@@ -160,7 +223,7 @@ async fn verify(
                                     &data.password,
                                     c.company_id,
                                     data_access::user::Role::Default,
-                                    &pool,
+                                    pool,
                                 )
                                 .await;
 
@@ -168,7 +231,7 @@ async fn verify(
                                     Ok(_v) => {
                                         // delete invite
                                         let delete =
-                                            data_access::user::delete_invite(&invite_id, &pool)
+                                            data_access::user::delete_invite(&invite_id, pool)
                                                 .await;
                                         match delete {
                                             Ok(_v) => {
@@ -197,17 +260,18 @@ async fn verify(
                     }
                 }
             }
+
             // since no company is set, create a new company
             match (&data.company_name, &data.company_address) {
                 (Some(name), Some(address)) => {
                     // create company
-                    let company = data_access::company::create_company(&pool, name, address).await;
+                    let company = data_access::company::create_company(pool, name, address).await;
                     match company {
                         Ok(c) => {
                             // create user with company from partial user
                             if let Some(id) = v.user_id {
                                 let partial_user =
-                                    data_access::user::get_partial_user(&id, &pool).await;
+                                    data_access::user::get_partial_user(&id, pool).await;
                                 match partial_user {
                                     Ok(v) => {
                                         // create user with company
@@ -216,7 +280,7 @@ async fn verify(
                                             &data.password,
                                             c.company_id,
                                             data_access::user::Role::CompanyItHead,
-                                            &pool,
+                                            pool,
                                         )
                                         .await;
 

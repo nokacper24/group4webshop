@@ -2,7 +2,7 @@ import {
   Company,
   Description,
   License,
-  LicenseVital,
+  FullLicenseInfo,
   MeUser,
   PartialUser,
   Product,
@@ -17,6 +17,32 @@ if (import.meta.env.PROD) {
 }
 
 /**
+ * Error for failed fetches.
+ * Throw it if response is not as expected.
+ * This error contains the status code as well as the status as text.
+ * Status code can be used to determine what went wrong, and act accordingly.
+ * @extends Error
+ */
+export class FetchError extends Error {
+  status: number;
+  statusText: string;
+
+  /**
+   * Create a new fetch error.
+   *
+   * @param message The error message.
+   * @param status The HTTP status code.
+   * @param statusText The HTTP status text.
+   */
+  constructor(message: string, status: number, statusText: string) {
+    super(message);
+    this.name = "FetchError";
+    this.status = status;
+    this.statusText = statusText;
+  }
+}
+
+/**
  * Get a specific user.
  *
  * @param userId The ID of the user.
@@ -24,8 +50,12 @@ if (import.meta.env.PROD) {
  */
 export const fetchUser = async (userId: string) => {
   const response = await fetch(`${baseUrl}/api/priv/users/${userId}`);
-  const data: User = await response.json();
-  return data;
+  if (response.ok) {
+    const data: User = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch user.");
+  }
 };
 
 /**
@@ -38,8 +68,16 @@ export const fetchMe = async () => {
     method: "GET",
     credentials: "include",
   });
-  const data: MeUser = await response.json();
-  return data;
+  if (response.ok) {
+    const data: MeUser = await response.json();
+    return data;
+  } else {
+    throw new FetchError(
+      "Could not fetch current user.",
+      response.status,
+      response.statusText
+    );
+  }
 };
 
 /**
@@ -63,6 +101,51 @@ export const patchPartialUser = async (userId: string, email?: string) => {
     },
     body: JSON.stringify(user),
   });
+};
+
+/**
+ * Send a GET request to get all users with the role 'Company IT Head'
+ *
+ * @returns A list of all company IT head users.
+ */
+export const fetchCompanyItHead = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyItHead`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Company IT'
+ *
+ * @returns A list of all company IT users.
+ */
+export const fetchCompanyIt = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/CompanyIt`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
+};
+
+/**
+ * Send a GET request to get all users with the role 'Default'
+ *
+ * @returns A list of all default users.
+ */
+export const fetchDefaultUser = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/users/role/Default`);
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
 };
 
 /**
@@ -93,8 +176,12 @@ export const fetchCompanyUsers = async (companyId: string) => {
   const response = await fetch(
     `${baseUrl}/api/priv/companies/${companyId}/users`
   );
-  const data: User[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: User[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch users.");
+  }
 };
 
 /**
@@ -104,47 +191,28 @@ export const fetchCompanyUsers = async (companyId: string) => {
  * @returns The license.
  */
 export const fetchLicense = async (licenseId: string) => {
-  const response = await fetch(`${baseUrl}/api/licenses/${licenseId}`);
-  const data: License = await response.json();
-  return data;
+  const response = await fetch(`${baseUrl}/api/priv/licenses/${licenseId}`);
+  if (response.ok) {
+    const data: License = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch license.");
+  }
 };
 
 /**
- * Get all licenses' vital information.
+ * Get all licenses' information.
  *
- * @returns All licenses' vital information.
+ * @returns All licenses' information.
  */
-export const fetchLicensesVital = async () => {
-  const response = await fetch(`${baseUrl}/api/licenses_vital`);
-  const data: LicenseVital[] = await response.json();
-  return data;
-};
-
-/**
- * Create a license.
- *
- * @param license The license to create.
- */
-export const postLicense = async (license: License) => {
-  return await fetch(`${baseUrl}/api/priv/licenses`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(license),
-  });
-};
-
-/**
- * Get all companies.
- *
- * @returns All companies.
- */
-export const fetchCompanies = async () => {
-  const response = await fetch(`${baseUrl}/api/companies`);
-  const data: Company[] = await response.json();
-  return data;
+export const fetchLicensesFullInfo = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/licenses_full`);
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
 };
 
 /**
@@ -155,10 +223,94 @@ export const fetchCompanies = async () => {
  */
 export const fetchCompanyLicenses = async (companyId: number) => {
   const response = await fetch(
-    `${baseUrl}/api/companies/${companyId}/licenses`
+    `${baseUrl}/api/priv/companies/${companyId}/licenses_full`
   );
-  const data: License[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
+};
+
+/**
+ * Get all licenses that a specific user has access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The user's licenses.
+ */
+export const fetchLicensesForUser = async (userId: string) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/user_licenses/user/${userId}`
+  );
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
+};
+
+/**
+ * Get all company licenses for a specific user that they have no access to.
+ *
+ * @param userId The ID of the user.
+ * @returns The company's licenses the user doesn't have.
+ */
+export const fetchLicensesForUserNoAccess = async (userId: string) => {
+  const response = await fetch(
+    `${baseUrl}/api/priv/user_licenses/user/${userId}/no_access`
+  );
+
+  if (response.ok) {
+    const data: FullLicenseInfo[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch licenses.");
+  }
+};
+
+/**
+ * Create a license.
+ *
+ * @param license The license to create.
+ * @returns The created license.
+ * @throws FetchError if the request fails.
+ */
+export const postLicense = async (license: License) => {
+  const response = await fetch(`${baseUrl}/api/priv/licenses`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(license),
+    credentials: "include",
+  });
+  if (response.status === 201) {
+    return await response.json();
+  } else {
+    throw new FetchError(
+      "Could not create license.",
+      response.status,
+      response.statusText
+    );
+  }
+};
+
+/**
+ * Get all companies.
+ *
+ * @returns All companies.
+ */
+export const fetchCompanies = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/companies`);
+  if (response.ok) {
+    const data: Company[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch companies.");
+  }
 };
 
 /**
@@ -169,8 +321,31 @@ export const fetchCompanyLicenses = async (companyId: number) => {
  */
 export const fetchProduct = async (productId: string) => {
   const response = await fetch(`${baseUrl}/api/products/${productId}`);
-  const data: Product = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Product = await response.json();
+    return data;
+  } else {
+    throw new FetchError(
+      "Could not fetch product.",
+      response.status,
+      response.statusText
+    );
+  }
+};
+
+/**
+ * Get all available products.
+ *
+ * @returns All available products.
+ */
+export const fetchAvailableProducts = async () => {
+  const response = await fetch(`${baseUrl}/api/products`);
+  if (response.ok) {
+    const data: Product[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch products.");
+  }
 };
 
 /**
@@ -178,10 +353,14 @@ export const fetchProduct = async (productId: string) => {
  *
  * @returns All products.
  */
-export const fetchProducts = async () => {
-  const response = await fetch(`${baseUrl}/api/products`);
-  const data: Product[] = await response.json();
-  return data;
+export const fetchAllProducts = async () => {
+  const response = await fetch(`${baseUrl}/api/priv/products`);
+  if (response.ok) {
+    const data: Product[] = await response.json();
+    return data;
+  } else {
+    throw new Error("Could not fetch products.");
+  }
 };
 
 /**
@@ -189,13 +368,22 @@ export const fetchProducts = async () => {
  *
  * @param productId The ID of the product.
  * @returns The descriptions for the product.
+ * @throws FetchError if the request fails.
  */
 export const fetchDescriptionComponents = async (productId: string) => {
   const response = await fetch(
     `${baseUrl}/api/products/${productId}/descriptions`
   );
-  const data: Description[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Description[] = await response.json();
+    return data;
+  } else {
+    throw new FetchError(
+      "Could not fetch descriptions.",
+      response.status,
+      response.statusText
+    );
+  }
 };
 
 /**
@@ -203,11 +391,20 @@ export const fetchDescriptionComponents = async (productId: string) => {
  *
  * @param productId The ID of the product.
  * @returns The testimonials for the product.
+ * @throws FetchError if the request fails.
  */
 export const fetchTestimonials = async (productId: string) => {
   const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
-  const data: Testimonial[] = await response.json();
-  return data;
+  if (response.ok) {
+    const data: Testimonial[] = await response.json();
+    return data;
+  } else {
+    throw new FetchError(
+      "Could not fetch testimonials.",
+      response.status,
+      response.statusText
+    );
+  }
 };
 
 /**
@@ -220,7 +417,7 @@ export const checkSignInStatus = async () => {
     method: "GET",
     credentials: "include",
   });
-  return response.status === 200;
+  return response.ok;
 };
 
 /**
@@ -236,6 +433,146 @@ export const verifySignInInfo = async (email: string, password: string) => {
     body: JSON.stringify({
       email: email,
       password: password,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * Sign out the user.
+ * @returns The response from the fetch request.
+ * */
+export const logout = async () => {
+  return await fetch(`${baseUrl}/api/priv/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+};
+
+/**
+ * Register an invite to a new user.
+ * @param email The email of the new user.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerInvite = async (email: string) => {
+  return await fetch(`${baseUrl}/api/priv/generate_invite_new`, {
+    method: "POST",
+    body: JSON.stringify({
+      email: email,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * check what type of invite the user has.
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const checkInvite = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite-type/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+/**
+ * Get invite info from endpoint
+ * @param inviteId The invite id of the user.
+ * @returns The response from the fetch request.
+ * */
+export const getInviteInfo = async (inviteId: string) => {
+  return await fetch(`${baseUrl}/api/priv/invite/info/${inviteId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+};
+
+/**
+ * Register a new company user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompanyUser = async (
+  invite_id: string,
+  password: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_company_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * Register a new company with a new user.
+ * @param invite_id The id to the invite of the new user.
+ * @param password The password of the new user.
+ * @param companyName The name of the company.
+ * @param companyAddress The address of the company.
+ *
+ * @returns The response from the fetch request.
+ * */
+export const registerCompany = async (
+  invite_id: string,
+  password: string,
+  companyName: string,
+  companyAddress: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/register_new_user`, {
+    method: "POST",
+    body: JSON.stringify({
+      invite_id: invite_id,
+      password: password,
+      company_name: companyName,
+      company_address: companyAddress,
+    }),
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      credentials: "include",
+    },
+  });
+};
+
+/**
+ * Send a support ticket.
+ * @param product The product the ticket is about.
+ * @param subject The subject of the ticket.
+ * @param message The message of the ticket.
+ * @returns The response from the fetch request.
+ * */
+export const sendSupportTicket = async (
+  product: string,
+  subject: string,
+  message: string
+) => {
+  return await fetch(`${baseUrl}/api/priv/support`, {
+    method: "POST",
+    body: JSON.stringify({
+      product: product,
+      subject: subject,
+      message: message,
     }),
     credentials: "include",
     headers: {

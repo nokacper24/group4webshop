@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { Company, License, Product } from "../../../Interfaces";
+import { Company, Product } from "../../../Interfaces";
 import { useNavigate } from "react-router-dom";
-import { fetchCompanies, fetchProducts } from "../../../ApiController";
+import { fetchCompanies, fetchAvailableProducts } from "../../../ApiController";
 
 /**
  * A form for creating a license.
@@ -27,7 +27,7 @@ export default function CreateLicenseForm() {
       })
       .catch(() => alert("Failed to load companies"));
 
-    fetchProducts()
+    fetchAvailableProducts()
       .then((products: Product[]) => {
         setProducts(products);
       })
@@ -40,7 +40,7 @@ export default function CreateLicenseForm() {
    * @param license The license to create.
    */
   const postLicense = async (license: any) => {
-    fetch(`${baseUrl}/api/priv/licenses`, {
+    await fetch(`${baseUrl}/api/priv/licenses`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -48,8 +48,7 @@ export default function CreateLicenseForm() {
       },
       body: license,
     }).then((response) => {
-      const status = response.status;
-      if (status == 201) {
+      if (response.ok) {
         alert("License created.");
         // Refresh
         navigate(0);

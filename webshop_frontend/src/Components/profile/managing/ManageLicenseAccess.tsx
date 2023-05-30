@@ -4,14 +4,14 @@ import { License, Product, User } from "../../../Interfaces";
 import SelectTable, {
   SelectTableProps,
   SelectTableRowProps,
-} from "./SelectTable";
+} from "../select-table/SelectTable";
 import {
   createSelectTableProps,
   createRowProps,
   updateNewChanges,
   moveItemBetweenTables,
   moveItemsBetweenTables,
-} from "./SelectTableFunctions";
+} from "../select-table/SelectTableFunctions";
 import {
   fetchCompanyUsers,
   fetchLicense,
@@ -59,12 +59,12 @@ export default function ManageLicenseAccess() {
   /**
    * Add a user to the list of users with license access.
    *
-   * @param index The index of the user in the list of users without
+   * @param id The index of the user in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addUserAccess = (index: number) => {
+  const addUserAccess = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       withoutAccessTable,
       withAccessTable,
       setUsersWithoutAccess,
@@ -77,12 +77,12 @@ export default function ManageLicenseAccess() {
   /**
    * Remove a user from the list of users with license access.
    *
-   * @param index The index of the user in the list of users with
+   * @param id The index of the user in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeUserAccess = (index: number) => {
+  const removeUserAccess = (id: string) => {
     let user = moveItemBetweenTables(
-      index,
+      id,
       withAccessTable,
       withoutAccessTable,
       setUsersWithAccess,
@@ -98,9 +98,9 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users without
    *        access to be added to the list of users with access.
    */
-  const addSelectedUsersAccess = (indices: number[]) => {
+  const addSelectedUsersAccess = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       withoutAccessTable,
       withAccessTable,
       setUsersWithoutAccess,
@@ -116,9 +116,9 @@ export default function ManageLicenseAccess() {
    * @param selectedRowsIndices The indices of the users in the list of users with
    *        access to be added to the list of users without access.
    */
-  const removeSelectedUsersAccess = (indices: number[]) => {
+  const removeSelectedUsersAccess = (ids: string[]) => {
     moveItemsBetweenTables(
-      indices,
+      ids,
       withAccessTable,
       withoutAccessTable,
       setUsersWithAccess,
@@ -163,9 +163,9 @@ export default function ManageLicenseAccess() {
   /**
    * Send a POST request to add users' access to the license.
    */
-  const sendAddUsersRequest = () => {
+  const sendAddUsersRequest = async () => {
     if (newUsersWithAccess.size > 0 && licenseId) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -181,12 +181,11 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 201) {
+          if (response.ok) {
             alert("User access successfully added");
             // Refresh
             navigate(0);
-          } else if (status == 409) {
+          } else if (response.status == 409) {
             alert("Failed to save changes, because users already have access");
           } else {
             alert("Something went wrong when adding users");
@@ -199,9 +198,9 @@ export default function ManageLicenseAccess() {
   /**
    * Send a DELETE request to remove users' access to the license.
    */
-  const sendRemoveUsersRequest = () => {
+  const sendRemoveUsersRequest = async () => {
     if (newUsersWithoutAccess.size > 0) {
-      fetch(`${baseUrl}/api/priv/license_users`, {
+      await fetch(`${baseUrl}/api/priv/license_users`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
@@ -217,8 +216,7 @@ export default function ManageLicenseAccess() {
         }),
       })
         .then((response) => {
-          const status = response.status;
-          if (status == 200) {
+          if (response.ok) {
             alert("User access successfully removed");
             // Refresh
             navigate(0);
@@ -288,17 +286,17 @@ export default function ManageLicenseAccess() {
         <h1>Manage license access</h1>
         <p>
           Product: {license.product_name}
-          <br></br>
+          <br />
           Active users: {usersWithAccess.length - newUsersWithAccess.size}
-          <br></br>
+          <br />
           Total allowed: {license.amount}
-          <br></br>
+          <br />
           Start date: {new Date(license.start_date).toDateString()}
-          <br></br>
+          <br />
           End date: {new Date(license.end_date).toDateString()}
-          <br></br>
+          <br />
           Status: {license.valid ? "Valid" : "Invalid"}
-          <br></br>
+          <br />
         </p>
       </section>
 

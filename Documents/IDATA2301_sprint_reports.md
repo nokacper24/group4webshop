@@ -1,5 +1,6 @@
 # Sprint reports for IDATA2301 Web Tech
-
+## Delegation of work for each sprint 
+On [the issue board](https://github.com/nokacper24/group4webshop/issues) we have all the issues for each sprint, where each issue has a milestone that corresponds to a sprint. If an issue is marked “sprint 2” it means the goal was to finish it within the end of sprint 2. The user the issue is assigned to is the group member that worked on and finished it.  
 ## Sprint 1
 
 Period: 12. January-12. February
@@ -61,5 +62,46 @@ Period: 13. February–12. March
 - We should have set the sprint to last longer, as the website is not a finished MVP. It has the most important details but lacks the finishing touches, such as logging in.
 
 ## Sprint 3
+Period 13. March - 9. April  
+### Goals:
+- Admin management panel 
+- Fix bugs 
+
+### Finished:  
+- Log in API endpoints
+- Alt-text for images
+- Fixed description bug
+- Fixed a few more bugs
+  - Scrolling in table for collapsed rows
+  - Description components for products not showing full width 
+
+### Unfinished:
+- Animation on gallery 
+- Edit product page 
+
+### Retrospective:  
+We fixed a few bugs and connected most of the front end to the back end. There were not many specific goals for the sprint, since it was later in the project, but we managed quite well. Most issues with the sprint came from the fact that the earlier sprint should have been longer.  
 
 ## Sprint 4
+Period: 10. April – 14. May
+
+### Goals
+- Finish remaining features
+- Write and edit video presentation 
+
+### Finished
+- Presentation script and slides created 
+- Some videos edited and some audio files created 
+- Fixed bugs 
+  - Select table properly selects rows 
+  - Fix style in high-contrast mode 
+  - Only customers can contact support 
+  - Fix saving profile changes when no changes have been made 
+- Implemented loading of Products from API into product manager. 
+
+### Unfinished
+- Manage product page 
+- Video presentations not finished 
+
+### Reflection
+The manage product page is still in development as it was found more difficult to implement than first thought. The mental health of the developer also caused the developer to be out of action for two weeks, really slowing development down.  

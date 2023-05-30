@@ -1,11 +1,10 @@
 use actix_web::{cookie::time::Duration, get, post, web, HttpRequest, HttpResponse, Responder};
 use log::error;
 
-use sqlx::{Pool, Postgres};
-
 use crate::{
     data_access::auth::delete_cookie,
     utils::auth::{self, AuthError, COOKIE_KEY_SECRET},
+    SharedData,
 };
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -14,8 +13,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 }
 
 #[post("/logout")]
-async fn logout(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Responder {
-    let cookie = match auth::extract_valid_cookie(req, &pool).await {
+async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    let cookie = match auth::extract_valid_cookie(req, pool).await {
         Ok(token) => token,
         Err(e) => {
             return match e {
@@ -28,7 +28,7 @@ async fn logout(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Respo
         }
     };
 
-    let cookie = delete_cookie(&pool, &cookie).await;
+    let cookie = delete_cookie(pool, &cookie).await;
     match cookie {
         Ok(_) => HttpResponse::Ok()
             .cookie(
@@ -46,8 +46,9 @@ async fn logout(pool: web::Data<Pool<Postgres>>, req: HttpRequest) -> impl Respo
 }
 
 #[get("/logged_in")]
-async fn logged_in(req: HttpRequest, pool: web::Data<Pool<Postgres>>) -> impl Responder {
-    let valid = auth::validate_user(req, &pool).await;
+async fn logged_in(req: HttpRequest, shared_data: web::Data<SharedData>) -> impl Responder {
+    let pool = &shared_data.db_pool;
+    let valid = auth::validate_user(req, pool).await;
     match valid {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(e) => match e {
