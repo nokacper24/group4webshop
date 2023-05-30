@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import TermsOfService from "./TermsOfService";
-import { getInviteInfo, registerCompany } from "../../../ApiController";
+import {
+  FetchError,
+  getInviteInfo,
+  registerCompany,
+} from "../../../ApiController";
+import { InviteInfo } from "../../../Interfaces";
 
 /**
  * Represents the Register Company component on the Create Account page.
@@ -9,26 +14,10 @@ import { getInviteInfo, registerCompany } from "../../../ApiController";
  * @returns A Register Company component.
  */
 export default function RegisterCompanyAccount() {
-  interface InviteInfo {
-    email: string;
-    companyName: string;
-    companyAddress: string;
-    role: string;
-  }
-
   const [inviteInfo, setInviteInfo] = useState<InviteInfo | null>(null);
   // get invite info from endpoint
   // if invite info is valid, fill in email field and disable it
   // if invite info is invalid, show error message and redirect to /register/email
-
-  const getInfo = async (id: string) => {
-    let result = await getInviteInfo(id);
-    if (result.ok) {
-      setInviteInfo(await result.json());
-    } else {
-      console.log("Invalid invite ID");
-    }
-  };
 
   const password = useRef<HTMLInputElement>(null);
   const confirmPassword = useRef<HTMLInputElement>(null);
@@ -72,11 +61,15 @@ export default function RegisterCompanyAccount() {
   };
 
   useEffect(() => {
-    //get the id from the url and call the getInfo function. e.g. /register/company/1234 -> 1234 or /someting/1234 -> 1234
-    //get the last part of the url
     const url = window.location.href;
     const id = url.substring(url.lastIndexOf("/") + 1);
-    getInfo(id);
+    getInviteInfo(id)
+      .then((invite_info) => {
+        setInviteInfo(invite_info);
+      })
+      .catch((error: FetchError) => {
+        console.log(error);
+      });
   }, []);
 
   return (
