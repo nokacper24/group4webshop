@@ -603,7 +603,7 @@ pub async fn update_user_roles(
     Ok(())
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct UserID {
     user_id: i32,
 }

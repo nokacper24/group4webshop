@@ -54,7 +54,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         register_new_company_user,
     ),
     components(
-        schemas(User, Role, UserRole, LicenseUser, LicenseUsers)
+        schemas(User, Role, UserRole, LicenseUser, LicenseUsers, UserIDs, UserID)
     ),
     tags(
         (name = "Users", description = "API endpoints for users")
@@ -788,30 +788,24 @@ async fn update_user_roles(
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 struct UserIDs {
     users: Vec<UserID>,
 }
 
 /// Delete users
-/// The JSON for `user_ids` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 3
-///         }
-///     ]
-/// }
-/// ```
 #[utoipa::path (
     context_path = "/api/priv",
     delete,
     tag = "Users",
     responses(
-        (status = 200, description = "Users have been deleted.", body = Vec<i32>),
+        (status = 200, description = "Users have been deleted.", body = Vec<UserID>),
         (status = 500, description = "Internal Server Error"),
         ),
+    request_body (
+        description = "List of user IDs to delete",
+        content = UserIDs,
+    ),
     )
   ]
 #[delete("/users")]
