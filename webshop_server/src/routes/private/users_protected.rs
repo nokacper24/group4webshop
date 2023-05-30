@@ -14,7 +14,6 @@ use futures::StreamExt;
 
 use log::error;
 use serde::{Deserialize, Serialize};
-use std::str;
 use utoipa::{OpenApi, ToSchema};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -54,7 +53,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         register_new_company_user,
     ),
     components(
-        schemas(User)
+        schemas(User, Role, UserRole, LicenseUser, LicenseUsers, UserIDs, UserID)
     ),
     tags(
         (name = "Users", description = "API endpoints for users")
@@ -64,6 +63,7 @@ pub struct UserApiDoc;
 
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 200, description = "List of all available users", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
@@ -106,6 +106,7 @@ async fn users(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Res
 
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 200, description = "User with specific ID", body = User),
     (status = 400, description = "User ID not recognized"),
@@ -165,6 +166,7 @@ async fn user_by_id(
 /// Get all the users that work for a specific company.
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 200, description = "List of all users in a specific company", body = Vec<User>),
     (status = 400, description = "Company ID not recognized"),
@@ -225,6 +227,7 @@ async fn users_by_company(
 /// Get all the users that have access to a specific license.
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 200, description = "List of all users with access to a speecific license", body = Vec<User>),
     (status = 400, description = "License ID not recognized"),
@@ -398,7 +401,7 @@ async fn generate_invite(
                 match partial {
                     Ok(partial) => {
                         let invite =
-                            user::create_invite(None, Some(partial.company_id), pool).await;
+                            user::create_invite(None, Some(partial.id), pool).await;
                         match invite {
                             Ok(invite) => {
                                 let email = utils::email::Email::new(
@@ -450,7 +453,7 @@ async fn generate_invite(
                         match partial {
                             Ok(partial) => {
                                 let invite =
-                                    user::create_invite(None, Some(partial.company_id), pool)
+                                    user::create_invite(None, Some(partial.id), pool)
                                         .await;
                                 match invite {
                                     Ok(invite) => {
@@ -497,7 +500,7 @@ async fn generate_invite(
                     match partial {
                         Ok(partial) => {
                             let invite =
-                                user::create_invite(None, Some(partial.company_id), pool).await;
+                                user::create_invite(None, Some(partial.id), pool).await;
                             match invite {
                                 Ok(invite) => {
                                     let email = utils::email::Email::new(
@@ -642,29 +645,23 @@ fn csv_string_to_list(text: String) -> Vec<String> {
     string_list
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema)]
 struct LicenseUsers {
     users: Vec<LicenseUser>,
 }
 
-/// Add rows into the user license table.
-/// The JSON for `other_users` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 1,
-///             "license_id": 1
-///         }
-///     ]
-/// }
-/// ```
+/// Add access to licenses for users.
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 201, description = "License user successfully added", body = Vec<User>),
     (status = 409, description = "License user already existed"),
     (status = 500, description = "Internal Server Error"),
+    ),
+    request_body(
+        description = "Pairs of user_id and license_id to grant access to licenses",
+        content = LicenseUsers,
     )
 )]
 #[post("/license_users")]
@@ -689,24 +686,20 @@ async fn add_license_users(
     }
 }
 
-/// Delete from into the user license table.
-/// The JSON for `other_users` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 1,
-///             "license_id": 1
-///         }
-///     ]
-/// }
-/// ```
+/// Remove access to licenses from users.
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
     (status = 200, description = "License users successfully removed", body = Vec<User>),
     (status = 500, description = "Internal Server Error"),
+    ),
+    request_body (
+        description = "Pairs of user_id and license_id to remove access to licenses",
+        content = LicenseUsers,
+        
     )
+
 )]
 #[delete("/license_users")]
 async fn remove_license_users(
@@ -724,8 +717,9 @@ async fn remove_license_users(
 /// Get all users with a specific role.
 #[utoipa::path(
     context_path = "/api/priv",
+    tag = "Users",
     responses(
-        (status = 200, description = "List of all users with a specific role", body = Vec<UserNoPass>),
+        (status = 200, description = "List of all users with a specific role", body = Vec<User>),
         (status = 401, description = "Unauthorized"),
         (status = 403, description = "Forbidden"),
         (status = 500, description = "Internal Server Error"),
@@ -773,6 +767,7 @@ struct UserRoles {
 #[utoipa::path (
     context_path = "/api/priv",
     patch,
+    tag = "Users",
     responses(
         (status = 200, description = "Users' roles have been updated", body = Vec<UserRole>),
         (status = 500, description = "Internal Server Error"),
@@ -792,29 +787,24 @@ async fn update_user_roles(
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 struct UserIDs {
     users: Vec<UserID>,
 }
 
 /// Delete users
-/// The JSON for `user_ids` can be like this:
-/// ```
-/// {
-///     "users": [
-///         {
-///             "user_id": 3
-///         }
-///     ]
-/// }
-/// ```
 #[utoipa::path (
     context_path = "/api/priv",
     delete,
+    tag = "Users",
     responses(
-        (status = 200, description = "Users have been deleted.", body = Vec<i32>),
+        (status = 200, description = "Users have been deleted.", body = Vec<UserID>),
         (status = 500, description = "Internal Server Error"),
         ),
+    request_body (
+        description = "List of user IDs to delete",
+        content = UserIDs,
+    ),
     )
   ]
 #[delete("/users")]
@@ -871,6 +861,24 @@ struct SupportRequest {
     message: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Support",
+    request_body(
+        content_type = "application/json",
+        description = "The parameters of the mail",
+    content = SupportRequest,
+example = json!({
+    "product": "Product name",
+    "subject": "Subject",
+    "message": "Message"
+})),
+    responses(
+        (status = 200, description = "Support request sent"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/support")]
 async fn support(
     shared_data: web::Data<SharedData>,
@@ -912,6 +920,18 @@ async fn support(
     }
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Invite",
+    params(
+        ("invite_id", description = "The ID of the invite", example = "1234567890"),
+    ),
+    responses(
+        (status = 200, description = "Invite type", body = String),
+        (status = 404, description = "Invite not found"),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/invite-type/{invite_id}")]
 async fn invite_type(
     invite_id: web::Path<String>,
@@ -921,10 +941,15 @@ async fn invite_type(
 
     let invite = match data_access::user::get_invite_by_id(&invite_id, pool).await {
         Ok(invite) => invite,
-        Err(e) => {
-            log::error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json("Internal Server Error");
-        }
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                return HttpResponse::NotFound().json("Invite not found");
+            }
+            _ => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
+            }
+        },
     };
 
     let invite_type = match invite.company_user_id {
@@ -958,55 +983,49 @@ async fn get_invite_info(
         }
     };
 
-    let invite_info = match invite.company_user_id {
-        Some(company_user_id) => {
-            let company =
-                match data_access::company::get_company_by_id(pool, &company_user_id).await {
-                    Ok(company) => company,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            let company_user =
-                match data_access::user::get_partial_company_user(&invite.user_id.unwrap(), pool)
-                    .await
-                {
-                    Ok(company_user) => company_user,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            InviteInfo {
-                company_name: company.company_name,
-                company_address: company.company_address,
-                email: company_user.email,
-                role: "company".to_string(),
+    let invite_info = if let Some(user_id) = invite.user_id {
+        let user = match data_access::user::get_partial_user(&user_id, pool).await {
+            Ok(user) => user,
+            Err(e) => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
             }
+        };
+        InviteInfo {
+            company_name: "".to_string(),
+            company_address: "".to_string(),
+            email: user.email,
+            role: "".to_string(),
         }
-        None => {
-            let partial_user =
-                match data_access::user::get_partial_user(&invite.user_id.unwrap(), pool).await {
-                    Ok(partial_user) => partial_user,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            InviteInfo {
-                company_name: "".to_string(),
-                company_address: "".to_string(),
-                email: partial_user.email,
-                role: "user".to_string(),
-            }
+    } else if let Some(company_urs_id) = invite.company_user_id {
+        let company_user =
+            match data_access::user::get_partial_company_user(&company_urs_id, pool).await {
+                Ok(company_user) => company_user,
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            };
+        let company =
+            match data_access::company::get_company_by_id(pool, &company_user.company_id).await {
+                Ok(company) => company,
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            };
+        InviteInfo {
+            company_name: company.company_name,
+            company_address: company.company_address,
+            email: company_user.email,
+            role: "default".to_string(),
         }
+    } else {
+        log::error!("Error: invite has no user_id or company_user_id");
+        return HttpResponse::InternalServerError().json("Internal Server Error");
     };
 
-    HttpResponse::Ok().json(invite_info)
+    return HttpResponse::Ok().json(invite_info);
 }
 
 #[derive(Deserialize, Serialize, ToSchema)]
@@ -1019,6 +1038,7 @@ struct RegisterUser {
 #[utoipa::path(
     context_path = "/api/priv",
     post,
+    tag = "Users",
     responses(
         (status = 200, description = "User successfully registered", body = User),
         (status = 500, description = "Internal Server Error"),
@@ -1115,6 +1135,7 @@ struct RegisterCompanyUser {
 #[utoipa::path(
     context_path = "/api/priv",
     post,
+    tag = "Users",
     responses(
         (status = 200, description = "User successfully registered", body = User),
         (status = 500, description = "Internal Server Error"),

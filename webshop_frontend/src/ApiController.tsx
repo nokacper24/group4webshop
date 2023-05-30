@@ -8,6 +8,7 @@ import {
   Product,
   Testimonial,
   User,
+  InviteInfo,
 } from "./Interfaces";
 
 let baseUrl = import.meta.env.VITE_URL + ":" + import.meta.env.VITE_PORT;
@@ -146,24 +147,6 @@ export const fetchDefaultUser = async () => {
   } else {
     throw new Error("Could not fetch users.");
   }
-};
-
-/**
- * Reset a user's password.
- *
- * @param email The user's e-mail address.
- */
-export const resetPassword = async (email: string) => {
-  return await fetch(`${baseUrl}/api/reset_password`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email,
-    }),
-  });
 };
 
 /**
@@ -488,13 +471,25 @@ export const checkInvite = async (inviteId: string) => {
 /**
  * Get invite info from endpoint
  * @param inviteId The invite id of the user.
- * @returns The response from the fetch request.
+ * @returns Invite info
+ * @throws FetchError if the request fails.
  * */
 export const getInviteInfo = async (inviteId: string) => {
-  return await fetch(`${baseUrl}/api/priv/invite/info/${inviteId}`, {
+  const response = await fetch(`${baseUrl}/api/priv/invite/info/${inviteId}`, {
     method: "GET",
     credentials: "include",
   });
+  if (response.ok) {
+    const data: InviteInfo = await response.json();
+    return data;
+  }
+  else {
+    throw new FetchError(
+      "Could not fetch invite info.",
+      response.status,
+      response.statusText
+    );
+  }
 };
 
 /**

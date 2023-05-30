@@ -28,7 +28,7 @@ pub struct User {
     pub role: Role,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct LicenseUser {
     user_id: i32,
     license_id: i32,
@@ -575,7 +575,7 @@ pub async fn get_users_by_role(
     Ok(users)
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, ToSchema)]
 pub struct UserRole {
     user_id: i32,
     role: Role,
@@ -603,7 +603,7 @@ pub async fn update_user_roles(
     Ok(())
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct UserID {
     user_id: i32,
 }

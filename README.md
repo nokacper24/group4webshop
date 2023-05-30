@@ -8,6 +8,8 @@ The website can be accessed at [group04.web-tek.ninja](https://group04.web-tek.n
 
 **Note:** The server may be down and the domain name used for other projects after summer 2023.
 
+**Note 2:** The mailer service seems to have issues sending emails to NTNU email addresses. If you experience trouble receiving emails from our website, try using a different email address. We recommend using [Gmail](https://www.google.com/gmail/).
+
 ## Some technical details
 ### Front-end (IDATA2301)
 We used [React](https://react.dev/) with [TypeScript](https://www.typescriptlang.org/) for the front-end development. For more information, please refer to the [webshop_frontend README](./webshop_frontend/README.md).

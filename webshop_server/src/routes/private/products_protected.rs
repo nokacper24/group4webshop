@@ -115,6 +115,7 @@ struct NewProductForm {
         (status = 401, description = "Unauthorized - no valid authentification"),
         (status = 403, description = "Forbidden - no permission to create products"),
         (status = 400, description = "Bad request - invalid form data"),
+        (status = 409, description = "Conflict - product with same name already exists"),
         (status = 413, description = "Payload too large - image too large"),
         (status = 415, description = "Unsupoorted media type - unsupported image format"),
         (status = 500, description = "Internal Server Error")

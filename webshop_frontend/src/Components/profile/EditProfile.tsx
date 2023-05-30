@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MeUser } from "../../Interfaces";
-import { resetPassword, patchPartialUser } from "../../ApiController";
+import { patchPartialUser } from "../../ApiController";
 
 interface Props {
   user: MeUser;
 }
 
 export default function EditProfile(props: Props) {
-  const [user, setUser] = useState<MeUser>(props.user);
+  const [user] = useState<MeUser>(props.user);
   const [email, setEmail] = useState<string>(props.user.email);
 
   const navigate = useNavigate();
@@ -28,18 +28,6 @@ export default function EditProfile(props: Props) {
         }
       );
     }
-  };
-
-  const handlePasswordReset = () => {
-    resetPassword(user!.email).then((response) => {
-      if (response.ok) {
-        alert(
-          "We have sent you an e-mail with a link to reset password. It may take a few minutes. Check the spam folder if you do not see it."
-        );
-      } else {
-        alert("Failed to reset password.");
-      }
-    });
   };
 
   return (

@@ -114,3 +114,10 @@ export interface OutsideButton {
   text: string;
   action: (ids: string[]) => void;
 }
+
+export interface InviteInfo {
+  company_name: string
+  company_address: string
+  email: string
+  role: string
+}
