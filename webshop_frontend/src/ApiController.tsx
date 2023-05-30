@@ -296,7 +296,6 @@ export const postLicense = async (license: License) => {
       response.statusText
     );
   }
-  
 };
 
 /**
@@ -369,6 +368,7 @@ export const fetchAllProducts = async () => {
  *
  * @param productId The ID of the product.
  * @returns The descriptions for the product.
+ * @throws FetchError if the request fails.
  */
 export const fetchDescriptionComponents = async (productId: string) => {
   const response = await fetch(
@@ -378,7 +378,11 @@ export const fetchDescriptionComponents = async (productId: string) => {
     const data: Description[] = await response.json();
     return data;
   } else {
-    throw new Error("Could not fetch descriptions.");
+    throw new FetchError(
+      "Could not fetch descriptions.",
+      response.status,
+      response.statusText
+    );
   }
 };
 
@@ -387,6 +391,7 @@ export const fetchDescriptionComponents = async (productId: string) => {
  *
  * @param productId The ID of the product.
  * @returns The testimonials for the product.
+ * @throws FetchError if the request fails.
  */
 export const fetchTestimonials = async (productId: string) => {
   const response = await fetch(`${baseUrl}/api/testimonials/${productId}`);
@@ -394,7 +399,11 @@ export const fetchTestimonials = async (productId: string) => {
     const data: Testimonial[] = await response.json();
     return data;
   } else {
-    throw new Error("Could not fetch testimonials.");
+    throw new FetchError(
+      "Could not fetch testimonials.",
+      response.status,
+      response.statusText
+    );
   }
 };
 
