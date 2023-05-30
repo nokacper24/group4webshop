@@ -19,6 +19,9 @@ export default function CreateCompanyAccount() {
   const [inviteType, setInviteType] = useState<string>("");
 
   const checkInviteType = async (inviteId: string) => {
+    if (inviteId === "" || inviteId === undefined || inviteId === null) {
+      return;
+    }
     const response = await checkInvite(inviteId);
     if (response.ok) {
       const data: any = await response.json();
