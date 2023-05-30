@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Spinner from "../utils/utils";
 import { License, MeUser, Product } from "../../Interfaces";
 import LicensePrices from "./LicensePrices";
@@ -10,6 +10,7 @@ import {
   postLicense,
 } from "../../ApiController";
 import TermsOfService from "../profile/register/TermsOfService";
+import { ErrorMessage } from "../ErrorMessage";
 
 /**
  * Represents a Purchase License page.
@@ -26,6 +27,7 @@ export default function PurchaseLicense() {
   const [loadingProd, setLoadingProd] = useState(true);
 
   const [error, setError] = useState<Error | null>(null);
+  const [purchased, setPurchased] = useState<boolean>(false);
 
   const { productId } = useParams();
   const [product, setProduct] = useState<Product>();
@@ -80,18 +82,16 @@ export default function PurchaseLicense() {
         amount: Math.round(totalPrice / product.price_per_user),
         valid: true,
       };
-
-      postLicense(license).then((response: Response) => {
-        if (response.ok) {
-          alert("License successfully purchased");
-          // Refresh
-          navigate(0);
-        } else {
-          alert(
-            "Sorry, something went wrong when purchasing license. Please try again."
-          );
-        }
-      });
+      setLoadingProd(true);
+      postLicense(license)
+        .then(() => {
+          setPurchased(true);
+          setLoadingProd(false);
+        })
+        .catch((error: FetchError) => {
+          setError(error);
+          setLoadingProd(false);
+        });
     }
   };
 
@@ -134,9 +134,9 @@ export default function PurchaseLicense() {
         <h1>Purchase License</h1>
         <br />
         {(loadingProd || loadingUser) && <Spinner />}
-        {!loadingProd && !loadingUser && (
+        {!loadingProd && !loadingUser && !purchased && (
           <>
-            {error && <p>{error.message}</p>}
+            {error && <ErrorMessage message={error.message} />}
             {!error && product && (
               <>
                 {!user && <MustBeSignedIn />}
@@ -173,6 +173,23 @@ export default function PurchaseLicense() {
                 )}
               </>
             )}
+          </>
+        )}
+        {purchased && !loadingProd && (
+          <>
+            <h2>License successfully purchased!</h2>
+            <p>
+              Thank you for purchasing a license for {product!.display_name}!
+              <br />
+              You can view your licenses on your{" "}
+              <a href="" onClick={() => navigate("/profile")}>
+                profile page
+              </a>
+              .
+            </p>
+            <Link className="hero-button" to="/products">
+              Back to products
+            </Link>
           </>
         )}
       </section>
