@@ -149,24 +149,6 @@ export const fetchDefaultUser = async () => {
 };
 
 /**
- * Reset a user's password.
- *
- * @param email The user's e-mail address.
- */
-export const resetPassword = async (email: string) => {
-  return await fetch(`${baseUrl}/api/reset_password`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email,
-    }),
-  });
-};
-
-/**
  * Get all users for a specific company.
  *
  * @param companyId The ID of the company.
