@@ -14,7 +14,6 @@ use futures::StreamExt;
 
 use log::error;
 use serde::{Deserialize, Serialize};
-use std::str;
 use utoipa::{OpenApi, ToSchema};
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
@@ -398,7 +397,7 @@ async fn generate_invite(
                 match partial {
                     Ok(partial) => {
                         let invite =
-                            user::create_invite(None, Some(partial.company_id), pool).await;
+                            user::create_invite(None, Some(partial.id), pool).await;
                         match invite {
                             Ok(invite) => {
                                 let email = utils::email::Email::new(
@@ -450,7 +449,7 @@ async fn generate_invite(
                         match partial {
                             Ok(partial) => {
                                 let invite =
-                                    user::create_invite(None, Some(partial.company_id), pool)
+                                    user::create_invite(None, Some(partial.id), pool)
                                         .await;
                                 match invite {
                                     Ok(invite) => {
@@ -497,7 +496,7 @@ async fn generate_invite(
                     match partial {
                         Ok(partial) => {
                             let invite =
-                                user::create_invite(None, Some(partial.company_id), pool).await;
+                                user::create_invite(None, Some(partial.id), pool).await;
                             match invite {
                                 Ok(invite) => {
                                     let email = utils::email::Email::new(
@@ -958,55 +957,49 @@ async fn get_invite_info(
         }
     };
 
-    let invite_info = match invite.company_user_id {
-        Some(company_user_id) => {
-            let company =
-                match data_access::company::get_company_by_id(pool, &company_user_id).await {
-                    Ok(company) => company,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            let company_user =
-                match data_access::user::get_partial_company_user(&invite.user_id.unwrap(), pool)
-                    .await
-                {
-                    Ok(company_user) => company_user,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            InviteInfo {
-                company_name: company.company_name,
-                company_address: company.company_address,
-                email: company_user.email,
-                role: "company".to_string(),
+    let invite_info = if let Some(user_id) = invite.user_id {
+        let user = match data_access::user::get_partial_user(&user_id, pool).await {
+            Ok(user) => user,
+            Err(e) => {
+                log::error!("Error: {}", e);
+                return HttpResponse::InternalServerError().json("Internal Server Error");
             }
+        };
+        InviteInfo {
+            company_name: "".to_string(),
+            company_address: "".to_string(),
+            email: user.email,
+            role: "".to_string(),
         }
-        None => {
-            let partial_user =
-                match data_access::user::get_partial_user(&invite.user_id.unwrap(), pool).await {
-                    Ok(partial_user) => partial_user,
-                    Err(e) => {
-                        log::error!("Error: {}", e);
-                        return HttpResponse::InternalServerError().json("Internal Server Error");
-                    }
-                };
-
-            InviteInfo {
-                company_name: "".to_string(),
-                company_address: "".to_string(),
-                email: partial_user.email,
-                role: "user".to_string(),
-            }
+    } else if let Some(company_urs_id) = invite.company_user_id {
+        let company_user =
+            match data_access::user::get_partial_company_user(&company_urs_id, pool).await {
+                Ok(company_user) => company_user,
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            };
+        let company =
+            match data_access::company::get_company_by_id(pool, &company_user.company_id).await {
+                Ok(company) => company,
+                Err(e) => {
+                    log::error!("Error: {}", e);
+                    return HttpResponse::InternalServerError().json("Internal Server Error");
+                }
+            };
+        InviteInfo {
+            company_name: company.company_name,
+            company_address: company.company_address,
+            email: company_user.email,
+            role: "default".to_string(),
         }
+    } else {
+        log::error!("Error: invite has no user_id or company_user_id");
+        return HttpResponse::InternalServerError().json("Internal Server Error");
     };
 
-    HttpResponse::Ok().json(invite_info)
+    return HttpResponse::Ok().json(invite_info);
 }
 
 #[derive(Deserialize, Serialize, ToSchema)]
