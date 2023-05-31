@@ -138,7 +138,6 @@ async fn create_user(
                     let invite = create_invite(Some(v.id), None, pool).await;
                     match invite {
                         Ok(_v) => {
-                            //print invite temporarely TODO: send email
                             let email = utils::email::Email {
                                 recipient_email: email.email.clone(),
                                 mail_type: utils::email::EmailType::RegisterUser,

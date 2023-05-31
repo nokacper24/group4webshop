@@ -1,4 +1,4 @@
-//TODO: Make all endpoints private
+
 use crate::{
     data_access::{
         self, company, error_handling, license,

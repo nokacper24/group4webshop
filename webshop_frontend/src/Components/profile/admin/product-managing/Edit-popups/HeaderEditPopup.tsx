@@ -1,7 +1,5 @@
 import { RefObject, useRef } from "react";
 
-//TODO: Update to follow the best practices. This is currently an old copy of the RowEditPopup component with minor changes.
-
 /**
  * Props for the HeaderEditPopup component.
  * The title can be undefined if a new header is being created.

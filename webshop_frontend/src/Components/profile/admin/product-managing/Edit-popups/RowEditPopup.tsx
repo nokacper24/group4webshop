@@ -49,7 +49,7 @@ export default function RowEditPopup() {
    * @param newProps The new props of the component.
    */
   const updateProps = (newProps: RowEditPopupProps) => {
-    setProps(newProps); //TODO: Remove nested ternary operators
+    setProps(newProps);
     if (titleRef.current) {
       titleRef.current.value = newProps.title ? newProps.title : "";
     }

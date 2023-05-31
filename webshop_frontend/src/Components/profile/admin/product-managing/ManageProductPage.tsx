@@ -290,8 +290,6 @@ export default function ManageProductPage() {
     alert("Product saved!");
   };
 
-  //TODO: Implement response handling
-
   /**
    * Sends the new product descriptions to the API.
    */

@@ -21,7 +21,9 @@ export function RegisterEmail() {
     if (result.ok) {
       navigate("/register/verify");
     } else {
-      // TODO: Show error message
+      alert(
+        "Something went wrong, please try again later. \n" + result.statusText
+      );
     }
   };
 
