@@ -44,13 +44,21 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         user_by_id,
         users_by_company,
         users_by_license,
+        generate_invite_new,
+        generate_invite,
+        generate_invites,
         add_license_users,
         remove_license_users,
         get_users_by_role,
         update_user_roles,
         delete_users,
-        register_new_user,
+        update_user,
+        support,
+        invite_type,
         register_new_company_user,
+        register_new_user,
+        get_invite_info
+
     ),
     components(
         schemas(User, Role, UserRole, LicenseUser, LicenseUsers, UserIDs, UserID)

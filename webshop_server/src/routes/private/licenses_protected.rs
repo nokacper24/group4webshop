@@ -275,6 +275,7 @@ async fn licenses_for_user_no_access(
 #[utoipa::path (
     context_path = "/api/priv",
     post,
+    tag = "Licenses",
     responses (
         (status = 201, description = "License created", body = License),
         (status = 400, description = "Bad Request"),
@@ -282,6 +283,7 @@ async fn licenses_for_user_no_access(
         (status = 403, description = "Forbidden"),
         (status = 500, description = "Internal Server Error"),
       ),
+
     request_body(
         description = "The license to create",
         content = PartialLicense,
@@ -339,6 +341,7 @@ struct LicenseValidations {
 #[utoipa::path (
   context_path = "/api/priv",
   patch,
+    tag = "Licenses",
   responses(
       (status = 200, description = "Licenses' validity have been updated", body = Vec<InvalidLicense>),
       (status = 500, description = "Internal Server Error"),
