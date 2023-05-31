@@ -825,25 +825,53 @@ struct PartialUser {
     email: Option<String>,
 }
 
-///Updates the user information of an ID.
-/// The JSON can be like this:
-/// ```
-/// {
-///     "email": john.doe@email.com
-/// }
-/// ```
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    patch,
+    responses(
+    (status = 200, description = "User updated", body = User),
+    (status = 400, description = "User ID not recognized"),
+    (status = 401, description = "Unauthorized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[patch("/users/{id}")]
 async fn update_user(
     shared_data: web::Data<SharedData>,
     id: web::Path<String>,
     body: web::Json<PartialUser>,
+    req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let mail = &body.email;
+
+    let user = match auth::validate_user(req, pool).await {
+        Ok(user) => user,
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+
     let id: i32 = match id.parse::<i32>() {
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
+
+
+    if user.role != user::Role::Admin && user.user_id != id
+    {
+        return HttpResponse::Forbidden().finish();
+    }
+
+
     let returned_user = match mail {
         Some(email) => match user::update_email(pool, email, &id).await {
             Ok(user) => user,
@@ -922,6 +950,7 @@ async fn support(
 
 #[utoipa::path(
     context_path = "/api/priv",
+    get,
     tag = "Invite",
     params(
         ("invite_id", description = "The ID of the invite", example = "1234567890"),
@@ -968,6 +997,18 @@ struct InviteInfo {
     role: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Invite",
+    get,
+    params(
+        ("invite_id", description = "The ID of the invite", example = "1234567890"),
+    ),
+    responses(
+        (status = 200, description = "Invite info", body = InviteInfo),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/invite/info/{invite_id}")]
 async fn get_invite_info(
     shared_data: web::Data<SharedData>,
