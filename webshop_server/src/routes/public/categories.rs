@@ -1,4 +1,5 @@
 use actix_web::{get, web, HttpResponse, Responder};
+use utoipa::OpenApi;
 
 use crate::{
     data_access::category::{get_categories, get_category_by_id},
@@ -10,7 +11,28 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(category_by_id);
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        categories,
+        category_by_id
+    ),
+    tags(
+        (name = "Category", description = "API endpoints for categories")
+    ),
+)]
+pub struct CategoryOpenApi;
+
 /// Get all categories.
+#[utoipa::path(
+    context_path = "/api",
+    get,
+    tag = "Category",
+    responses(
+        (status = 200, description = "List of all categories", body = Vec<crate::data_access::category::Category>),
+        (status = 500, description = "Internal Server Error"),
+    ),
+)]
 #[get("/categories")]
 async fn categories(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
@@ -30,6 +52,18 @@ async fn categories(shared_data: web::Data<SharedData>) -> impl Responder {
 }
 
 /// Get a specific category by ID.
+#[utoipa::path(
+    context_path = "/api",
+    get,
+    tag = "Category",
+    responses(
+        (status = 200, description = "Category", body = crate::data_access::category::Category),
+        (status = 500, description = "Internal Server Error"),
+    ),
+    params(
+        ("category_id", description = "The id of the category"),
+    ),
+)]
 #[get("/categories/{category_id}")]
 async fn category_by_id(
     shared_data: web::Data<SharedData>,

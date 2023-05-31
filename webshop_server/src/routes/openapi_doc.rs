@@ -11,6 +11,8 @@ fn public_routes_docs() -> Vec<openapi::OpenApi> {
         public::products::ProductsApiDoc::openapi(),
         public::products::descriptions::DescriptionApiDoc::openapi(),
         public::testimonials::TestimonialsOpenApi::openapi(),
+        public::categories::CategoryOpenApi::openapi(),
+        public::auth::AuthOpenApi::openapi(),
     ]
 }
 
