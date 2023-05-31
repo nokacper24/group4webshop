@@ -1,5 +1,6 @@
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use log::error;
+use utoipa::{OpenApi, ToSchema};
 
 use crate::{
     utils::auth::{validate_user, AuthError},
@@ -10,7 +11,21 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(me);
 }
 
-#[derive(serde::Serialize)]
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        me
+    ),
+    components(
+        schemas(MeUser)
+    ),
+    tags(
+        (name = "me", description = "User related routes")
+    ),
+)]
+pub struct UserApiDoc;
+
+#[derive(serde::Serialize, ToSchema)]
 struct MeUser {
     user_id: i32,
     email: String,
@@ -29,6 +44,16 @@ impl From<crate::data_access::user::User> for MeUser {
     }
 }
 
+#[utoipa::path(
+        context_path = "/api/priv",
+    tag = "me",
+    responses(
+    (status = 200, description = "JSON containing the user information"),
+    (status = 401, description = "Unauthorized"),
+    (status = 500, description = "Internal Server Error"
+    )
+    )
+)]
 #[get("/me")]
 async fn me(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
