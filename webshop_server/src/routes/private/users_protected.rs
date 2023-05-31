@@ -1241,14 +1241,6 @@ async fn register_new_company_user(
         }
     };
 
-    let company = match data_access::company::get_company_by_id(pool, &company_user_id).await {
-        Ok(company) => company,
-        Err(e) => {
-            log::error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json("Internal Server Error");
-        }
-    };
-
     // unpack Some invite.user_id
     let user_id = match invite.company_user_id {
         Some(user_id) => user_id,
@@ -1260,6 +1252,14 @@ async fn register_new_company_user(
     // Get partial user from invite
     let partial_user = match data_access::user::get_partial_company_user(&user_id, pool).await {
         Ok(partial_user) => partial_user,
+        Err(e) => {
+            log::error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json("Internal Server Error");
+        }
+    };
+
+    let company = match data_access::company::get_company_by_id(pool, &partial_user.company_id).await {
+        Ok(company) => company,
         Err(e) => {
             log::error!("Error: {}", e);
             return HttpResponse::InternalServerError().json("Internal Server Error");
