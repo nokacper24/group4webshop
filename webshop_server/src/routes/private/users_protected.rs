@@ -1,4 +1,4 @@
-//TODO: Make all endpoints private
+
 use crate::{
     data_access::{
         self, company, error_handling, license,
@@ -44,19 +44,29 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         user_by_id,
         users_by_company,
         users_by_license,
+        generate_invite_new,
+        generate_invite,
+        generate_invites,
         add_license_users,
         remove_license_users,
         get_users_by_role,
         update_user_roles,
         delete_users,
-        register_new_user,
+        update_user,
+        support,
+        invite_type,
         register_new_company_user,
+        register_new_user,
+        get_invite_info
+
     ),
     components(
         schemas(User, Role, UserRole, LicenseUser, LicenseUsers, UserIDs, UserID)
     ),
     tags(
-        (name = "Users", description = "API endpoints for users")
+        (name = "Users", description = "API endpoints for users"),
+        (name = "Invite", description = "API endpoints for invites"),
+        (name = "Support", description = "API endpoints for support"),
     ),
 )]
 pub struct UserApiDoc;
@@ -301,6 +311,15 @@ struct NewUser {
     email: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invite_new")]
 async fn generate_invite_new(
     shared_data: web::Data<SharedData>,
@@ -360,6 +379,15 @@ struct Invite {
     company_id: Option<i32>,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invite")]
 async fn generate_invite(
     shared_data: web::Data<SharedData>,
@@ -542,7 +570,15 @@ async fn generate_invite(
     }
 }
 
-/// Generate invites for a CSV list of users.
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invites")]
 async fn generate_invites(
     shared_data: web::Data<SharedData>,
@@ -825,25 +861,53 @@ struct PartialUser {
     email: Option<String>,
 }
 
-///Updates the user information of an ID.
-/// The JSON can be like this:
-/// ```
-/// {
-///     "email": john.doe@email.com
-/// }
-/// ```
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    patch,
+    responses(
+    (status = 200, description = "User updated", body = User),
+    (status = 400, description = "User ID not recognized"),
+    (status = 401, description = "Unauthorized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[patch("/users/{id}")]
 async fn update_user(
     shared_data: web::Data<SharedData>,
     id: web::Path<String>,
     body: web::Json<PartialUser>,
+    req: HttpRequest,
 ) -> impl Responder {
     let pool = &shared_data.db_pool;
     let mail = &body.email;
+
+    let user = match auth::validate_user(req, pool).await {
+        Ok(user) => user,
+        Err(e) => {
+            return match e {
+                auth::AuthError::Unauthorized => HttpResponse::Unauthorized().finish(),
+                auth::AuthError::SqlxError(e) => {
+                    error!("{}", e);
+                    HttpResponse::InternalServerError().finish()
+                }
+            }
+        }
+    };
+
+
     let id: i32 = match id.parse::<i32>() {
         Ok(id) => id,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
+
+
+    if user.role != user::Role::Admin && user.user_id != id
+    {
+        return HttpResponse::Forbidden().finish();
+    }
+
+
     let returned_user = match mail {
         Some(email) => match user::update_email(pool, email, &id).await {
             Ok(user) => user,
@@ -922,6 +986,7 @@ async fn support(
 
 #[utoipa::path(
     context_path = "/api/priv",
+    get,
     tag = "Invite",
     params(
         ("invite_id", description = "The ID of the invite", example = "1234567890"),
@@ -968,6 +1033,18 @@ struct InviteInfo {
     role: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Invite",
+    get,
+    params(
+        ("invite_id", description = "The ID of the invite", example = "1234567890"),
+    ),
+    responses(
+        (status = 200, description = "Invite info", body = InviteInfo),
+        (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[get("/invite/info/{invite_id}")]
 async fn get_invite_info(
     shared_data: web::Data<SharedData>,

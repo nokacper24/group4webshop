@@ -1,5 +1,6 @@
 use actix_web::{cookie::time::Duration, get, post, web, HttpRequest, HttpResponse, Responder};
 use log::error;
+use utoipa::OpenApi;
 
 use crate::{
     data_access::auth::delete_cookie,
@@ -12,6 +13,28 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(logged_in);
 }
 
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        logout,
+        logged_in
+    ),
+
+    tags(
+        (name = "auth", description = "Authentication related routes")
+    ),
+)]
+pub struct AuthApiDoc;
+
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "auth",
+    responses(
+        (status = 200, description = "User logged out"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[post("/logout")]
 async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Responder {
     let pool = &shared_data.db_pool;
@@ -45,6 +68,15 @@ async fn logout(shared_data: web::Data<SharedData>, req: HttpRequest) -> impl Re
     }
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "auth",
+    responses(
+        (status = 200, description = "User logged in"),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[get("/logged_in")]
 async fn logged_in(req: HttpRequest, shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;

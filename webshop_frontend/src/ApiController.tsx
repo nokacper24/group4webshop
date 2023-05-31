@@ -94,14 +94,25 @@ export const patchPartialUser = async (userId: string, email?: string) => {
     user.email = email;
   }
 
-  return await fetch(`${baseUrl}/api/priv/users/${userId}`, {
+  let result = await fetch(`${baseUrl}/api/priv/users/${userId}`, {
     method: "PATCH",
     headers: {
       Accept: "application:json",
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify(user),
   });
+
+  if (result.ok) {
+    return result;
+  } else {
+    throw new FetchError(
+      "Could not update user.",
+      result.status,
+      result.statusText
+    );
+  }
 };
 
 /**
@@ -482,8 +493,7 @@ export const getInviteInfo = async (inviteId: string) => {
   if (response.ok) {
     const data: InviteInfo = await response.json();
     return data;
-  }
-  else {
+  } else {
     throw new FetchError(
       "Could not fetch invite info.",
       response.status,

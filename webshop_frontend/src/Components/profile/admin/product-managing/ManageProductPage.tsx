@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { redirect, useParams } from "react-router-dom";
 import AccordionTable from "./Accordion/AccordionTable";
 import HeaderEditPopup from "./Edit-popups/HeaderEditPopup";
 import RowEditPopup from "./Edit-popups/RowEditPopup";
@@ -56,16 +56,29 @@ export default function ManageProductPage() {
     assignProductInfo();
   }, [productInfo]);
 
+  const handleBreakingErrors = (response: Error) => {
+    alert(
+      "Something went wrong. \n " +
+        response.message +
+        "\n Please try again later or contact support."
+    );
+    redirect("/profile/admin-products");
+  };
+
   const initializeData = () => {
-    fetchTestimonials(productId!).then((testimonials: Testimonial[]) =>
-      setTestimonials(testimonials)
-    );
-    fetchDescriptionComponents(productId!).then((descriptions: Description[]) =>
-      initializeSections(assignImageState(descriptions))
-    );
-    fetchProduct(productId!).then((product: Product) => {
-      setProductInfo(product);
-    });
+    fetchTestimonials(productId!)
+      .then((testimonials: Testimonial[]) => setTestimonials(testimonials))
+      .catch(handleBreakingErrors);
+    fetchDescriptionComponents(productId!)
+      .then((descriptions: Description[]) =>
+        initializeSections(assignImageState(descriptions))
+      )
+      .catch(handleBreakingErrors);
+    fetchProduct(productId!)
+      .then((product: Product) => {
+        setProductInfo(product);
+      })
+      .catch(handleBreakingErrors);
   };
 
   const [priorityChanges, setPriorityChanges] = useState<number[][]>([]); //Section IDs that has had a swap change as value
@@ -106,19 +119,13 @@ export default function ManageProductPage() {
    * @param change The type of change that has been made
    */
   const registerContentChange = (id: number, change: ChangeType) => {
-    if (contentChanges.get(change)) {
-      console.log(contentChanges.get(change));
-      console.log(contentChanges);
-    }
-    if (!contentChanges.get(change)?.includes(id)) {
-      contentChanges.get(change)?.push(id);
-    }
+    let changes = contentChanges;
     if (change === ChangeType.Delete) {
-      contentChanges
-        .get(ChangeType.Edit)
-        ?.filter((changeId) => changeId !== id);
-      priorityChanges?.filter((array) => array[0] !== id && array[1] !== id);
-      setPriorityChanges(priorityChanges);
+      changes.get(ChangeType.Edit)?.filter((changeId) => changeId !== id);
+      let newPriority = priorityChanges?.filter(
+        (array) => array[0] !== id && array[1] !== id
+      );
+      setPriorityChanges(newPriority);
     } else if (change === ChangeType.Swap) {
       if (
         !priorityChanges?.find((array) => array[0] === id || array[1] === id)
@@ -127,15 +134,18 @@ export default function ManageProductPage() {
         sections
           .find((sections) => sections.sectionID === id)
           ?.rows.forEach((row) => rows.push(row.component_id));
-        priorityChanges?.push(rows);
-        setPriorityChanges(priorityChanges);
+        let newPriority = priorityChanges;
+        newPriority?.push(rows);
+        setPriorityChanges(newPriority);
       } else {
         //Since a section only can have two rows at a time, we can assume that if the section already is on the list, the rows are swapped back to their original positions
-        priorityChanges?.filter((array) => array[0] !== id && array[1] !== id);
-        setPriorityChanges(priorityChanges);
+        let newPriority = priorityChanges?.filter(
+          (array) => array[0] !== id && array[1] !== id
+        );
+        setPriorityChanges(newPriority);
       }
     }
-    setContentChanges(contentChanges);
+    setContentChanges(changes);
   };
 
   /**
@@ -145,15 +155,16 @@ export default function ManageProductPage() {
    * @param change the type of change that has been made
    */
   const registerTestimonialChange = (id: number, change: ChangeType) => {
-    if (!testimonialChanges.get(change)?.includes(id)) {
-      testimonialChanges.get(change)?.push(id);
+    let newTestimonialChanges = testimonialChanges;
+    if (!newTestimonialChanges.get(change)?.includes(id)) {
+      newTestimonialChanges.get(change)?.push(id);
     }
     if (change === ChangeType.Delete) {
-      testimonialChanges
+      newTestimonialChanges
         .get(ChangeType.Edit)
         ?.filter((changeId) => changeId !== id);
     }
-    setTestimonialChanges(testimonialChanges);
+    setTestimonialChanges(newTestimonialChanges);
   };
 
   /**
@@ -163,12 +174,11 @@ export default function ManageProductPage() {
    * @returns the descriptions with the property assigned
    */
   const assignImageState = (descriptions: Description[]): Description[] => {
-    for (let i = 0; i < descriptions.length; i += 1) {
-      //TODO: For of loop?
-      if (descriptions[i].text) {
-        descriptions[i].is_text_not_image = true;
+    for (const element of descriptions) {
+      if (element.text) {
+        element.is_text_not_image = true;
       } else {
-        descriptions[i].is_text_not_image = false;
+        element.is_text_not_image = false;
       }
     }
     return descriptions;
@@ -250,21 +260,32 @@ export default function ManageProductPage() {
     }
   };
 
+  const handleGeneralErrors = (response: Response) => {
+    if (!response.ok) {
+      alert(
+        "An error occurred." +
+          "\n " +
+          response.statusText +
+          "\n If this problem persists, please contact support."
+      );
+    }
+  };
+
   /**
    * Starts the process of saving the product. This includes saving the product itself, the sections and the testimonials.
    */
   const initializeSaveProtocol = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     //Product description API calls
-    sendProduct();
-    sendDeleteDescriptions();
-    sendNewDescriptions();
-    sendPriorityChanges();
-    sendEdits();
+    sendProduct().catch(handleGeneralErrors);
+    sendDeleteDescriptions().catch(handleGeneralErrors);
+    sendNewDescriptions().catch(handleGeneralErrors);
+    sendPriorityChanges().catch(handleGeneralErrors);
+    sendEdits().catch(handleGeneralErrors);
     //Testimonial API calls
-    sendDeletedTestimonials();
-    sendNewTestimonials();
-    sendEditedTestimonials();
+    sendDeletedTestimonials().catch(handleGeneralErrors);
+    sendNewTestimonials().catch(handleGeneralErrors);
+    sendEditedTestimonials().catch(handleGeneralErrors);
 
     alert("Product saved!");
   };
@@ -278,16 +299,14 @@ export default function ManageProductPage() {
     formData.append("price_per_unit", productPrice.current!.value);
     formData.append("product_name", productName.current!.value);
     formData.append("short_description", productDescription.current!.value);
-    let response = await fetch(
-      `${baseUrl}/api/priv/products${createState ? "" : `/${productId}`}`,
-      {
-        method: createState ? "POST" : "PUT",
-        headers: {
-          Accept: "multipart/form-data",
-        },
-        body: formData,
-      }
-    );
+    let pId = createState ? "" : `/${productId}`;
+    let response = await fetch(`${baseUrl}/api/priv/products${pId}`, {
+      method: createState ? "POST" : "PUT",
+      headers: {
+        Accept: "multipart/form-data",
+      },
+      body: formData,
+    });
   };
 
   /**
@@ -339,7 +358,7 @@ export default function ManageProductPage() {
       let { description: row, foundAt } = findRow(id);
       if (row) {
         if (row.is_text_not_image) {
-          let respone = fetch(
+          let response = fetch(
             `${baseUrl}/api/priv/products/${productId}/descriptions/text`,
             {
               method: "POST",
@@ -625,7 +644,9 @@ export default function ManageProductPage() {
         <section className="button-container">
           <button
             className="default-button small-button bg-danger"
-            onClick={() => initializeAvailabilityChangeProtocol()}
+            onClick={() =>
+              initializeAvailabilityChangeProtocol().catch(handleBreakingErrors)
+            }
             type="button"
           >
             {productInfo?.available ? "Unavailable" : "Available"}

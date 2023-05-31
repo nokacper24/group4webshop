@@ -1,6 +1,7 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use utoipa::{OpenApi, ToSchema};
 
 use crate::{
     data_access::{
@@ -19,12 +20,36 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(verify);
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        login,
+        create_user,
+        valid_verify,
+        verify
+    ),
+    tags(
+        (name = "Auth", description = "API endpoints for authentication")
+    ),
+)]
+pub struct AuthOpenApi;
+
+#[derive(Deserialize, Serialize, ToSchema)]
 struct Login {
     email: String,
     password: String,
 }
 
+#[utoipa::path(
+    context_path = "/api",
+    tag = "Auth",
+    post,
+    responses(
+        (status = 200, description = "Login successful", body = Login),
+        (status = 401, description = "Incorrect username or password"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[post("/login")]
 async fn login(user: web::Json<Login>, shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
@@ -83,6 +108,16 @@ struct Email {
     email: String,
 }
 
+#[utoipa::path(
+    context_path = "/api",
+    tag = "Auth",
+    post,
+    responses(
+        (status = 200, description = "Invite created", body = Email),
+        (status = 400, description = "User already exists"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[post("/create-user")]
 async fn create_user(
     email: web::Json<Email>,
@@ -103,7 +138,6 @@ async fn create_user(
                     let invite = create_invite(Some(v.id), None, pool).await;
                     match invite {
                         Ok(_v) => {
-                            //print invite temporarely TODO: send email
                             let email = utils::email::Email {
                                 recipient_email: email.email.clone(),
                                 mail_type: utils::email::EmailType::RegisterUser,
@@ -141,6 +175,16 @@ struct AddUserData {
     company_address: Option<String>,
 }
 
+#[utoipa::path(
+    context_path = "/api",
+    tag = "Auth",
+    get,
+    responses(
+        (status = 200, description = "Invite is valid", body = AddUserData),
+        (status = 404, description = "Invite not found"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[get("/verify/{invite_id}")]
 async fn valid_verify(
     invite_id: web::Path<String>,
@@ -186,6 +230,18 @@ async fn valid_verify(
     }
 }
 
+#[utoipa::path(
+    context_path = "/api",
+    tag = "Auth",
+    post,
+    responses(
+        (status = 200, description = "User created"),
+        (status = 400, description = "Company name and address are required"),
+        (status = 400, description = "Company name is required"),
+        (status = 400, description = "Company address is required"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[post("/verify/{invite_id}")]
 async fn verify(
     invite_id: web::Path<String>,

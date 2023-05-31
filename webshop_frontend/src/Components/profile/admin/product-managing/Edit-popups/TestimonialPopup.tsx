@@ -59,6 +59,9 @@ export default function TestimonialPopup(
    * Saves the testimonial and closes the popup.
    */
   const save = () => {
+    if (!validateForm()) {
+      return;
+    }
     //Uses the callback function to return the values of the testimonial.
     props.informationCallBack({
       testimonial_id: 0,
@@ -79,6 +82,33 @@ export default function TestimonialPopup(
       ? authorPicRef.current?.files[0]
       : "";
   });
+
+  /**
+   * Validates the form and alerts the user if there are any fields not filled or
+   * filled incorrectly.
+   *
+   * @returns true if the form is valid, false otherwise.
+   */
+  function validateForm(): boolean {
+    if (
+      testimonialText.current?.value === undefined ||
+      RegExp(/^ *$/).exec(testimonialText.current?.value) !== null
+    ) {
+      alert("Paragraph cannot be empty");
+      return false;
+    } else if (
+      authorNameRef.current?.value === undefined ||
+      RegExp(/^ *$/).exec(authorNameRef.current?.value) !== null
+    ) {
+      alert("Author name cannot be empty");
+      return false;
+    } else if (authorPicRef.current?.value === undefined) {
+      alert("Author picture cannot be empty");
+      return false;
+    }
+
+    return true;
+  }
 
   return (
     <div className="popup-grey-zone" ref={popupRef}>

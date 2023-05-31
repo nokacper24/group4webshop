@@ -11,11 +11,19 @@ fn public_routes_docs() -> Vec<openapi::OpenApi> {
         public::products::ProductsApiDoc::openapi(),
         public::products::descriptions::DescriptionApiDoc::openapi(),
         public::testimonials::TestimonialsOpenApi::openapi(),
+        public::categories::CategoryOpenApi::openapi(),
+        public::auth::AuthOpenApi::openapi(),
     ]
 }
 
 fn protected_routes_docs() -> Vec<openapi::OpenApi> {
-    vec![private::users_protected::UserApiDoc::openapi()]
+    vec![
+        private::users_protected::UserApiDoc::openapi(),
+        private::me::UserApiDoc::openapi(),
+        private::licenses_protected::ProtectedLicensesOpenApi::openapi(),
+        private::companies_protected::CompanyApiDoc::openapi(),
+        private::auth::AuthApiDoc::openapi(),
+    ]
 }
 
 fn admin_routes_docs() -> Vec<openapi::OpenApi> {

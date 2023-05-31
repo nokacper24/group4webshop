@@ -1,4 +1,5 @@
 use actix_web::{get, web, HttpResponse, Responder};
+use utoipa::OpenApi;
 
 use crate::{
     data_access::{company, error_handling},
@@ -8,9 +9,30 @@ use crate::{
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(companies);
 }
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        companies
+    ),
+
+    tags(
+        (name = "Company", description = "API endpoints for companies")
+    ),
+)]
+pub struct CompanyApiDoc;
 
 /// Get all companies from the database.
 /// returns a json array of all companies.
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Company",
+    responses(
+        (status = 200, description = "JSON containing the companies"),
+        (status = 404, description = "No companies found"),
+        (status = 409, description = "Company already exists"),
+        (status = 500, description = "Internal Server Error")
+    )
+)]
 #[get("/companies")]
 async fn companies(shared_data: web::Data<SharedData>) -> impl Responder {
     let pool = &shared_data.db_pool;
