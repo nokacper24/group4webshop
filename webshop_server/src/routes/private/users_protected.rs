@@ -301,6 +301,15 @@ struct NewUser {
     email: String,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invite_new")]
 async fn generate_invite_new(
     shared_data: web::Data<SharedData>,
@@ -360,6 +369,15 @@ struct Invite {
     company_id: Option<i32>,
 }
 
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invite")]
 async fn generate_invite(
     shared_data: web::Data<SharedData>,
@@ -542,7 +560,15 @@ async fn generate_invite(
     }
 }
 
-/// Generate invites for a CSV list of users.
+#[utoipa::path(
+    context_path = "/api/priv",
+    tag = "Users",
+    responses(
+    (status = 200, description = "Invite info", body = User),
+    (status = 400, description = "Invite ID not recognized"),
+    (status = 500, description = "Internal Server Error"),
+    )
+)]
 #[post("/generate_invites")]
 async fn generate_invites(
     shared_data: web::Data<SharedData>,
