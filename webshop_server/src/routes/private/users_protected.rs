@@ -56,7 +56,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         schemas(User, Role, UserRole, LicenseUser, LicenseUsers, UserIDs, UserID)
     ),
     tags(
-        (name = "Users", description = "API endpoints for users")
+        (name = "Users", description = "API endpoints for users"),
+        (name = "Invite", description = "API endpoints for invites"),
+        (name = "Support", description = "API endpoints for support"),
     ),
 )]
 pub struct UserApiDoc;
